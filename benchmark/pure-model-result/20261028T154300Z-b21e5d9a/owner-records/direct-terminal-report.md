@@ -1,0 +1,12 @@
+# Direct arm terminal candidate
+
+Status: CANDIDATE_READY, not independent semantic acceptance. The author reports complete Theorem 1 with no remaining obligations. The existing persistent supervisor recorded complete standalone Proof.lean compilation and native theorem/axiom inspection. Nine explicit external theorem parameters remain in the native signature. Author-provided correspondence claims the cited primary texts were accessible and manually checked; that is not an independent fidelity judgment. warn.json explicitly marks the proof conditional and independent source certification false. No mathematical evaluation was sent to Yui or the direct session.
+
+The final Proof.lean SHA-256 is bf73ff25c1c67c020023ad545649bd2e0444658191c6c0c637b86528ad0b0cd0; it matches completion-check.json and execution-result.json. Proof.olean exists. The supervisor build log is empty and its native verification log checks theorem_1 and reports only propext, Classical.choice and Quot.sound. A read-only lexical check found no sorry/admit/axiom/unsafe tokens after stripping comments/strings. These are mechanical evidence only. No new compiler or model session was started by the owner. Original files and exact hashes are in direct-terminal-evidence.json.
+
+Actual supervisor elapsed: 24181.945501 seconds, or 6 h 43 min 1.95 s. One native model session and one long normal turn were observed. Reported native usage: 190,088,829 input, 861,602 output, 190,950,431 combined. Cached input 188,204,032 and reasoning output 414,568 are subsets. These are actual reported counts, not estimates. Native/provider-request coverage and any missing retry usage are unknown. No dollar cost was supplied. Actual provider service tier remains UNVERIFIED; native context reports gpt-6.1-sol/high, CLI requested default tier.
+
+Execution qualification: native stderr records WebSocket disconnect/reset/connection-limit retries, a compaction-stream retry, analytics delivery warnings and a write_stdin Unknown process id tool error. Preserve every original line in direct-terminal-native-stderr.log. The supervisor ultimately completed normally, but this is not fault-free execution or an isolated speed measurement. No imposed time/token/call budget was exhausted.
+
+The bounded metadata snapshot at 2026-10-28T22:35:33.119765+00:00 verified no exact owned PID/start/PGID or registered process group remained. Authentication copied into the native runtime home was removed by the supervisor. Scientific outputs remain intact.
+

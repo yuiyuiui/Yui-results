@@ -4,6 +4,17 @@ This repository contains inputs and benchmark startup material. The Yui runtime
 is supplied by an independently installed skill named exactly `rigorous-proof`.
 Neither the name nor location of a separate Yui source checkout is assumed.
 
+## Retained direct-model result
+
+The [direct candidate](pure-model-result/20261028T154300Z-b21e5d9a/Proof.lean),
+its drafts, source correspondence, compiler evidence and execution metadata are
+retained under that run directory. [Owner records](pure-model-result/20261028T154300Z-b21e5d9a/owner-records/README.md)
+include the separate, limited post hoc source/target review. Compilation and that
+review are distinct from a complete independent semantic proof audit. Raw native
+session traces and compiled caches remain local under the existing ignore rules.
+Prior Yui-arm generated results and mixed owner records have been removed so
+future Yui runs start in new output directories.
+
 ## Installation check
 
 Install the complete Yui skill using your host's supported skill installer or
