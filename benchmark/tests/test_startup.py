@@ -111,6 +111,26 @@ class StartupTests(unittest.TestCase):
         self.assertEqual(result['supervisor'], str(source))
         self.assertEqual(result['args'], ['--prepare-only'])
 
+    def test_two_variants_select_exact_registered_installations_without_fallback(self):
+        import shutil
+        v2=self.root/'separate v2 installation';shutil.copytree(self.install,v2)
+        (v2/'SKILL.md').write_text('---\nname: rigorous-proof-v2\ndescription: Synthetic variant only.\n---\n')
+        entry={**self.entry,'name':'rigorous-proof-v2','path':str(v2/'SKILL.md')}
+        inventory=self.registry(self.entry,entry)
+        self.assertEqual(skills.select(inventory)['root'],str(self.install))
+        selected=skills.select(inventory,skill_name='rigorous-proof-v2')
+        self.assertEqual(selected['root'],str(v2))
+        with self.assertRaisesRegex(skills.SkillUnavailable,'not installed'):
+            skills.select(self.registry(self.entry),skill_name='rigorous-proof-v2')
+        with self.assertRaises(skills.SkillUnavailable):
+            skills.select(inventory,skill_name='rigorous-proof-development')
+        paper=self.root/'paper.pdf';paper.write_bytes(b'%PDF-1.7\nsynthetic')
+        prompt=prepare_yui.invocation(paper,20,selected)
+        self.assertTrue(prompt.startswith('Use $rigorous-proof-v2 '))
+        self.assertIn(str(v2/'SKILL.md'),prompt)
+        self.assertIn(str(BENCHMARK/'rigorous-proof-v2-result'),prompt)
+        self.assertNotIn(str(self.install/'SKILL.md'),prompt)
+
 
 if __name__ == '__main__':
     unittest.main()

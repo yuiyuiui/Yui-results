@@ -19,6 +19,7 @@ import threading
 import time
 
 NAME = 'rigorous-proof'
+SUPPORTED_NAMES = {NAME, 'rigorous-proof-v2'}
 
 
 class SkillUnavailable(ValueError):
@@ -87,12 +88,14 @@ def inventory(cwd, *, codex=None, timeout=30):
         process.stdout.close()
 
 
-def select(result):
+def select(result, *, skill_name=NAME):
+    if skill_name not in SUPPORTED_NAMES:
+        raise SkillUnavailable('Select an explicit supported Yui skill: '+', '.join(sorted(SUPPORTED_NAMES)))
     candidates = {}
     disabled = False
     for group in result.get('data', []):
         for item in group.get('skills', []):
-            if item.get('name') != NAME:
+            if item.get('name') != skill_name:
                 continue
             if item.get('enabled') is not True:
                 disabled = True
@@ -108,36 +111,39 @@ def select(result):
             header = path.read_text().split('---', 2)
             match = re.search(r'^name:\s*[\"\']?([^\"\'\n]+?)[\"\']?\s*$',
                               header[1] if len(header) >= 3 else '', re.MULTILINE)
-            if not match or match.group(1).strip() != NAME:
-                raise SkillUnavailable('The registered entry is not the exact rigorous-proof skill')
+            if not match or match.group(1).strip() != skill_name:
+                raise SkillUnavailable('The registered entry is not the exact '+skill_name+' skill')
             root = path.parent
             required = ['config.json', 'nl0/scripts/yui.py', 'nl0/scripts/direct_runner.py',
                         'nl02lean/scripts/workflow.py', 'toolchain/lock.json']
             if any(not (root/name).is_file() for name in required):
                 raise SkillUnavailable('The installed rigorous-proof skill is incomplete: '+str(root))
-            candidates[path] = {'name': NAME, 'skill_md': str(path), 'root': str(root),
+            candidates[path] = {'name': skill_name, 'skill_md': str(path), 'root': str(root),
                 'scope': item.get('scope'), 'skill_sha256': hashlib.sha256(path.read_bytes()).hexdigest()}
     if not candidates:
         state = 'disabled' if disabled else 'not installed'
-        raise SkillUnavailable('Required skill $rigorous-proof is '+state+
+        raise SkillUnavailable('Required skill $'+skill_name+' is '+state+
             '. Install/enable the complete Yui skill, then retry. A sibling Yui checkout is not an installation.')
     if len(candidates) != 1:
-        raise SkillUnavailable('Several enabled rigorous-proof installations were found; resolve the duplicate names before starting')
+        raise SkillUnavailable('Several enabled '+skill_name+' installations were found; resolve the duplicate names before starting')
     return next(iter(candidates.values()))
 
 
-def require_skill(cwd=None, *, codex=None):
+def require_skill(cwd=None, *, codex=None, skill_name=NAME):
+    if skill_name not in SUPPORTED_NAMES:
+        raise SkillUnavailable('Unsupported Yui skill name')
     binary, result = inventory(cwd or Path(__file__).resolve().parent, codex=codex)
-    return {'status': 'INSTALLED_SKILL_VERIFIED', **select(result),
+    return {'status': 'INSTALLED_SKILL_VERIFIED', **select(result, skill_name=skill_name),
             'codex': str(binary), 'resolved_by': 'codex_skills_list', 'model_started': False}
 
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--codex', type=Path)
+    parser.add_argument('--skill', choices=sorted(SUPPORTED_NAMES), default=NAME)
     args = parser.parse_args(argv)
     try:
-        result = require_skill(codex=args.codex)
+        result = require_skill(codex=args.codex, skill_name=args.skill)
     except (OSError, ValueError, subprocess.SubprocessError) as error:
         print(json.dumps({'status': 'BENCHMARK_NOT_STARTED', 'error': str(error)}))
         return 1

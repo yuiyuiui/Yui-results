@@ -54,6 +54,22 @@ is not an actual schedule. Each wake checks bounded metadata; unchanged checks
 stay quiet unless periodic reports were explicitly requested. A host lacking
 scheduled follow-up must disclose that limitation instead of idle polling.
 
+## Selecting a local V2 installation
+
+V1 remains the default. An independently installed experimental V2 can be
+selected explicitly without changing the existing direct-model result:
+
+```sh
+python3 -B benchmark/skill_check.py --skill rigorous-proof-v2
+python3 -B benchmark/prepare_yui.py --skill rigorous-proof-v2 --workers 20
+```
+
+Use the worker count actually confirmed for the new run. V1 and V2 preparation
+select their exact registered skill names and separate output roots,
+`rigorous-proof-result/` and `rigorous-proof-v2-result/`. Missing V2 never falls
+back to V1. These commands only prepare invocations; they start no benchmark.
+The direct runner still uses the original `rigorous-proof` supervisor by default.
+
 ## Direct-model arm
 
 ```sh
