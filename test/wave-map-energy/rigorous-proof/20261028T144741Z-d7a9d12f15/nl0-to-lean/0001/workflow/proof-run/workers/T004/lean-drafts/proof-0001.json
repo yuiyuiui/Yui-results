@@ -1,0 +1,16 @@
+{
+  "proof": "intro t ht\nobtain ⟨C, hC, hu⟩ := h_H006 (t/2) (3*t/2) (by linarith) (by linarith)\nobtain ⟨L, hL⟩ := hC.exists_bound_of_continuousOn (continuous_norm.continuousOn : ContinuousOn (fun x : WSpace n => ‖x‖) C)\nlet R : ℝ := max 1 (L+1)\nhave hR : 0 < R := lt_of_lt_of_le zero_lt_one (le_max_left _ _)\nhave hLR : L < R := lt_of_lt_of_le (by linarith) (le_max_right _ _)\nhave hsub : C ⊆ wOpenBox n R := by\n  intro x hx j\n  have hxL : ‖x‖ ≤ L := by simpa only [norm_norm] using hL x hx\n  have hj : |x j| < R := lt_of_le_of_lt (by simpa only [Real.norm_eq_abs] using norm_le_pi_norm x j) (lt_of_le_of_lt hxL hLR)\n  exact abs_lt.mp hj\nhave hv : volume (wBox n R) = ENNReal.ofReal ((2*R)^n) := by\n  simp only [wBox, Real.volume_Icc_pi, sub_neg_eq_add, ← two_mul]\n  simp only [Finset.prod_const, Finset.card_univ, Fintype.card_fin]\n  exact (ENNReal.ofReal_pow (by positivity : 0 ≤ 2 * R) n).symm\nrefine ⟨C, R, hC, hR, hsub, hu, ?_, hv, ?_⟩\n· intro k x r hk hx hr\n  have hopen : IsOpen (Cᶜ ×ˢ Set.Ioo (t/2) (3*t/2)) := hC.isClosed.isOpen_compl.prod isOpen_Ioo\n  have heq : u =ᶠ[𝓝 (x,r)] (fun _ => q) := by\n    filter_upwards [hopen.mem_nhds (show (x,r) ∈ Cᶜ ×ˢ Set.Ioo (t/2) (3*t/2) from ⟨hx, hr⟩)] with p hp\n    exact hu p.1 p.2 hp.1 ⟨hp.2.1.le, hp.2.2.le⟩\n  rw [(heq.iteratedFDeriv ℝ k).eq_of_nhds, iteratedFDeriv_const_of_ne (Nat.ne_of_gt hk)]\n  rfl\n· rw [hv]\n  exact ENNReal.ofReal_lt_top",
+  "statement": "∀ t : ℝ, 0 < t → ∃ (C : Set (WSpace n)) (R : ℝ), wGeometry u q t C R",
+  "check": {
+    "exit_code": 1,
+    "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/nl0-ir-check-cc0a3gm2/output/Check.lean:47:20: error(lean.unknownIdentifier): Unknown identifier `𝓝`\nT004 : ∀ (n m : ℕ) (u : WSpace n × ℝ → WTarget m) (q : WTarget m),\n  1 ≤ n ∧ 1 ≤ m →\n    ContDiffOn ℝ ∞ u (wDomain n) →\n      (∀ (s t : ℝ), 0 < s → s < t → ∃ C, IsCompact C ∧ ∀ (x : WSpace n) (r : ℝ), x ∉ C → r ∈ Icc s t → u (x, r) = q) →\n        ∀ (t : ℝ), 0 < t → ∃ C R, wGeometry u q t C R\n'Translation.T004' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]\n",
+    "stderr": "",
+    "wall_seconds": 3.5401471669320017,
+    "status": "LEAN-CHECK-FAILED",
+    "contract_sha256": "050ebba9dad2ccc88c95406874e50cdb3fd6a34946b94f96f20abf140f437f73",
+    "lean_sha256": "dc3ae38bbb910fb7fb0c0bb06d7ecfe935524667567b1735ee97bf59a8b7fa8d",
+    "scope": "T004",
+    "accepted": false,
+    "stage_complete": false
+  }
+}

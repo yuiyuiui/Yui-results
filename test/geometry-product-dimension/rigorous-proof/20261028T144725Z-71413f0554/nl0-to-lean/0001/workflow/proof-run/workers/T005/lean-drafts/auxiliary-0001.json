@@ -1,0 +1,22 @@
+{
+  "statement": "∀ s δ : ℝ, 0 < s → 0 < δ → content s δ E < ⊤",
+  "proof": "classical\nintro s δ hs hδ\nobtain ⟨t, ht⟩ := h_H003.elim_finite_subcover (fun x : E => Metric.ball (x : V n) (δ / 2)) (fun _ => Metric.isOpen_ball) (by\n  intro x hx\n  exact Set.mem_iUnion.mpr ⟨⟨x, hx⟩, Metric.mem_ball_self (by linarith)⟩)\nlet m := Fintype.card t\nlet e : t ≃ Fin m := Fintype.equivFin t\nlet U : ℕ → Set (V n) := fun i => if h : i < m then Metric.ball (((e.symm ⟨i, h⟩ : t) : E) : V n) (δ / 2) else ∅\nhave hU : scaleCover δ E U := by\n  constructor\n  · intro x hx\n    obtain ⟨c, hc, hxc⟩ := Set.mem_iUnion₂.mp (ht hx)\n    let k : t := ⟨c, hc⟩\n    refine Set.mem_iUnion.mpr ⟨(e k).val, ?_⟩\n    simpa [U, (e k).isLt] using hxc\n  · intro i\n    dsimp [U]\n    split_ifs with hi\n    · apply Metric.ediam_le_of_forall_dist_le\n      intro x hx y hy\n      have hx' := Metric.mem_ball.mp hx\n      have hy' := Metric.mem_ball.mp hy\n      have htri := dist_triangle x (((e.symm ⟨i, hi⟩ : t) : E) : V n) y\n      rw [dist_comm (((e.symm ⟨i, hi⟩ : t) : E) : V n) y] at htri\n      linarith\n    · simp\nhave hfin : cost s U < ⊤ := by\n  unfold cost\n  rw [tsum_eq_sum (s := Finset.range m) (fun i hi => by\n    have hi' : ¬ i < m := by simpa using hi\n    simp [U, hi', hs.ne'])]\n  apply ENNReal.sum_lt_top.mpr\n  intro i hi\n  apply ENNReal.rpow_lt_top_of_nonneg hs.le\n  exact ne_top_of_le_ne_top ENNReal.ofReal_ne_top (hU.2 i)\nexact lt_of_le_of_lt (iInf_le_of_le U (iInf_le_of_le hU le_rfl)) hfin",
+  "check": {
+    "exit_code": 1,
+    "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-32l36ach/output/Auxiliary.lean:68:55: error: unsolved goals\nn : ℕ\nE : Set (V n)\nh_H003 : IsCompact E\ns δ : ℝ\nhs : 0 < s\nhδ : 0 < δ\nt : Finset ↑E\nht : E ⊆ ⋃ i ∈ t, Metric.ball (↑i) (δ / 2)\nm : ℕ := Fintype.card ↥t\ne : ↥t ≃ Fin m := Fintype.equivFin ↥t\nU : ℕ → Set (V n) := fun i => if h : i < m then Metric.ball (↑↑(e.symm ⟨i, h⟩)) (δ / 2) else ∅\nhU : scaleCover δ E U\ni : ℕ\nhi : i ∉ Finset.range m\nhi' : ¬i < m\n⊢ 0 < s\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-32l36ach/output/Auxiliary.lean:70:20: warning: This simp argument is unused:\n  hs.ne'\n\nHint: Omit it from the simp argument list.\n  simp [U, hi',̵ ̵h̵s̵.̵n̵e̵'̵]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nchecked : ∀ (n : ℕ) (E : Set (V n)), IsCompact E → ∀ (s δ : ℝ), 0 < s → 0 < δ → content s δ E < ∞\n'YuiAuxiliary.checked' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]\n",
+    "stderr": "",
+    "wall_seconds": 3.294964041095227,
+    "auxiliary_valid": false,
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext",
+      "sorryAx"
+    ],
+    "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+    "context_port": "T005",
+    "candidate": 1,
+    "accepted": false,
+    "stage_complete": false
+  }
+}

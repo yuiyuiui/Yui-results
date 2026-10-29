@@ -1,0 +1,21 @@
+{
+  "proof": "classical\nhave hR : ∃ R : ℝ, 1 ≤ R ∧ ∀ x ∈ E, ‖x‖ ≤ R := by\n  obtain ⟨t, ht⟩ := h_H003.elim_finite_subcover (fun m : ℕ => Metric.ball (0 : V n) ((m : ℝ) + 1)) (fun _ => Metric.isOpen_ball) (by\n    intro x hx\n    obtain ⟨m, hm⟩ := exists_nat_gt ‖x‖\n    refine Set.mem_iUnion.mpr ⟨m, ?_⟩\n    simp only [Metric.mem_ball, dist_zero_right]\n    linarith)\n  refine ⟨((t.sup id : ℕ) : ℝ) + 1, ?_, ?_⟩\n  · have h : (0 : ℝ) ≤ ((t.sup id : ℕ) : ℝ) := Nat.cast_nonneg _\n    linarith\n  · intro x hx\n    obtain ⟨m, hm, hxm⟩ := Set.mem_iUnion₂.mp (ht hx)\n    have hm' : m ≤ t.sup id := Finset.le_sup (f := id) hm\n    have hm'' : (m : ℝ) ≤ ((t.sup id : ℕ) : ℝ) := by exact_mod_cast hm'\n    have hx' : ‖x‖ < (m : ℝ) + 1 := by simpa using hxm\n    linarith\nobtain ⟨R, hRone, hRbound⟩ := hR\nrefine ⟨⟨R, hRone, ?_⟩, isBounded_iff_forall_norm_le.mpr ⟨R, hRbound⟩, ?_⟩\n· intro x hx j\n  have hj : ‖x j‖ ≤ ‖x‖ := PiLp.norm_apply_le x j\n  have hj' : |x j| ≤ ‖x‖ := by simpa only [Real.norm_eq_abs] using hj\n  exact hj'.trans (hRbound x hx)\n· intro s δ hs hδ\n  obtain ⟨t, ht⟩ := h_H003.elim_finite_subcover (fun x : E => Metric.ball (x : V n) (δ / 2)) (fun _ => Metric.isOpen_ball) (by\n    intro x hx\n    exact Set.mem_iUnion.mpr ⟨⟨x, hx⟩, Metric.mem_ball_self (by linarith)⟩)\n  let m := Fintype.card t\n  let e : t ≃ Fin m := Fintype.equivFin t\n  let U : ℕ → Set (V n) := fun i => if h : i < m then Metric.ball (((e.symm ⟨i, h⟩ : t) : E) : V n) (δ / 2) else ∅\n  have hU : scaleCover δ E U := by\n    constructor\n    · intro x hx\n      obtain ⟨c, hc, hxc⟩ := Set.mem_iUnion₂.mp (ht hx)\n      let k : t := ⟨c, hc⟩\n      refine Set.mem_iUnion.mpr ⟨(e k).val, ?_⟩\n      simpa [U, (e k).isLt] using hxc\n    · intro i\n      dsimp [U]\n      split_ifs with hi\n      · apply Metric.ediam_le_of_forall_dist_le\n        intro x hx y hy\n        have hx' := Metric.mem_ball.mp hx\n        have hy' := Metric.mem_ball.mp hy\n        have htri := dist_triangle x (((e.symm ⟨i, hi⟩ : t) : E) : V n) y\n        rw [dist_comm (((e.symm ⟨i, hi⟩ : t) : E) : V n) y] at htri\n        linarith\n      · simp\n  have hfin : cost s U < ⊤ := by\n    unfold cost\n    rw [tsum_eq_sum (s := Finset.range m) (fun i hi => by\n      have hi' : ¬ i < m := by simpa using hi\n      simp [U, hi', ENNReal.zero_rpow_of_pos hs])]\n    apply ENNReal.sum_lt_top.mpr\n    intro i hi\n    apply ENNReal.rpow_lt_top_of_nonneg hs.le\n    exact ne_top_of_le_ne_top ENNReal.ofReal_ne_top (hU.2 i)\n  exact lt_of_le_of_lt (iInf_le_of_le U (iInf_le_of_le hU le_rfl)) hfin",
+  "statement": "(∃ R : ℝ, 1 ≤ R ∧ ∀ x ∈ E, ∀ j : Fin n, |x j| ≤ R) ∧ Bornology.IsBounded E ∧ (∀ s δ : ℝ, 0 < s → 0 < δ → content s δ E < ⊤)",
+  "check": {
+    "exit_code": 0,
+    "stdout": "T005 : ∀ (n : ℕ) (E : Set (V n)),\n  IsCompact E →\n    (∃ R, 1 ≤ R ∧ ∀ x ∈ E, ∀ (j : Fin n), |x.ofLp j| ≤ R) ∧\n      Bornology.IsBounded E ∧ ∀ (s δ : ℝ), 0 < s → 0 < δ → content s δ E < ∞\n'Translation.T005' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+    "stderr": "",
+    "wall_seconds": 3.3430010830052197,
+    "status": "LOCAL-PROOF-CHECKED",
+    "contract_sha256": "0467e5822c05f4c9f24215b792be871dd8e9464159089ac12c1d9713278b637a",
+    "lean_sha256": "b376165096225c6152a4dd99e627574b19cdafe46f7da729ae711e7107c295c6",
+    "scope": "T005",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "accepted": true,
+    "stage_complete": true
+  }
+}

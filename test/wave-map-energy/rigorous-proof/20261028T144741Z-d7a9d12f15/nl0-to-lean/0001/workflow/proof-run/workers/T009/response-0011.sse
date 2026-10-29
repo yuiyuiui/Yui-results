@@ -1,0 +1,549 @@
+event: response.created
+data: {"type":"response.created","sequence_number":0,"safety_buffering":false,"response":{"id":"resp_0f7ec9c51e1de711016ae218779ed88191a7d8a73ef3162e1b","object":"response","created_at":1793202296,"completed_at":null,"status":"in_progress","background":false,"frequency_penalty":0.0,"presence_penalty":0.0,"moderation":null,"model":"gpt-6.1-sol","access_programs":{"cyber":"standard"},"previous_response_id":null,"instructions":"You translate the supplied natural-language proof faithfully into Lean 4. Use the explicit project premises and any proved result in the pinned Mathlib environment. Preserve all assumptions, conclusions, equality modes and the supplied proof route. No reference answers, personal context, other tasks, shell or external services are available. Use the submit tool when the requested artifact is complete; if rejected, repair it. A strategy is advice, never an additional theorem or assumption.\n\n# Lean implementation safeguards\n\nApply these requirements within the accepted NL0 and the fixed Lean interface.\nThey govern implementation, not additional NL0 detail or a weaker Audit B.\nUse existing library readers and local checking tools; no separate review\nmodel, new premise or mandatory lookup of every familiar declaration is needed.\n\n1. **Check critical library signatures.** Before relying on a critical or\n   unfamiliar library application, establish its complete type in the pinned\n   environment, including explicit, implicit and instance binders and all\n   side conditions. Read the declaration or check a small typed application\n   when its signature is uncertain. Do not infer the calling convention from\n   its name or pass an implicit argument as though it were an explicit one.\n   A previously checked signature in this context need not be looked up again.\n2. **Constrain difficult inference.** When coercions or implicit inference\n   obscure the intended application, give the intermediate fact an explicit\n   type and supply the relevant named parameters, such as the set, exponent\n   or ambient space. Prefer this to leaving Lean to discover those choices by\n   unfolding large definitions. Routine unambiguous arguments can stay\n   implicit; explicit parameters must preserve the existing target and inputs.\n3. **Check conversions before combining them.** When an argument crosses Lean\n   representations, first establish a small typed conversion fact, then use\n   it in the main proof. In particular, distinguish `ℝ`, `ℝ≥0` and `ℝ≥0∞`;\n   check the conversion direction, nonnegativity and any finiteness conditions.\n   A conversion is not automatically invertible, and matching notation does\n   not establish equality of differently typed expressions. Reuse a checked\n   fact when available. Do not invent another representation, a global helper\n   requirement or an extra hypothesis just to satisfy this instruction.\n4. **Isolate an inference failure.** If compiler feedback identifies a library\n   application, coercion or expensive inference problem, reduce the next check\n   to that application or conversion with explicit local types before adding\n   more proof code. Use `check_auxiliary` in a proof worker, or\n   `check_lean_types` during preparation when that tool is supplied. Helpers\n   use only the current allowed inputs and never become new premises. Once\n   the small check succeeds, integrate the result and recheck the complete\n   obligation; success of a helper alone does not accept the target.\n\nThese rules do not interrupt an active compiler call or impose a time limit.\nThey guide the next implementation/checking action when feedback is available.\nRetain failed attempts and actual diagnostics. Standalone assembly, native\ntrust/signature checks and independent endpoint-fidelity Audit B remain required.\n End this stage immediately when a submit tool reports stage_complete:true; the controller handles later stages. Within a proof stage, checked helper attempts are available through read_lean_draft. After a context reset, query its index before claiming no draft or helper exists. Helpers never become new premises. Use familiar interfaces directly; no background-note scan is required. For a relevant obstacle, select a matching local background_note_index entry and read_background_note if its details may help. Relate the actual Lean goal/context to its NL step: use the note grounds to identify a small missing application premise or transport, prove it from permitted inputs, then check the intended application. Verify actual types and conditions; a note is not a Lean proof or extra assumption. If it does not fit, continue ordinary allowed search or repair without insisting on that note or rebuilding a larger argument by default.","output":[],"error":null,"incomplete_details":null,"tools":[{"type":"function","name":"search_mathlib","description":"Search the pinned mathlib Lean source using a regular expression; at most 100 lines.","parameters":{"type":"object","properties":{"query":{"type":"string"}},"required":["query"],"additionalProperties":false},"output_schema":null,"strict":false},{"type":"function","name":"read_mathlib","description":"Read specified lines of a Mathlib/*.lean source file from the pinned checkout.","parameters":{"type":"object","properties":{"path":{"type":"string"},"start_line":{"type":"integer"},"line_count":{"type":"integer"}},"required":["path","start_line","line_count"],"additionalProperties":false},"output_schema":null,"strict":false},{"type":"function","name":"check_transition","description":"Compile a tactic body for the fixed target; no leading by, declarations, or placeholders.","parameters":{"type":"object","properties":{"proof":{"type":"string"}},"required":["proof"],"additionalProperties":false},"output_schema":null,"strict":false},{"type":"function","name":"submit_transition","description":"Submit and check the final tactic body for the same target.","parameters":{"type":"object","properties":{"proof":{"type":"string"}},"required":["proof"],"additionalProperties":false},"output_schema":null,"strict":false},{"type":"function","name":"check_auxiliary","description":"Compile one helper proposition and tactic body in exactly this local port context. This never accepts the final goal or adds a premise.","parameters":{"type":"object","properties":{"statement":{"type":"string"},"proof":{"type":"string"}},"required":["statement","proof"],"additionalProperties":false},"output_schema":null,"strict":false},{"type":"function","name":"read_lean_draft","description":"Read only your own same-stage proof/helper attempts. kind=index lists attempts; proof/auxiliary returns the selected body lines and actual check. No other stage or file is accessible.","parameters":{"type":"object","properties":{"kind":{"type":"string","enum":["index","proof","auxiliary"]},"candidate":{"type":"integer"},"start":{"type":"integer"},"end":{"type":"integer"}},"required":["kind","candidate","start","end"],"additionalProperties":false},"output_schema":null,"strict":false},{"type":"function","name":"read_background_note","description":"Read one complete audited background note from this task index by its qualified ID. No other task, file or proof is accessible; this is guidance, not a checked Lean proof.","parameters":{"type":"object","properties":{"id":{"type":"string"}},"required":["id"],"additionalProperties":false},"output_schema":null,"strict":false}],"tool_choice":"auto","parallel_tool_calls":false,"prompt_cache_key":"72b33218-4aed-4f6d-8161-63ed1e2b5035","prompt_cache_retention":"24h","text":{"format":{"type":"text"},"verbosity":"low"},"top_p":0.98,"top_logprobs":0,"temperature":1.0,"reasoning":{"effort":"high","context":"all_turns","summary":null,"mode":"standard"},"user":null,"usage":null,"tool_usage":{"image_gen":{"input_tokens":0,"output_tokens":0,"total_tokens":0,"input_tokens_details":{"text_tokens":0,"image_tokens":0},"output_tokens_details":{"image_tokens":0,"text_tokens":0}},"web_search":{"num_requests":0}},"safety_identifier":"user-EpSBagPYSg8yOGllmjblVHlJ","store":false,"metadata":{},"max_output_tokens":null,"max_tool_calls":null,"service_tier":"auto","truncation":"disabled"}}
+
+event: response.in_progress
+data: {"type":"response.in_progress","sequence_number":1,"safety_buffering":false,"response":{"id":"resp_0f7ec9c51e1de711016ae218779ed88191a7d8a73ef3162e1b","object":"response","created_at":1793202296,"completed_at":null,"status":"in_progress","background":false,"frequency_penalty":0.0,"presence_penalty":0.0,"moderation":null,"model":"gpt-6.1-sol","access_programs":{"cyber":"standard"},"previous_response_id":null,"instructions":"You translate the supplied natural-language proof faithfully into Lean 4. Use the explicit project premises and any proved result in the pinned Mathlib environment. Preserve all assumptions, conclusions, equality modes and the supplied proof route. No reference answers, personal context, other tasks, shell or external services are available. Use the submit tool when the requested artifact is complete; if rejected, repair it. A strategy is advice, never an additional theorem or assumption.\n\n# Lean implementation safeguards\n\nApply these requirements within the accepted NL0 and the fixed Lean interface.\nThey govern implementation, not additional NL0 detail or a weaker Audit B.\nUse existing library readers and local checking tools; no separate review\nmodel, new premise or mandatory lookup of every familiar declaration is needed.\n\n1. **Check critical library signatures.** Before relying on a critical or\n   unfamiliar library application, establish its complete type in the pinned\n   environment, including explicit, implicit and instance binders and all\n   side conditions. Read the declaration or check a small typed application\n   when its signature is uncertain. Do not infer the calling convention from\n   its name or pass an implicit argument as though it were an explicit one.\n   A previously checked signature in this context need not be looked up again.\n2. **Constrain difficult inference.** When coercions or implicit inference\n   obscure the intended application, give the intermediate fact an explicit\n   type and supply the relevant named parameters, such as the set, exponent\n   or ambient space. Prefer this to leaving Lean to discover those choices by\n   unfolding large definitions. Routine unambiguous arguments can stay\n   implicit; explicit parameters must preserve the existing target and inputs.\n3. **Check conversions before combining them.** When an argument crosses Lean\n   representations, first establish a small typed conversion fact, then use\n   it in the main proof. In particular, distinguish `ℝ`, `ℝ≥0` and `ℝ≥0∞`;\n   check the conversion direction, nonnegativity and any finiteness conditions.\n   A conversion is not automatically invertible, and matching notation does\n   not establish equality of differently typed expressions. Reuse a checked\n   fact when available. Do not invent another representation, a global helper\n   requirement or an extra hypothesis just to satisfy this instruction.\n4. **Isolate an inference failure.** If compiler feedback identifies a library\n   application, coercion or expensive inference problem, reduce the next check\n   to that application or conversion with explicit local types before adding\n   more proof code. Use `check_auxiliary` in a proof worker, or\n   `check_lean_types` during preparation when that tool is supplied. Helpers\n   use only the current allowed inputs and never become new premises. Once\n   the small check succeeds, integrate the result and recheck the complete\n   obligation; success of a helper alone does not accept the target.\n\nThese rules do not interrupt an active compiler call or impose a time limit.\nThey guide the next implementation/checking action when feedback is available.\nRetain failed attempts and actual diagnostics. Standalone assembly, native\ntrust/signature checks and independent endpoint-fidelity Audit B remain required.\n End this stage immediately when a submit tool reports stage_complete:true; the controller handles later stages. Within a proof stage, checked helper attempts are available through read_lean_draft. After a context reset, query its index before claiming no draft or helper exists. Helpers never become new premises. Use familiar interfaces directly; no background-note scan is required. For a relevant obstacle, select a matching local background_note_index entry and read_background_note if its details may help. Relate the actual Lean goal/context to its NL step: use the note grounds to identify a small missing application premise or transport, prove it from permitted inputs, then check the intended application. Verify actual types and conditions; a note is not a Lean proof or extra assumption. If it does not fit, continue ordinary allowed search or repair without insisting on that note or rebuilding a larger argument by default.","output":[],"error":null,"incomplete_details":null,"tools":[{"type":"function","name":"search_mathlib","description":"Search the pinned mathlib Lean source using a regular expression; at most 100 lines.","parameters":{"type":"object","properties":{"query":{"type":"string"}},"required":["query"],"additionalProperties":false},"output_schema":null,"strict":false},{"type":"function","name":"read_mathlib","description":"Read specified lines of a Mathlib/*.lean source file from the pinned checkout.","parameters":{"type":"object","properties":{"path":{"type":"string"},"start_line":{"type":"integer"},"line_count":{"type":"integer"}},"required":["path","start_line","line_count"],"additionalProperties":false},"output_schema":null,"strict":false},{"type":"function","name":"check_transition","description":"Compile a tactic body for the fixed target; no leading by, declarations, or placeholders.","parameters":{"type":"object","properties":{"proof":{"type":"string"}},"required":["proof"],"additionalProperties":false},"output_schema":null,"strict":false},{"type":"function","name":"submit_transition","description":"Submit and check the final tactic body for the same target.","parameters":{"type":"object","properties":{"proof":{"type":"string"}},"required":["proof"],"additionalProperties":false},"output_schema":null,"strict":false},{"type":"function","name":"check_auxiliary","description":"Compile one helper proposition and tactic body in exactly this local port context. This never accepts the final goal or adds a premise.","parameters":{"type":"object","properties":{"statement":{"type":"string"},"proof":{"type":"string"}},"required":["statement","proof"],"additionalProperties":false},"output_schema":null,"strict":false},{"type":"function","name":"read_lean_draft","description":"Read only your own same-stage proof/helper attempts. kind=index lists attempts; proof/auxiliary returns the selected body lines and actual check. No other stage or file is accessible.","parameters":{"type":"object","properties":{"kind":{"type":"string","enum":["index","proof","auxiliary"]},"candidate":{"type":"integer"},"start":{"type":"integer"},"end":{"type":"integer"}},"required":["kind","candidate","start","end"],"additionalProperties":false},"output_schema":null,"strict":false},{"type":"function","name":"read_background_note","description":"Read one complete audited background note from this task index by its qualified ID. No other task, file or proof is accessible; this is guidance, not a checked Lean proof.","parameters":{"type":"object","properties":{"id":{"type":"string"}},"required":["id"],"additionalProperties":false},"output_schema":null,"strict":false}],"tool_choice":"auto","parallel_tool_calls":false,"prompt_cache_key":"72b33218-4aed-4f6d-8161-63ed1e2b5035","prompt_cache_retention":"24h","text":{"format":{"type":"text"},"verbosity":"low"},"top_p":0.98,"top_logprobs":0,"temperature":1.0,"reasoning":{"effort":"high","context":"all_turns","summary":null,"mode":"standard"},"user":null,"usage":null,"tool_usage":{"image_gen":{"input_tokens":0,"output_tokens":0,"total_tokens":0,"input_tokens_details":{"text_tokens":0,"image_tokens":0},"output_tokens_details":{"image_tokens":0,"text_tokens":0}},"web_search":{"num_requests":0}},"safety_identifier":"user-EpSBagPYSg8yOGllmjblVHlJ","store":false,"metadata":{},"max_output_tokens":null,"max_tool_calls":null,"service_tier":"auto","truncation":"disabled"}}
+
+event: response.output_item.added
+data: {"type":"response.output_item.added","sequence_number":2,"output_index":0,"item":{"type":"reasoning","id":"rs_0f7ec9c51e1de711016ae218798fb88191bdd5ae00495efa1d","summary":[],"content":[],"encrypted_content":"gAAAAABq4hh5ZzPib8OVOfl2a-Udsbl7QLTw2U_BtYG2j22STeZUF0BscW4TBnWHQif_nr7s3pLoiiR9zps7p6LuakVPvqwVx6Y_EnSimS_KQmuQBSS4YY2XJEX4T6E2jBiN3qChDWSpZZCDfr6b6J7ts1oY6H2pHQTL8uiqSRSRtSWzR1xaiCTQidAMIUFADHY3XHA2A-EoDReS3fDGIUckSW6lH8qtkpUkrBkAzcBGQbY6BQ6XuQf3NYpw6bDVH3lgVDS6XQkP0ucfxPsHEQMm1oND6WDRf9X5PwPddL2z0n9rcEPDMwfgzW1B7qqya_xDtBFHW6ZiXbn8wHYoO7QVujC6dX3LmUIQmXzkzD8l2aZw-Yu4qtHWpYsJ6478BdEyKJ93gflVAwtLNKbe6-BwG0q0b5Iydy3wJVabcCizvo9EG_XoeyaA_HbvcnwGeja0i3S8KIMGNxpUznjsCHwYB0J7IptCjOswqpMOSwp5dL6qs211lf5jWx1CTlWWVL7H2rWIkoa8ChPqLE8G2bcvnvWGeS2jB_0M6WeYsMaLZMgE-4PgRnaV_JopKC009QaOgp7Qg6D-rMVNZKkwH5KS4jbj3G9Hhkgef0HGeppICikOTPr3wH6XfuqnKwOTXSAan4m3ALWnPKB5yDlIVPJk6JkHTpADTs2-TM0hcaL9uGRgWNB1yhpN6Vg2vg8x25metoX_4DNOyrUSuFQjhkKcWmEQFCYs3HoKyoLRuTSffYqV4lEPmaGEaA2U0xebFuUPuUWNKCpPDScMMIzN58FDGabiNEyzy4_HwJjcqZjHEWx0f7XVmbQhBbV5fWgnfF_CuC6hmRp5VfxH5u0vo4T136hGkClVdrGhJ8XqHx5uZ4xCiACxF6RGojEM4feVtJiwzplTC9yzoEs2a-Nr4OjttouJuixpcIe60jCSHFnu5tIjnqGjhJ5I7q6X_5meIyBtDc58U1G660OMevQWxRnoBc-wGCEHUvrhj9wHyT2JRA-UL1fQM7710gCdiwUmB44STgw7Z3_qi7mJo9uN2d4wuaFN8umKiiHbnGLTB9UCICMMMh626d_0ZWOOigFGCKagY8e7BfmPN0W75khMM9bwqSjWiZXKKPFEULZmabGRFTAQJN8fgcSW_SWpD_NfdrHc3Uq5-Qul8mBP4PX4-rWaeJb_uep3VimCUewgptHF0JOdC0HbfdCwgaaAilyjSyzX_kBDeOWXyDg38j-KCTx_Kwnmz5zyZoSxp9dQ-FMCx0BAlJGNd3riRhXd36I_Y8d6SigU4g-3BzvXeTwqFMQ-ag4SAY7GuRIq0ZBaJpYNEGayZRmpC2uXqj9XDCG8onhZSNcjj-UlBoM1nTA3r8V0OQRpQGeDXpCISKiy5IQ_cMpHq3GFgDJLjtPoMoxirc07F_OzbJZ79HIyIxgDxKdutZl1HSQSatC6BAhqwmGosncDLKswTrjONzuTpC9UyhdK8OTnihDycWTrUCn9y721iEsL8NEXLOlpoEAdcb5-xs0-G0dHoZhmZ8UliJt_7s9YziuRC1r9IV1rd2SRYeLMZYZX4gV4Ug4jb7Ifn9qFJvAeRj3PLMBkOqOGnycLGYOJZofIal_Z1H1vq-0hfwJIkyR7FnFjxjFugBvwAj9XqvkO5wvCbMw="}}
+
+event: response.output_item.done
+data: {"type":"response.output_item.done","sequence_number":3,"output_index":0,"item":{"type":"reasoning","id":"rs_0f7ec9c51e1de711016ae218798fb88191bdd5ae00495efa1d","summary":[],"content":[],"encrypted_content":"gAAAAABq4hh5ZzPib8OVOfl2a-Udsbl7QLTw2U_BtYG2j22STeZUF0BscW4TBnWHQif_nr7s3pLoiiR9zps7p6LuakVPvqwVx6Y_EnSimS_KQmuQBSS4YY2XJEX4T6E2jBiN3qChDWSpZZCDfr6b6J7ts1oY6H2pHQTL8uiqSRSRtSWzR1xaiCTQidAMIUFADHY3XHA2A-EoDReS3fDGIUckSW6lH8qtkpUkrBkAzcBGQbY6BQ6XuQf3NYpw6bDVH3lgVDS6XQkP0ucfxPsHEQMm1oND6WDRf9X5PwPddL2z0n9rcEPDMwfgzW1B7qqya_xDtBFHW6ZiXbn8wHYoO7QVujC6dX3LmUIQmXzkzD8l2aZw-Yu4qtHWpYsJ6478BdEyKJ93gflVAwtLNKbe6-BwG0q0b5Iydy3wJVabcCizvo9EG_XoeyaA_HbvcnwGeja0i3S8KIMGNxpUznjsCHwYB0J7IptCjOswqpMOSwp5dL6qs211lf5jWx1CTlWWVL7H2rWIkoa8ChPqLE8G2bcvnvWGeS2jB_0M6WeYsMaLZMgE-4PgRnaV_JopKC009QaOgp7Qg6D-rMVNZKkwH5KS4jbj3G9Hhkgef0HGeppICikOTPr3wH6XfuqnKwOTXSAan4m3ALWnPKB5yDlIVPJk6JkHTpADTs2-TM0hcaL9uGRgWNB1yhpN6Vg2vg8x25metoX_4DNOyrUSuFQjhkKcWmEQFCYs3HoKyoLRuTSffYqV4lEPmaGEaA2U0xebFuUPuUWNKCpPDScMMIzN58FDGabiNEyzy4_HwJjcqZjHEWx0f7XVmbQhBbV5fWgnfF_CuC6hmRp5VfxH5u0vo4T136hGkClVdrGhJ8XqHx5uZ4xCiACxF6RGojEM4feVtJiwzplTC9yzoEs2a-Nr4OjttouJuixpcIe60jCSHFnu5tIjnqGjhJ5I7q6X_5meIyBtDc58U1G660OMevQWxRnoBc-wGCEHUvrhj9wHyT2JRA-UL1fQM7710gCdiwUmB44STgw7Z3_qi7mJo9uN2d4wuaFN8umKiiHbnGLTB9UCICMMMh626d_0ZWOOigFGCKagY8e7BfmPN0W75khMM9bwqSjWiZXKKPFEULZmabGRFTAQJN8fgcSW_SWpD_NfdrHc3Uq5-Qul8mBP4PX4-rWaeJb_uep3VimCUewgptHF0JOdC0HbfdCwgaaAilyjSyzX_kBDeOWXyDg38j-KCTx_Kwnmz5zyZoSxp9dQ-FMCx0BAlJGNd3riRhXd36I_Y8d6SigU4g-3BzvXeTwqFMQ-ag4SAY7GuRIq0ZBaJpYNEGayZRmpC2uXqj9XDCG8onhZSNcjj-UlBoM1nTA3r8V0OQRpQGeDXpCISKiy5IQ_cMpHq3GFgDJLjtPoMoxirc07F_OzbJZ79HIyIxgDxKdutZl1HSQSatC6BAhqwmGosncDLKswTrjONzuTpC9UyhdK8OTnihDycWTrUCn9y721iEsL8NEXLOlpoEAdcb5-xs0-G0dHoZhmZ8UliJt_7s9YziuRC1r9IV1rd2SRYeLMZYZX4gV4Ug4jb7Ifn9qFJvAeRj3PLMBkOqOGnycLGYOJZofIal_Z1H1vq-0hfwJIkyR7FnFjxjFugBvwAj9XqvkO5wvCbMw="}}
+
+event: response.output_item.added
+data: {"type":"response.output_item.added","sequence_number":4,"output_index":1,"item":{"type":"function_call","id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","call_id":"call_822e993382ce4768b12f4f862d502f3c","name":"check_auxiliary","arguments":"","status":"in_progress"}}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":5,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"{\"","obfuscation":"tEwucqittxhyqw"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":6,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"statement","obfuscation":"Km98lVW"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":7,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"\":\"","obfuscation":"OJfGJJ2wiqfHw"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":8,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"∀","obfuscation":"i5GncXJfGItxgIs"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":9,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" (","obfuscation":"omsolTRHRuODTQ"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":10,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"t","obfuscation":"awLm1wBfjZW7zJq"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":11,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" :","obfuscation":"RIymfpPgCRKR5U"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":12,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" ℝ","obfuscation":"9iWCrG2Z6K1tN6"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":13,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"),","obfuscation":"DP8fQTUyy3Eqyc"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":14,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" ","obfuscation":"455iie1XRyxYufd"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":15,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"0","obfuscation":"4q5zavOvieiogUM"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":16,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" <","obfuscation":"nQgnnedreW1jQ6"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":17,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" t","obfuscation":"IhRmYgUaaU5MLh"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":18,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" →","obfuscation":"kbNodHpOXDcQNN"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":19,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" ∀","obfuscation":"rzhvEFgUMtTx2h"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":20,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" x","obfuscation":"D5xXvyoX2IB2Dh"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":21,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" :","obfuscation":"enS7bEbn3mbczt"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":22,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" W","obfuscation":"jRpeG0IquKAtWi"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":23,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"Space","obfuscation":"EYifaKbY2RB"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":24,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" n","obfuscation":"lrfLpDaoyPZnLO"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":25,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":",","obfuscation":"H942kOlUMZyiglO"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":26,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" w","obfuscation":"WTghau4uWbh6bc"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":27,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"T","obfuscation":"nz6Bf9ct77SdOFm"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":28,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" u","obfuscation":"gq1ysUbMO0x6TL"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":29,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" (","obfuscation":"DixPZAr7bFhdUK"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":30,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"x","obfuscation":"Mv6Rp69YNYv00U6"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":31,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":",t","obfuscation":"VbtO3qwiSPVFjQ"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":32,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":")","obfuscation":"ZNDoRmWKq33P0z8"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":33,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" =","obfuscation":"veKcUi9a4h5JJW"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":34,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" f","obfuscation":"nDeAjhSLMqLd1z"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":35,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"der","obfuscation":"ZXgKyZkJ1dnvJ"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":36,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"iv","obfuscation":"MWACo5hhrL3QUX"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":37,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" ℝ","obfuscation":"jvj2kHk7uGgQyD"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":38,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" u","obfuscation":"mOJyf7JKlaI69i"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":39,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" (","obfuscation":"iuCWXuqkTKiuK5"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":40,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"x","obfuscation":"Gcyab8LR7DxmOPg"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":41,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":",t","obfuscation":"QhqZLTo36IO1Gp"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":42,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":")","obfuscation":"a6pM8w7QBcnesU9"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":43,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" (","obfuscation":"wAF7btn89XaLjE"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":44,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"0","obfuscation":"bLiBzu4snQitbV3"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":45,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":",","obfuscation":"YKh2tJOL1FuoJXy"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":46,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"1","obfuscation":"7NqGXpUUwOKflIb"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":47,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":")","obfuscation":"frmcWVI39s3jrZQ"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":48,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"\",\"","obfuscation":"Nk58qs9bS81QE"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":49,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"proof","obfuscation":"rctXcAKdlHN"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":50,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"\":\"","obfuscation":"lbOqI9z6aBwZm"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":51,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"intro","obfuscation":"qKIar2ZWw57"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":52,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" t","obfuscation":"EKakEcWOH42OHz"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":53,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" ht","obfuscation":"u3y6tC0Ho8fzb"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":54,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" x","obfuscation":"oWD44GzNHG90xa"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":55,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"\\n","obfuscation":"eRYrd1P9xt8TwQ"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":56,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"have","obfuscation":"vcLG3POfx4xL"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":57,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" hopen","obfuscation":"LGTQiXQ8gd"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":58,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" :","obfuscation":"INfIDaOzdRMyqF"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":59,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" Is","obfuscation":"mheEGpJjsOqN3"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":60,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"Open","obfuscation":"ayGjrU4bwLYd"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":61,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" (","obfuscation":"X6zY6mgrfugzQJ"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":62,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"w","obfuscation":"F4tPUpZIFJDndrR"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":63,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"Domain","obfuscation":"uXPZXmkxSe"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":64,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" n","obfuscation":"sM4aQ3RFh7XuCQ"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":65,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":")","obfuscation":"k0tyhKiXDUYxMqB"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":66,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" :=","obfuscation":"luQswKcnsFil8"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":67,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" is","obfuscation":"qbpFKTEXyCKsd"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":68,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"Open","obfuscation":"3ymYZhRFwL3s"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":69,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"_lt","obfuscation":"D3yO7Su03sGMR"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":70,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" continuous","obfuscation":"9kHZN"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":71,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"_const","obfuscation":"GNNff2H0Ki"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":72,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" continuous","obfuscation":"PlcJo"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":73,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"_s","obfuscation":"8XSAO28YZheOJD"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":74,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"nd","obfuscation":"CkWVlLlaLCdTVS"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":75,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"\\n","obfuscation":"UuENWuFVboJ9hX"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":76,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"have","obfuscation":"IGnGxvRTAeRZ"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":77,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" hu","obfuscation":"ZCRcJCt2auFhw"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":78,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" :","obfuscation":"KHGK7QxmxRAixe"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":79,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" Differ","obfuscation":"UAXKX926s"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":80,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"enti","obfuscation":"MyhEzUufyQTY"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":81,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"able","obfuscation":"bz77bUcdDqo2"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":82,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"At","obfuscation":"WMoc49DtA7cIBK"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":83,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" ℝ","obfuscation":"hQKbjLrLxALIKB"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":84,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" u","obfuscation":"HFrpGD5C2d4TJB"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":85,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" (","obfuscation":"0vojn2B1T9XBIF"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":86,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"x","obfuscation":"VF2pRiijrsAyHuo"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":87,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":",t","obfuscation":"h9aSJp1JkpTlcc"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":88,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":")","obfuscation":"bcLGkE0FTv5kYy1"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":89,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" :=","obfuscation":"LoE1ASQymXU57"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":90,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" (","obfuscation":"OJz8F4mtPZ9aAC"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":91,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"h","obfuscation":"2ucD5qua7Z32g70"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":92,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"_H","obfuscation":"V9Egnzacd3ibTg"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":93,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"002","obfuscation":"qV6BqchWB2lTJ"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":94,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":".cont","obfuscation":"r3Xf73ak6lT"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":95,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"Diff","obfuscation":"luov33Ar6NRX"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":96,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"At","obfuscation":"fC4fQqFmqRuBer"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":97,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" (","obfuscation":"0q5tAYUTu0ZKb7"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":98,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"h","obfuscation":"lGl6plBzlvYa3oz"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":99,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"open","obfuscation":"SUoOqjiCNLK2"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":100,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":".mem","obfuscation":"gP93hUzJMcDj"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":101,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"_n","obfuscation":"GgHRPGRzbVXaPQ"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":102,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"h","obfuscation":"Rq1rmUVWlpPXlMy"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":103,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"ds","obfuscation":"4VJ0FWVGmUUPiE"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":104,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" ht","obfuscation":"GsK6GVC6Nc26h"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":105,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":")).","obfuscation":"z2hUr56L0Gj2U"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":106,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"d","obfuscation":"AmgzQz3NQxPzxCG"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":107,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"iffer","obfuscation":"AjSmTOHHqBZ"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":108,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"enti","obfuscation":"OOdXVt4UZabL"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":109,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"able","obfuscation":"LiFaYw0WcRY0"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":110,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"At","obfuscation":"yroLxLbx3K0hie"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":111,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" (","obfuscation":"HrsreZEYE4Ichf"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":112,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"by","obfuscation":"u7XroQdqYQ4yPZ"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":113,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" simp","obfuscation":"h8T02soO0Zd"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":114,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":")\\","obfuscation":"SMoXXforGMOvX8"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":115,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"nh","obfuscation":"rZlmNL4ejjzT6S"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":116,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"ave","obfuscation":"jjd8rvBmgJpMA"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":117,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" hc","obfuscation":"ZH6st4qSQzO7S"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":118,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" :","obfuscation":"zgNuBejqI74IvX"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":119,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" Has","obfuscation":"noQFI3tGdXdL"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":120,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"Der","obfuscation":"CBzwmNK2Da083"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":121,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"iv","obfuscation":"AHfaHXhXA37RQr"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":122,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"At","obfuscation":"BGN6AyMnj3KsDZ"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":123,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" (","obfuscation":"Zby06lbNFgTMTN"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":124,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"fun","obfuscation":"XgwxYVpQTaGw5"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":125,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" r","obfuscation":"1YpsIdmgs36kmu"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":126,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" :","obfuscation":"d7GwfGamUMGyta"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":127,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" ℝ","obfuscation":"rEk894ufajOoI5"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":128,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" =>","obfuscation":"rovr9PNF77Wpq"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":129,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" (","obfuscation":"e8fguX2LNO0vNR"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":130,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"x","obfuscation":"3b7X5haShspEiXm"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":131,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":",r","obfuscation":"FKdmFAn4ZsSf3F"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":132,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"))","obfuscation":"QehwQG0qAcWR6N"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":133,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" (","obfuscation":"MCzyCAmMQOZuBn"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":134,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"0","obfuscation":"bcZCVSuMxnQlAlj"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":135,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":",","obfuscation":"q7ksgEMUdeaupB4"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":136,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"1","obfuscation":"htr2znSz12tSVjF"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":137,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":")","obfuscation":"eUhspXiI76M099i"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":138,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" t","obfuscation":"HbzbDzKP3sCxDP"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":139,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" :=","obfuscation":"HMExhB2DSaYwl"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":140,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" (","obfuscation":"x8Pq4e6JBlAWxV"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":141,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"has","obfuscation":"48zi0qu96FIOl"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":142,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"Der","obfuscation":"ID0puSYciXTvZ"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":143,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"iv","obfuscation":"tnHb9C1Xo7cPkc"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":144,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"At","obfuscation":"UJBvZAezAfuHCa"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":145,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"_const","obfuscation":"mWDjKFFgd2"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":146,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" t","obfuscation":"yyhZFEi8dCePsB"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":147,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" x","obfuscation":"zqWjyO6gs6HmAa"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":148,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":").","obfuscation":"ladBO5k1ygt8Oh"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":149,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"prod","obfuscation":"5OHp4SMiSqhA"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":150,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"Mk","obfuscation":"36w9kBFxl0wEnW"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":151,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" (","obfuscation":"DqhZaW9P88K7SG"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":152,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"has","obfuscation":"aURhHTeDYPCuY"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":153,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"Der","obfuscation":"ceqitvvvPHxBi"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":154,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"iv","obfuscation":"USifOLUYCrzokR"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":155,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"At","obfuscation":"VLN5C2U0VcWxjb"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":156,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"_id","obfuscation":"ybCUBR5b4lAXc"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":157,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" t","obfuscation":"62Z1BOJMRSWjNA"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":158,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":")\\","obfuscation":"Pq9LaB89QoE4NM"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":159,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"n","obfuscation":"EPBG8rR62ZopNvn"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":160,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"exact","obfuscation":"3qpvXvFWx4q"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":161,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" (","obfuscation":"Bh6Pf9tGgiwqUe"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":162,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"hu","obfuscation":"Pgro0Wv8Onj7cJ"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":163,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":".has","obfuscation":"2M8XIw1x9OTn"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":164,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"F","obfuscation":"4A0hamIDyR3tzVp"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":165,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"Der","obfuscation":"2Gw5RoSyWeD1u"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":166,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"iv","obfuscation":"dPe51krAl69feJ"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":167,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"At","obfuscation":"8SPYxPyFp7oWEW"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":168,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":".comp","obfuscation":"Q7LTHIHhaPo"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":169,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"_has","obfuscation":"t1mxTZ2QtNeP"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":170,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"Der","obfuscation":"ZuH41vzDjq37n"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":171,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"iv","obfuscation":"X6TMBhYJ48x1OV"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":172,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"At","obfuscation":"f5aco0qQpDuYZc"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":173,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" t","obfuscation":"sGmpHFhkVvJGSS"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":174,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":" hc","obfuscation":"dyadzKAOJf5xU"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":175,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":").","obfuscation":"iOu5mQPfWpVE7T"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":176,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"der","obfuscation":"Qk2dyLoskiwcU"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":177,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"iv","obfuscation":"xfUHWD7fwRxVso"}
+
+event: response.function_call_arguments.delta
+data: {"type":"response.function_call_arguments.delta","sequence_number":178,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"delta":"\"}","obfuscation":"qCt8U6yloOasoh"}
+
+event: response.function_call_arguments.done
+data: {"type":"response.function_call_arguments.done","sequence_number":179,"item_id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","output_index":1,"arguments":"{\"statement\":\"∀ (t : ℝ), 0 < t → ∀ x : WSpace n, wT u (x,t) = fderiv ℝ u (x,t) (0,1)\",\"proof\":\"intro t ht x\\nhave hopen : IsOpen (wDomain n) := isOpen_lt continuous_const continuous_snd\\nhave hu : DifferentiableAt ℝ u (x,t) := (h_H002.contDiffAt (hopen.mem_nhds ht)).differentiableAt (by simp)\\nhave hc : HasDerivAt (fun r : ℝ => (x,r)) (0,1) t := (hasDerivAt_const t x).prodMk (hasDerivAt_id t)\\nexact (hu.hasFDerivAt.comp_hasDerivAt t hc).deriv\"}"}
+
+event: response.output_item.done
+data: {"type":"response.output_item.done","sequence_number":180,"output_index":1,"item":{"type":"function_call","id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","call_id":"call_822e993382ce4768b12f4f862d502f3c","name":"check_auxiliary","arguments":"{\"statement\":\"∀ (t : ℝ), 0 < t → ∀ x : WSpace n, wT u (x,t) = fderiv ℝ u (x,t) (0,1)\",\"proof\":\"intro t ht x\\nhave hopen : IsOpen (wDomain n) := isOpen_lt continuous_const continuous_snd\\nhave hu : DifferentiableAt ℝ u (x,t) := (h_H002.contDiffAt (hopen.mem_nhds ht)).differentiableAt (by simp)\\nhave hc : HasDerivAt (fun r : ℝ => (x,r)) (0,1) t := (hasDerivAt_const t x).prodMk (hasDerivAt_id t)\\nexact (hu.hasFDerivAt.comp_hasDerivAt t hc).deriv\"}","status":"completed"}}
+
+event: response.metadata
+data: {"type":"response.metadata","sequence_number":181,"response_id":"resp_0f7ec9c51e1de711016ae218779ed88191a7d8a73ef3162e1b","metadata":{"openai_chatgpt_moderation_metadata":{"prompt":{"omnimod":{"protection_type":"omnimod","outputs":[{"results":[{"category_flags":{"A1":false,"A2":false,"A3":false,"C1":false,"C11":false,"C2":false,"E1":false,"E2":false,"E3":false,"H1":false,"H2":false,"H3":false,"JB1":false,"K1":false,"K2":false,"K3":false,"K4":false,"P1":false,"P2":false,"P3":false,"P4":false,"PD1":false,"PD4":false,"S1":false,"S3+":false,"S4":false,"SH":false,"TXT-C3":false,"TXT-C4":false,"V1":false,"V2+":false,"V4+":false,"REFUSED":false,"CBRN-B1+":false,"IMG-C1":false,"IMG-C11":false,"IMG-C2":false,"IMG-S1":false,"IMG-SH":false,"IMG-V1":false,"IMG-V2+":false,"IMG-V4+":false}}],"is_blocked":false}]}},"generation":{},"tool_call":{},"tool_response":{}}}}
+
+event: response.completed
+data: {"type":"response.completed","sequence_number":182,"safety_buffering":false,"response":{"id":"resp_0f7ec9c51e1de711016ae218779ed88191a7d8a73ef3162e1b","object":"response","created_at":1793202296,"completed_at":1793202299,"status":"completed","background":false,"frequency_penalty":0.0,"presence_penalty":0.0,"moderation":null,"model":"gpt-6.1-sol","access_programs":{"cyber":"standard"},"previous_response_id":null,"instructions":"You translate the supplied natural-language proof faithfully into Lean 4. Use the explicit project premises and any proved result in the pinned Mathlib environment. Preserve all assumptions, conclusions, equality modes and the supplied proof route. No reference answers, personal context, other tasks, shell or external services are available. Use the submit tool when the requested artifact is complete; if rejected, repair it. A strategy is advice, never an additional theorem or assumption.\n\n# Lean implementation safeguards\n\nApply these requirements within the accepted NL0 and the fixed Lean interface.\nThey govern implementation, not additional NL0 detail or a weaker Audit B.\nUse existing library readers and local checking tools; no separate review\nmodel, new premise or mandatory lookup of every familiar declaration is needed.\n\n1. **Check critical library signatures.** Before relying on a critical or\n   unfamiliar library application, establish its complete type in the pinned\n   environment, including explicit, implicit and instance binders and all\n   side conditions. Read the declaration or check a small typed application\n   when its signature is uncertain. Do not infer the calling convention from\n   its name or pass an implicit argument as though it were an explicit one.\n   A previously checked signature in this context need not be looked up again.\n2. **Constrain difficult inference.** When coercions or implicit inference\n   obscure the intended application, give the intermediate fact an explicit\n   type and supply the relevant named parameters, such as the set, exponent\n   or ambient space. Prefer this to leaving Lean to discover those choices by\n   unfolding large definitions. Routine unambiguous arguments can stay\n   implicit; explicit parameters must preserve the existing target and inputs.\n3. **Check conversions before combining them.** When an argument crosses Lean\n   representations, first establish a small typed conversion fact, then use\n   it in the main proof. In particular, distinguish `ℝ`, `ℝ≥0` and `ℝ≥0∞`;\n   check the conversion direction, nonnegativity and any finiteness conditions.\n   A conversion is not automatically invertible, and matching notation does\n   not establish equality of differently typed expressions. Reuse a checked\n   fact when available. Do not invent another representation, a global helper\n   requirement or an extra hypothesis just to satisfy this instruction.\n4. **Isolate an inference failure.** If compiler feedback identifies a library\n   application, coercion or expensive inference problem, reduce the next check\n   to that application or conversion with explicit local types before adding\n   more proof code. Use `check_auxiliary` in a proof worker, or\n   `check_lean_types` during preparation when that tool is supplied. Helpers\n   use only the current allowed inputs and never become new premises. Once\n   the small check succeeds, integrate the result and recheck the complete\n   obligation; success of a helper alone does not accept the target.\n\nThese rules do not interrupt an active compiler call or impose a time limit.\nThey guide the next implementation/checking action when feedback is available.\nRetain failed attempts and actual diagnostics. Standalone assembly, native\ntrust/signature checks and independent endpoint-fidelity Audit B remain required.\n End this stage immediately when a submit tool reports stage_complete:true; the controller handles later stages. Within a proof stage, checked helper attempts are available through read_lean_draft. After a context reset, query its index before claiming no draft or helper exists. Helpers never become new premises. Use familiar interfaces directly; no background-note scan is required. For a relevant obstacle, select a matching local background_note_index entry and read_background_note if its details may help. Relate the actual Lean goal/context to its NL step: use the note grounds to identify a small missing application premise or transport, prove it from permitted inputs, then check the intended application. Verify actual types and conditions; a note is not a Lean proof or extra assumption. If it does not fit, continue ordinary allowed search or repair without insisting on that note or rebuilding a larger argument by default.","output":[{"type":"reasoning","id":"rs_0f7ec9c51e1de711016ae218798fb88191bdd5ae00495efa1d","summary":[],"content":[],"encrypted_content":"gAAAAABq4hh5ZzPib8OVOfl2a-Udsbl7QLTw2U_BtYG2j22STeZUF0BscW4TBnWHQif_nr7s3pLoiiR9zps7p6LuakVPvqwVx6Y_EnSimS_KQmuQBSS4YY2XJEX4T6E2jBiN3qChDWSpZZCDfr6b6J7ts1oY6H2pHQTL8uiqSRSRtSWzR1xaiCTQidAMIUFADHY3XHA2A-EoDReS3fDGIUckSW6lH8qtkpUkrBkAzcBGQbY6BQ6XuQf3NYpw6bDVH3lgVDS6XQkP0ucfxPsHEQMm1oND6WDRf9X5PwPddL2z0n9rcEPDMwfgzW1B7qqya_xDtBFHW6ZiXbn8wHYoO7QVujC6dX3LmUIQmXzkzD8l2aZw-Yu4qtHWpYsJ6478BdEyKJ93gflVAwtLNKbe6-BwG0q0b5Iydy3wJVabcCizvo9EG_XoeyaA_HbvcnwGeja0i3S8KIMGNxpUznjsCHwYB0J7IptCjOswqpMOSwp5dL6qs211lf5jWx1CTlWWVL7H2rWIkoa8ChPqLE8G2bcvnvWGeS2jB_0M6WeYsMaLZMgE-4PgRnaV_JopKC009QaOgp7Qg6D-rMVNZKkwH5KS4jbj3G9Hhkgef0HGeppICikOTPr3wH6XfuqnKwOTXSAan4m3ALWnPKB5yDlIVPJk6JkHTpADTs2-TM0hcaL9uGRgWNB1yhpN6Vg2vg8x25metoX_4DNOyrUSuFQjhkKcWmEQFCYs3HoKyoLRuTSffYqV4lEPmaGEaA2U0xebFuUPuUWNKCpPDScMMIzN58FDGabiNEyzy4_HwJjcqZjHEWx0f7XVmbQhBbV5fWgnfF_CuC6hmRp5VfxH5u0vo4T136hGkClVdrGhJ8XqHx5uZ4xCiACxF6RGojEM4feVtJiwzplTC9yzoEs2a-Nr4OjttouJuixpcIe60jCSHFnu5tIjnqGjhJ5I7q6X_5meIyBtDc58U1G660OMevQWxRnoBc-wGCEHUvrhj9wHyT2JRA-UL1fQM7710gCdiwUmB44STgw7Z3_qi7mJo9uN2d4wuaFN8umKiiHbnGLTB9UCICMMMh626d_0ZWOOigFGCKagY8e7BfmPN0W75khMM9bwqSjWiZXKKPFEULZmabGRFTAQJN8fgcSW_SWpD_NfdrHc3Uq5-Qul8mBP4PX4-rWaeJb_uep3VimCUewgptHF0JOdC0HbfdCwgaaAilyjSyzX_kBDeOWXyDg38j-KCTx_Kwnmz5zyZoSxp9dQ-FMCx0BAlJGNd3riRhXd36I_Y8d6SigU4g-3BzvXeTwqFMQ-ag4SAY7GuRIq0ZBaJpYNEGayZRmpC2uXqj9XDCG8onhZSNcjj-UlBoM1nTA3r8V0OQRpQGeDXpCISKiy5IQ_cMpHq3GFgDJLjtPoMoxirc07F_OzbJZ79HIyIxgDxKdutZl1HSQSatC6BAhqwmGosncDLKswTrjONzuTpC9UyhdK8OTnihDycWTrUCn9y721iEsL8NEXLOlpoEAdcb5-xs0-G0dHoZhmZ8UliJt_7s9YziuRC1r9IV1rd2SRYeLMZYZX4gV4Ug4jb7Ifn9qFJvAeRj3PLMBkOqOGnycLGYOJZofIal_Z1H1vq-0hfwJIkyR7FnFjxjFugBvwAj9XqvkO5wvCbMw="},{"type":"function_call","id":"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d","call_id":"call_822e993382ce4768b12f4f862d502f3c","name":"check_auxiliary","arguments":"{\"statement\":\"∀ (t : ℝ), 0 < t → ∀ x : WSpace n, wT u (x,t) = fderiv ℝ u (x,t) (0,1)\",\"proof\":\"intro t ht x\\nhave hopen : IsOpen (wDomain n) := isOpen_lt continuous_const continuous_snd\\nhave hu : DifferentiableAt ℝ u (x,t) := (h_H002.contDiffAt (hopen.mem_nhds ht)).differentiableAt (by simp)\\nhave hc : HasDerivAt (fun r : ℝ => (x,r)) (0,1) t := (hasDerivAt_const t x).prodMk (hasDerivAt_id t)\\nexact (hu.hasFDerivAt.comp_hasDerivAt t hc).deriv\"}","status":"completed"}],"error":null,"incomplete_details":null,"tools":[{"type":"function","name":"search_mathlib","description":"Search the pinned mathlib Lean source using a regular expression; at most 100 lines.","parameters":{"type":"object","properties":{"query":{"type":"string"}},"required":["query"],"additionalProperties":false},"output_schema":null,"strict":false},{"type":"function","name":"read_mathlib","description":"Read specified lines of a Mathlib/*.lean source file from the pinned checkout.","parameters":{"type":"object","properties":{"path":{"type":"string"},"start_line":{"type":"integer"},"line_count":{"type":"integer"}},"required":["path","start_line","line_count"],"additionalProperties":false},"output_schema":null,"strict":false},{"type":"function","name":"check_transition","description":"Compile a tactic body for the fixed target; no leading by, declarations, or placeholders.","parameters":{"type":"object","properties":{"proof":{"type":"string"}},"required":["proof"],"additionalProperties":false},"output_schema":null,"strict":false},{"type":"function","name":"submit_transition","description":"Submit and check the final tactic body for the same target.","parameters":{"type":"object","properties":{"proof":{"type":"string"}},"required":["proof"],"additionalProperties":false},"output_schema":null,"strict":false},{"type":"function","name":"check_auxiliary","description":"Compile one helper proposition and tactic body in exactly this local port context. This never accepts the final goal or adds a premise.","parameters":{"type":"object","properties":{"statement":{"type":"string"},"proof":{"type":"string"}},"required":["statement","proof"],"additionalProperties":false},"output_schema":null,"strict":false},{"type":"function","name":"read_lean_draft","description":"Read only your own same-stage proof/helper attempts. kind=index lists attempts; proof/auxiliary returns the selected body lines and actual check. No other stage or file is accessible.","parameters":{"type":"object","properties":{"kind":{"type":"string","enum":["index","proof","auxiliary"]},"candidate":{"type":"integer"},"start":{"type":"integer"},"end":{"type":"integer"}},"required":["kind","candidate","start","end"],"additionalProperties":false},"output_schema":null,"strict":false},{"type":"function","name":"read_background_note","description":"Read one complete audited background note from this task index by its qualified ID. No other task, file or proof is accessible; this is guidance, not a checked Lean proof.","parameters":{"type":"object","properties":{"id":{"type":"string"}},"required":["id"],"additionalProperties":false},"output_schema":null,"strict":false}],"tool_choice":"auto","parallel_tool_calls":false,"prompt_cache_key":"72b33218-4aed-4f6d-8161-63ed1e2b5035","prompt_cache_retention":"24h","text":{"format":{"type":"text"},"verbosity":"low"},"top_p":0.98,"top_logprobs":0,"temperature":1.0,"reasoning":{"effort":"high","context":"all_turns","summary":null,"mode":"standard"},"user":null,"usage":{"input_tokens":13841,"input_tokens_details":{"cached_tokens":0,"cache_write_tokens":0},"output_tokens":205,"output_tokens_details":{"reasoning_tokens":10},"total_tokens":14046,"attribution":{"items":{"fc_0f7ec9c51e1de711016ae2183b93008191b8c598b8776e2807":{"input_tokens":62,"cached_tokens":0,"cache_write_tokens":0,"output_tokens":0},"fc_0f7ec9c51e1de711016ae2184147648191bba091352311a616":{"input_tokens":44,"cached_tokens":0,"cache_write_tokens":0,"output_tokens":0},"fc_0f7ec9c51e1de711016ae2184ff738819181753281f4099a7b":{"input_tokens":94,"cached_tokens":0,"cache_write_tokens":0,"output_tokens":0},"fc_0f7ec9c51e1de711016ae21854c8888191b7fa79d5ebd0d95c":{"input_tokens":44,"cached_tokens":0,"cache_write_tokens":0,"output_tokens":0},"fc_0f7ec9c51e1de711016ae21858f6448191b4ffdb5595892c32":{"input_tokens":44,"cached_tokens":0,"cache_write_tokens":0,"output_tokens":0},"fc_0f7ec9c51e1de711016ae2185c97548191b04463ac9f1bfa70":{"input_tokens":43,"cached_tokens":0,"cache_write_tokens":0,"output_tokens":0},"fc_0f7ec9c51e1de711016ae2186041a88191a87d8891414dfee0":{"input_tokens":57,"cached_tokens":0,"cache_write_tokens":0,"output_tokens":0},"fc_0f7ec9c51e1de711016ae2186516ac8191ae3840f77963e9ca":{"input_tokens":42,"cached_tokens":0,"cache_write_tokens":0,"output_tokens":0},"fc_0f7ec9c51e1de711016ae2186b147881919f0866e88bc05ab3":{"input_tokens":194,"cached_tokens":0,"cache_write_tokens":0,"output_tokens":0},"fc_0f7ec9c51e1de711016ae2187521888191a8cf5b801d15d0ca":{"input_tokens":44,"cached_tokens":0,"cache_write_tokens":0,"output_tokens":0},"fc_0f7ec9c51e1de711016ae21879b2a08191b075422ed3379e3d":{"input_tokens":0,"cached_tokens":0,"cache_write_tokens":0,"output_tokens":195},"fco_01a1832e-b22a-76e0-bc4c-236893c46215":{"input_tokens":544,"cached_tokens":0,"cache_write_tokens":0,"output_tokens":0,"content":[{"input_tokens":544,"cached_tokens":0,"cache_write_tokens":0,"output_tokens":0}]},"fco_01a1832e-c0ef-74b3-8be4-64c01ba10a93":{"input_tokens":1309,"cached_tokens":0,"cache_write_tokens":0,"output_tokens":0,"content":[{"input_tokens":1309,"cached_tokens":0,"cache_write_tokens":0,"output_tokens":0}]},"fco_01a1832f-019a-7f50-9973-c92f54fc076a":{"input_tokens":649,"cached_tokens":0,"cache_write_tokens":0,"output_tokens":0,"content":[{"input_tokens":649,"cached_tokens":0,"cache_write_tokens":0,"output_tokens":0}]},"fco_01a1832f-0da9-7762-a344-63ef7a8853bc":{"input_tokens":604,"cached_tokens":0,"cache_write_tokens":0,"output_tokens":0,"content":[{"input_tokens":604,"cached_tokens":0,"cache_write_tokens":0,"output_tokens":0}]},"fco_01a1832f-1e36-7403-b55b-ed78c1d4e122":{"input_tokens":486,"cached_tokens":0,"cache_write_tokens":0,"output_tokens":0,"content":[{"input_tokens":486,"cached_tokens":0,"cache_write_tokens":0,"output_tokens":0}]},"fco_01a1832f-2cd5-75a2-b2ba-6e5c4669d247":{"input_tokens":2011,"cached_tokens":0,"cache_write_tokens":0,"output_tokens":0,"content":[{"input_tokens":2011,"cached_tokens":0,"cache_write_tokens":0,"output_tokens":0}]},"fco_01a1832f-4026-79f1-b846-325c567739e4":{"input_tokens":2057,"cached_tokens":0,"cache_write_tokens":0,"output_tokens":0,"content":[{"input_tokens":2057,"cached_tokens":0,"cache_write_tokens":0,"output_tokens":0}]},"fco_01a1832f-4f1e-77e3-b58b-22a67c6e2cfd":{"input_tokens":26,"cached_tokens":0,"cache_write_tokens":0,"output_tokens":0,"content":[{"input_tokens":26,"cached_tokens":0,"cache_write_tokens":0,"output_tokens":0}]},"fco_01a1832f-7d31-7f72-981b-4d89d0637c54":{"input_tokens":610,"cached_tokens":0,"cache_write_tokens":0,"output_tokens":0,"content":[{"input_tokens":610,"cached_tokens":0,"cache_write_tokens":0,"output_tokens":0}]},"fco_01a1832f-8e61-71b3-bf61-aca856934d3d":{"input_tokens":786,"cached_tokens":0,"cache_write_tokens":0,"output_tokens":0,"content":[{"input_tokens":786,"cached_tokens":0,"cache_write_tokens":0,"output_tokens":0}]},"msg_0f7ec9c51e1de711016ae218779f948191b7a1cbdbfb73db74":{"input_tokens":2547,"cached_tokens":0,"cache_write_tokens":0,"output_tokens":0,"content":[{"input_tokens":2547,"cached_tokens":0,"cache_write_tokens":0,"output_tokens":0}]},"rs_0f7ec9c51e1de711016ae2184fd0388191bc47ad9d3c53fced":{"input_tokens":297,"cached_tokens":0,"cache_write_tokens":0,"output_tokens":0},"rs_0f7ec9c51e1de711016ae2186ae5bc8191959a6d5a7660e1e1":{"input_tokens":23,"cached_tokens":0,"cache_write_tokens":0,"output_tokens":0},"rs_0f7ec9c51e1de711016ae218798fb88191bdd5ae00495efa1d":{"input_tokens":2,"cached_tokens":0,"cache_write_tokens":0,"output_tokens":10}},"request_fields":{"instructions":{"input_tokens":827,"cached_tokens":0,"cache_write_tokens":0,"output_tokens":0},"tools":{"input_tokens":395,"cached_tokens":0,"cache_write_tokens":0,"output_tokens":0}}}},"tool_usage":{"image_gen":{"input_tokens":0,"output_tokens":0,"total_tokens":0,"input_tokens_details":{"text_tokens":0,"image_tokens":0},"output_tokens_details":{"image_tokens":0,"text_tokens":0}},"web_search":{"num_requests":0}},"safety_identifier":"user-EpSBagPYSg8yOGllmjblVHlJ","store":false,"metadata":{},"max_output_tokens":null,"max_tool_calls":null,"service_tier":"default","truncation":"disabled"}}
+

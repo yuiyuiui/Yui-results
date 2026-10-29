@@ -1,0 +1,243 @@
+{
+  "header": "import Mathlib\nopen MeasureTheory Set Filter\nopen scoped ContDiff\nnoncomputable abbrev WSpace (n : ℕ) := Fin n → ℝ\nnoncomputable abbrev WTarget (m : ℕ) := EuclideanSpace ℝ (Fin m)\nnoncomputable def wDx {n : ℕ} {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] (f : WSpace n → F) (j : Fin n) (x : WSpace n) : F := fderiv ℝ f x (Pi.single j 1)\nnoncomputable def wT {n : ℕ} {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] (f : WSpace n × ℝ → F) (p : WSpace n × ℝ) : F := deriv (fun r => f (p.1,r)) p.2\nnoncomputable def wX {n : ℕ} {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] (f : WSpace n × ℝ → F) (j : Fin n) (p : WSpace n × ℝ) : F := wDx (fun x => f (x,p.2)) j p.1\nnoncomputable def wLap {n m : ℕ} (u : WSpace n × ℝ → WTarget m) (p : WSpace n × ℝ) : WTarget m := ∑ j : Fin n, wX (wX u j) j p\nnoncomputable def wDensity {n m : ℕ} (u : WSpace n × ℝ → WTarget m) (p : WSpace n × ℝ) : ℝ := ‖wT u p‖^2 + ∑ j : Fin n, ‖wX u j p‖^2\nnoncomputable def wEnergy {n m : ℕ} (u : WSpace n × ℝ → WTarget m) (t : ℝ) : ℝ := ∫ x : WSpace n, wDensity u (x,t)\nnoncomputable def wA {n m : ℕ} (u : WSpace n × ℝ → WTarget m) (p : WSpace n × ℝ) : ℝ := inner ℝ (wT u p) (wT (wT u) p)\nnoncomputable def wB {n m : ℕ} (u : WSpace n × ℝ → WTarget m) (j : Fin n) (p : WSpace n × ℝ) : ℝ := inner ℝ (wX u j p) (wX (wT u) j p)\nnoncomputable def wC {n m : ℕ} (u : WSpace n × ℝ → WTarget m) (j : Fin n) (p : WSpace n × ℝ) : ℝ := inner ℝ (wT u p) (wX (wX u j) j p)\nnoncomputable def wG {n m : ℕ} (u : WSpace n × ℝ → WTarget m) (j : Fin n) (p : WSpace n × ℝ) : ℝ := inner ℝ (wT u p) (wX u j p)\ndef wDomain (n : ℕ) : Set (WSpace n × ℝ) := {p | 0 < p.2}\ndef wBox (n : ℕ) (R : ℝ) : Set (WSpace n) := Set.Icc (fun _ => -R) (fun _ => R)\ndef wOpenBox (n : ℕ) (R : ℝ) : Set (WSpace n) := {x | ∀ j, -R < x j ∧ x j < R}\nnoncomputable def wTerms {n m : ℕ} (u : WSpace n × ℝ → WTarget m) (r : ℝ) : Set (WSpace n → ℝ) := {f | f = (fun x => wDensity u (x,r)) ∨ f = (fun x => wT (wDensity u) (x,r)) ∨ f = (fun x => wA u (x,r)) ∨ ∃ j : Fin n, f = (fun x => wB u j (x,r)) ∨ f = (fun x => wC u j (x,r)) ∨ f = (fun x => wG u j (x,r)) ∨ f = (fun x => wX (wG u j) j (x,r))}\ndef wNice {n : ℕ} (C : Set (WSpace n)) (f : WSpace n → ℝ) : Prop := Continuous f ∧ (∀ x, x ∉ C → f x = 0) ∧ Integrable f\nnoncomputable def wGeometry {n m : ℕ} (u : WSpace n × ℝ → WTarget m) (q : WTarget m) (t : ℝ) (C : Set (WSpace n)) (R : ℝ) : Prop := IsCompact C ∧ 0 < R ∧ C ⊆ wOpenBox n R ∧ (∀ x r, x ∉ C → r ∈ Set.Icc (t/2) (3*t/2) → u (x,r) = q) ∧ (∀ (k : ℕ) x r, 0 < k → x ∉ C → r ∈ Set.Ioo (t/2) (3*t/2) → iteratedFDeriv ℝ k u (x,r) = 0) ∧ volume (wBox n R) = ENNReal.ofReal ((2*R)^n) ∧ volume (wBox n R) < ⊤\nnoncomputable def wLocal {n m : ℕ} (u : WSpace n × ℝ → WTarget m) (q : WTarget m) (t : ℝ) (C : Set (WSpace n)) (R B : ℝ) : Prop := wGeometry u q t C R ∧ 0 ≤ B ∧ (∀ r ∈ Set.Ioo (t/2) (3*t/2), ∀ f ∈ wTerms u r, wNice C f) ∧ (∀ x ∈ wBox n R, ∀ r ∈ Set.Icc (3*t/4) (5*t/4), |wT (wDensity u) (x,r)| ≤ B)\n",
+  "parameters": [
+    {
+      "name": "n",
+      "type": "ℕ"
+    },
+    {
+      "name": "m",
+      "type": "ℕ"
+    },
+    {
+      "name": "u",
+      "type": "WSpace n × ℝ → WTarget m"
+    },
+    {
+      "name": "q",
+      "type": "WTarget m"
+    }
+  ],
+  "premise_types": {
+    "H001": "1 ≤ n ∧ 1 ≤ m",
+    "H002": "ContDiffOn ℝ ∞ u (wDomain n)",
+    "H003": "‖q‖ = 1",
+    "H004": "∀ (x : WSpace n) (t : ℝ), 0 < t → ‖u (x,t)‖ = 1",
+    "H005": "∀ (x : WSpace n) (t : ℝ), 0 < t → ∃ a : ℝ, wT (wT u) (x,t) - wLap u (x,t) = a • u (x,t)",
+    "H006": "∀ s t : ℝ, 0 < s → s < t → ∃ C : Set (WSpace n), IsCompact C ∧ ∀ x r, x ∉ C → r ∈ Set.Icc s t → u (x,r) = q"
+  },
+  "conclusion_type": "(∀ t : ℝ, 0 < t → Integrable (fun x : WSpace n => wDensity u (x,t)) ∧ DifferentiableAt ℝ (wEnergy u) t ∧ deriv (wEnergy u) t = 0) ∧ (∀ a b : ℝ, 0 < a → 0 < b → wEnergy u b = wEnergy u a)",
+  "representation": "PENDING_AUDIT_B. Space is the coordinate product Fin n → ℝ with its product Lebesgue volume; its finite-dimensional product norm gives the same topology and smoothness as Euclidean ℝ^n. Values use EuclideanSpace ℝ (Fin m), so all displayed norms and inner products are exactly Euclidean. Indices are zero-based Fin n. u is a total ambient extension, assumed smooth only on the open positive-time domain; all claims are restricted to positive times. Coordinate derivatives use Fréchet derivatives evaluated on Pi.single j 1, and time derivatives use deriv of the fixed-space curve. wLap, wDensity and wEnergy are precisely the componentwise Laplacian, unhalved density and Lebesgue energy. Totalized integrals do not assert finiteness: that is separately proved in N002 and P. wGeometry, wLocal and wNice merely bundle explicit support, box, continuity, integrability and bound propositions; none is an assumed theorem. T010 is the explicit checked measure-transport obligation for the coordinate-product split used in the FTC/Fubini proof.",
+  "objects": [],
+  "steps": [
+    {
+      "id": "T001",
+      "statement": "∀ (x : WSpace n) (t : ℝ), 0 < t → inner ℝ (u (x,t)) (wT u (x,t)) = 0 ∧ ∀ j : Fin n, inner ℝ (u (x,t)) (wX u j (x,t)) = 0",
+      "inputs": [
+        "H002",
+        "H004"
+      ],
+      "source_steps": [
+        "S001"
+      ],
+      "explanation": "Differentiate the squared unit constraint along the time and coordinate curves, using locality on the positive open domain and HasDerivAt.inner."
+    },
+    {
+      "id": "T002",
+      "statement": "∀ (x : WSpace n) (t : ℝ), 0 < t → inner ℝ (wT u (x,t)) (wT (wT u) (x,t) - wLap u (x,t)) = 0 ∧ (∀ a : ℝ, wT (wT u) (x,t) - wLap u (x,t) = a • u (x,t) → a = (∑ j : Fin n, ‖wX u j (x,t)‖^2) - ‖wT u (x,t)‖^2)",
+      "inputs": [
+        "H002",
+        "H004",
+        "H005",
+        "T001"
+      ],
+      "source_steps": [
+        "S002"
+      ],
+      "explanation": "Use any normality witness without differentiating it. Differentiate tangency once more to identify its coefficient by dotting with u; the identity holds for every witness."
+    },
+    {
+      "id": "T003",
+      "statement": "ContDiffOn ℝ ∞ (wDensity u) (wDomain n) ∧ ContinuousOn (wT (wDensity u)) (wDomain n) ∧ ∀ (x : WSpace n) (t : ℝ), 0 < t → inner ℝ (u (x,t)) (wT u (x,t)) = 0 ∧ inner ℝ (wT u (x,t)) (wT (wT u) (x,t) - wLap u (x,t)) = 0 ∧ (∀ a : ℝ, wT (wT u) (x,t) - wLap u (x,t) = a • u (x,t) → a = (∑ j : Fin n, ‖wX u j (x,t)‖^2) - ‖wT u (x,t)‖^2) ∧ (∀ j : Fin n, wT (wX u j) (x,t) = wX (wT u) j (x,t)) ∧ wT (wDensity u) (x,t) = 2 * wA u (x,t) + 2 * ∑ j : Fin n, wB u j (x,t)",
+      "inputs": [
+        "H002",
+        "T001",
+        "T002"
+      ],
+      "source_steps": [
+        "S003"
+      ],
+      "explanation": "N001. Prove mixed-coordinate symmetry by the symmetric second Fréchet derivative at each interior point. Apply the inner-product product rule to the density and bundle tangency, normal orthogonality and the coefficient identity."
+    },
+    {
+      "id": "T004",
+      "statement": "∀ t : ℝ, 0 < t → ∃ (C : Set (WSpace n)) (R : ℝ), wGeometry u q t C R",
+      "inputs": [
+        "H001",
+        "H002",
+        "H006"
+      ],
+      "source_steps": [
+        "S004",
+        "S005",
+        "S006",
+        "S007"
+      ],
+      "explanation": "Choose the support on J, bound its norm on the compact C, and enlarge to a positive coordinate cube. Product volume gives (2R)^n. Local constancy on the open complement times int J makes every positive joint derivative zero."
+    },
+    {
+      "id": "T005",
+      "statement": "∀ t : ℝ, 0 < t → Integrable (fun x : WSpace n => wDensity u (x,t)) ∧ ∃ (C : Set (WSpace n)) (R B : ℝ), wLocal u q t C R B",
+      "inputs": [
+        "H002",
+        "T003",
+        "T004"
+      ],
+      "source_steps": [
+        "S007",
+        "S008",
+        "S009"
+      ],
+      "explanation": "N002 in full. Every listed spatial section is continuous and zero off C, hence integrable by compact support. Bound the continuous e_t on the compact space-time cube and replace its bound by max 0 B. All positive-order coordinate vanishing follows from the joint derivative vanishing recorded in wGeometry."
+    },
+    {
+      "id": "T006",
+      "statement": "∀ t : ℝ, 0 < t → ∀ (C : Set (WSpace n)) (R B : ℝ), wLocal u q t C R B → Integrable ((wBox n R).indicator (fun _ => B)) ∧ ∀ h : ℝ, 0 < |h| → |h| < t/4 → ∀ x : WSpace n, |(wDensity u (x,t+h) - wDensity u (x,t))/h| ≤ (wBox n R).indicator (fun _ => B) x",
+      "inputs": [
+        "H002",
+        "T003",
+        "T005"
+      ],
+      "source_steps": [
+        "S010",
+        "S011"
+      ],
+      "explanation": "Use the scalar mean-value estimate on [3t/4,5t/4] inside J. Off Q both densities vanish. The constant B on finite-measure Q extended by zero is integrable."
+    },
+    {
+      "id": "T007",
+      "statement": "∀ t : ℝ, 0 < t → Filter.Tendsto (fun h : ℝ => ∫ x : WSpace n, (wDensity u (x,t+h) - wDensity u (x,t))/h) (nhdsWithin 0 ({0}ᶜ)) (nhds (∫ x : WSpace n, wT (wDensity u) (x,t)))",
+      "inputs": [
+        "H002",
+        "T003",
+        "T005",
+        "T006"
+      ],
+      "source_steps": [
+        "S012"
+      ],
+      "explanation": "Apply Mathlib dominated convergence to the punctured real neighborhood filter using T006. Near zero spatial quotients are continuous and integrable, and their pointwise limits are the time derivatives. Using the untruncated quotient has exactly the same filter germ as S012's truncated F."
+    },
+    {
+      "id": "T008",
+      "statement": "∀ t : ℝ, 0 < t → DifferentiableAt ℝ (wEnergy u) t ∧ deriv (wEnergy u) t = ∫ x : WSpace n, wT (wDensity u) (x,t) ∧ HasDerivAt (wEnergy u) (∫ x : WSpace n, 2 * wA u (x,t) + 2 * ∑ j : Fin n, wB u j (x,t)) t ∧ Integrable (fun x : WSpace n => wT (wDensity u) (x,t)) ∧ Integrable (fun x : WSpace n => wA u (x,t)) ∧ ∀ j : Fin n, Integrable (fun x : WSpace n => wB u j (x,t))",
+      "inputs": [
+        "H002",
+        "T003",
+        "T005",
+        "T007"
+      ],
+      "source_steps": [
+        "S013"
+      ],
+      "explanation": "N003. Integral linearity identifies the quotient of actual energies with the integral quotient near t. Apply the difference-quotient derivative criterion to T007, then substitute N001. Record finiteness of the displayed summands explicitly."
+    },
+    {
+      "id": "T009",
+      "statement": "∀ t : ℝ, 0 < t → ∀ j : Fin n, ContDiff ℝ ∞ (fun x : WSpace n => wG u j (x,t)) ∧ HasCompactSupport (fun x : WSpace n => wG u j (x,t)) ∧ ∀ x : WSpace n, wX (wG u j) j (x,t) = wB u j (x,t) + wC u j (x,t)",
+      "inputs": [
+        "H002",
+        "T005"
+      ],
+      "source_steps": [
+        "S014"
+      ],
+      "explanation": "Spatial product rule for g_j and symmetry of the real inner product give the displayed equality. N002 gives common compact support, so g_j vanishes in a neighborhood of the chosen box boundary."
+    },
+    {
+      "id": "T010",
+      "statement": "∀ (d : ℕ) (j : Fin (d+1)) (R : ℝ), MeasureTheory.MeasurePreserving (MeasurableEquiv.piFinSuccAbove (fun _ : Fin (d+1) => ℝ) j) (volume.restrict (wBox (d+1) R)) ((volume.restrict (Set.Icc (-R) R)).prod (volume.restrict (wBox d R)))",
+      "inputs": [],
+      "source_steps": [
+        "S015"
+      ],
+      "explanation": "Checked conversion obligation for the coordinate split actually used in FTC/Fubini. Apply measurePreserving_piFinSuccAbove to restricted coordinate measures and identify product restrictions with volume restricted to the coordinate boxes; inverse is insertion at j. Includes the zero-dimensional remaining factor."
+    },
+    {
+      "id": "T011",
+      "statement": "∀ (f : WSpace n → ℝ), ContDiff ℝ ∞ f → HasCompactSupport f → ∀ j : Fin n, Integrable (fun x : WSpace n => wDx f j x) ∧ (∫ x : WSpace n, wDx f j x) = 0",
+      "inputs": [
+        "H001",
+        "T010"
+      ],
+      "source_steps": [
+        "S015"
+      ],
+      "explanation": "Implementation extraction of S015's argument for an arbitrary smooth compactly supported scalar g. Enclose its support strictly inside a coordinate box. Split at j using T010 after writing n=d+1; at fixed remaining coordinates apply FTC on [-R,R], whose endpoint values are zero. Fubini yields zero on the box, and the derivative is zero off it. Compact support and continuity prove derivative integrability. Do not replace this route by an unplanned divergence theorem."
+    },
+    {
+      "id": "T012",
+      "statement": "∀ t : ℝ, 0 < t → ∀ j : Fin n, Integrable (fun x : WSpace n => wB u j (x,t)) ∧ Integrable (fun x : WSpace n => wC u j (x,t)) ∧ (∫ x : WSpace n, wB u j (x,t)) = -(∫ x : WSpace n, wC u j (x,t))",
+      "inputs": [
+        "T005",
+        "T009",
+        "T011"
+      ],
+      "source_steps": [
+        "S016"
+      ],
+      "explanation": "N004. Apply T011 to g_j, integrate T009's product rule, and use integrability of the two summands from N002. Rearrangement is exactly integration by parts with no boundary contribution."
+    },
+    {
+      "id": "T013",
+      "statement": "∀ t : ℝ, 0 < t → HasDerivAt (wEnergy u) (2 * ∫ x : WSpace n, inner ℝ (wT u (x,t)) (wT (wT u) (x,t) - wLap u (x,t))) t",
+      "inputs": [
+        "T005",
+        "T008",
+        "T012"
+      ],
+      "source_steps": [
+        "S017"
+      ],
+      "explanation": "Sum N004 over the finite coordinates and substitute into N003. Linearity for all integrable products gives the derivative as twice the integral of u_t dotted with the normal acceleration."
+    },
+    {
+      "id": "T014",
+      "statement": "∀ t : ℝ, 0 < t → Integrable (fun x : WSpace n => wDensity u (x,t)) ∧ HasDerivAt (wEnergy u) 0 t",
+      "inputs": [
+        "T003",
+        "T005",
+        "T013"
+      ],
+      "source_steps": [
+        "S018"
+      ],
+      "explanation": "N001 makes the integrand in T013 identically zero. Retain density integrability from N002; HasDerivAt at a positive time is the ordinary two-sided derivative of any local extension."
+    },
+    {
+      "id": "T015",
+      "statement": "(∀ t : ℝ, 0 < t → Integrable (fun x : WSpace n => wDensity u (x,t)) ∧ DifferentiableAt ℝ (wEnergy u) t ∧ deriv (wEnergy u) t = 0) ∧ (∀ a b : ℝ, 0 < a → 0 < b → wEnergy u b = wEnergy u a)",
+      "inputs": [
+        "T014"
+      ],
+      "source_steps": [
+        "S019"
+      ],
+      "explanation": "P. Extract differentiability and the deriv value from HasDerivAt. Apply the mean-value inequality with derivative bound zero on [min a b,max a b], all of whose times are positive, to obtain constancy. The definition of wEnergy retains the exact unhalved normalization."
+    }
+  ],
+  "terminal": "T015",
+  "source_outputs": {
+    "N001": "T003",
+    "N002": "T005",
+    "N003": "T008",
+    "N004": "T012",
+    "P": "T015"
+  },
+  "endpoint_correspondence": {
+    "P": {
+      "mode": "equivalent",
+      "explanation": "The parameters n,m and H001 retain precisely the positive finite dimensions. Identify coordinate ℝ^n with Fin n → ℝ and target ℝ^m with EuclideanSpace ℝ (Fin m); product-space and Euclidean domain norms are equivalent, so open sets, compactness, smoothness and coordinate derivatives agree, and volume on the coordinate product is precisely the specified product Lebesgue measure. A map on positive times admits an arbitrary total extension, and restriction of any such extension recovers the original map. H002 constrains smoothness only on the positive open domain; derivatives there depend only on the germ, so both extension and restriction preserve H002, H004 and pointwise H005. H003 is exactly the fixed unit vector condition, and H006 exactly requires one compact C for each closed positive time slab, with no extra scalar regularity in H005. Conversely the original data produce these hypotheses for every total extension. wDx evaluates the Fréchet derivative on the coordinate unit vector; wT, wLap and the squared Euclidean norms therefore give exactly the prescribed derivatives, componentwise Laplacian and Frobenius density. The conclusion quantifies over every positive real t, asserting Lebesgue integrability, ordinary differentiability and zero derivative of the actual integral, plus equality of energies at every two positive times. Restriction and extension give these conclusions in both directions because derivatives at positive times are local and the density sections and integrals coincide. No condition or assertion at time zero or outside positive times is imposed; the integral has no factor 1/2."
+    }
+  }
+}

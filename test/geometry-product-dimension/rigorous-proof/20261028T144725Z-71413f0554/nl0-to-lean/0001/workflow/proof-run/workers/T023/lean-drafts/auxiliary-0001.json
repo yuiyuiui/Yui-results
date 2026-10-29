@@ -1,0 +1,22 @@
+{
+  "statement": "∀ (a : ℝ), 1 < a → ∀ (m : ℕ), 0 < m → ∀ δ : ℝ, 1 / (m : ℝ) ≤ δ → content a δ unitI ≤ ENNReal.ofReal ((1 / (m : ℝ)) ^ (a - 1))",
+  "proof": "intro a ha m hm δ hδ\nhave hmR : (0 : ℝ) < m := by exact_mod_cast hm\nhave hrec : 0 < 1 / (m : ℝ) := by positivity\nlet U : ℕ → Set ℝ := fun j => if j < m then Icc ((j : ℝ) / m) (((j : ℝ) + 1) / m) else ∅\nhave hcov : scaleCover δ unitI U := by\n  constructor\n  · intro x hx\n    have hx0 : 0 ≤ x := hx.1\n    have hx1 : x ≤ 1 := hx.2\n    apply Set.mem_iUnion.mpr\n    by_cases hx : x = 1\n    · refine ⟨m - 1, ?_⟩\n      have hj : m - 1 < m := by omega\n      have hjR : ((m - 1 : ℕ) : ℝ) = (m : ℝ) - 1 := by rw [Nat.cast_sub (by omega)]; norm_num\n      simp only [U, if_pos hj, mem_Icc, hx, hjR]\n      constructor\n      · apply (div_le_iff₀ hmR).2; linarith\n      · apply (le_div_iff₀ hmR).2; linarith\n    · have hxm : x * m < (m : ℝ) := by nlinarith\n      have hj : ⌊x * m⌋₊ < m := (Nat.floor_lt (by positivity)).2 hxm\n      refine ⟨⌊x * m⌋₊, ?_⟩\n      simp only [U, if_pos hj, mem_Icc]\n      constructor\n      · exact (div_le_iff₀ hmR).2 (Nat.floor_le (by positivity))\n      · exact (le_div_iff₀ hmR).2 (Nat.lt_floor_add_one (x * m)).le\n  · intro j\n    dsimp [U]\n    split_ifs with hj\n    · rw [Real.ediam_Icc]\n      have heq : ((j : ℝ) + 1) / m - (j : ℝ) / m = 1 / (m : ℝ) := by ring\n      rw [heq]\n      exact ENNReal.ofReal_le_ofReal hδ\n    · simp\nhave hcost : cost a U = ENNReal.ofReal ((1 / (m : ℝ)) ^ (a - 1)) := by\n  unfold cost\n  rw [tsum_eq_sum (s := Finset.range m)]\n  · have hd : ∀ j ∈ Finset.range m, Metric.ediam (U j) = ENNReal.ofReal (1 / (m : ℝ)) := by\n      intro j hj\n      rw [U, if_pos (Finset.mem_range.mp hj), Real.ediam_Icc]\n      congr 1\n      ring\n    simp_rw [Finset.sum_congr rfl (fun j hj => congrArg (fun d : ℝ≥0∞ => d ^ a) (hd j hj))]\n    rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul, ENNReal.ofReal_rpow_of_pos hrec]\n    rw [← ENNReal.ofReal_natCast, ← ENNReal.ofReal_mul hmR.le]\n    congr 1\n    rw [Real.rpow_sub_one (ne_of_gt hrec)]\n    field_simp\n  · intro j hj\n    have hj' : ¬ j < m := by simpa using hj\n    simp [U, hj', ENNReal.zero_rpow_of_pos (show 0 < a by linarith)]\nexact (iInf_le_of_le U (iInf_le_of_le hcov le_rfl)).trans_eq hcost",
+  "check": {
+    "exit_code": 1,
+    "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-hrd8rgnq/output/Auxiliary.lean:58:41: error: linarith failed to find a contradiction\nn : ℕ\nE : Set (V n)\nh_T004 : ScaleLaws ∧ CriticalLaws ∧ InvarianceLaws ∧ PowerLaws\na : ℝ\nha : 1 < a\nm : ℕ\nhm : 0 < m\nδ : ℝ\nhδ : 1 / ↑m ≤ δ\nhmR : 0 < ↑m\nhrec : 0 < 1 / ↑m\nU : ℕ → Set ℝ := fun j => if j < m then Icc (↑j / ↑m) ((↑j + 1) / ↑m) else ∅\nx : ℝ\nhx✝ : x ∈ unitI\nhx0 : 0 ≤ x\nhx1 : x ≤ 1\nhx : ¬x = 1\na✝ : ↑m ≤ x * ↑m\n⊢ False\nfailed\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-hrd8rgnq/output/Auxiliary.lean:78:12: error: Invalid rewrite argument: Expected an equality or iff proof or definition name, but `U ?a✝ ?a✝¹` is a value of type\n  Prop\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-hrd8rgnq/output/Auxiliary.lean:90:40: error: Application type mismatch: The argument\n  hcov\nhas type\n  scaleCover δ unitI U\nof sort `Prop` but is expected to have type\n  ℕ\nof sort `Type` in the application\n  iInf_le_of_le hcov\nchecked : ∀ (n : ℕ) (E : Set (V n)),\n  ScaleLaws ∧ CriticalLaws ∧ InvarianceLaws ∧ PowerLaws →\n    ∀ (a : ℝ),\n      1 < a → ∀ (m : ℕ), 0 < m → ∀ (δ : ℝ), 1 / ↑m ≤ δ → content a δ unitI ≤ ENNReal.ofReal ((1 / ↑m) ^ (a - 1))\n'YuiAuxiliary.checked' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]\n",
+    "stderr": "",
+    "wall_seconds": 3.9764422080479562,
+    "auxiliary_valid": false,
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext",
+      "sorryAx"
+    ],
+    "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+    "context_port": "T023",
+    "candidate": 1,
+    "accepted": false,
+    "stage_complete": false
+  }
+}
