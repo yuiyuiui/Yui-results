@@ -1,0 +1,274 @@
+{
+  "version": 2,
+  "contract_sha256": "14199085e6c524b590375005617dc91641dc0983b027c04359c7bb748550fcc4",
+  "representation_notes": "Use one complex vector space V and its three Chevalley endomorphisms. H003 is the action of the standard sl2 presentation, H002 retains finite dimension, irreducibility and existence of a highest-weight vector, and H004 supplies the chosen vector. The omitted explicit LieModule bundle is determined uniquely by these three generator actions and their brackets; no result uses a different complex representation. M is a ℤ-submodule, equivalently an additive subgroup. Admissibility is a finite integer basis whose ambient images form a complex basis plus stability under every divided power, equivalent to U_Z stability. p:ℕ represents the positive prime integer and lam:ℤ is unchanged. H001 contains primality, characteristic and 0≤lam<p. Every use of toNat is guarded by that nonnegative hypothesis; Fin(lam.toNat+1) corresponds bijectively to the integer interval I. All exponents r,d use ℕ, equivalent to nonnegative integers. R is implemented as the subring closure of fractions with denominator prime to p; T005 proves this closure has exactly that carrier before relying on its localization meaning. MR=R⊗ℤM; mu is the multiplication lift, and image is used only with proved injectivity. Ji is the inverse image of mu(MR) under c↦c e_i, not an assumed rank-one submodule. VK is K⊗ℤM consistently throughout, using the canonical tensor flip from the source M⊗ℤK; no additional vector-space model is introduced. latticeOp is the restriction when its Stable guard holds and zero otherwise; H005 and the bracket identity prove the guards before it is used as an induced action, explicitly exported in N005. kop is its scalar extension. Module.End multiplication is composition with the right factor first, powers are iterated operators, and kdp is the inverse factorial scalar multiple. Basis coordinate maps define unit B i j: w↦(j-th coordinate of w) B_i. Actions uses integer casts into the coefficient field; basisAt extends a finite basis by zero and uses predecessor/successor only under the source boundary guards. Output predicates abbreviate full displayed propositions and assume none of their clauses. Background notes remain local references; M001 is applied directly from the pinned library at T009 and is not a premise port.",
+  "steps": [
+    {
+      "id": "T001",
+      "statement": "Strings lam x y h v",
+      "inputs": [
+        "H003",
+        "H004"
+      ],
+      "source_steps": [
+        "S001"
+      ],
+      "explanation": "Prove the two commutator recurrences by natural induction; d≥1 is a guard on the x formula. Nonnegative integer exponents use ℕ with its canonical identification with the source range.",
+      "background_notes": []
+    },
+    {
+      "id": "T002",
+      "statement": "Coordinates lam y v",
+      "inputs": [
+        "H001",
+        "H002",
+        "H004",
+        "T001"
+      ],
+      "source_steps": [
+        "S002"
+      ],
+      "explanation": "Show e_i≠0 by the iterated raising formula. Isolate coefficients with the product of h minus the other complex eigenvalues, then use finite dimension. Fin(lam.toNat+1) enumerates exactly the integer interval I under H001.",
+      "background_notes": [
+        "R001.BG001"
+      ]
+    },
+    {
+      "id": "T003",
+      "statement": "∀ d : ℕ, lam < (d : ℤ) → (y ^ d) v = 0",
+      "inputs": [
+        "H001",
+        "T001",
+        "T002"
+      ],
+      "source_steps": [
+        "S003"
+      ],
+      "explanation": "Use the e-basis spectrum to kill y^(lam+1)v at the absent complex weight, then all higher powers. No reduction of weights.",
+      "background_notes": [
+        "R001.BG002"
+      ]
+    },
+    {
+      "id": "T004",
+      "statement": "ComplexOutput lam x y h v",
+      "inputs": [
+        "H001",
+        "T001",
+        "T002",
+        "T003"
+      ],
+      "source_steps": [
+        "S004"
+      ],
+      "explanation": "N001: derive the x,y,h coordinate formulas, iterate and divide by factorials to obtain both integral binomial formulas including out-of-range zero cases; package all earlier clauses.",
+      "background_notes": [
+        "R001.BG003"
+      ]
+    },
+    {
+      "id": "T005",
+      "statement": "LocalBasics p lam M x y",
+      "inputs": [
+        "H001",
+        "H005",
+        "T004"
+      ],
+      "source_steps": [
+        "S005"
+      ],
+      "explanation": "Prove the closure-based R equals the source rational local ring; this is a representation obligation, not an assumption. Extend an admissible integer basis to R, prove μ injective by its complex independence, and prove spanning and divided-power preservation/intertwining on pure tensors. Basis.baseChange and LinearMap.liftBaseChange implement these maps.",
+      "background_notes": [
+        "R002.BG001",
+        "R002.BG002"
+      ]
+    },
+    {
+      "id": "T006",
+      "statement": "MatrixOutput p lam M x y v",
+      "inputs": [
+        "H001",
+        "T004",
+        "T005"
+      ],
+      "source_steps": [
+        "S006",
+        "S007"
+      ],
+      "explanation": "N002: compute Q and the three matrix-unit factors on the e-basis. Prove the binomial integers are units in R using factorial divisibility below p, then show their compositions preserve μ(M_R). Multiplication of endomorphisms applies the right factor first, as in Module.End.mul_apply.",
+      "background_notes": [
+        "R002.BG003"
+      ]
+    },
+    {
+      "id": "T007",
+      "statement": "CommonOutput p lam M x y v",
+      "inputs": [
+        "H001",
+        "T004",
+        "T006"
+      ],
+      "source_steps": [
+        "S008",
+        "S009"
+      ],
+      "explanation": "N003: coordinate projections give finitely generated J_i; matrix units identify them all and spanning proves nonzero. The displayed equivalence J^I≃M_R must have the exact coordinate-sum formula after μ. Prove bijectivity using the complex e-basis and μ injectivity; do not assume J has rational rank one.",
+      "background_notes": [
+        "R003.BG001",
+        "R003.BG002"
+      ]
+    },
+    {
+      "id": "T008",
+      "statement": "let J := Ji p M y v 0\n  (∃ theta : (ℚ ⊗[R p] J) →ₗ[ℚ] ℂ,\n    (∀ (q : ℚ) (c : J), theta (TensorProduct.tmul (R p) q c) = (q : ℂ) * (c : ℂ)) ∧\n    Function.Injective theta) ∧ FiniteDimensional ℚ (ℚ ⊗[R p] J)",
+      "inputs": [
+        "H001",
+        "T007"
+      ],
+      "source_steps": [
+        "S010"
+      ],
+      "explanation": "Use the rational fraction field of R. Construct multiplication theta and prove injectivity by a common nonzero denominator. Tensor a finite R-generating family to prove finite dimensionality. Establish any needed scalar-tower compatibility locally from the explicitly defined embeddings; it is not a new premise.",
+      "background_notes": [
+        "R004.BG001"
+      ]
+    },
+    {
+      "id": "T009",
+      "statement": "let J := Ji p M y v 0\n  Module.finrank ℚ (ℚ ⊗[R p] J) = 1 ∧\n  ∀ a : ℂ, a ∈ J → a ≠ 0 → ∀ c : ℂ, c ∈ J → ∃! q : ℚ, c = (q : ℂ) * a",
+      "inputs": [
+        "H001",
+        "T007",
+        "T008"
+      ],
+      "source_steps": [
+        "S011"
+      ],
+      "explanation": "Tensor the coordinate equivalence and a finite R-basis to get n=nr with n>0. Use Module.finrank_pi_fintype directly at ℚ, finite I, constant family T; finite dimensionality supplies freeness and finite generation, and ℚ supplies StrongRankCondition. Through injective theta obtain the unique rational ratio.",
+      "background_notes": [
+        "R004.BG002"
+      ]
+    },
+    {
+      "id": "T010",
+      "statement": "PrincipalOutput p lam M y v",
+      "inputs": [
+        "H001",
+        "T007",
+        "T009"
+      ],
+      "source_steps": [
+        "S012",
+        "S013"
+      ],
+      "explanation": "N004: choose a nonzero a and finite nonempty generating family of nonzero members of J. Express each rational ratio as p^d times a unit of R by integer p-factor extraction. Choose the minimum exponent, prove J=Rb and construct the R-basis mapping to b e_i. Private choices remain local; the export is existence of b and the prescribed basis.",
+      "background_notes": [
+        "R004.BG003"
+      ]
+    },
+    {
+      "id": "T011",
+      "statement": "∀ hc : CharP K p,\n  letI : CharP K p := hc\n  ∃ rho : R p →+* K,\n    RingHom.ker rho = Ideal.span {(p : R p)} ∧\n    (∀ (r : R p) (a b : ℤ), ¬ (p : ℤ) ∣ b →\n      (r : ℚ) = (a : ℚ) / (b : ℚ) → rho r = (a : K) / (b : K)) ∧\n    letI : Algebra (R p) K := rho.toAlgebra\n    ∃ phi : VK K M ≃ₗ[K] (K ⊗[R p] MR p M),\n      (∀ (c : K) (m : M), phi (TensorProduct.tmul ℤ c m) =\n        TensorProduct.tmul (R p) c (TensorProduct.tmul ℤ (1 : R p) m)) ∧\n      (∀ f : Module.End ℂ V, Stable M f → ∀ z,\n        phi (kop K M f z) = ((latticeOp M f).baseChange (R p)).baseChange K (phi z)) ∧\n      ∃ qmod : Module (ZMod p) (QuotMR p M),\n        letI : Module (ZMod p) (QuotMR p M) := qmod\n        ∃ eta : (K ⊗[R p] MR p M) ≃ₗ[K] (K ⊗[ZMod p] QuotMR p M),\n          ∀ (c : K) (z : MR p M), eta (TensorProduct.tmul (R p) c z) =\n            TensorProduct.tmul (ZMod p) c (Submodule.Quotient.mk z)",
+      "inputs": [
+        "H001",
+        "H005",
+        "T006"
+      ],
+      "source_steps": [
+        "S014"
+      ],
+      "explanation": "Construct the characteristic-p fraction map rho and kernel pR, then the two natural scalar-extension equivalences with the displayed pure-tensor formulas. Tensor factors consistently put the scalar ring first. Check balancing, inverses and naturality on pure tensors. The ZMod p action on M_R/pM_R is constructed here. H001 provides CharP only as a proposition; install it locally, without assuming extra instances globally.",
+      "background_notes": [
+        "R005.BG001",
+        "R005.BG002"
+      ]
+    },
+    {
+      "id": "T012",
+      "statement": "∃ rho : R p →+* K,\n  letI : Algebra (R p) K := rho.toAlgebra\n  ∃ phi : VK K M ≃ₗ[K] (K ⊗[R p] MR p M),\n    (∀ (c : K) (m : M), phi (TensorProduct.tmul ℤ c m) =\n      TensorProduct.tmul (R p) c (TensorProduct.tmul ℤ (1 : R p) m)) ∧\n    (∀ f : Module.End ℂ V, Stable M f → ∀ z,\n      phi (kop K M f z) = ((latticeOp M f).baseChange (R p)).baseChange K (phi z)) ∧\n    ∃ b : ℂ, b ≠ 0 ∧\n      ∃ BR : Module.Basis (Fin (lam.toNat + 1)) (R p) (MR p M),\n        (∀ i, mu p M (BR i) = b • e y v i.val) ∧\n        ∃ B : Module.Basis (Fin (lam.toNat + 1)) K (VK K M),\n          (∀ i, phi (B i) = TensorProduct.tmul (R p) (1 : K) (BR i)) ∧\n          Actions lam (kop K M x) (kop K M y) (kop K M h) B",
+      "inputs": [
+        "H001",
+        "H003",
+        "H005",
+        "T004",
+        "T006",
+        "T010",
+        "T011"
+      ],
+      "source_steps": [
+        "S015"
+      ],
+      "explanation": "Extend the R-basis b e_i along rho and transport by phi inverse. Basis.baseChange gives 1⊗BR_i, proving independence as well as spanning. The integer matrices from N001 transport through μ and phi. Export the exact same rho, phi, scalar b, R-basis BR and K-basis B with pure-tensor and naturality formulas: these witnesses are needed for the next matrix-unit transport, not merely a basis with matching three matrices.",
+      "background_notes": [
+        "R005.BG003"
+      ]
+    },
+    {
+      "id": "T013",
+      "statement": "ReducedOutput K lam M x y h",
+      "inputs": [
+        "H001",
+        "H003",
+        "H005",
+        "T004",
+        "T006",
+        "T010",
+        "T011",
+        "T012"
+      ],
+      "source_steps": [
+        "S016"
+      ],
+      "explanation": "N005: take the compatible witnesses from T012. Prove factorials through λ are nonzero in K and identify induced divided powers with inverse-factorial powers by tensoring r!X_r=x^r. N002's matrix-unit operators, their R-unit coefficients, μ injectivity and the prescribed b e_i R-basis show after extension by the same rho and phi that they become unit B i j. This proves the displayed K matrix-unit identity. Prove the induced brackets from H003 and lattice stability and assemble every N005 clause, without comparing reduced weights.",
+      "background_notes": []
+    },
+    {
+      "id": "T014",
+      "statement": "Nontrivial (VK K M) ∧\n  ∀ (B : Module.Basis (Fin (lam.toNat + 1)) K (VK K M)),\n    (∀ i j : Fin (lam.toNat + 1), (Nat.choose lam.toNat j.val : K) ≠ 0 ∧\n      unit B i j = ((Nat.choose lam.toNat j.val : K)⁻¹) •\n        (kdp (kop K M x) (lam.toNat - i.val) * kdp (kop K M y) lam.toNat *\n         kdp (kop K M x) lam.toNat * kdp (kop K M y) (lam.toNat - j.val))) →\n    ∀ W : Submodule K (VK K M), Inv W (kop K M x) → Inv W (kop K M y) →\n      Inv W (kop K M h) → ∀ i j, Inv W (unit B i j)",
+      "inputs": [
+        "H001",
+        "T013"
+      ],
+      "source_steps": [
+        "S017"
+      ],
+      "explanation": "N005 gives a nonempty finite basis and hence nontriviality. Invariance under x_K and y_K gives invariance under powers, scalar multiples and compositions, so under every displayed matrix unit. Keep W arbitrary and its invariance hypotheses scoped in the implication.",
+      "background_notes": [
+        "R006.BG001",
+        "R006.BG002"
+      ]
+    },
+    {
+      "id": "T015",
+      "statement": "∀ (B : Module.Basis (Fin (lam.toNat + 1)) K (VK K M))\n  (W : Submodule K (VK K M)), W ≠ ⊥ →\n  ∃ w : VK K M, w ∈ W ∧ w ≠ 0 ∧ ∃ j : Fin (lam.toNat + 1), B.repr w j ≠ 0",
+      "inputs": [
+        "T013"
+      ],
+      "source_steps": [
+        "S018"
+      ],
+      "explanation": "For a nonzero subspace choose a nonzero vector. Its finite basis coordinates cannot all vanish. The witness is local to this existence result and eliminated only in the final step.",
+      "background_notes": []
+    },
+    {
+      "id": "T016",
+      "statement": "Target K M x y h",
+      "inputs": [
+        "H001",
+        "H003",
+        "H005",
+        "T013",
+        "T014",
+        "T015"
+      ],
+      "source_steps": [
+        "S019"
+      ],
+      "explanation": "P: split W=⊥ or W≠⊥. In the latter case choose a nonzero coefficient, apply each T_ij and divide by that coefficient to place every basis vector in W. Thus W=⊤. Combine with nontriviality. The explicit induced brackets in N005 ensure invariance under these generators is precisely invariance for the Chevalley L_K action, including p=2. No algebraic-closure assumption or distinct reduced weights enter.",
+      "background_notes": [
+        "R006.BG003"
+      ]
+    }
+  ],
+  "terminal": "T016"
+}

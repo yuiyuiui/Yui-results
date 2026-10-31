@@ -1,0 +1,23 @@
+{
+  "proof": "  have hxp : ∀ r i : ℕ, i ≤ l.toNat →\n ((rho x)^r) (LR.eNat (rho y) v i) =\n if r ≤ i then (((l.toNat-i+1).ascFactorial r : ℕ) : ℂ) • LR.eNat (rho y) v (i-r) else 0 := by\n    have hl : (l.toNat : ℂ) = (l : ℂ) := by\n      exact_mod_cast Int.toNat_of_nonneg h_H001.2.2.1\n    rcases h_T004 with ⟨hx0, hx, hy, hy0, ht⟩\n    intro r\n    induction r with\n    | zero => intro i hi; simp\n    | succ r ih =>\n      intro i hi\n      rw [pow_succ', Module.End.mul_apply, ih i hi]\n      by_cases hr : r ≤ i\n      · rw [if_pos hr, map_smul]\n        by_cases hrs : r+1 ≤ i\n        · rw [if_pos hrs, hx (i-r) (by omega) (by omega)]\n          have hind : i-r-1 = i-(r+1) := by omega\n          rw [hind, smul_smul, Nat.ascFactorial_succ, Nat.cast_mul]\n          congr 1\n          have hc : (l : ℂ) - ((i-r : ℕ) : ℂ) + 1 =\n              ((l.toNat-i+1+r : ℕ) : ℂ) := by\n            rw [Nat.cast_sub hr, Nat.cast_add, Nat.cast_add, Nat.cast_sub hi, hl]\n            push_cast\n            ring\n          rw [hc]\n          ring\n        · have hir : i-r = 0 := by omega\n          rw [if_neg (by omega), hir, hx0, smul_zero]\n      · rw [if_neg hr, map_zero, if_neg (by omega)]\n  \n  have hyp : ∀ r i : ℕ, i ≤ l.toNat →\n ((rho y)^r) (LR.eNat (rho y) v i) =\n if i+r ≤ l.toNat then (((i+1).ascFactorial r : ℕ) : ℂ) • LR.eNat (rho y) v (i+r) else 0 := by\n    rcases h_T004 with ⟨hx0, hx, hy, hy0, ht⟩\n    intro r\n    induction r with\n    | zero => intro i hi; simp [hi]\n    | succ r ih =>\n      intro i hi\n      rw [pow_succ', Module.End.mul_apply, ih i hi]\n      by_cases hr : i+r ≤ l.toNat\n      · rw [if_pos hr, map_smul]\n        by_cases hrs : i+(r+1) ≤ l.toNat\n        · rw [if_pos hrs, hy (i+r) (by omega), smul_smul,\n              Nat.ascFactorial_succ, Nat.cast_mul]\n          have hind : i+r+1 = i+(r+1) := by omega\n          rw [hind]\n          congr 1\n          push_cast\n          ring\n        · have hir : i+r = l.toNat := by omega\n          rw [if_neg hrs, hir, hy0, smul_zero]\n      · rw [if_neg hr, map_zero, if_neg (by omega)]\n  \n  have hcoeff : ∀ n r : ℕ, (r.factorial : ℂ)⁻¹ * (((n+1).ascFactorial r : ℕ) : ℂ) = (Nat.choose (n+r) r : ℂ) := by\n    intro n r\n    have hf : (r.factorial : ℂ) ≠ 0 := by exact_mod_cast Nat.factorial_ne_zero r\n    rw [Nat.ascFactorial_eq_factorial_mul_choose, Nat.cast_mul, ← mul_assoc,\n      inv_mul_cancel₀ hf, one_mul]\n\n  refine ⟨by omega, ?_, h_T001, h_T003, h_T004, ?_⟩\n  · simp only [LR.I, Fintype.card_fin]\n    omega\n  · intro r i hi\n    constructor\n    · change (r.factorial : ℂ)⁻¹ • ((rho x)^r) (LR.eNat (rho y) v i) = _\n      rw [hxp r i hi]\n      by_cases hr : r ≤ i\n      · rw [if_pos hr, if_pos hr, smul_smul, hcoeff (l.toNat-i) r]\n      · rw [if_neg hr, if_neg hr, smul_zero]\n    · change (r.factorial : ℂ)⁻¹ • ((rho y)^r) (LR.eNat (rho y) v i) = _\n      rw [hyp r i hi]\n      by_cases hr : i+r ≤ l.toNat\n      · rw [if_pos hr, if_pos hr, smul_smul, hcoeff i r]\n      · rw [if_neg hr, if_neg hr, smul_zero]\n",
+  "statement": "LR.N1 l (rho x) (rho y) (rho h) v",
+  "check": {
+    "exit_code": 0,
+    "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/nl0-ir-check-s39nzhxp/output/Check.lean:263:117: warning: Variable name `M` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nT005 : ∀ (K : Type u_1) [fieldK : Field K] (V : Type u_2) [addV : AddCommGroup V] [modV : Module ℂ V] (p : ℕ) (l : ℤ)\n  (M : Submodule ℤ V) (rho : ↥LR.L →ₗ[ℂ] Module.End ℂ V) (x y h : ↥LR.L) (v : V),\n  Nat.Prime p ∧ CharP K p ∧ 0 ≤ l ∧ l < ↑p →\n    LR.Strings l (rho x) (rho y) (rho h) v →\n      LR.BasisString l (rho y) v →\n        LR.Matrices l (rho x) (rho y) (rho h) (LR.eNat (rho y) v) → LR.N1 l (rho x) (rho y) (rho h) v\n'Translation.T005' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+    "stderr": "",
+    "wall_seconds": 7.461266290862113,
+    "source_path": "/Users/syyui/projects/Yui-results/test/lie-module-irreducibility/rigorous-proof/20261030T202021Z-c161389626/native-checks/7a6139fd7b3a45cab7c3a758e8f0d310.lean",
+    "source_sha256": "a0485ff179e52edfc1fa5790b5d419e73ffa4c60b3851cd68f77b9b08c332be6",
+    "status": "LOCAL-PROOF-CHECKED",
+    "contract_sha256": "545b9318510f0eec66107c8abe623d3bad571cf47a1f14ed0097efbf9718aed5",
+    "lean_sha256": "a0485ff179e52edfc1fa5790b5d419e73ffa4c60b3851cd68f77b9b08c332be6",
+    "scope": "T005",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "accepted": true,
+    "stage_complete": true
+  }
+}

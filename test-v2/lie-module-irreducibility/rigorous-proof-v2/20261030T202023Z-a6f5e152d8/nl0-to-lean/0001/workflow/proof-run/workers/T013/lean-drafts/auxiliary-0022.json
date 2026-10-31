@@ -1,0 +1,86 @@
+{
+  "statement": "True",
+  "proof": "classical\nlet S : Subring (Module.End ℂ V) :=\n  { carrier := {f | Stable M f}\n    zero_mem' := by intro w hw; simpa using M.zero_mem\n    one_mem' := by intro w hw; simpa using hw\n    add_mem' := by intro f g hf hg w hw; exact M.add_mem (hf w hw) (hg w hw)\n    neg_mem' := by intro f hf w hw; exact M.neg_mem (hf w hw)\n    mul_mem' := by intro f g hf hg w hw; exact hf _ (hg w hw) }\nlet res : S →+* Module.End ℤ M :=\n  { toFun := fun f => (f.val.restrictScalars ℤ).restrict f.property\n    map_zero' := by ext w; rfl\n    map_one' := by ext w; rfl\n    map_add' := by intro f g; ext w; rfl\n    map_mul' := by intro f g; ext w; rfl }\nhave hres (f : Module.End ℂ V) (hf : Stable M f) :\n    res ⟨f, hf⟩ = latticeOp M f := by\n  simp [res, latticeOp, hf]\n\nhave hx : Stable M x := by simpa [dp] using (h_H005.2 1).1\nhave hy : Stable M y := by simpa [dp] using (h_H005.2 1).2\nhave hh : Stable M h := by\n  intro w hw\n  rw [← h_H003.2.2]\n  exact M.sub_mem (hx _ (hy w hw)) (hy _ (hx w hw))\nlet X : S := ⟨x, hx⟩\nlet Y : S := ⟨y, hy⟩\nlet H : S := ⟨h, hh⟩\nlet F : S →+* Module.End K (VK K M) :=\n  (Module.End.baseChangeHom ℤ K M).toRingHom.comp res\nhave hF (f : Module.End ℂ V) (hf : Stable M f) :\n    F ⟨f, hf⟩ = kop K M f := by\n  change (res ⟨f, hf⟩).baseChange K = _\n  rw [hres]; rfl\n\nhave hFsub (a b : S) : F (a - b) = F a - F b :=\n  map_sub (G := S) (H := Module.End K (VK K M)) F a b\nhave hFmul (a b : S) : F (a * b) = F a * F b := map_mul F a b\nhave hFz (n : ℤ) (a : S) : F (n • a) = n • F a :=\n  map_zsmul (G := S) (H := Module.End K (VK K M)) F n a\nhave hxy : X * Y - Y * X = H := by\n  apply Subtype.ext\n  exact h_H003.2.2\nhave hhx : H * X - X * H = (2 : ℤ) • X := by\n  apply Subtype.ext\n  change h * x - x * h = (2 : ℤ) • x\n  simpa only [← Int.cast_smul_eq_zsmul ℂ, Int.cast_ofNat] using h_H003.1\nhave hhy : H * Y - Y * H = (-2 : ℤ) • Y := by\n  apply Subtype.ext\n  change h * y - y * h = (-2 : ℤ) • y\n  simpa only [← Int.cast_smul_eq_zsmul ℂ, Int.cast_neg, Int.cast_ofNat] using h_H003.2.1\nhave hbr1 : kop K M h = kop K M x * kop K M y - kop K M y * kop K M x := by\n  have eqn := (congrArg F hxy).symm\n  rw [hFsub, hFmul, hFmul] at eqn\n  simpa only [X, Y, H, hF] using eqn\nhave hbr2 : kop K M h * kop K M x - kop K M x * kop K M h = (2 : K) • kop K M x := by\n  have eqn := congrArg F hhx\n  rw [hFsub, hFmul, hFmul, hFz] at eqn\n  simpa only [X, H, hF, ← Int.cast_smul_eq_zsmul K, Int.cast_ofNat] using eqn\nhave hbr3 : kop K M h * kop K M y - kop K M y * kop K M h = (-2 : K) • kop K M y := by\n  have eqn := congrArg F hhy\n  rw [hFsub, hFmul, hFmul, hFz] at eqn\n  simpa only [Y, H, hF, ← Int.cast_smul_eq_zsmul K, Int.cast_neg, Int.cast_ofNat] using eqn\n\nletI : CharP K p := h_H001.2.1\nhave hlp : lam.toNat < p := by omega\nhave hfac (r : ℕ) (hr : r ≤ lam.toNat) : (r.factorial : K) ≠ 0 := by\n  rw [Ne, CharP.cast_eq_zero_iff K p, h_H001.1.dvd_factorial]\n  omega\nhave hFn (n : ℕ) (a : S) : F (n • a) = n • F a :=\n  map_nsmul (G := S) (H := Module.End K (VK K M)) F n a\nhave hFp (a : S) (r : ℕ) : F (a ^ r) = F a ^ r := map_pow F a r\nhave hdiv (f : Module.End ℂ V) (hf : Stable M f) (r : ℕ)\n    (hd : Stable M (dp f r)) (hr : r ≤ lam.toNat) :\n    (latticeOp M (dp f r)).baseChange K = kdp (kop K M f) r := by\n  let Q : S := ⟨f, hf⟩\n  let D : S := ⟨dp f r, hd⟩\n  have heq : r.factorial • D = Q ^ r := by\n    apply Subtype.ext\n    change r.factorial • dp f r = f ^ r\n    rw [← Nat.cast_smul_eq_nsmul ℂ, dp, smul_smul,\n      mul_inv_cancel₀ (Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero r)), one_smul]\n  have eqn := congrArg F heq\n  rw [hFn, hFp] at eqn\n  have heqK : (r.factorial : K) • kop K M (dp f r) = kop K M f ^ r := by\n    simpa only [Q, D, hF, Nat.cast_smul_eq_nsmul] using eqn\n  change kop K M (dp f r) = _\n  calc\n    _ = (r.factorial : K)⁻¹ • ((r.factorial : K) • kop K M (dp f r)) :=\n      (inv_smul_smul₀ (hfac r hr) _).symm\n    _ = _ := by rw [heqK]; rfl\nhave hdx (r : ℕ) (hr : r ≤ lam.toNat) :\n    (latticeOp M (dp x r)).baseChange K = kdp (kop K M x) r :=\n  hdiv x hx r (h_H005.2 r).1 hr\nhave hdy (r : ℕ) (hr : r ≤ lam.toNat) :\n    (latticeOp M (dp y r)).baseChange K = kdp (kop K M y) r :=\n  hdiv y hy r (h_H005.2 r).2 hr\n\nrcases h_T012 with ⟨rho, hdata⟩\nletI : Algebra (R p) K := rho.toAlgebra\nrcases hdata with ⟨phi, hphi0, hphi, b, hb, BR, hBR, B, hB, hAct⟩\nlet T : Module.End (R p) (MR p M) →+* Module.End K (VK K M) :=\n  (phi.symm.conjRingEquiv.toRingHom).comp\n    (Module.End.baseChangeHom (R p) K (MR p M)).toRingHom\nhave hT (f : Module.End (R p) (MR p M)) (z : VK K M) :\n    phi (T f z) = f.baseChange K (phi z) := by\n  change phi (phi.symm (f.baseChange K (phi z))) = _\n  exact phi.apply_symm_apply _\nhave hTx (r : ℕ) (hr : r ≤ lam.toNat) :\n    T (rop p M (dp x r)) = kdp (kop K M x) r := by\n  rw [← hdx r hr]\n  change T (rop p M (dp x r)) = kop K M (dp x r)\n  apply LinearMap.ext\n  intro z\n  apply phi.injective\n  rw [hT, hphi _ (h_H005.2 r).1]\n  rfl\nhave hTy (r : ℕ) (hr : r ≤ lam.toNat) :\n    T (rop p M (dp y r)) = kdp (kop K M y) r := by\n  rw [← hdy r hr]\n  change T (rop p M (dp y r)) = kop K M (dp y r)\n  apply LinearMap.ext\n  intro z\n  apply phi.injective\n  rw [hT, hphi _ (h_H005.2 r).2]\n  rfl\nhave hTmul (f g : Module.End (R p) (MR p M)) : T (f*g) = T f * T g :=\n  map_mul T f g\nrcases h_T004.2.2.1 with ⟨BC, hBC⟩\nhave hcompat := h_T006.1.2.2.2.2.1\nhave hmuX (r : ℕ) (z : MR p M) :\n    mu p M (rop p M (dp x r) z) = dp x r (mu p M z) := (hcompat r).1 z\nhave hmuY (r : ℕ) (z : MR p M) :\n    mu p M (rop p M (dp y r) z) = dp y r (mu p M z) := (hcompat r).2 z\nhave hBR' (k : Fin (lam.toNat + 1)) : mu p M (BR k) = b • BC k := by\n  rw [hBR, hBC]\n\nlet D (i j : Fin (lam.toNat + 1)) : Module.End (R p) (MR p M) :=\n  rop p M (dp x (lam.toNat - i.val)) * rop p M (dp y lam.toNat) *\n    rop p M (dp x lam.toNat) * rop p M (dp y (lam.toNat - j.val))\nhave hDR (i j k : Fin (lam.toNat + 1)) :\n    D i j (BR k) = (Nat.choose lam.toNat j.val) •\n      (if k = j then BR i else 0) := by\n  let n := Nat.choose lam.toNat j.val\n  let DC : Module.End ℂ V :=\n    dp x (lam.toNat - i.val) * dp y lam.toNat *\n      dp x lam.toNat * dp y (lam.toNat - j.val)\n  have hn : (n : ℂ) ≠ 0 :=\n    Nat.cast_ne_zero.mpr (Nat.ne_of_gt (Nat.choose_pos (Nat.le_of_lt_succ j.isLt)))\n  have hMC : unit BC i j = (n : ℂ)⁻¹ • DC :=\n    (h_T006.2.2 BC hBC i j).1\n  have hDC : DC = (n : ℂ) • unit BC i j := by\n    rw [hMC, smul_smul, mul_inv_cancel₀ hn, one_smul]\n  apply h_T006.1.2.1\n  change mu p M (D i j (BR k)) = mu p M (n • (if k = j then BR i else 0))\n  rw [map_nsmul (G := MR p M) (H := V) (mu p M) n (if k = j then BR i else 0)]\n  have hleft : mu p M (D i j (BR k)) = DC (b • BC k) := by\n    simp only [D, Module.End.mul_apply, hmuX, hmuY, hBR', DC]\n  rw [hleft, hDC, LinearMap.smul_apply]\n  have huc : unit BC i j (b • BC k) =\n      b • (if k = j then BC i else 0) := by\n    simp only [unit, LinearMap.comp_apply, LinearMap.toSpanSingleton_apply, map_smul,\n      Module.Basis.coord_apply, Module.Basis.repr_self_apply]\n    by_cases hk : k = j\n    · subst k; simp\n    · simp [hk]\n  rw [huc]\n  by_cases hk : k = j\n  · subst k\n    rw [if_pos rfl, if_pos rfl, hBR']\n    exact Nat.cast_smul_eq_nsmul ℂ n (b • BC i)\n  · rw [if_neg hk, if_neg hk, smul_zero, smul_zero, (mu p M).map_zero, nsmul_zero]\ntrivial",
+  "check": {
+    "exit_code": 1,
+    "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-fvzgo4cr/output/Auxiliary.lean:185:34: warning: try 'simp' instead of 'simpa'\n\nNote: This linter can be disabled with `set_option linter.unnecessarySimpa false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-fvzgo4cr/output/Auxiliary.lean:352:54: error: (deterministic) timeout at `isDefEq`, maximum number of heartbeats (200000) has been reached\n\nNote: Use `set_option maxHeartbeats <num>` to set the limit.\n\nHint: Additional diagnostic information may be available using the `set_option diagnostics true` command.\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-fvzgo4cr/output/Auxiliary.lean:179:0: error: (deterministic) timeout at `whnf`, maximum number of heartbeats (200000) has been reached\n\nNote: Use `set_option maxHeartbeats <num>` to set the limit.\n\nHint: Additional diagnostic information may be available using the `set_option diagnostics true` command.\nchecked : ∀ (p : ℕ) (K : Type u_1) [fieldK : Field K] (lam : ℤ) (V : Type u_2) [addV : AddCommGroup V]\n  [moduleV : _root_.Module ℂ V] (x y h : Module.End ℂ V) (v : V) (M : Submodule ℤ V),\n  Nat.Prime p ∧ CharP K p ∧ 0 ≤ lam ∧ lam < ↑p →\n    h * x - x * h = 2 • x ∧ h * y - y * h = -2 • y ∧ x * y - y * x = h →\n      ((∃ d bZ bC, ∀ (i : Fin d), bC i = ↑(bZ i)) ∧ ∀ (r : ℕ), Stable M (dp x r) ∧ Stable M (dp y r)) →\n        ComplexOutput lam x y h v →\n          MatrixOutput p lam M x y v →\n            PrincipalOutput p lam M y v → ScalarExtensionData p K M → ReducedBasisData p K lam M x y h v → True\n'YuiAuxiliary.checked' does not depend on any axioms\n",
+    "stderr": "",
+    "wall_seconds": 13.050280999857932,
+    "source_path": "/Users/syyui/projects/Yui-results/test-v2/lie-module-irreducibility/rigorous-proof-v2/20261030T202023Z-a6f5e152d8/native-checks/977af9522076469281d1d2ce5d301d6c.lean",
+    "source_sha256": "1712584b326cf4dbbe19fec42f539dbd95687021ca7e4ef4dabbc6cddbdde6b8",
+    "auxiliary_valid": false,
+    "axioms": [],
+    "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+    "context_port": "T013",
+    "candidate": 22,
+    "accepted": false,
+    "stage_complete": false,
+    "repair_advice": {
+      "policy": "native-timeout-st020-1",
+      "trigger": "NATIVE_HEARTBEAT_EXHAUSTED",
+      "status": "ADVICE_DELIVERED",
+      "card_id": "ST020",
+      "next_action": "First use the applicable ST020 diagnostic branch to locate and repair this native failure. Check a small typed fragment, then recheck the complete unchanged target with the same permitted inputs. If that branch does not help, revisit the diagnosis and continue normal local repair; do not blindly repeat it, raise limits, or add assumptions.",
+      "card_revision": 1,
+      "card_sha256": "be4da266e7860cb207510d238b106b8ecc20ed3671c9a94fad84aebc38c1fb22",
+      "strategy": {
+        "id": "ST020",
+        "score": 7,
+        "applicability": "PRECONDITIONS_REPORTED",
+        "missing_preconditions": [],
+        "preconditions_independently_verified": false,
+        "card": {
+          "id": "ST020",
+          "revision": 1,
+          "title": "Localize native timeouts before expanding proof search",
+          "family": "execution",
+          "domains": [
+            "general"
+          ],
+          "tags": [
+            "native_timeout",
+            "heartbeat",
+            "definitional_equality",
+            "type_inference",
+            "automation",
+            "composition"
+          ],
+          "obstacle": "A recorded native Lean resource limit prevents a candidate from returning useful proof feedback.",
+          "preconditions": [
+            "native_resource_failure_recorded",
+            "exact_target_and_inputs_retained",
+            "pinned_environment_available"
+          ],
+          "contraindications": [
+            "provider_or_controller_fault",
+            "changed_target_or_hypotheses",
+            "unconfirmed_process_cleanup"
+          ],
+          "procedure": [
+            "Read the actual native result and confirm owned-process cleanup. Distinguish wall timeout, heartbeat exhaustion, definitional-equality work and an earlier ordinary error from provider or controller faults.",
+            "Preserve the candidate, exact target, declared premises, imports, versions and resource settings before changing its implementation. Do not treat a timeout as a mathematical rejection.",
+            "Locate the costly application or tactic using a bounded local fragment or retained diagnostics. Address the earliest ordinary type error before interpreting later resource errors; a very small diagnostic allowance may also reject valid code.",
+            "For expensive implicit inference, inspect the full declaration type and supply the function, object, exponent, index and coercion types explicitly where needed. Name typed intermediate facts rather than asking unification to reconstruct a nested expression.",
+            "For an equality or representation bridge, state the intermediate function and the required equality direction explicitly. Use a small checked change, convert, congrArg or extensionality step and a restricted simp only list instead of broad unfolding.",
+            "For broad closure or recursive automation, construct intermediate closure facts from the leaves and compose the specific lemmas explicitly. Do not replace every use of automation without locating its cost.",
+            "Recheck the smallest changed application with a finite allowance, then the complete original target with all its original inputs. Retain unsuccessful candidates and diagnostics; a faster fragment alone does not establish complete acceptance.",
+            "If the selected branch does not help, revisit the diagnosis rather than blindly repeating it or raising limits. Changes to mathematical boundaries require the normal reviewed source/interface procedure."
+          ],
+          "verification": "The repaired complete candidate must pass a fresh native check under the pinned environment with the unchanged target and premises; compare performance only with disclosed comparable settings, and keep mathematical audits separate.",
+          "positive_example": "A native equality-check timeout is addressed by a typed intermediate function and a short checked equality bridge, followed by a complete candidate recheck.",
+          "negative_example": "Delete an equality reversal, replace every tactic or increase every timeout solely because an unrelated candidate once compiled afterward.",
+          "lean_versions": [
+            "4.32.2"
+          ],
+          "status": "GENERAL_GUIDANCE",
+          "evidence": [
+            {
+              "kind": "generalized_observation",
+              "note": "Bounded retrospective comparisons of completed implementations motivate this diagnostic procedure; individual edits were not all causally isolated and broader effectiveness is unestablished."
+            }
+          ]
+        }
+      }
+    }
+  }
+}

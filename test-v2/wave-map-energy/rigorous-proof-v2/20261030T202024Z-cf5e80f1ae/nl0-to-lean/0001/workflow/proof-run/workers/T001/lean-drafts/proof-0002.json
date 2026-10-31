@@ -1,0 +1,23 @@
+{
+  "proof": "have unit_direction : ∀ {E : Type} [NormedAddCommGroup E] [NormedSpace ℝ E]\n    (f : E → V m) (s : Set E), IsOpen s → ContDiffOn ℝ ∞ f s →\n    (∀ z ∈ s, ‖f z‖ = 1) → ∀ z ∈ s, ∀ v : E,\n    inner ℝ (f z) (fderiv ℝ f z v) = 0 ∧\n    inner ℝ (f z) (fderiv ℝ (fun y => fderiv ℝ f y v) z v) =\n      -(‖fderiv ℝ f z v‖ ^ 2) := by\n  intro E _ _ f s hs hf hn\n  have hd : ∀ z ∈ s, DifferentiableAt ℝ f z := fun z hz =>\n    (hf.contDiffAt (hs.mem_nhds hz)).differentiableAt (by simp)\n  have hfirst : ∀ z ∈ s, ∀ v : E, inner ℝ (f z) (fderiv ℝ f z v) = 0 := by\n    intro z hz v\n    have he : (fun y => inner ℝ (f y) (f y)) =ᶠ[nhds z] (fun _ => (1 : ℝ)) := by\n      filter_upwards [hs.mem_nhds hz] with y hy\n      rw [real_inner_self_eq_norm_sq, hn y hy]\n      norm_num\n    have he' : fderiv ℝ (fun y => inner ℝ (f y) (f y)) z v = 0 := by\n      rw [he.fderiv_eq]\n      simp\n    rw [fderiv_inner_apply ℝ (hd z hz) (hd z hz), real_inner_comm (f z) (fderiv ℝ f z v)] at he'\n    linarith\n  intro z hz v\n  refine ⟨hfirst z hz v, ?_⟩\n  have hD : ContDiffOn ℝ 1 (fun y => fderiv ℝ f y v) s :=\n    (hf.fderiv_of_isOpen hs (by\n      change ((1 + 1 : ℕ∞) : WithTop ℕ∞) ≤ (⊤ : ℕ∞)\n      exact WithTop.coe_le_coe.mpr le_top)).clm_apply contDiffOn_const\n  have hdD : DifferentiableAt ℝ (fun y => fderiv ℝ f y v) z :=\n    (hD.contDiffAt (hs.mem_nhds hz)).differentiableAt one_ne_zero\n  have he : (fun y => inner ℝ (f y) (fderiv ℝ f y v)) =ᶠ[nhds z] (fun _ => (0 : ℝ)) := by\n    filter_upwards [hs.mem_nhds hz] with y hy\n    exact hfirst y hy v\n  have he' : fderiv ℝ (fun y => inner ℝ (f y) (fderiv ℝ f y v)) z v = 0 := by\n    rw [he.fderiv_eq]\n    simp\n  rw [fderiv_inner_apply ℝ (hd z hz) hdD, real_inner_self_eq_norm_sq] at he'\n  linarith\nintro x t ht\nhave htime : ContDiffOn ℝ ∞ (fun r : ℝ => u (x, r)) (Ioi 0) :=\n  h_H002.comp (contDiffOn_const.prodMk contDiffOn_id) (by\n    intro r hr\n    exact hr)\nhave hspace : ContDiffOn ℝ ∞ (fun y : X n => u (y, t)) univ :=\n  h_H002.comp (contDiffOn_id.prodMk contDiffOn_const) (by\n    intro y hy\n    exact ht)\nhave hT := unit_direction (fun r : ℝ => u (x, r)) (Ioi 0) isOpen_Ioi\n  htime (fun r hr => h_H004 x r hr) t ht 1\nrefine ⟨?_, ?_, ?_⟩\n· simpa only [dt, fderiv_apply_one_eq_deriv] using hT.1\n· simpa only [dt, fderiv_apply_one_eq_deriv] using hT.2\n· intro j\n  have hS := unit_direction (fun y : X n => u (y, t)) univ isOpen_univ\n    hspace (fun y _ => h_H004 y t ht) x (mem_univ x) (Pi.single j 1)\n  simpa only [dx] using hS.2",
+  "statement": "∀ x : X n, ∀ t : ℝ, 0 < t →\n  inner ℝ (u (x,t)) (dt u (x,t)) = 0 ∧\n  inner ℝ (u (x,t)) (dt (dt u) (x,t)) = -(‖dt u (x,t)‖ ^ 2) ∧\n  (∀ j : Fin n, inner ℝ (u (x,t)) (dx (dx u j) j (x,t)) = -(‖dx u j (x,t)‖ ^ 2))",
+  "check": {
+    "exit_code": 0,
+    "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/nl0-ir-check-yluaho7r/output/Check.lean:61:50: warning: Variable name `q` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/nl0-ir-check-yluaho7r/output/Check.lean:61:60: warning: Variable name `h_H001` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nT001 : ∀ (n m : ℕ) (u : X n × ℝ → V m) (q : V m),\n  1 ≤ n ∧ 1 ≤ m →\n    ContDiffOn ℝ ∞ u (domain n) →\n      (∀ (x : X n) (t : ℝ), 0 < t → ‖u (x, t)‖ = 1) →\n        ∀ (x : X n) (t : ℝ),\n          0 < t →\n            inner ℝ (u (x, t)) (dt u (x, t)) = 0 ∧\n              inner ℝ (u (x, t)) (dt (dt u) (x, t)) = -‖dt u (x, t)‖ ^ 2 ∧\n                ∀ (j : Fin n), inner ℝ (u (x, t)) (dx (dx u j) j (x, t)) = -‖dx u j (x, t)‖ ^ 2\n'Translation.T001' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+    "stderr": "",
+    "wall_seconds": 3.6914684590883553,
+    "source_path": "/Users/syyui/projects/Yui-results/test-v2/wave-map-energy/rigorous-proof-v2/20261030T202024Z-cf5e80f1ae/native-checks/ee663a1ba1a54c6b90c61fbf22a7bc50.lean",
+    "source_sha256": "356162ea0078ba93daa92cb0a12fc431cc2bfb4155ae8dc3f7cee8c50eb88336",
+    "status": "LOCAL-PROOF-CHECKED",
+    "contract_sha256": "9cb0b9e42383468e68c64f225072ce2d7d43315dd11f26ea68d2ad073dc062cd",
+    "lean_sha256": "356162ea0078ba93daa92cb0a12fc431cc2bfb4155ae8dc3f7cee8c50eb88336",
+    "scope": "T001",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "accepted": true,
+    "stage_complete": true
+  }
+}

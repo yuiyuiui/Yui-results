@@ -1,0 +1,689 @@
+{
+  "contract_version": 2,
+  "case_id": "wave-map-energy",
+  "graph_sha256": "2aa0715d10d257741a3b71b3386950d1c63955feaf73d55dd8d4973bddb291b2",
+  "spec_sha256": "afff4b5a1bbdf99c9982bd0b137314c57853bd9f147d75d1d3efa825a6735610",
+  "parameters": [
+    {
+      "symbol": "n",
+      "type": "integer dimension index"
+    },
+    {
+      "symbol": "m",
+      "type": "integer dimension index"
+    },
+    {
+      "symbol": "u",
+      "type": "map R^n × (0,∞) → R^m"
+    },
+    {
+      "symbol": "q",
+      "type": "vector in R^m"
+    }
+  ],
+  "logic": {
+    "classical": true,
+    "rules": [
+      "direct",
+      "forall_introduction",
+      "exists_elimination",
+      "implication_introduction"
+    ],
+    "calculations": [
+      "equality: Equality reflexivity, symmetry, transitivity and substitution.",
+      "definitions: Unfold an explicitly supplied definition; this proves no extra property.",
+      "finite_algebra: Routine finite semiring/ring/field arithmetic, including zero/one laws, distributivity, associativity and finite polynomial identities. Correct elementary compression is permitted; a substantive missing argument is not.",
+      "finite_order: Routine ordered-field reasoning with actual signs/domains: order laws, adding inequalities, multiplication/division with sign conditions, and real square nonnegativity. Ordinary valid elementary inferences need no exhaustive displayed chain. Check that the conclusion follows; substantial named theorems still require inputs or verified-background admission.",
+      "finite_sums: Unfold and rearrange finite sums/products with explicitly given finite indices."
+    ],
+    "primitives": [
+      {
+        "symbol": "0",
+        "type": "typed numeral",
+        "meaning": "Zero of the explicitly specified mathematical type."
+      },
+      {
+        "symbol": "1",
+        "type": "typed numeral",
+        "meaning": "One of the explicitly specified mathematical type."
+      },
+      {
+        "symbol": "2",
+        "type": "typed numeral",
+        "meaning": "Two of the explicitly specified mathematical type, including an exponent two."
+      },
+      {
+        "symbol": "ℕ",
+        "type": "number system",
+        "meaning": "The natural numbers with their usual arithmetic."
+      },
+      {
+        "symbol": "ℤ",
+        "type": "number system",
+        "meaning": "The integers with their usual arithmetic."
+      },
+      {
+        "symbol": "ℚ",
+        "type": "number system",
+        "meaning": "The rational numbers with their usual ordered-field operations."
+      },
+      {
+        "symbol": "ℝ",
+        "type": "number system",
+        "meaning": "The real numbers with their usual ordered-field structure."
+      },
+      {
+        "symbol": "ℂ",
+        "type": "number system",
+        "meaning": "The complex numbers with their usual field structure."
+      },
+      {
+        "symbol": "∅",
+        "type": "typed set notation",
+        "meaning": "The empty set in the explicitly specified ambient type."
+      },
+      {
+        "symbol": "∞",
+        "type": "typed order notation",
+        "meaning": "The top element in an explicitly specified extended ordered codomain."
+      }
+    ]
+  },
+  "pins": {
+    "lean_version": "4.32.2",
+    "mathlib_commit": "905b95818eb32af7874a58b427f50c1711a5e96c",
+    "mathlib_root": "/Users/syyui/formalization-tools/lean-mathlib-v4.32.2/mathlib"
+  },
+  "foundation_profile": "elementary-language-4",
+  "standard_language": "Ordinary typed mathematical language: logical connectives, quantifiers, equality, sets, functions, tuples, finite indices and their usual notation. A type explicitly named natural numbers, integers, rationals, reals or complex numbers means that standard structure, with its usual numerals and arithmetic operations; these operation tokens need not be redeclared as project objects. The fixed finite calculation rules below, including a+0=a, are controller permissions, not an author claim. The core symbol table below is not a dictionary of all allowed mathematics. Objects and notation from any subject are introduced by this problem's parameters, D definitions or scoped locals, with their types and dependencies. Their properties need direct inputs or displayed local proofs; a familiar name or symbol supplies no theorem.",
+  "background_policy": "mathematical-background-v2-1",
+  "definitions": [
+    {
+      "id": "D001",
+      "symbol": "u_t",
+      "type": "map R^n × (0,∞) → R^m",
+      "definition": "u_t(x,t)=∂u(x,t)/∂t, the componentwise first time derivative.",
+      "depends_on": [],
+      "requires": [
+        "H001",
+        "H002"
+      ],
+      "binders": [
+        {
+          "symbol": "x",
+          "type": "R^n"
+        },
+        {
+          "symbol": "t",
+          "type": "positive real"
+        }
+      ],
+      "objects": [
+        "u",
+        "n",
+        "m",
+        "x",
+        "t"
+      ]
+    },
+    {
+      "id": "D002",
+      "symbol": "u_tt",
+      "type": "map R^n × (0,∞) → R^m",
+      "definition": "u_tt(x,t)=∂²u(x,t)/∂t², componentwise.",
+      "depends_on": [
+        "D001"
+      ],
+      "requires": [
+        "H001",
+        "H002"
+      ],
+      "binders": [
+        {
+          "symbol": "x",
+          "type": "R^n"
+        },
+        {
+          "symbol": "t",
+          "type": "positive real"
+        }
+      ],
+      "objects": [
+        "u",
+        "n",
+        "m",
+        "x",
+        "t"
+      ]
+    },
+    {
+      "id": "D003",
+      "symbol": "∂_x",
+      "type": "family of componentwise spatial differential operators",
+      "definition": "For each integer j with 1≤j≤n, ∂_{x_j} denotes componentwise differentiation in the jth spatial coordinate on R^n. Repeated subscripts denote iterated spatial derivatives, and ∂_{x_j}u_t differentiates u_t in that coordinate. Spatial gradients of u have rows ∂_{x_j}u; their Frobenius square is ∑_{j=1}^n |∂_{x_j}u|².",
+      "depends_on": [
+        "D001"
+      ],
+      "requires": [
+        "H001",
+        "H002"
+      ],
+      "binders": [
+        {
+          "symbol": "j",
+          "type": "integer"
+        }
+      ],
+      "objects": [
+        "u",
+        "n",
+        "m",
+        "j",
+        "u_t"
+      ]
+    },
+    {
+      "id": "D004",
+      "symbol": "Δ_x",
+      "type": "componentwise spatial Laplacian",
+      "definition": "Δ_xu=∑_{j=1}^n ∂_{x_jx_j}u.",
+      "depends_on": [
+        "D003"
+      ],
+      "requires": [
+        "H001",
+        "H002"
+      ],
+      "binders": [
+        {
+          "symbol": "j",
+          "type": "integer spatial summation index"
+        }
+      ],
+      "objects": [
+        "u",
+        "n",
+        "m",
+        "j",
+        "∂_x"
+      ]
+    },
+    {
+      "id": "D005",
+      "symbol": "μ",
+      "type": "measure on R^n",
+      "definition": "μ is Lebesgue measure on R^n, identified with the product of n one-dimensional Lebesgue measures; dx in spatial integrals denotes dμ. Euclidean dot products and norms are used in R^m and its finite matrix spaces. On coordinate boxes, μ is the product of the restricted coordinate Lebesgue measures.",
+      "depends_on": [],
+      "requires": [
+        "H001"
+      ],
+      "binders": [],
+      "objects": [
+        "n",
+        "m"
+      ]
+    },
+    {
+      "id": "D006",
+      "symbol": "e",
+      "type": "real function on R^n × (0,∞)",
+      "definition": "e(x,t)=|u_t(x,t)|²+∑_{j=1}^n |∂_{x_j}u(x,t)|².",
+      "depends_on": [
+        "D001",
+        "D003"
+      ],
+      "requires": [
+        "H001",
+        "H002"
+      ],
+      "binders": [
+        {
+          "symbol": "x",
+          "type": "R^n"
+        },
+        {
+          "symbol": "t",
+          "type": "positive real"
+        },
+        {
+          "symbol": "j",
+          "type": "integer spatial summation index"
+        }
+      ],
+      "objects": [
+        "u_t",
+        "∂_x",
+        "u",
+        "n",
+        "m",
+        "x",
+        "t",
+        "j"
+      ]
+    },
+    {
+      "id": "D007",
+      "symbol": "e_t",
+      "type": "real function on R^n × (0,∞)",
+      "definition": "e_t(x,t)=∂e(x,t)/∂t.",
+      "depends_on": [
+        "D006"
+      ],
+      "requires": [
+        "H001",
+        "H002"
+      ],
+      "binders": [
+        {
+          "symbol": "x",
+          "type": "R^n"
+        },
+        {
+          "symbol": "t",
+          "type": "positive real"
+        }
+      ],
+      "objects": [
+        "e",
+        "x",
+        "t",
+        "n"
+      ]
+    }
+  ],
+  "inputs": [
+    {
+      "id": "H001",
+      "kind": "hypothesis",
+      "statement": "n≥1 and m≥1 are integers.",
+      "definitions": [],
+      "binders": [],
+      "objects": [
+        "n",
+        "m"
+      ]
+    },
+    {
+      "id": "H002",
+      "kind": "hypothesis",
+      "statement": "u:R^n×(0,∞)→R^m is jointly smooth (C^∞ in space and time).",
+      "definitions": [],
+      "binders": [],
+      "objects": [
+        "u",
+        "n",
+        "m"
+      ]
+    },
+    {
+      "id": "H003",
+      "kind": "hypothesis",
+      "statement": "q∈R^m is fixed, independent of space and time, and |q|=1.",
+      "definitions": [],
+      "binders": [],
+      "objects": [
+        "q",
+        "m"
+      ]
+    },
+    {
+      "id": "H006",
+      "kind": "hypothesis",
+      "statement": "For every pair of real numbers 0<s<t<∞ there exists a compact set C_[s,t]⊂R^n such that u(x,r)=q for every x∉C_[s,t] and every r∈[s,t].",
+      "definitions": [],
+      "binders": [
+        {
+          "symbol": "s",
+          "type": "positive real"
+        },
+        {
+          "symbol": "t",
+          "type": "real greater than s"
+        },
+        {
+          "symbol": "r",
+          "type": "real in [s,t]"
+        },
+        {
+          "symbol": "x",
+          "type": "R^n"
+        },
+        {
+          "symbol": "C_[s,t]",
+          "type": "compact subset of R^n existentially bound for each s,t"
+        }
+      ],
+      "objects": [
+        "u",
+        "q",
+        "n",
+        "m",
+        "s",
+        "t",
+        "r",
+        "x",
+        "C_[s,t]"
+      ]
+    }
+  ],
+  "output": {
+    "id": "N002",
+    "kind": "internal",
+    "statement": "For every t0>0, let J=[t0/2,3t0/2]. There exist a compact C⊂R^n and R>0 such that C⊂(-R,R)^n, u(x,r)=q for x∉C and r∈J, and, with Q=[-R,R]^n, μ(Q)=(2R)^n<∞. Every positive-order space/time derivative of u vanishes on (R^n\\C)×int(J). The functions e and e_t are smooth. For every r∈int(J), e(·,r), e_t(·,r), u_t(·,r)·u_tt(·,r), and, for each j∈{1,…,n}, the functions ∂_{x_j}u(·,r)·∂_{x_j}u_t(·,r), u_t(·,r)·∂_{x_jx_j}u(·,r), u_t(·,r)·∂_{x_j}u(·,r), and ∂_{x_j}(u_t(·,r)·∂_{x_j}u(·,r)) are continuous, vanish outside C, and are absolutely integrable on R^n. All these scalar functions are bounded on every compact space-time box Q×K with K a compact subinterval of int(J). In particular e(·,t) is integrable for every t>0.",
+    "definitions": [
+      "D001",
+      "D002",
+      "D003",
+      "D004",
+      "D005",
+      "D006",
+      "D007"
+    ],
+    "binders": [
+      {
+        "symbol": "t0",
+        "type": "positive real"
+      },
+      {
+        "symbol": "J",
+        "type": "specified closed time interval"
+      },
+      {
+        "symbol": "C",
+        "type": "existential compact spatial set"
+      },
+      {
+        "symbol": "R",
+        "type": "existential positive real"
+      },
+      {
+        "symbol": "Q",
+        "type": "specified spatial box"
+      },
+      {
+        "symbol": "r",
+        "type": "time in int(J)"
+      },
+      {
+        "symbol": "j",
+        "type": "spatial index"
+      },
+      {
+        "symbol": "x",
+        "type": "R^n"
+      },
+      {
+        "symbol": "K",
+        "type": "compact subinterval of int(J)"
+      },
+      {
+        "symbol": "t",
+        "type": "positive real"
+      }
+    ],
+    "objects": [
+      "u",
+      "q",
+      "u_t",
+      "u_tt",
+      "∂_x",
+      "e",
+      "e_t",
+      "μ",
+      "n",
+      "m",
+      "t0",
+      "J",
+      "C",
+      "R",
+      "Q",
+      "r",
+      "j",
+      "x",
+      "K",
+      "t"
+    ]
+  },
+  "inference": {
+    "id": "R002",
+    "inputs": [
+      "H001",
+      "H002",
+      "H003",
+      "H006"
+    ],
+    "output": "N002",
+    "definitions": [
+      "D001",
+      "D002",
+      "D003",
+      "D004",
+      "D005",
+      "D006",
+      "D007"
+    ],
+    "rules": [
+      "direct",
+      "forall_introduction",
+      "exists_elimination"
+    ],
+    "locals": [
+      {
+        "symbol": "t0",
+        "type": "positive real",
+        "scope": "R002/argument",
+        "start": "S001",
+        "end": "S003",
+        "kind": "arbitrary",
+        "declaration": "Fix arbitrary t0>0.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": []
+      },
+      {
+        "symbol": "J",
+        "type": "closed interval in R",
+        "scope": "R002/argument",
+        "start": "S001",
+        "end": "S003",
+        "kind": "definition",
+        "declaration": "Set J=[t0/2,3t0/2].",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "t0"
+        ]
+      },
+      {
+        "symbol": "C",
+        "type": "compact subset of R^n",
+        "scope": "R002/argument",
+        "start": "S001",
+        "end": "S003",
+        "kind": "witness",
+        "declaration": "Choose C from H006 for s=t0/2 and t=3t0/2, so u(x,r)=q for x∉C and r∈J.",
+        "from_inputs": [
+          "H006"
+        ],
+        "from_local": [],
+        "objects": [
+          "u",
+          "q",
+          "n",
+          "t0",
+          "J"
+        ]
+      },
+      {
+        "symbol": "R",
+        "type": "positive real",
+        "scope": "R002/argument",
+        "start": "S002",
+        "end": "S003",
+        "kind": "witness",
+        "declaration": "Choose R>0 with C⊂(-R,R)^n using F001.",
+        "from_inputs": [],
+        "from_local": [
+          "F001"
+        ],
+        "objects": [
+          "C",
+          "n"
+        ]
+      },
+      {
+        "symbol": "Q",
+        "type": "compact box in R^n",
+        "scope": "R002/argument",
+        "start": "S002",
+        "end": "S003",
+        "kind": "definition",
+        "declaration": "Set Q=[-R,R]^n.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "R",
+          "n"
+        ]
+      }
+    ],
+    "argument": [
+      {
+        "id": "S001",
+        "text": "Fix t0>0 and J=[t0/2,3t0/2]. Since 0<t0/2<3t0/2, H006 gives a compact C with u(x,r)=q for x∉C, r∈J. H001 supplies the positive finite spatial dimension. A compact subset of Euclidean space is bounded; choosing a strict larger coordinate bound, there exists R>0 with C⊂(-R,R)^n. This standard compactness consequence also covers an empty C (any positive R works).",
+        "uses": [
+          "H001",
+          "H006"
+        ],
+        "uses_local": [],
+        "objects": [
+          "u",
+          "q",
+          "n",
+          "t0",
+          "J",
+          "C"
+        ],
+        "produces": [
+          {
+            "id": "F001",
+            "statement": "There exists a positive real R with C⊂(-R,R)^n.",
+            "objects": [
+              "C",
+              "n",
+              "R"
+            ],
+            "binders": [
+              {
+                "symbol": "R",
+                "type": "existential positive real"
+              }
+            ],
+            "assumptions": []
+          }
+        ],
+        "introduces": [],
+        "discharges": []
+      },
+      {
+        "id": "S002",
+        "text": "Choose R as in F001 and set Q=[-R,R]^n. Its Lebesgue measure is (2R)^n<∞, by the product formula for a coordinate box. Compact C is closed; hence (R^n\\C)×int(J) is open. On this open set u is the constant vector q: H003 supplies that q is fixed, and H006 supplies the equality. By H002, every positive-order derivative of u therefore vanishes there. In particular e,e_t and the scalar functions u_t·u_tt, ∂_{x_j}u·∂_{x_j}u_t, u_t·∂_{x_jx_j}u, u_t·∂_{x_j}u and ∂_{x_j}(u_t·∂_{x_j}u) for every spatial index j vanish there. Smoothness, finite sums and products also imply their continuity (indeed smoothness). For a fixed r∈int(J), each scalar function is bounded on compact Q and zero off C⊂Q. Its absolute value is consequently bounded by a finite constant times the measurable indicator 1_Q; continuous sections are measurable, and this bound has finite integral because μ(Q)=(2R)^n. Thus all listed sections are absolutely integrable. The same boundedness argument on Q×K for any compact subinterval K⊂int(J) proves all the asserted uniform bounds.",
+        "uses": [
+          "H001",
+          "H002",
+          "H003",
+          "H006"
+        ],
+        "uses_local": [
+          "F001"
+        ],
+        "objects": [
+          "u",
+          "q",
+          "n",
+          "m",
+          "u_t",
+          "u_tt",
+          "∂_x",
+          "e",
+          "e_t",
+          "μ",
+          "t0",
+          "J",
+          "C",
+          "R",
+          "Q"
+        ],
+        "produces": [
+          {
+            "id": "F002",
+            "statement": "For these C,R,J,Q, μ(Q)=(2R)^n<∞ and all positive-order derivatives of u vanish on (R^n\\C)×int(J). The functions e,e_t are smooth. For every r∈int(J), the spatial sections e, e_t, u_t·u_tt and, for every j∈{1,…,n}, ∂_{x_j}u·∂_{x_j}u_t, u_t·∂_{x_jx_j}u, u_t·∂_{x_j}u, and ∂_{x_j}(u_t·∂_{x_j}u), evaluated at r, are continuous, zero outside C and absolutely integrable. These scalar functions have finite bounds on Q×K for every compact K⊂int(J).",
+            "objects": [
+              "u",
+              "n",
+              "m",
+              "u_t",
+              "u_tt",
+              "∂_x",
+              "e",
+              "e_t",
+              "μ",
+              "C",
+              "R",
+              "J",
+              "Q",
+              "r",
+              "K",
+              "j"
+            ],
+            "binders": [
+              {
+                "symbol": "r",
+                "type": "time in int(J)"
+              },
+              {
+                "symbol": "K",
+                "type": "compact subinterval of int(J)"
+              },
+              {
+                "symbol": "j",
+                "type": "spatial index"
+              }
+            ],
+            "assumptions": []
+          }
+        ],
+        "introduces": [],
+        "discharges": []
+      },
+      {
+        "id": "S003",
+        "text": "The properties in F002 hold for the witnesses C,R chosen above. In particular t0∈int(J), so e(·,t0) is integrable. Package their existence, with the displayed formulas J=[t0/2,3t0/2] and Q=[-R,R]^n, and quantify over arbitrary t0>0. This proves all the asserted support and boundedness properties, including integrability at every positive time. The choices of C and R remain existential for each time window.",
+        "uses": [],
+        "uses_local": [
+          "F002"
+        ],
+        "objects": [
+          "u",
+          "q",
+          "n",
+          "m",
+          "e",
+          "e_t",
+          "μ",
+          "t0",
+          "J",
+          "C",
+          "R",
+          "Q"
+        ],
+        "produces": [],
+        "introduces": [],
+        "discharges": []
+      }
+    ],
+    "applications": []
+  },
+  "warning": "Direct inputs and fixed logic are supplied. V2 Audit A may record mathematically checked routine background with actual conditions and justification; exact Lean bindings belong to nl02lean. No ancestor proof or extra H is available. A packet is not an audit certificate.",
+  "packet_sha256": "6108758d76bb7a8a3b7f9fd7653b86955b6eb05ac148e81bd90fbe7c33f80c5a"
+}

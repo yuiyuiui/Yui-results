@@ -1,0 +1,23 @@
+{
+  "statement": "∀ (e : LR.I l → V), (∀ i, e i ≠ 0) → (∀ i, rho h (e i) = ((l : ℂ) - 2 * (i.val : ℂ)) • e i) → LinearIndependent ℂ e",
+  "proof": "classical\nintro e hn he\nlet w : LR.I l → ℂ := fun i => (l : ℂ) - 2 * (i.val : ℂ)\nhave hw : Function.Injective w := by\n  intro i j hij\n  apply Fin.ext\n  have heq : (i.val : ℂ) = (j.val : ℂ) := by dsimp [w] at hij; linear_combination (-1/2 : ℂ) * hij\n  exact_mod_cast heq\napply Fintype.linearIndependent_iff.mpr\nintro c hc j\nlet P : Polynomial ℂ := ∏ k ∈ (Finset.univ.erase j), (Polynomial.X - Polynomial.C (w k))\nhave hp : ∀ i : LR.I l, P.eval (w i) = ∏ k ∈ (Finset.univ.erase j), (w i - w k) := by\n  intro i\n  simp [P, Polynomial.eval_prod]\nhave hz : ∀ i : LR.I l, i ≠ j → P.eval (w i) = 0 := by\n  intro i hij\n  rw [hp]\n  exact Finset.prod_eq_zero (Finset.mem_erase.mpr ⟨hij, Finset.mem_univ i⟩) (sub_self (w i))\nhave hnj : P.eval (w j) ≠ 0 := by\n  rw [hp]\n  apply Finset.prod_ne_zero_iff.mpr\n  intro k hk\n  apply sub_ne_zero.mpr\n  intro heq\n  exact (Finset.mem_erase.mp hk).1 (hw heq).symm\nhave happ : ∀ i : LR.I l,\n    (Polynomial.aeval (rho h) P) (e i) = P.eval (w i) • e i := by\n  intro i\n  exact Module.End.aeval_apply_of_mem_apply_eq_smul (he i)\nhave ht := congrArg (fun z : V => (Polynomial.aeval (rho h) P) z) hc\nsimp only [map_sum, map_smul, map_zero, happ] at ht\nhave hsum : (∑ i : LR.I l, c i • (P.eval (w i) • e i)) =\n    c j • (P.eval (w j) • e j) := by\n  apply Finset.sum_eq_single j\n  · intro i hi hij\n    rw [hz i hij]\n    simp\n  · simp\nrw [hsum] at ht\nexact (smul_eq_zero.mp ht).resolve_right (smul_ne_zero hnj (hn j))",
+  "check": {
+    "exit_code": 0,
+    "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-0df__ajc/output/Auxiliary.lean:267:29: warning: Variable name `fieldK` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-0df__ajc/output/Auxiliary.lean:267:120: warning: Variable name `M` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-0df__ajc/output/Auxiliary.lean:267:215: warning: Variable name `h_H001` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-0df__ajc/output/Auxiliary.lean:267:272: warning: Variable name `h_H003` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-0df__ajc/output/Auxiliary.lean:267:327: warning: Variable name `h_T001` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (K : Type u_1) [fieldK : Field K] (V : Type u_2) [addV : AddCommGroup V] [modV : _root_.Module ℂ V] (p : ℕ)\n  (l : ℤ) (M : Submodule ℤ V) (rho : ↥LR.L →ₗ[ℂ] Module.End ℂ V) (x y h : ↥LR.L) (v : V),\n  Nat.Prime p ∧ CharP K p ∧ 0 ≤ l ∧ l < ↑p →\n    v ≠ 0 ∧ (rho x) v = 0 ∧ (rho h) v = ↑l • v →\n      LR.Strings l (rho x) (rho y) (rho h) v →\n        ∀ (e : LR.I l → V),\n          (∀ (i : LR.I l), e i ≠ 0) → (∀ (i : LR.I l), (rho h) (e i) = (↑l - 2 * ↑↑i) • e i) → LinearIndependent ℂ e\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+    "stderr": "",
+    "wall_seconds": 6.790774874854833,
+    "source_path": "/Users/syyui/projects/Yui-results/test/lie-module-irreducibility/rigorous-proof/20261030T202021Z-c161389626/native-checks/35d3ce604d81439a9402f9f8fde97ead.lean",
+    "source_sha256": "1fc1e1b22ae238b2f3dc92514e1ace970fb585df3bef3bf08ff040fb9f57ab06",
+    "auxiliary_valid": true,
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+    "context_port": "T002",
+    "candidate": 2,
+    "accepted": true,
+    "stage_complete": false
+  }
+}

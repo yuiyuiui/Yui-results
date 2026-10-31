@@ -1,0 +1,249 @@
+{
+  "header": "import Mathlib\nopen scoped BigOperators ContDiff\nopen MeasureTheory Set Filter\nnamespace WaveEnergy\nabbrev X (n : ℕ) := Fin n → ℝ\nabbrev V (m : ℕ) := EuclideanSpace ℝ (Fin m)\ndef domain (n : ℕ) : Set (X n × ℝ) := {p | 0 < p.2}\nnoncomputable def mu (n : ℕ) : Measure (X n) := Measure.pi (fun _ : Fin n => (volume : Measure ℝ))\nnoncomputable def dt {n : ℕ} {F : Type} [NormedAddCommGroup F] [NormedSpace ℝ F]\n    (f : X n × ℝ → F) (p : X n × ℝ) : F := deriv (fun r : ℝ => f (p.1, r)) p.2\nnoncomputable def dx {n : ℕ} {F : Type} [NormedAddCommGroup F] [NormedSpace ℝ F]\n    (f : X n × ℝ → F) (j : Fin n) (p : X n × ℝ) : F :=\n  fderiv ℝ (fun y : X n => f (y, p.2)) p.1 (Pi.single j 1)\nnoncomputable def lap {n m : ℕ} (u : X n × ℝ → V m) (p : X n × ℝ) : V m :=\n  ∑ j : Fin n, dx (dx u j) j p\nnoncomputable def density {n m : ℕ} (u : X n × ℝ → V m) (p : X n × ℝ) : ℝ :=\n  ‖dt u p‖ ^ 2 + ∑ j : Fin n, ‖dx u j p‖ ^ 2\nnoncomputable def energy {n m : ℕ} (u : X n × ℝ → V m) (t : ℝ) : ℝ :=\n  ∫ x : X n, density u (x, t) ∂mu n\nnoncomputable def kinetic {n m : ℕ} (u : X n × ℝ → V m) (p : X n × ℝ) : ℝ :=\n  inner ℝ (dt u p) (dt (dt u) p)\nnoncomputable def mixed {n m : ℕ} (u : X n × ℝ → V m) (j : Fin n) (p : X n × ℝ) : ℝ :=\n  inner ℝ (dx u j p) (dx (dt u) j p)\nnoncomputable def lapTerm {n m : ℕ} (u : X n × ℝ → V m) (j : Fin n) (p : X n × ℝ) : ℝ :=\n  inner ℝ (dt u p) (dx (dx u j) j p)\nnoncomputable def flux {n m : ℕ} (u : X n × ℝ → V m) (j : Fin n) (p : X n × ℝ) : ℝ :=\n  inner ℝ (dt u p) (dx u j p)\ndef box {n : ℕ} (R : ℝ) : Set (X n) := {x | ∀ j, x j ∈ Icc (-R) R}\ndef scalarTerms {n m : ℕ} (u : X n × ℝ → V m) : Set (X n × ℝ → ℝ) :=\n  {f | f = density u ∨ f = dt (density u) ∨ f = kinetic u ∨\n    ∃ j : Fin n, f = mixed u j ∨ f = lapTerm u j ∨ f = flux u j ∨ f = dx (flux u j) j}\nstructure Window {n m : ℕ} (u : X n × ℝ → V m) (q : V m)\n    (t0 : ℝ) (C : Set (X n)) (R : ℝ) : Prop where\n  compact : IsCompact C\n  radius_pos : 0 < R\n  inside : ∀ x ∈ C, ∀ j : Fin n, x j ∈ Ioo (-R) R\n  constant : ∀ x, x ∉ C → ∀ r ∈ Icc (t0 / 2) (3 * t0 / 2), u (x, r) = q\n  box_volume : mu n (box R) = ENNReal.ofReal ((2 * R) ^ n)\n  box_finite : mu n (box R) < ⊤\n  derivatives_zero : ∀ k : ℕ, 0 < k → ∀ x, x ∉ C →\n    ∀ r ∈ Ioo (t0 / 2) (3 * t0 / 2), iteratedFDeriv ℝ k u (x, r) = 0\n  sections : ∀ f ∈ scalarTerms u, ∀ r ∈ Ioo (t0 / 2) (3 * t0 / 2),\n    Continuous (fun x => f (x, r)) ∧ (∀ x, x ∉ C → f (x, r) = 0) ∧\n    Integrable (fun x => f (x, r)) (mu n)\n  uniform : ∀ f ∈ scalarTerms u, ∀ a b : ℝ,\n    Icc a b ⊆ Ioo (t0 / 2) (3 * t0 / 2) →\n    ∃ B : ℝ, 0 ≤ B ∧ ∀ x ∈ box R, ∀ r ∈ Icc a b, |f (x, r)| ≤ B\nend WaveEnergy\nopen WaveEnergy\n",
+  "parameters": [
+    {
+      "name": "n",
+      "type": "ℕ"
+    },
+    {
+      "name": "m",
+      "type": "ℕ"
+    },
+    {
+      "name": "u",
+      "type": "X n × ℝ → V m"
+    },
+    {
+      "name": "q",
+      "type": "V m"
+    }
+  ],
+  "premise_types": {
+    "H001": "1 ≤ n ∧ 1 ≤ m",
+    "H002": "ContDiffOn ℝ ∞ u (domain n)",
+    "H003": "‖q‖ = 1",
+    "H004": "∀ x : X n, ∀ t : ℝ, 0 < t → ‖u (x,t)‖ = 1",
+    "H005": "∀ x : X n, ∀ t : ℝ, 0 < t → ∃ a : ℝ, dt (dt u) (x,t) - lap u (x,t) = a • u (x,t)",
+    "H006": "∀ s t : ℝ, 0 < s → s < t → ∃ C : Set (X n), IsCompact C ∧ ∀ x : X n, x ∉ C → ∀ r : ℝ, r ∈ Icc s t → u (x,r) = q"
+  },
+  "conclusion_type": "(∀ t : ℝ, 0 < t →\n  Integrable (fun x : X n => density u (x,t)) (mu n) ∧\n  DifferentiableAt ℝ (energy u) t ∧ deriv (energy u) t = 0) ∧\n  (∀ s : ℝ, 0 < s → ∀ t : ℝ, 0 < t → energy u s = energy u t)",
+  "representation": "n,m are natural dimension indices with H001 enforcing positivity; these represent precisely the original positive integers. X n is the standard finite coordinate space Fin n → ℝ, with its product norm/topology and explicitly the product of one-dimensional Lebesgue measures mu n; its max norm is used only for topology/calculus, never in the energy. All finite-dimensional coordinate norms give the same smooth structure. V m is EuclideanSpace ℝ (Fin m), the pinned library's PiLp 2 real coordinate space; its norm squared and real inner are exactly the Euclidean sum of component squares and dot product. Fin n reindexes source coordinates 1,...,n by 0,...,n-1. The parameter u is a total function on X n × ℝ, with H002 asserting smoothness only on the open positive-time domain. Its values at nonpositive times are arbitrary: every source map has such an extension and all asserted values and derivatives are local inside the positive domain. dt is the derivative of the time section; dx is its spatial Fréchet derivative evaluated on Pi.single j 1; iterated dx defines the componentwise second spatial derivative and lap is their finite sum. On H002 these are the componentwise derivatives of the source. The pinned deriv/fderiv are totalized with zero outside differentiability, but no proof uses that fallback at positive times. ContDiff's scoped ∞ is the coercion of top of ℕ∞ into WithTop ℕ∞, requiring all finite orders; it is not ω, the stronger analytic order. density uses coefficient one for both the time norm square and the sum of spatial norm squares. energy is the total Bochner-integral expression; all uses as a finite energy are downstream of T004's integrability, so its library totalization does not replace the source integrability guard. kinetic, mixed, lapTerm, flux and scalarTerms are just explicit formulas already present in N002–N004. Window packages exactly N002's common-support witness properties, with no extra assumptions. The ENNReal box volume is written ofReal ((2*R)^n); Window includes both that equality and actual finiteness, with radius positivity ensuring the usual real-volume identification. No M premise ports or Audit A note ports are introduced; ordinary pinned library results are used directly. The only coordinate-product representation crossing is the restricted measure-preserving insertion explicitly proved in T011 before Fubini.",
+  "objects": [],
+  "steps": [
+    {
+      "id": "T001",
+      "statement": "∀ x : X n, ∀ t : ℝ, 0 < t →\n  inner ℝ (u (x,t)) (dt u (x,t)) = 0 ∧\n  inner ℝ (u (x,t)) (dt (dt u) (x,t)) = -(‖dt u (x,t)‖ ^ 2) ∧\n  (∀ j : Fin n, inner ℝ (u (x,t)) (dx (dx u j) j (x,t)) = -(‖dx u j (x,t)‖ ^ 2))",
+      "inputs": [
+        "H001",
+        "H002",
+        "H004"
+      ],
+      "source_steps": [
+        "S001"
+      ],
+      "explanation": "Differentiate the unit constraint once and twice in time and twice in each coordinate on the open positive-time domain; use the inner-product product rule. No normality witness is needed."
+    },
+    {
+      "id": "T002",
+      "statement": "∀ x : X n, ∀ t : ℝ, 0 < t →\n  inner ℝ (u (x,t)) (dt u (x,t)) = 0 ∧\n  inner ℝ (u (x,t)) (dt (dt u) (x,t)) = -(‖dt u (x,t)‖ ^ 2) ∧\n  (∀ j : Fin n, inner ℝ (u (x,t)) (dx (dx u j) j (x,t)) = -(‖dx u j (x,t)‖ ^ 2)) ∧\n  inner ℝ (dt u (x,t)) (dt (dt u) (x,t) - lap u (x,t)) = 0 ∧\n  dt (dt u) (x,t) - lap u (x,t) =\n    ((∑ j : Fin n, ‖dx u j (x,t)‖ ^ 2) - ‖dt u (x,t)‖ ^ 2) • u (x,t) ∧\n  (∀ a : ℝ, dt (dt u) (x,t) - lap u (x,t) = a • u (x,t) →\n    a = (∑ j : Fin n, ‖dx u j (x,t)‖ ^ 2) - ‖dt u (x,t)‖ ^ 2)",
+      "inputs": [
+        "H001",
+        "H002",
+        "H004",
+        "H005",
+        "T001"
+      ],
+      "source_steps": [
+        "S002"
+      ],
+      "explanation": "Export N001 in full. At each positive-time point eliminate H005's scalar witness, dot the normality equation with dt u and with u, and use T001. Prove the scalar formula for every scalar satisfying that equation; never differentiate a selection."
+    },
+    {
+      "id": "T003",
+      "statement": "∀ t0 : ℝ, 0 < t0 →\n  ∃ C : Set (X n), ∃ R : ℝ, IsCompact C ∧ 0 < R ∧\n    (∀ x ∈ C, ∀ j : Fin n, x j ∈ Ioo (-R) R) ∧\n    (∀ x, x ∉ C → ∀ r ∈ Icc (t0/2) (3*t0/2), u (x,r) = q)",
+      "inputs": [
+        "H001",
+        "H006"
+      ],
+      "source_steps": [
+        "S003"
+      ],
+      "explanation": "Use H006 on [t0/2,3*t0/2], then compactness to choose a strictly larger positive coordinate bound, including the empty compact-set case."
+    },
+    {
+      "id": "T004",
+      "statement": "(∀ t0 : ℝ, 0 < t0 → ∃ C : Set (X n), ∃ R : ℝ, Window u q t0 C R) ∧\n  ContDiffOn ℝ ∞ (density u) (domain n) ∧\n  ContDiffOn ℝ ∞ (dt (density u)) (domain n) ∧\n  (∀ t : ℝ, 0 < t → Integrable (fun x : X n => density u (x,t)) (mu n))",
+      "inputs": [
+        "H001",
+        "H002",
+        "H003",
+        "H006",
+        "T003"
+      ],
+      "source_steps": [
+        "S004",
+        "S005"
+      ],
+      "explanation": "Export all of N002. On the open complement of C times the open time window, local constancy makes every positive iterated Fréchet derivative zero. Establish scalar smoothness, continuous spatial sections, zero values off C, integrability by a bounded box indicator, and uniform bounds on compact time intervals. Window is only a package of these proved facts. Use the product formula for the ENNReal box measure; its equality with ofReal ((2*R)^n) and finiteness are explicit obligations. Obtain energy-density integrability at every positive time, before using energy as a finite integral."
+    },
+    {
+      "id": "T005",
+      "statement": "∀ x : X n, ∀ t : ℝ, 0 < t →\n  HasDerivAt (fun r : ℝ => density u (x,r)) (dt (density u) (x,t)) t ∧\n  dt (density u) (x,t) = 2 * kinetic u (x,t) + 2 * ∑ j : Fin n, mixed u j (x,t)",
+      "inputs": [
+        "H001",
+        "H002",
+        "T004"
+      ],
+      "source_steps": [
+        "S006"
+      ],
+      "explanation": "Prove the pointwise time derivative of density using the inner-product product rule, finite sums, and equality of mixed partials. Keep the HasDerivAt assertion available for difference-quotient convergence."
+    },
+    {
+      "id": "T006",
+      "statement": "∀ t0 : ℝ, 0 < t0 → ∃ R B : ℝ, 0 < R ∧ 0 ≤ B ∧\n  Integrable ((box R).indicator (fun _ : X n => B)) (mu n) ∧\n  (∀ x ∈ box R, ∀ r ∈ Icc (t0-t0/4) (t0+t0/4), |dt (density u) (x,r)| ≤ B) ∧\n  (∀ x : X n, ∀ h : ℝ, 0 < |h| → |h| < t0/4 →\n    |(density u (x,t0+h) - density u (x,t0))/h| ≤\n      (box R).indicator (fun _ : X n => B) x)",
+      "inputs": [
+        "H001",
+        "H002",
+        "T004",
+        "T005"
+      ],
+      "source_steps": [
+        "S007",
+        "S008"
+      ],
+      "explanation": "Set eta=t0/4. For a Window witness choose B by the extreme-value bound on Q times the smaller closed time interval. Apply the library real mean-value theorem for either sign of h. Outside Q both densities vanish; prove indicator integrability from Window.box_finite."
+    },
+    {
+      "id": "T007",
+      "statement": "∀ t0 : ℝ, 0 < t0 → ∀ h : ℕ → ℝ,\n  (∀ k : ℕ, 0 < |h k| ∧ |h k| < t0/4) →\n  Tendsto h atTop (nhds 0) →\n  Tendsto (fun k : ℕ => (energy u (t0+h k) - energy u t0)/h k) atTop\n    (nhds (∫ x : X n, dt (density u) (x,t0) ∂mu n))",
+      "inputs": [
+        "H001",
+        "H002",
+        "T004",
+        "T005",
+        "T006"
+      ],
+      "source_steps": [
+        "S009"
+      ],
+      "explanation": "Use the directly available dominated-convergence theorem for scalar spatial difference quotients. T005 gives pointwise convergence and T006 gives the integrable majorant. T004 makes both density sections integrable at each increment; integral linearity identifies the integrated quotient. The sequence and all temporary size assumptions remain universally quantified."
+    },
+    {
+      "id": "T008",
+      "statement": "∀ t : ℝ, 0 < t →\n  DifferentiableAt ℝ (energy u) t ∧\n  deriv (energy u) t = (∫ x : X n, dt (density u) (x,t) ∂mu n) ∧\n  deriv (energy u) t =\n    2 * (∫ x : X n, kinetic u (x,t) ∂mu n) +\n    2 * ∑ j : Fin n, (∫ x : X n, mixed u j (x,t) ∂mu n) ∧\n  Integrable (fun x : X n => dt (density u) (x,t)) (mu n) ∧\n  Integrable (fun x : X n => kinetic u (x,t)) (mu n) ∧\n  (∀ j : Fin n, Integrable (fun x : X n => mixed u j (x,t)) (mu n)) ∧\n  (∀ x : X n, dt (density u) (x,t) =\n    2 * kinetic u (x,t) + 2 * ∑ j : Fin n, mixed u j (x,t))",
+      "inputs": [
+        "H001",
+        "H002",
+        "T004",
+        "T005",
+        "T007"
+      ],
+      "source_steps": [
+        "S010"
+      ],
+      "explanation": "Export N003. Remove finite initial portions of arbitrary nonzero increment sequences; use the real sequential limit criterion to obtain the two-sided derivative limit. Identify deriv, then integrate T005 using the individually integrable terms from T004. This retains the supplied difference-quotient and dominated-convergence route."
+    },
+    {
+      "id": "T009",
+      "statement": "∀ t0 : ℝ, 0 < t0 → ∀ j : Fin n,\n  ContDiff ℝ ∞ (fun x : X n => flux u j (x,t0)) ∧\n  (∀ x : X n, dx (flux u j) j (x,t0) =\n    inner ℝ (dx (dt u) j (x,t0)) (dx u j (x,t0)) + lapTerm u j (x,t0)) ∧\n  (∀ x : X n, HasDerivAt (fun z : ℝ => flux u j (Function.update x j z,t0))\n    (dx (flux u j) j (x,t0)) (x j)) ∧\n  (∀ C : Set (X n), ∀ R : ℝ, Window u q t0 C R →\n    ∀ x : X n, x j = -R ∨ x j = R → flux u j (x,t0) = 0)",
+      "inputs": [
+        "H001",
+        "H002",
+        "T004"
+      ],
+      "source_steps": [
+        "S011"
+      ],
+      "explanation": "Establish spatial smoothness of the flux, its product-rule derivative, and the coordinate-line chain rule. For any fixed Window witness, C lies strictly inside the box, so the flux is zero on each j-face. The derivative and its two summands are integrable by T004. Coordinate updates are the same coordinate lines as the source insertion."
+    },
+    {
+      "id": "T010",
+      "statement": "∀ t0 : ℝ, 0 < t0 → ∀ j : Fin n,\n  ∀ C : Set (X n), ∀ R : ℝ, Window u q t0 C R →\n  ∀ x : X n, (∫ z in (-R)..R,\n    dx (flux u j) j (Function.update x j z,t0)) = 0",
+      "inputs": [
+        "H001",
+        "H002",
+        "T004",
+        "T009"
+      ],
+      "source_steps": [
+        "S012"
+      ],
+      "explanation": "At fixed remaining coordinates apply intervalIntegral.integral_eq_sub_of_hasDerivAt_of_le with real codomain. Smoothness supplies continuity and interval integrability, the coordinate-line derivative is T009, and both endpoint values are zero. All conditions refer to the same C and R."
+    },
+    {
+      "id": "T011",
+      "statement": "∀ t0 : ℝ, 0 < t0 → ∀ j : Fin n,\n  ∀ C : Set (X n), ∀ R : ℝ, Window u q t0 C R →\n  let Y := {i : Fin n // i ≠ j} → ℝ\n  let nu : Measure Y := Measure.pi (fun _ : {i : Fin n // i ≠ j} => (volume : Measure ℝ))\n  let Q' : Set Y := {y | ∀ i, y i ∈ Icc (-R) R}\n  let ins : Y × ℝ → X n := fun p i => if h : i = j then p.2 else p.1 ⟨i,h⟩\n  MeasurePreserving ins ((nu.restrict Q').prod (volume.restrict (Icc (-R) R))) ((mu n).restrict (box R)) ∧\n  (∫ x in box R, dx (flux u j) j (x,t0) ∂mu n) = 0",
+      "inputs": [
+        "H001",
+        "H002",
+        "T004",
+        "T009",
+        "T010"
+      ],
+      "source_steps": [
+        "S013"
+      ],
+      "explanation": "Prove the displayed restricted-product measure-preserving identification before using it to transport the box integral. The remaining coordinates are indexed by the complement of j; this has exactly n-1 elements and avoids subtraction/reindexing in public dimensions. On coordinate rectangles both measures are products of the same lengths. Continuity and boundedness give integrability on the finite product box. Apply Fubini with remaining coordinates outermost and the j-coordinate innermost, then T010, converting oriented interval integration to closed-interval integration using null endpoints. For n=1 the remaining index set is empty and its product measure has mass one. The measure identification is a checked component of this obligation, not an assumed conversion."
+    },
+    {
+      "id": "T012",
+      "statement": "∀ t : ℝ, 0 < t → ∀ j : Fin n,\n  (∫ x : X n, mixed u j (x,t) ∂mu n) = -(∫ x : X n, lapTerm u j (x,t) ∂mu n) ∧\n  Integrable (fun x : X n => mixed u j (x,t)) (mu n) ∧\n  Integrable (fun x : X n => lapTerm u j (x,t)) (mu n)",
+      "inputs": [
+        "H001",
+        "H002",
+        "T004",
+        "T009",
+        "T011"
+      ],
+      "source_steps": [
+        "S014"
+      ],
+      "explanation": "Export N004. Choose a Window from T004; all flux-derivative terms vanish off C, so T011 gives zero full-space derivative integral. Integrate T009's product identity with individually integrable summands, use inner-product symmetry and rearrange."
+    },
+    {
+      "id": "T013",
+      "statement": "∀ t : ℝ, 0 < t →\n  Integrable (fun x : X n => density u (x,t)) (mu n) ∧\n  DifferentiableAt ℝ (energy u) t ∧ deriv (energy u) t = 0",
+      "inputs": [
+        "H001",
+        "H002",
+        "T002",
+        "T004",
+        "T008",
+        "T012"
+      ],
+      "source_steps": [
+        "S015",
+        "S016"
+      ],
+      "explanation": "Combine N003 and N004 at an arbitrary positive time, then use finite integral linearity to write the derivative as twice the integral of inner (dt u) (dt(dt u)-lap u). N001 makes the integrand pointwise zero. Retain density integrability and actual differentiability."
+    },
+    {
+      "id": "T014",
+      "statement": "(∀ t : ℝ, 0 < t →\n  Integrable (fun x : X n => density u (x,t)) (mu n) ∧\n  DifferentiableAt ℝ (energy u) t ∧ deriv (energy u) t = 0) ∧\n  (∀ s : ℝ, 0 < s → ∀ t : ℝ, 0 < t → energy u s = energy u t)",
+      "inputs": [
+        "H001",
+        "H002",
+        "T013"
+      ],
+      "source_steps": [
+        "S017"
+      ],
+      "explanation": "Export the full target P, retaining every assertion from T013. Apply the library real mean-value theorem on any strictly ordered positive closed interval to the differentiable energy and its zero derivative; handle equal and reversed endpoint orders to conclude equality for any two positive times."
+    }
+  ],
+  "terminal": "T014",
+  "source_outputs": {
+    "N001": "T002",
+    "N002": "T004",
+    "N003": "T008",
+    "N004": "T012",
+    "P": "T014"
+  },
+  "endpoint_correspondence": {
+    "P": {
+      "mode": "equivalent",
+      "explanation": "The full theorem quantifies arbitrary positive dimensions n,m, a jointly smooth map and a single fixed unit vector q with exactly H001–H006. Natural dimension indices subject to H001 are precisely the original positive integer dimensions. The standard coordinates X n with product Lebesgue measure and Euclidean V m identify the original spaces and integrals; Fin n enumerates each original spatial coordinate once. Replacing a map on positive times by an arbitrary real-time extension is reversible by restriction: the positive-time domain is open, so smoothness and every derivative in H005 and the conclusion depend only on the restriction; any source map may be extended arbitrarily outside it. H004 is the original sphere constraint, H005 is pointwise existence of a real normal multiplier with no regularity imposed, and H006 is the same compact perturbation from the fixed q uniformly on each positive closed time interval. The conclusion asserts absolute spatial integrability for every positive time, actual differentiability and derivative zero of the integral of density, and equality of that energy at every pair of positive times. Its norm squares and finite coordinate sum have exactly coefficient one; integrability makes the Bochner scalar integral the ordinary finite Lebesgue integral. No assertion or smooth extension condition is imposed at time zero."
+    }
+  }
+}

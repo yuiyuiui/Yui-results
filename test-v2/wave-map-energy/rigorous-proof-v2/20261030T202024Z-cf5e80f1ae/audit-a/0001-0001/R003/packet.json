@@ -1,0 +1,1056 @@
+{
+  "contract_version": 2,
+  "case_id": "wave-map-energy",
+  "graph_sha256": "2aa0715d10d257741a3b71b3386950d1c63955feaf73d55dd8d4973bddb291b2",
+  "spec_sha256": "afff4b5a1bbdf99c9982bd0b137314c57853bd9f147d75d1d3efa825a6735610",
+  "parameters": [
+    {
+      "symbol": "n",
+      "type": "integer dimension index"
+    },
+    {
+      "symbol": "m",
+      "type": "integer dimension index"
+    },
+    {
+      "symbol": "u",
+      "type": "map R^n × (0,∞) → R^m"
+    },
+    {
+      "symbol": "q",
+      "type": "vector in R^m"
+    }
+  ],
+  "logic": {
+    "classical": true,
+    "rules": [
+      "direct",
+      "forall_introduction",
+      "exists_elimination",
+      "implication_introduction"
+    ],
+    "calculations": [
+      "equality: Equality reflexivity, symmetry, transitivity and substitution.",
+      "definitions: Unfold an explicitly supplied definition; this proves no extra property.",
+      "finite_algebra: Routine finite semiring/ring/field arithmetic, including zero/one laws, distributivity, associativity and finite polynomial identities. Correct elementary compression is permitted; a substantive missing argument is not.",
+      "finite_order: Routine ordered-field reasoning with actual signs/domains: order laws, adding inequalities, multiplication/division with sign conditions, and real square nonnegativity. Ordinary valid elementary inferences need no exhaustive displayed chain. Check that the conclusion follows; substantial named theorems still require inputs or verified-background admission.",
+      "finite_sums: Unfold and rearrange finite sums/products with explicitly given finite indices."
+    ],
+    "primitives": [
+      {
+        "symbol": "0",
+        "type": "typed numeral",
+        "meaning": "Zero of the explicitly specified mathematical type."
+      },
+      {
+        "symbol": "1",
+        "type": "typed numeral",
+        "meaning": "One of the explicitly specified mathematical type."
+      },
+      {
+        "symbol": "2",
+        "type": "typed numeral",
+        "meaning": "Two of the explicitly specified mathematical type, including an exponent two."
+      },
+      {
+        "symbol": "ℕ",
+        "type": "number system",
+        "meaning": "The natural numbers with their usual arithmetic."
+      },
+      {
+        "symbol": "ℤ",
+        "type": "number system",
+        "meaning": "The integers with their usual arithmetic."
+      },
+      {
+        "symbol": "ℚ",
+        "type": "number system",
+        "meaning": "The rational numbers with their usual ordered-field operations."
+      },
+      {
+        "symbol": "ℝ",
+        "type": "number system",
+        "meaning": "The real numbers with their usual ordered-field structure."
+      },
+      {
+        "symbol": "ℂ",
+        "type": "number system",
+        "meaning": "The complex numbers with their usual field structure."
+      },
+      {
+        "symbol": "∅",
+        "type": "typed set notation",
+        "meaning": "The empty set in the explicitly specified ambient type."
+      },
+      {
+        "symbol": "∞",
+        "type": "typed order notation",
+        "meaning": "The top element in an explicitly specified extended ordered codomain."
+      }
+    ]
+  },
+  "pins": {
+    "lean_version": "4.32.2",
+    "mathlib_commit": "905b95818eb32af7874a58b427f50c1711a5e96c",
+    "mathlib_root": "/Users/syyui/formalization-tools/lean-mathlib-v4.32.2/mathlib"
+  },
+  "foundation_profile": "elementary-language-4",
+  "standard_language": "Ordinary typed mathematical language: logical connectives, quantifiers, equality, sets, functions, tuples, finite indices and their usual notation. A type explicitly named natural numbers, integers, rationals, reals or complex numbers means that standard structure, with its usual numerals and arithmetic operations; these operation tokens need not be redeclared as project objects. The fixed finite calculation rules below, including a+0=a, are controller permissions, not an author claim. The core symbol table below is not a dictionary of all allowed mathematics. Objects and notation from any subject are introduced by this problem's parameters, D definitions or scoped locals, with their types and dependencies. Their properties need direct inputs or displayed local proofs; a familiar name or symbol supplies no theorem.",
+  "background_policy": "mathematical-background-v2-1",
+  "definitions": [
+    {
+      "id": "D001",
+      "symbol": "u_t",
+      "type": "map R^n × (0,∞) → R^m",
+      "definition": "u_t(x,t)=∂u(x,t)/∂t, the componentwise first time derivative.",
+      "depends_on": [],
+      "requires": [
+        "H001",
+        "H002"
+      ],
+      "binders": [
+        {
+          "symbol": "x",
+          "type": "R^n"
+        },
+        {
+          "symbol": "t",
+          "type": "positive real"
+        }
+      ],
+      "objects": [
+        "u",
+        "n",
+        "m",
+        "x",
+        "t"
+      ]
+    },
+    {
+      "id": "D002",
+      "symbol": "u_tt",
+      "type": "map R^n × (0,∞) → R^m",
+      "definition": "u_tt(x,t)=∂²u(x,t)/∂t², componentwise.",
+      "depends_on": [
+        "D001"
+      ],
+      "requires": [
+        "H001",
+        "H002"
+      ],
+      "binders": [
+        {
+          "symbol": "x",
+          "type": "R^n"
+        },
+        {
+          "symbol": "t",
+          "type": "positive real"
+        }
+      ],
+      "objects": [
+        "u",
+        "n",
+        "m",
+        "x",
+        "t"
+      ]
+    },
+    {
+      "id": "D003",
+      "symbol": "∂_x",
+      "type": "family of componentwise spatial differential operators",
+      "definition": "For each integer j with 1≤j≤n, ∂_{x_j} denotes componentwise differentiation in the jth spatial coordinate on R^n. Repeated subscripts denote iterated spatial derivatives, and ∂_{x_j}u_t differentiates u_t in that coordinate. Spatial gradients of u have rows ∂_{x_j}u; their Frobenius square is ∑_{j=1}^n |∂_{x_j}u|².",
+      "depends_on": [
+        "D001"
+      ],
+      "requires": [
+        "H001",
+        "H002"
+      ],
+      "binders": [
+        {
+          "symbol": "j",
+          "type": "integer"
+        }
+      ],
+      "objects": [
+        "u",
+        "n",
+        "m",
+        "j",
+        "u_t"
+      ]
+    },
+    {
+      "id": "D004",
+      "symbol": "Δ_x",
+      "type": "componentwise spatial Laplacian",
+      "definition": "Δ_xu=∑_{j=1}^n ∂_{x_jx_j}u.",
+      "depends_on": [
+        "D003"
+      ],
+      "requires": [
+        "H001",
+        "H002"
+      ],
+      "binders": [
+        {
+          "symbol": "j",
+          "type": "integer spatial summation index"
+        }
+      ],
+      "objects": [
+        "u",
+        "n",
+        "m",
+        "j",
+        "∂_x"
+      ]
+    },
+    {
+      "id": "D005",
+      "symbol": "μ",
+      "type": "measure on R^n",
+      "definition": "μ is Lebesgue measure on R^n, identified with the product of n one-dimensional Lebesgue measures; dx in spatial integrals denotes dμ. Euclidean dot products and norms are used in R^m and its finite matrix spaces. On coordinate boxes, μ is the product of the restricted coordinate Lebesgue measures.",
+      "depends_on": [],
+      "requires": [
+        "H001"
+      ],
+      "binders": [],
+      "objects": [
+        "n",
+        "m"
+      ]
+    },
+    {
+      "id": "D006",
+      "symbol": "e",
+      "type": "real function on R^n × (0,∞)",
+      "definition": "e(x,t)=|u_t(x,t)|²+∑_{j=1}^n |∂_{x_j}u(x,t)|².",
+      "depends_on": [
+        "D001",
+        "D003"
+      ],
+      "requires": [
+        "H001",
+        "H002"
+      ],
+      "binders": [
+        {
+          "symbol": "x",
+          "type": "R^n"
+        },
+        {
+          "symbol": "t",
+          "type": "positive real"
+        },
+        {
+          "symbol": "j",
+          "type": "integer spatial summation index"
+        }
+      ],
+      "objects": [
+        "u_t",
+        "∂_x",
+        "u",
+        "n",
+        "m",
+        "x",
+        "t",
+        "j"
+      ]
+    },
+    {
+      "id": "D007",
+      "symbol": "e_t",
+      "type": "real function on R^n × (0,∞)",
+      "definition": "e_t(x,t)=∂e(x,t)/∂t.",
+      "depends_on": [
+        "D006"
+      ],
+      "requires": [
+        "H001",
+        "H002"
+      ],
+      "binders": [
+        {
+          "symbol": "x",
+          "type": "R^n"
+        },
+        {
+          "symbol": "t",
+          "type": "positive real"
+        }
+      ],
+      "objects": [
+        "e",
+        "x",
+        "t",
+        "n"
+      ]
+    },
+    {
+      "id": "D008",
+      "symbol": "E",
+      "type": "real function on (0,∞)",
+      "definition": "E(t)=∫_{R^n} e(x,t) dx, with the ordinary finite Lebesgue integral, used only after spatial integrability for every positive time has been proved.",
+      "depends_on": [
+        "D005",
+        "D006"
+      ],
+      "requires": [
+        "H001",
+        "H002",
+        "N002"
+      ],
+      "binders": [
+        {
+          "symbol": "x",
+          "type": "R^n spatial integration variable"
+        },
+        {
+          "symbol": "t",
+          "type": "positive real"
+        }
+      ],
+      "objects": [
+        "μ",
+        "e",
+        "x",
+        "t",
+        "n"
+      ]
+    }
+  ],
+  "inputs": [
+    {
+      "id": "H001",
+      "kind": "hypothesis",
+      "statement": "n≥1 and m≥1 are integers.",
+      "definitions": [],
+      "binders": [],
+      "objects": [
+        "n",
+        "m"
+      ]
+    },
+    {
+      "id": "H002",
+      "kind": "hypothesis",
+      "statement": "u:R^n×(0,∞)→R^m is jointly smooth (C^∞ in space and time).",
+      "definitions": [],
+      "binders": [],
+      "objects": [
+        "u",
+        "n",
+        "m"
+      ]
+    },
+    {
+      "id": "N002",
+      "kind": "internal",
+      "statement": "For every t0>0, let J=[t0/2,3t0/2]. There exist a compact C⊂R^n and R>0 such that C⊂(-R,R)^n, u(x,r)=q for x∉C and r∈J, and, with Q=[-R,R]^n, μ(Q)=(2R)^n<∞. Every positive-order space/time derivative of u vanishes on (R^n\\C)×int(J). The functions e and e_t are smooth. For every r∈int(J), e(·,r), e_t(·,r), u_t(·,r)·u_tt(·,r), and, for each j∈{1,…,n}, the functions ∂_{x_j}u(·,r)·∂_{x_j}u_t(·,r), u_t(·,r)·∂_{x_jx_j}u(·,r), u_t(·,r)·∂_{x_j}u(·,r), and ∂_{x_j}(u_t(·,r)·∂_{x_j}u(·,r)) are continuous, vanish outside C, and are absolutely integrable on R^n. All these scalar functions are bounded on every compact space-time box Q×K with K a compact subinterval of int(J). In particular e(·,t) is integrable for every t>0.",
+      "definitions": [
+        "D001",
+        "D002",
+        "D003",
+        "D004",
+        "D005",
+        "D006",
+        "D007"
+      ],
+      "binders": [
+        {
+          "symbol": "t0",
+          "type": "positive real"
+        },
+        {
+          "symbol": "J",
+          "type": "specified closed time interval"
+        },
+        {
+          "symbol": "C",
+          "type": "existential compact spatial set"
+        },
+        {
+          "symbol": "R",
+          "type": "existential positive real"
+        },
+        {
+          "symbol": "Q",
+          "type": "specified spatial box"
+        },
+        {
+          "symbol": "r",
+          "type": "time in int(J)"
+        },
+        {
+          "symbol": "j",
+          "type": "spatial index"
+        },
+        {
+          "symbol": "x",
+          "type": "R^n"
+        },
+        {
+          "symbol": "K",
+          "type": "compact subinterval of int(J)"
+        },
+        {
+          "symbol": "t",
+          "type": "positive real"
+        }
+      ],
+      "objects": [
+        "u",
+        "q",
+        "u_t",
+        "u_tt",
+        "∂_x",
+        "e",
+        "e_t",
+        "μ",
+        "n",
+        "m",
+        "t0",
+        "J",
+        "C",
+        "R",
+        "Q",
+        "r",
+        "j",
+        "x",
+        "K",
+        "t"
+      ]
+    },
+    {
+      "id": "M001",
+      "kind": "mathlib",
+      "statement": "For any measurable space A, measure ν on A, real normed vector space V (a normed additive commutative group with an R-normed-space structure), sequence F:ℕ→A→V, function f:A→V and bound b:A→R: if each F(k) is ν-almost everywhere strongly measurable, b is ν-integrable, for every k one has ||F(k)(y)||≤b(y) for ν-almost every y, and F(k)(y)→f(y) as k→∞ for ν-almost every y, then ∫ F(k) dν→∫ f dν (Bochner integrals). No completeness premise on V is required by this declaration.",
+      "definitions": [],
+      "binders": [
+        {
+          "symbol": "A",
+          "type": "measurable space"
+        },
+        {
+          "symbol": "ν",
+          "type": "measure on A"
+        },
+        {
+          "symbol": "V",
+          "type": "real normed vector space"
+        },
+        {
+          "symbol": "F",
+          "type": "sequence of functions A→V"
+        },
+        {
+          "symbol": "f",
+          "type": "function A→V"
+        },
+        {
+          "symbol": "b",
+          "type": "function A→R"
+        },
+        {
+          "symbol": "k",
+          "type": "natural sequence index"
+        },
+        {
+          "symbol": "y",
+          "type": "point of A"
+        }
+      ],
+      "objects": [
+        "A",
+        "ν",
+        "V",
+        "F",
+        "f",
+        "b",
+        "k",
+        "y"
+      ],
+      "source_contract": {
+        "hypotheses": [
+          "A is a measurable space, ν a measure, and V a normed additive commutative group and normed space over R.",
+          "For every k, F(k) is ν-almost everywhere strongly measurable.",
+          "b is ν-integrable.",
+          "For every k, ||F(k)(y)||≤b(y) for ν-almost every y.",
+          "For ν-almost every y, F(k)(y) tends to f(y) as k tends to infinity."
+        ],
+        "declaration": "MeasureTheory.tendsto_integral_of_dominated_convergence",
+        "signature": "@MeasureTheory.tendsto_integral_of_dominated_convergence : ∀ {α : Type u_1} {G : Type u_3} [inst : NormedAddCommGroup.{u_3} G] [inst_1 : NormedSpace.{0, u_3} ℝ G]\n  {m : MeasurableSpace.{u_1} α} {μ : MeasureTheory.Measure.{u_1} α} {F : ℕ → α → G} {f : α → G} (bound : α → ℝ),\n  (∀ (n : ℕ), MeasureTheory.AEStronglyMeasurable.{u_1, u_3} (F n) μ) →\n    MeasureTheory.Integrable.{0, u_1} bound μ →\n      (∀ (n : ℕ), ∀ᵐ (a : α) ∂μ, LE.le.{0} (norm.{u_3} (F n a)) (bound a)) →\n        (∀ᵐ (a : α) ∂μ, Filter.Tendsto.{0, u_3} (fun n => F n a) Filter.atTop.{0} (nhds.{u_3} (f a))) →\n          Filter.Tendsto.{0, u_3} (fun n => ∫ (a : α), F n a ∂μ) Filter.atTop.{0} (nhds.{u_3} (∫ (a : α), f a ∂μ))"
+      }
+    },
+    {
+      "id": "M002",
+      "kind": "mathlib",
+      "statement": "For real functions f,d:R→R and real endpoints a<b, if f is continuous on [a,b] and has derivative d(z) at every z∈(a,b), then there exists c∈(a,b) with d(c)=(f(b)-f(a))/(b-a).",
+      "definitions": [],
+      "binders": [
+        {
+          "symbol": "f",
+          "type": "R→R"
+        },
+        {
+          "symbol": "d",
+          "type": "R→R"
+        },
+        {
+          "symbol": "a",
+          "type": "real"
+        },
+        {
+          "symbol": "b",
+          "type": "real"
+        },
+        {
+          "symbol": "z",
+          "type": "real interval variable"
+        },
+        {
+          "symbol": "c",
+          "type": "real existential witness"
+        }
+      ],
+      "objects": [
+        "f",
+        "d",
+        "a",
+        "b",
+        "z",
+        "c"
+      ],
+      "source_contract": {
+        "hypotheses": [
+          "f and d are real functions and a,b are real numbers with a<b.",
+          "f is continuous on [a,b].",
+          "For every z∈(a,b), f has derivative d(z) at z."
+        ],
+        "declaration": "exists_hasDerivAt_eq_slope",
+        "signature": "@exists_hasDerivAt_eq_slope : ∀ (f f' : ℝ → ℝ) {a b : ℝ},\n  LT.lt.{0} a b →\n    ContinuousOn.{0, 0} f (Set.Icc.{0} a b) →\n      (∀ (x : ℝ), Membership.mem.{0, 0} (Set.Ioo.{0} a b) x → HasDerivAt.{0, 0} f (f' x) x) →\n        ∃ c,\n          Membership.mem.{0, 0} (Set.Ioo.{0} a b) c ∧\n            Eq.{1} (f' c) (HDiv.hDiv.{0, 0, 0} (HSub.hSub.{0, 0, 0} (f b) (f a)) (HSub.hSub.{0, 0, 0} b a))"
+      }
+    }
+  ],
+  "output": {
+    "id": "N003",
+    "kind": "internal",
+    "statement": "For every t>0, E is differentiable at t and E'(t)=∫_{R^n} e_t(x,t) dx=2∫_{R^n} u_t(x,t)·u_tt(x,t) dx+2∑_{j=1}^n ∫_{R^n} ∂_{x_j}u(x,t)·∂_{x_j}u_t(x,t) dx. Pointwise, e_t=2u_t·u_tt+2∑_{j=1}^n ∂_{x_j}u·∂_{x_j}u_t. All displayed integrals are absolutely finite.",
+    "definitions": [
+      "D001",
+      "D002",
+      "D003",
+      "D004",
+      "D005",
+      "D006",
+      "D007",
+      "D008"
+    ],
+    "binders": [
+      {
+        "symbol": "t",
+        "type": "positive real"
+      },
+      {
+        "symbol": "x",
+        "type": "R^n integration variable"
+      },
+      {
+        "symbol": "j",
+        "type": "spatial summation index"
+      }
+    ],
+    "objects": [
+      "E",
+      "e",
+      "e_t",
+      "u_t",
+      "u_tt",
+      "∂_x",
+      "μ",
+      "n",
+      "m",
+      "x",
+      "t",
+      "j"
+    ]
+  },
+  "inference": {
+    "id": "R003",
+    "inputs": [
+      "H001",
+      "H002",
+      "N002",
+      "M001",
+      "M002"
+    ],
+    "output": "N003",
+    "definitions": [
+      "D001",
+      "D002",
+      "D003",
+      "D004",
+      "D005",
+      "D006",
+      "D007",
+      "D008"
+    ],
+    "rules": [
+      "direct",
+      "forall_introduction",
+      "exists_elimination",
+      "implication_introduction"
+    ],
+    "locals": [
+      {
+        "symbol": "t0",
+        "type": "positive real",
+        "scope": "R003/argument",
+        "start": "S001",
+        "end": "S005",
+        "kind": "arbitrary",
+        "declaration": "Fix arbitrary t0>0.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": []
+      },
+      {
+        "symbol": "J",
+        "type": "closed time interval",
+        "scope": "R003/argument",
+        "start": "S001",
+        "end": "S005",
+        "kind": "definition",
+        "declaration": "Set J=[t0/2,3t0/2].",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "t0"
+        ]
+      },
+      {
+        "symbol": "C",
+        "type": "compact subset of R^n",
+        "scope": "R003/argument",
+        "start": "S001",
+        "end": "S005",
+        "kind": "witness",
+        "declaration": "Choose C and R from N002 for t0, with its common support and boundedness properties.",
+        "from_inputs": [
+          "N002"
+        ],
+        "from_local": [],
+        "objects": [
+          "t0",
+          "n"
+        ]
+      },
+      {
+        "symbol": "R",
+        "type": "positive real",
+        "scope": "R003/argument",
+        "start": "S001",
+        "end": "S005",
+        "kind": "witness",
+        "declaration": "Choose R jointly with C as in N002, so C⊂(-R,R)^n.",
+        "from_inputs": [
+          "N002"
+        ],
+        "from_local": [],
+        "objects": [
+          "t0",
+          "n",
+          "C"
+        ]
+      },
+      {
+        "symbol": "Q",
+        "type": "compact spatial box",
+        "scope": "R003/argument",
+        "start": "S001",
+        "end": "S005",
+        "kind": "definition",
+        "declaration": "Set Q=[-R,R]^n.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "R",
+          "n"
+        ]
+      },
+      {
+        "symbol": "η",
+        "type": "positive real",
+        "scope": "R003/argument",
+        "start": "S002",
+        "end": "S005",
+        "kind": "definition",
+        "declaration": "Set η=t0/4, so [t0-η,t0+η]⊂int(J).",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "t0",
+          "J"
+        ]
+      },
+      {
+        "symbol": "B",
+        "type": "nonnegative real",
+        "scope": "R003/argument",
+        "start": "S003",
+        "end": "S005",
+        "kind": "witness",
+        "declaration": "Choose B≥0 bounding |e_t| on Q×[t0-η,t0+η], using F002.",
+        "from_inputs": [],
+        "from_local": [
+          "F002"
+        ],
+        "objects": [
+          "e_t",
+          "Q",
+          "t0",
+          "η"
+        ]
+      },
+      {
+        "symbol": "x",
+        "type": "R^n",
+        "scope": "R003/argument",
+        "start": "S003",
+        "end": "S003",
+        "kind": "arbitrary",
+        "declaration": "Fix an arbitrary spatial point x for the difference-quotient estimate.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "n"
+        ]
+      },
+      {
+        "symbol": "h",
+        "type": "real",
+        "scope": "R003/argument",
+        "start": "S003",
+        "end": "S003",
+        "kind": "arbitrary",
+        "declaration": "Fix an arbitrary real increment h.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": []
+      },
+      {
+        "symbol": "hseq",
+        "type": "sequence ℕ→R",
+        "scope": "R003/argument",
+        "start": "S004",
+        "end": "S005",
+        "kind": "arbitrary",
+        "declaration": "Fix an arbitrary sequence of real increments hseq.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": []
+      },
+      {
+        "symbol": "Fseq",
+        "type": "sequence of real functions on R^n",
+        "scope": "R003/argument",
+        "start": "S004",
+        "end": "S004",
+        "kind": "definition",
+        "declaration": "Under L2 set Fseq(k)(y)=(e(y,t0+hseq(k))-e(y,t0))/hseq(k).",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "e",
+          "t0",
+          "hseq",
+          "n"
+        ]
+      }
+    ],
+    "argument": [
+      {
+        "id": "S001",
+        "text": "Fix t0>0, put J=[t0/2,3t0/2], and choose C,R from N002 for this t0; put Q=[-R,R]^n. N002 gives finiteness of the spatial energy integrals for every positive time, so the guarded definition of E is available. H001 gives the finite coordinate range. H002 gives the product rule and equality ∂_t∂_{x_j}u=∂_{x_j}u_t. Hence pointwise on the full domain, e_t=2u_t·u_tt+2∑_{j=1}^n ∂_{x_j}u·∂_{x_j}u_t. By N002 these terms are spatially integrable at all times in int(J).",
+        "uses": [
+          "H001",
+          "H002",
+          "N002"
+        ],
+        "uses_local": [],
+        "objects": [
+          "u",
+          "u_t",
+          "u_tt",
+          "∂_x",
+          "e",
+          "e_t",
+          "E",
+          "μ",
+          "n",
+          "m",
+          "t0",
+          "J",
+          "C",
+          "R",
+          "Q"
+        ],
+        "produces": [
+          {
+            "id": "F001",
+            "statement": "On R^n×(0,∞), e_t=2u_t·u_tt+2∑_{j=1}^n ∂_{x_j}u·∂_{x_j}u_t; all terms are spatially integrable at times in int(J), and e is smooth.",
+            "objects": [
+              "u_t",
+              "u_tt",
+              "∂_x",
+              "e",
+              "e_t",
+              "n",
+              "J",
+              "j"
+            ],
+            "binders": [
+              {
+                "symbol": "j",
+                "type": "spatial summation index"
+              }
+            ],
+            "assumptions": []
+          }
+        ],
+        "introduces": [],
+        "discharges": []
+      },
+      {
+        "id": "S002",
+        "text": "Set η=t0/4>0. Then [t0-η,t0+η]⊂int(J). By F001 and N002, e_t is continuous on the compact Q×[t0-η,t0+η], so its absolute value has a finite nonnegative bound. Consequently there exists B≥0 with |e_t(x,r)|≤B on that box. The compactness and boundedness facts used here are the standard extreme-value property for continuous real functions on a compact finite-dimensional box.",
+        "uses": [
+          "N002"
+        ],
+        "uses_local": [
+          "F001"
+        ],
+        "objects": [
+          "e_t",
+          "Q",
+          "t0",
+          "η",
+          "J"
+        ],
+        "produces": [
+          {
+            "id": "F002",
+            "statement": "There exists B≥0 such that for all x∈Q and r∈[t0-η,t0+η], |e_t(x,r)|≤B.",
+            "objects": [
+              "e_t",
+              "Q",
+              "t0",
+              "η",
+              "B",
+              "x",
+              "r"
+            ],
+            "binders": [
+              {
+                "symbol": "B",
+                "type": "existential nonnegative real"
+              },
+              {
+                "symbol": "x",
+                "type": "point of Q"
+              },
+              {
+                "symbol": "r",
+                "type": "time in the indicated interval"
+              }
+            ],
+            "assumptions": []
+          }
+        ],
+        "introduces": [],
+        "discharges": []
+      },
+      {
+        "id": "S003",
+        "text": "Choose B from F002. Fix x∈R^n and a real h, and temporarily assume L1: 0<|h|<η. For x∈Q, apply M002 to the real function r↦e(x,r) on the interval with endpoints min(t0,t0+h) and max(t0,t0+h), and derivative r↦e_t(x,r). Both endpoints and the full interval lie in [t0-η,t0+η]. F001 supplies differentiability and continuity there, and F002 bounds the intermediate derivative. The theorem's slope is (e(x,t0+h)-e(x,t0))/h also when h<0, because reversing both differences changes neither quotient. Thus its absolute value is at most B. If x∉Q, N002 makes both densities zero and gives the same estimate with right side zero. Discharge L1 and quantify x,h: for all x and all 0<|h|<η, |(e(x,t0+h)-e(x,t0))/h|≤B 1_Q(x). The right side is integrable by μ(Q)=(2R)^n<∞, from N002.",
+        "uses": [
+          "M002",
+          "N002"
+        ],
+        "uses_local": [
+          "F001",
+          "F002"
+        ],
+        "objects": [
+          "e",
+          "e_t",
+          "μ",
+          "n",
+          "Q",
+          "t0",
+          "η",
+          "B",
+          "x",
+          "h"
+        ],
+        "produces": [
+          {
+            "id": "F003",
+            "statement": "For all y0∈R^n and real h0 with 0<|h0|<η, |(e(y0,t0+h0)-e(y0,t0))/h0|≤B 1_Q(y0), and the function y0↦B 1_Q(y0) is μ-integrable.",
+            "objects": [
+              "e",
+              "μ",
+              "n",
+              "Q",
+              "t0",
+              "η",
+              "B",
+              "y0",
+              "h0"
+            ],
+            "binders": [
+              {
+                "symbol": "y0",
+                "type": "R^n"
+              },
+              {
+                "symbol": "h0",
+                "type": "real increment"
+              }
+            ],
+            "assumptions": []
+          }
+        ],
+        "introduces": [
+          "L1"
+        ],
+        "discharges": [
+          "L1"
+        ]
+      },
+      {
+        "id": "S004",
+        "text": "Fix an arbitrary real sequence hseq and temporarily assume L2: 0<|hseq(k)|<η for every k and hseq(k)→0. Define Fseq(k)(y)=(e(y,t0+hseq(k))-e(y,t0))/hseq(k). These are continuous real spatial functions, hence μ-almost everywhere strongly measurable. By F003 they are dominated pointwise by B 1_Q, which is integrable. Smoothness in F001 gives pointwise convergence Fseq(k)(y)→e_t(y,t0). Apply M001 with spatial Lebesgue measure μ and real codomain: ∫Fseq(k) dμ→∫e_t(y,t0) dμ. For each k, the two densities are integrable by N002; integral linearity and scalar multiplication identify ∫Fseq(k) dμ=(E(t0+hseq(k))-E(t0))/hseq(k). Thus the energy difference quotients converge to ∫e_t(y,t0) dμ along this sequence.",
+        "uses": [
+          "M001",
+          "N002"
+        ],
+        "uses_local": [
+          "F001",
+          "F003"
+        ],
+        "objects": [
+          "hseq",
+          "Fseq",
+          "e",
+          "e_t",
+          "E",
+          "μ",
+          "n",
+          "t0",
+          "η",
+          "B",
+          "Q"
+        ],
+        "produces": [
+          {
+            "id": "F004",
+            "statement": "(E(t0+hseq(k))-E(t0))/hseq(k) tends to ∫_{R^n} e_t(y,t0) dμ(y) as k→∞.",
+            "objects": [
+              "E",
+              "e_t",
+              "μ",
+              "n",
+              "t0",
+              "hseq",
+              "k",
+              "y"
+            ],
+            "binders": [
+              {
+                "symbol": "k",
+                "type": "natural sequence index"
+              },
+              {
+                "symbol": "y",
+                "type": "R^n integration variable"
+              }
+            ],
+            "assumptions": [
+              "L2"
+            ]
+          }
+        ],
+        "introduces": [
+          "L2"
+        ],
+        "discharges": []
+      },
+      {
+        "id": "S005",
+        "text": "Discharge L2 in F004 and quantify the arbitrary sequence. Any sequence of nonzero real increments tending to zero eventually satisfies |h|<η, so discarding its finite initial part yields the same limit. The sequential criterion for limits in R now gives the full two-sided difference-quotient limit at zero. Explicitly, if that limit failed, a fixed positive error could be attained by nonzero increments arbitrarily close to zero; choosing one at distance less than min(η,1/(k+1)) for each k would contradict the just-proved sequence limit. Thus E is differentiable at t0 and E'(t0)=∫ e_t(x,t0) dx. Substitute F001 and use finite linearity of the integral; every summand is absolutely integrable by N002. This yields E'(t0)=2∫u_t·u_tt dx+2∑_{j=1}^n ∫∂_{x_j}u·∂_{x_j}u_t dx, at time t0. The pointwise formula, finiteness, and arbitrary choice of t0 prove all asserted differentiation identities and finiteness clauses.",
+        "uses": [
+          "N002"
+        ],
+        "uses_local": [
+          "F001",
+          "F003",
+          "F004"
+        ],
+        "objects": [
+          "u_t",
+          "u_tt",
+          "∂_x",
+          "e",
+          "e_t",
+          "E",
+          "μ",
+          "n",
+          "m",
+          "t0",
+          "η",
+          "hseq",
+          "Q",
+          "B"
+        ],
+        "produces": [],
+        "introduces": [],
+        "discharges": [
+          "L2"
+        ]
+      }
+    ],
+    "applications": [
+      {
+        "id": "A001",
+        "input": "M002",
+        "at": "S003",
+        "bindings": "Set f(r)=e(x,r), d(r)=e_t(x,r); a=min(t0,t0+h), b=max(t0,t0+h). Use the real functions extended arbitrarily outside positive times, which does not affect this interval.",
+        "hypothesis_checks": [
+          "L1 gives h≠0 and hence a<b; all quantities are real, and a,b lie within [t0-η,t0+η]⊂(0,∞).",
+          "F001 gives smoothness of e, so r↦e(x,r) is continuous on [a,b].",
+          "F001 gives derivative e_t(x,r) at every interior r; F002 bounds its absolute value at the intermediate point when x∈Q."
+        ]
+      },
+      {
+        "id": "A002",
+        "input": "M001",
+        "at": "S004",
+        "bindings": "Set A=R^n with its Borel measurable structure, ν=μ, V=R, F=Fseq, f(y)=e_t(y,t0), and bound b(y)=B 1_Q(y).",
+        "hypothesis_checks": [
+          "R^n is a measurable Euclidean space with Lebesgue measure μ (D005); R is a real normed vector space.",
+          "Under L2 all increments are nonzero and t0+hseq(k)>0. Each Fseq(k) is continuous in space by F001, hence almost everywhere strongly measurable.",
+          "F003 proves integrability of B 1_Q, using finite μ(Q) in N002.",
+          "F003 applies pointwise to h=hseq(k) under L2, and supplies the domination for every k.",
+          "Under L2, hseq(k)→0 and hseq(k)≠0. The time derivative of e from F001 gives pointwise difference-quotient convergence to e_t(y,t0)."
+        ]
+      }
+    ]
+  },
+  "warning": "Direct inputs and fixed logic are supplied. V2 Audit A may record mathematically checked routine background with actual conditions and justification; exact Lean bindings belong to nl02lean. No ancestor proof or extra H is available. A packet is not an audit certificate.",
+  "packet_sha256": "de4592f5a011f68446f4e573c42b17bc87113430e41b7621a094bd72f59241a5"
+}

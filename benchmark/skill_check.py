@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Resolve the enabled installed $rigorous-proof through Codex's skill registry.
+"""Resolve this benchmark's exact installed skill through Codex's registry.
 
 Only initialize and skills/list are called. No thread, model turn or benchmark
 is started, and no neighboring checkout is used as an installation fallback.
@@ -18,8 +18,10 @@ import subprocess
 import threading
 import time
 
-NAME = 'rigorous-proof'
-SUPPORTED_NAMES = {NAME, 'rigorous-proof-v2'}
+from benchmark_config import load_config
+
+NAME = load_config()['skill_name']
+SUPPORTED_NAMES = {'rigorous-proof', 'rigorous-proof-v2'}
 
 
 class SkillUnavailable(ValueError):
@@ -130,8 +132,8 @@ def select(result, *, skill_name=NAME):
 
 
 def require_skill(cwd=None, *, codex=None, skill_name=NAME):
-    if skill_name not in SUPPORTED_NAMES:
-        raise SkillUnavailable('Unsupported Yui skill name')
+    if skill_name != NAME:
+        raise SkillUnavailable('This benchmark requires exactly $'+NAME+'; no variant substitution')
     binary, result = inventory(cwd or Path(__file__).resolve().parent, codex=codex)
     return {'status': 'INSTALLED_SKILL_VERIFIED', **select(result, skill_name=skill_name),
             'codex': str(binary), 'resolved_by': 'codex_skills_list', 'model_started': False}
@@ -140,7 +142,7 @@ def require_skill(cwd=None, *, codex=None, skill_name=NAME):
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--codex', type=Path)
-    parser.add_argument('--skill', choices=sorted(SUPPORTED_NAMES), default=NAME)
+    parser.add_argument('--skill', choices=[NAME], default=NAME)
     args = parser.parse_args(argv)
     try:
         result = require_skill(codex=args.codex, skill_name=args.skill)

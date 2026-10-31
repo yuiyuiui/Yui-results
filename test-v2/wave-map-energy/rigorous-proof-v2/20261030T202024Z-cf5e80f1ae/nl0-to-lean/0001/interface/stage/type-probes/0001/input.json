@@ -1,0 +1,27 @@
+{
+  "header": "import Mathlib\nopen scoped BigOperators ContDiff\nopen MeasureTheory Set Filter\nnamespace WaveEnergy\nabbrev X (n : ℕ) := Fin n → ℝ\nabbrev V (m : ℕ) := EuclideanSpace ℝ (Fin m)\ndef domain (n : ℕ) : Set (X n × ℝ) := {p | 0 < p.2}\nnoncomputable def mu (n : ℕ) : Measure (X n) := Measure.pi (fun _ : Fin n => (volume : Measure ℝ))\nnoncomputable def dt {n : ℕ} {F : Type} [NormedAddCommGroup F] [NormedSpace ℝ F]\n    (f : X n × ℝ → F) (p : X n × ℝ) : F := deriv (fun r : ℝ => f (p.1, r)) p.2\nnoncomputable def dx {n : ℕ} {F : Type} [NormedAddCommGroup F] [NormedSpace ℝ F]\n    (f : X n × ℝ → F) (j : Fin n) (p : X n × ℝ) : F :=\n  fderiv ℝ (fun y : X n => f (y, p.2)) p.1 (Pi.single j 1)\nnoncomputable def lap {n m : ℕ} (u : X n × ℝ → V m) (p : X n × ℝ) : V m :=\n  ∑ j : Fin n, dx (dx u j) j p\nnoncomputable def density {n m : ℕ} (u : X n × ℝ → V m) (p : X n × ℝ) : ℝ :=\n  ‖dt u p‖ ^ 2 + ∑ j : Fin n, ‖dx u j p‖ ^ 2\nnoncomputable def energy {n m : ℕ} (u : X n × ℝ → V m) (t : ℝ) : ℝ :=\n  ∫ x : X n, density u (x, t) ∂mu n\nnoncomputable def kinetic {n m : ℕ} (u : X n × ℝ → V m) (p : X n × ℝ) : ℝ :=\n  inner ℝ (dt u p) (dt (dt u) p)\nnoncomputable def mixed {n m : ℕ} (u : X n × ℝ → V m) (j : Fin n) (p : X n × ℝ) : ℝ :=\n  inner ℝ (dx u j p) (dx (dt u) j p)\nnoncomputable def lapTerm {n m : ℕ} (u : X n × ℝ → V m) (j : Fin n) (p : X n × ℝ) : ℝ :=\n  inner ℝ (dt u p) (dx (dx u j) j p)\nnoncomputable def flux {n m : ℕ} (u : X n × ℝ → V m) (j : Fin n) (p : X n × ℝ) : ℝ :=\n  inner ℝ (dt u p) (dx u j p)\ndef box {n : ℕ} (R : ℝ) : Set (X n) := {x | ∀ j, x j ∈ Icc (-R) R}\ndef scalarTerms {n m : ℕ} (u : X n × ℝ → V m) : Set (X n × ℝ → ℝ) :=\n  {f | f = density u ∨ f = dt (density u) ∨ f = kinetic u ∨\n    ∃ j : Fin n, f = mixed u j ∨ f = lapTerm u j ∨ f = flux u j ∨ f = dx (flux u j) j}\nstructure Window {n m : ℕ} (u : X n × ℝ → V m) (q : V m)\n    (t0 : ℝ) (C : Set (X n)) (R : ℝ) : Prop where\n  compact : IsCompact C\n  radius_pos : 0 < R\n  inside : ∀ x ∈ C, ∀ j : Fin n, x j ∈ Ioo (-R) R\n  constant : ∀ x, x ∉ C → ∀ r ∈ Icc (t0 / 2) (3 * t0 / 2), u (x, r) = q\n  box_volume : mu n (box R) = ENNReal.ofReal ((2 * R) ^ n)\n  box_finite : mu n (box R) < ⊤\n  derivatives_zero : ∀ k : ℕ, 0 < k → ∀ x, x ∉ C →\n    ∀ r ∈ Ioo (t0 / 2) (3 * t0 / 2), iteratedFDeriv ℝ k u (x, r) = 0\n  sections : ∀ f ∈ scalarTerms u, ∀ r ∈ Ioo (t0 / 2) (3 * t0 / 2),\n    Continuous (fun x => f (x, r)) ∧ (∀ x, x ∉ C → f (x, r) = 0) ∧\n    Integrable (fun x => f (x, r)) (mu n)\n  uniform : ∀ f ∈ scalarTerms u, ∀ a b : ℝ,\n    Icc a b ⊆ Ioo (t0 / 2) (3 * t0 / 2) →\n    ∃ B : ℝ, 0 ≤ B ∧ ∀ x ∈ box R, ∀ r ∈ Icc a b, |f (x, r)| ≤ B\nend WaveEnergy\nopen WaveEnergy\n",
+  "parameters": [
+    {
+      "name": "n",
+      "type": "ℕ"
+    },
+    {
+      "name": "m",
+      "type": "ℕ"
+    },
+    {
+      "name": "u",
+      "type": "X n × ℝ → V m"
+    },
+    {
+      "name": "q",
+      "type": "V m"
+    }
+  ],
+  "types": [
+    "ContDiffOn ℝ ∞ u (domain n)",
+    "∀ t0 : ℝ, 0 < t0 → ∃ C : Set (X n), ∃ R : ℝ, Window u q t0 C R",
+    "∀ j : Fin n, ∀ x : X n, ∀ t : ℝ, HasDerivAt (fun r : ℝ => flux u j (Function.update x j r, t)) (dx (flux u j) j (x, t)) (x j)",
+    "∀ t : ℝ, 0 < t → Integrable (fun x : X n => density u (x, t)) (mu n) ∧ DifferentiableAt ℝ (energy u) t ∧ deriv (energy u) t = 0"
+  ]
+}

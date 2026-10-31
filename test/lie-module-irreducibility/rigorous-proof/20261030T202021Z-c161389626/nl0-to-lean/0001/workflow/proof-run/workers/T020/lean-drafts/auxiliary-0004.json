@@ -1,0 +1,86 @@
+{
+  "statement": "∀ Q : LR.Residue p K, letI := Q.phi.toAlgebra; letI := Q.kappa.toAlgebra; ∃ D : (K ⊗[LR.R p] LR.MR p M) ≃ₗ[K] K ⊗[ZMod p] ModN (LR.MR p M) p, LR.DeltaPure p K M D",
+  "proof": "intro Q\nletI := Q.phi.toAlgebra\nletI := Q.kappa.toAlgebra\nletI : CharP K p := h_H001.2.1\nhave hmk : ∀ (r : LR.R p) (z : LR.MR p M), ModN.mkQ p (r • z) = Q.psi r • ModN.mkQ p z := by\n  have hpz : ∀ z : LR.MR p M, p • ModN.mkQ p z = 0 := by\n    intro z\n    have hz := (ModN.liftEquiv (AddMonoidHom.id (ModN (LR.MR p M) p))).property z\n    exact hz\n  intro r z\n  obtain ⟨a, ha⟩ := ZMod.intCast_surjective (Q.psi r)\n  have hmem : r - (a : LR.R p) ∈ Ideal.span {(p : LR.R p)} := by\n    rw [← Q.psi_kernel, RingHom.mem_ker]\n    simp [ha]\n  obtain ⟨s, hs⟩ := Ideal.mem_span_singleton.mp hmem\n  have hr : r = (a : LR.R p) + (p : LR.R p) * s := by\n    rw [← hs]; ring\n  rw [hr, add_smul, map_add, mul_smul]\n  have hk : ModN.mkQ p ((p : LR.R p) • s • z) = 0 := by\n    simpa only [Nat.cast_smul_eq_nsmul, map_nsmul] using hpz (s • z)\n  rw [hk, add_zero, ← hr, ← ha]\n  simp only [Int.cast_smul_eq_zsmul, map_zsmul, Int.cast_smul_eq_zsmul]\n  \nlet T := K ⊗[LR.R p] LR.MR p M\nlet U := K ⊗[ZMod p] ModN (LR.MR p M) p\nhave hpT : ∀ z : T, p • z = 0 := by\n  intro z\n  rw [← Nat.cast_smul_eq_nsmul K, CharP.cast_eq_zero K p, zero_smul]\nlet iq : ModN (LR.MR p M) p →ₗ[ZMod p] T :=\n  ModN.liftEquiv'.symm ⟨(TensorProduct.mk (LR.R p) K (LR.MR p M) 1).toAddMonoidHom, fun z => hpT _⟩\nhave hiq (z : LR.MR p M) : iq (ModN.mkQ p z) = 1 ⊗ₜ[LR.R p] z := by rfl\nlet di : U →ₗ[K] T := iq.liftBaseChange K\nhave hdi (c : K) (z : LR.MR p M) : di (c ⊗ₜ[ZMod p] ModN.mkQ p z) = c ⊗ₜ[LR.R p] z := by\n  simp [di, hiq, TensorProduct.smul_tmul']\nlet fq : LR.MR p M →ₗ[LR.R p] U :=\n  { toFun := fun z => 1 ⊗ₜ[ZMod p] ModN.mkQ p z\n    map_add' := by intro z w; simp [TensorProduct.tmul_add]\n    map_smul' := by\n      intro r z\n      dsimp\n      rw [hmk, ← TensorProduct.smul_tmul]\n      change (Q.kappa (Q.psi r) * 1) ⊗ₜ[ZMod p] ModN.mkQ p z =\n        (Q.phi r * 1) ⊗ₜ[ZMod p] ModN.mkQ p z\n      rw [Q.compatible]\n      rfl }\nlet df : T →ₗ[K] U := fq.liftBaseChange K\nhave hdf (c : K) (z : LR.MR p M) : df (c ⊗ₜ[LR.R p] z) = c ⊗ₜ[ZMod p] ModN.mkQ p z := by\n  simp [df, fq, TensorProduct.smul_tmul']\n\nhave hid : di.comp df = LinearMap.id := by\n  ext c z\n  simp [hdf, hdi]\nhave hfd : df.comp di = LinearMap.id := by\n  ext c q\n  obtain ⟨z, rfl⟩ := (Submodule.mkQ_surjective (LinearMap.range (LinearMap.lsmul ℤ (LR.MR p M) p))) q\n  change df (di (c ⊗ₜ[ZMod p] ModN.mkQ p z)) = c ⊗ₜ[ZMod p] ModN.mkQ p z\n  rw [hdi, hdf]\nlet D : T ≃ₗ[K] U := LinearEquiv.ofLinear df di hfd hid\nexact ⟨D, hdf, hdi⟩\n",
+  "check": {
+    "exit_code": 1,
+    "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-k4zv4p8w/output/Auxiliary.lean:300:88: error: unsolved goals\nK : Type u_1\nfieldK : Field K\nV : Type u_2\naddV : AddCommGroup V\nmodV : _root_.Module ℂ V\np : ℕ\nl : ℤ\nM : Submodule ℤ V\nrho : ↥LR.L →ₗ[ℂ] Module.End ℂ V\nx y h : ↥LR.L\nv : V\nh_H001 : Nat.Prime p ∧ CharP K p ∧ 0 ≤ l ∧ l < ↑p\nQ : LR.Residue p K\nthis✝¹ : Algebra (↥(LR.R p)) K := Q.phi.toAlgebra\nthis✝ : Algebra (ZMod p) K := Q.kappa.toAlgebra\nthis : CharP K p := h_H001.right.left\nhmk : ∀ (r : ↥(LR.R p)) (z : LR.MR p M), (ModN.mkQ p) (r • z) = Q.psi r • (ModN.mkQ p) z\nT : Type (max u_1 u_2) := K ⊗[↥(LR.R p)] LR.MR p M\nU : Type (max u_1 u_2) := K ⊗[ZMod p] ModN (LR.MR p M) p\nhpT : ∀ (z : T), p • z = 0\niq : ModN (LR.MR p M) p →ₗ[ZMod p] T :=\n  ModN.liftEquiv'.symm ⟨((TensorProduct.mk (↥(LR.R p)) K (LR.MR p M)) 1).toAddMonoidHom, ⋯⟩\nhiq : ∀ (z : LR.MR p M), iq ((ModN.mkQ p) z) = 1 ⊗ₜ[↥(LR.R p)] z\ndi : U →ₗ[K] T := LinearMap.liftBaseChange K iq\nc : K\nz : LR.MR p M\n⊢ (LinearMap.liftBaseChange K iq) (c ⊗ₜ[ZMod p] (ModN.mkQ p) z) = c ⊗ₜ[↥(LR.R p)] z\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-k4zv4p8w/output/Auxiliary.lean:314:88: error: unsolved goals\nK : Type u_1\nfieldK : Field K\nV : Type u_2\naddV : AddCommGroup V\nmodV : _root_.Module ℂ V\np : ℕ\nl : ℤ\nM : Submodule ℤ V\nrho : ↥LR.L →ₗ[ℂ] Module.End ℂ V\nx y h : ↥LR.L\nv : V\nh_H001 : Nat.Prime p ∧ CharP K p ∧ 0 ≤ l ∧ l < ↑p\nQ : LR.Residue p K\nthis✝¹ : Algebra (↥(LR.R p)) K := Q.phi.toAlgebra\nthis✝ : Algebra (ZMod p) K := Q.kappa.toAlgebra\nthis : CharP K p := h_H001.right.left\nhmk : ∀ (r : ↥(LR.R p)) (z : LR.MR p M), (ModN.mkQ p) (r • z) = Q.psi r • (ModN.mkQ p) z\nT : Type (max u_1 u_2) := K ⊗[↥(LR.R p)] LR.MR p M\nU : Type (max u_1 u_2) := K ⊗[ZMod p] ModN (LR.MR p M) p\nhpT : ∀ (z : T), p • z = 0\niq : ModN (LR.MR p M) p →ₗ[ZMod p] T :=\n  ModN.liftEquiv'.symm ⟨((TensorProduct.mk (↥(LR.R p)) K (LR.MR p M)) 1).toAddMonoidHom, ⋯⟩\nhiq : ∀ (z : LR.MR p M), iq ((ModN.mkQ p) z) = 1 ⊗ₜ[↥(LR.R p)] z\ndi : U →ₗ[K] T := LinearMap.liftBaseChange K iq\nhdi : ∀ (c : K) (z : LR.MR p M), di (c ⊗ₜ[ZMod p] (ModN.mkQ p) z) = c ⊗ₜ[↥(LR.R p)] z\nfq : LR.MR p M →ₗ[↥(LR.R p)] U := { toFun := fun z => 1 ⊗ₜ[ZMod p] (ModN.mkQ p) z, map_add' := ⋯, map_smul' := ⋯ }\ndf : T →ₗ[K] U := LinearMap.liftBaseChange K fq\nc : K\nz : LR.MR p M\n⊢ (LinearMap.liftBaseChange K { toFun := fun z => 1 ⊗ₜ[ZMod p] (ModN.mkQ p) z, map_add' := ⋯, map_smul' := ⋯ })\n      (c ⊗ₜ[↥(LR.R p)] z) =\n    c ⊗ₜ[ZMod p] (ModN.mkQ p) z\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-k4zv4p8w/output/Auxiliary.lean:318:10: warning: `ext` did not consume the patterns `z`\n\nNote: This linter can be disabled with `set_option linter.unusedRCasesPattern false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-k4zv4p8w/output/Auxiliary.lean:321:4: error: (deterministic) timeout at `whnf`, maximum number of heartbeats (200000) has been reached\n\nNote: Use `set_option maxHeartbeats <num>` to set the limit.\n\nHint: Additional diagnostic information may be available using the `set_option diagnostics true` command.\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-k4zv4p8w/output/Auxiliary.lean:267:0: error: (deterministic) timeout at `whnf`, maximum number of heartbeats (200000) has been reached\n\nNote: Use `set_option maxHeartbeats <num>` to set the limit.\n\nHint: Additional diagnostic information may be available using the `set_option diagnostics true` command.\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-k4zv4p8w/output/Auxiliary.lean:301:14: warning: This simp argument is unused:\n  hiq\n\nHint: Omit it from the simp argument list.\n  simp [di, h̵i̵q̵,̵ ̵TensorProduct.smul_tmul']\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-k4zv4p8w/output/Auxiliary.lean:301:19: warning: This simp argument is unused:\n  TensorProduct.smul_tmul'\n\nHint: Omit it from the simp argument list.\n  simp [di, hiq,̵ ̵T̵e̵n̵s̵o̵r̵P̵r̵o̵d̵u̵c̵t̵.̵s̵m̵u̵l̵_̵t̵m̵u̵l̵'̵]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-k4zv4p8w/output/Auxiliary.lean:315:18: warning: This simp argument is unused:\n  TensorProduct.smul_tmul'\n\nHint: Omit it from the simp argument list.\n  simp [df, fq,̵ ̵T̵e̵n̵s̵o̵r̵P̵r̵o̵d̵u̵c̵t̵.̵s̵m̵u̵l̵_̵t̵m̵u̵l̵'̵]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nchecked : ∀ (K : Type u_1) [fieldK : Field K] (V : Type u_2) [addV : AddCommGroup V] [modV : _root_.Module ℂ V] (p : ℕ)\n  (l : ℤ) (M : Submodule ℤ V) (rho : ↥LR.L →ₗ[ℂ] Module.End ℂ V) (x y h : ↥LR.L) (v : V),\n  Nat.Prime p ∧ CharP K p ∧ 0 ≤ l ∧ l < ↑p → ∀ (Q : LR.Residue p K), ∃ D, LR.DeltaPure p K M D\n'YuiAuxiliary.checked' does not depend on any axioms\n",
+    "stderr": "",
+    "wall_seconds": 12.689199416898191,
+    "source_path": "/Users/syyui/projects/Yui-results/test/lie-module-irreducibility/rigorous-proof/20261030T202021Z-c161389626/native-checks/5e8a8db4d7984a9d84bdbf3e50228946.lean",
+    "source_sha256": "6e5228cbfc1789aaeb12953dcaa646f57614681657d8a997001fd57fb1f757b9",
+    "auxiliary_valid": false,
+    "axioms": [],
+    "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+    "context_port": "T020",
+    "candidate": 4,
+    "accepted": false,
+    "stage_complete": false,
+    "repair_advice": {
+      "policy": "native-timeout-st020-1",
+      "trigger": "NATIVE_HEARTBEAT_EXHAUSTED",
+      "status": "ADVICE_DELIVERED",
+      "card_id": "ST020",
+      "next_action": "First use the applicable ST020 diagnostic branch to locate and repair this native failure. Check a small typed fragment, then recheck the complete unchanged target with the same permitted inputs. If that branch does not help, revisit the diagnosis and continue normal local repair; do not blindly repeat it, raise limits, or add assumptions.",
+      "card_revision": 1,
+      "card_sha256": "be4da266e7860cb207510d238b106b8ecc20ed3671c9a94fad84aebc38c1fb22",
+      "strategy": {
+        "id": "ST020",
+        "score": 7,
+        "applicability": "PRECONDITIONS_REPORTED",
+        "missing_preconditions": [],
+        "preconditions_independently_verified": false,
+        "card": {
+          "id": "ST020",
+          "revision": 1,
+          "title": "Localize native timeouts before expanding proof search",
+          "family": "execution",
+          "domains": [
+            "general"
+          ],
+          "tags": [
+            "native_timeout",
+            "heartbeat",
+            "definitional_equality",
+            "type_inference",
+            "automation",
+            "composition"
+          ],
+          "obstacle": "A recorded native Lean resource limit prevents a candidate from returning useful proof feedback.",
+          "preconditions": [
+            "native_resource_failure_recorded",
+            "exact_target_and_inputs_retained",
+            "pinned_environment_available"
+          ],
+          "contraindications": [
+            "provider_or_controller_fault",
+            "changed_target_or_hypotheses",
+            "unconfirmed_process_cleanup"
+          ],
+          "procedure": [
+            "Read the actual native result and confirm owned-process cleanup. Distinguish wall timeout, heartbeat exhaustion, definitional-equality work and an earlier ordinary error from provider or controller faults.",
+            "Preserve the candidate, exact target, declared premises, imports, versions and resource settings before changing its implementation. Do not treat a timeout as a mathematical rejection.",
+            "Locate the costly application or tactic using a bounded local fragment or retained diagnostics. Address the earliest ordinary type error before interpreting later resource errors; a very small diagnostic allowance may also reject valid code.",
+            "For expensive implicit inference, inspect the full declaration type and supply the function, object, exponent, index and coercion types explicitly where needed. Name typed intermediate facts rather than asking unification to reconstruct a nested expression.",
+            "For an equality or representation bridge, state the intermediate function and the required equality direction explicitly. Use a small checked change, convert, congrArg or extensionality step and a restricted simp only list instead of broad unfolding.",
+            "For broad closure or recursive automation, construct intermediate closure facts from the leaves and compose the specific lemmas explicitly. Do not replace every use of automation without locating its cost.",
+            "Recheck the smallest changed application with a finite allowance, then the complete original target with all its original inputs. Retain unsuccessful candidates and diagnostics; a faster fragment alone does not establish complete acceptance.",
+            "If the selected branch does not help, revisit the diagnosis rather than blindly repeating it or raising limits. Changes to mathematical boundaries require the normal reviewed source/interface procedure."
+          ],
+          "verification": "The repaired complete candidate must pass a fresh native check under the pinned environment with the unchanged target and premises; compare performance only with disclosed comparable settings, and keep mathematical audits separate.",
+          "positive_example": "A native equality-check timeout is addressed by a typed intermediate function and a short checked equality bridge, followed by a complete candidate recheck.",
+          "negative_example": "Delete an equality reversal, replace every tactic or increase every timeout solely because an unrelated candidate once compiled afterward.",
+          "lean_versions": [
+            "4.32.2"
+          ],
+          "status": "GENERAL_GUIDANCE",
+          "evidence": [
+            {
+              "kind": "generalized_observation",
+              "note": "Bounded retrospective comparisons of completed implementations motivate this diagnostic procedure; individual edits were not all causally isolated and broader effectiveness is unestablished."
+            }
+          ]
+        }
+      }
+    }
+  }
+}

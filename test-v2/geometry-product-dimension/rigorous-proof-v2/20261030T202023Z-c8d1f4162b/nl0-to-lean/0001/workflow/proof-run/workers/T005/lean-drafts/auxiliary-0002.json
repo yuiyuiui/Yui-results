@@ -1,0 +1,24 @@
+{
+  "statement": "∃ L : ℝ, 0 < L ∧ ∀ x ∈ E, ∀ i : Fin n, |x i| ≤ L",
+  "proof": "classical\n  let B : ℕ → Set (YEucl n) := fun k => {x | ∀ i : Fin n, |x i| < (k : ℝ) + 1}\n  have hBo : ∀ k, IsOpen (B k) := by\n    intro k\n    change IsOpen (⋂ i : Fin n, {x : YEucl n | |x i| < (k : ℝ) + 1})\n    exact isOpen_iInter_of_finite (fun i => isOpen_lt (PiLp.continuous_apply 2 (fun _ : Fin n => ℝ) i).abs continuous_const)\n  have hBc : E ⊆ ⋃ k, B k := by\n    intro x hx\n    obtain ⟨k, hk⟩ := exists_nat_gt ‖x‖\n    refine Set.mem_iUnion.mpr ⟨k, ?_⟩\n    intro i\n    have hi : |x i| ≤ ‖x‖ := by simpa only [Real.norm_eq_abs] using PiLp.norm_apply_le x i\n    dsimp [B]\n    linarith\n  obtain ⟨t, ht⟩ := h_H002.elim_finite_subcover B hBo hBc\n  let L : ℝ := (∑ k ∈ t, ((k : ℝ) + 1)) + 1\n  have hsum : 0 ≤ ∑ k ∈ t, ((k : ℝ) + 1) :=\n    Finset.sum_nonneg (fun k hk => by positivity)\n  refine ⟨L, by dsimp [L]; linarith, ?_⟩\n  intro x hx i\n  obtain ⟨k, hkt, hxk⟩ := Set.mem_iUnion₂.mp (ht hx)\n  have hk : (k : ℝ) + 1 ≤ ∑ j ∈ t, ((j : ℝ) + 1) :=\n    Finset.single_le_sum (fun j hj => by positivity) hkt\n  have hi : |x i| < (k : ℝ) + 1 := hxk i\n  dsimp [L]\n  linarith",
+  "check": {
+    "exit_code": 1,
+    "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-26glsctl/output/Auxiliary.lean:47:6: error: 'change' tactic failed, pattern\n  IsOpen (⋂ i, {x | |x.ofLp i| < ↑k + 1})\nis not definitionally equal to target\n  IsOpen (B k)\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-26glsctl/output/Auxiliary.lean:65:43: error: failed to synthesize\n  Zero ?m.266\n\nHint: Additional diagnostic information may be available using the `set_option diagnostics true` command.\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-26glsctl/output/Auxiliary.lean:65:6: error: Type mismatch\n  Finset.single_le_sum (fun j hj => ?m.274) hkt\nhas type\n  ?m.269 k ≤ ∑ x ∈ t, ?m.269 x\nbut is expected to have type\n  ↑k + 1 ≤ ∑ j ∈ t, (↑j + 1)\nchecked : ∀ (n : ℕ) (E : Set (YEucl n)), IsCompact E → ∃ L, 0 < L ∧ ∀ x ∈ E, ∀ (i : Fin n), |x.ofLp i| ≤ L\n'YuiAuxiliary.checked' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]\n",
+    "stderr": "",
+    "wall_seconds": 3.0718747079372406,
+    "source_path": "/Users/syyui/projects/Yui-results/test-v2/geometry-product-dimension/rigorous-proof-v2/20261030T202023Z-c8d1f4162b/native-checks/1262cf0859aa49d9916239c7a2cf8ed6.lean",
+    "source_sha256": "7767efd8e120df028f9f5961dfe0cd34e1b393587a87583fc8afed9bac509a9c",
+    "auxiliary_valid": false,
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext",
+      "sorryAx"
+    ],
+    "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+    "context_port": "T005",
+    "candidate": 2,
+    "accepted": false,
+    "stage_complete": false
+  }
+}

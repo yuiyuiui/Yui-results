@@ -1,0 +1,23 @@
+{
+  "proof": "classical\nintro δ U hδ hU\nhave hfin (i : ℕ) : Metric.ediam (U i) ≠ ⊤ :=\n  ne_top_of_le_ne_top ENNReal.ofReal_ne_top (hU.2 i)\nhave hdiam (i : ℕ) : ENNReal.ofReal (Metric.diam (U i)) = Metric.ediam (U i) :=\n  ENNReal.ofReal_toReal (hfin i)\nhave hpair (i : ℕ) : ∀ b ∈ U i, ∀ b' ∈ U i, |b - b'| ≤ Metric.diam (U i) := by\n  intro b hb b' hb'\n  simpa only [Real.dist_eq] using Metric.dist_le_diam_of_mem' (hfin i) hb hb'\napply ENNReal.le_of_forall_pos_le_add\nintro ε hε _\nhave hεreal : 0 < (ε : ℝ) := hε\nlet η : ℕ → ℝ := fun i => (ε : ℝ) / 2 / 2 ^ i\nhave hη (i : ℕ) : 0 < η i := by dsimp [η]; positivity\nhave hsumη : (∑' i, ENNReal.ofReal (η i)) = (ε : ENNReal) := by\n  dsimp [η]\n  rw [← ENNReal.ofReal_tsum_of_nonneg (fun i => by positivity)\n    (summable_geometric_two' (ε : ℝ)), tsum_geometric_two']\n  simp\nlet J : ℕ → Set ℝ := fun i =>\n  if (U i).Nonempty then\n    Set.Ioo (sInf (U i) - η i / 2) (sSup (U i) + η i / 2)\n  else ∅\nhave hJ (i : ℕ) : U i ⊆ J i ∧\n    MeasureTheory.volume (J i) ≤ Metric.ediam (U i) + ENNReal.ofReal (η i) := by\n  by_cases hi : (U i).Nonempty\n  · obtain ⟨_, _, _, _, _, hsub, _, hlen⟩ :=\n      h_T006 (U i) (Metric.diam (U i)) (η i) hi Metric.diam_nonneg (hpair i) (hη i)\n    have hJi : J i = Set.Ioo (sInf (U i) - η i / 2) (sSup (U i) + η i / 2) := by\n      simp only [J, if_pos hi]\n    rw [hJi]\n    refine ⟨hsub, ?_⟩\n    rw [Real.volume_Ioo]\n    calc\n      ENNReal.ofReal (sSup (U i) + η i / 2 - (sInf (U i) - η i / 2))\n          ≤ ENNReal.ofReal (Metric.diam (U i) + η i) := ENNReal.ofReal_le_ofReal hlen\n      _ = Metric.ediam (U i) + ENNReal.ofReal (η i) := by\n        rw [ENNReal.ofReal_add Metric.diam_nonneg (hη i).le, hdiam i]\n  · have hempty : U i = ∅ := Set.not_nonempty_iff_eq_empty.mp hi\n    simp [J, hi, hempty]\nhave hcov : GPI ⊆ ⋃ i, J i := by\n  intro x hx\n  obtain ⟨i, hi⟩ := Set.mem_iUnion.mp (hU.1 hx)\n  exact Set.mem_iUnion.mpr ⟨i, (hJ i).1 hi⟩\ncalc\n  (1 : ENNReal) = MeasureTheory.volume GPI := by\n    simp [GPI, Real.volume_Icc]\n  _ ≤ MeasureTheory.volume (⋃ i, J i) := MeasureTheory.measure_mono hcov\n  _ ≤ ∑' i, MeasureTheory.volume (J i) := MeasureTheory.measure_iUnion_le J\n  _ ≤ ∑' i, (Metric.ediam (U i) + ENNReal.ofReal (η i)) :=\n    ENNReal.tsum_le_tsum (fun i => (hJ i).2)\n  _ = (∑' i, Metric.ediam (U i)) + ε := by rw [ENNReal.tsum_add, hsumη]",
+  "statement": "∀ (δ : ℝ) (U : ℕ → Set ℝ), 0 < δ →\n  GPcover GPI δ U → (1 : ENNReal) ≤ ∑' i, Metric.ediam (U i)",
+  "check": {
+    "exit_code": 0,
+    "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/nl0-ir-check-pxxjnk06/output/Check.lean:26:22: warning: Variable name `E` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/nl0-ir-check-pxxjnk06/output/Check.lean:74:15: warning: This simp argument is unused:\n  hi\n\nHint: Omit it from the simp argument list.\n  simp [J, hi̵,̵ ̵h̵empty]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nT015 : ∀ (n : ℕ) (E : Set (GPEucl n)),\n  (∀ (B : Set ℝ) (ρ η : ℝ),\n      B.Nonempty →\n        0 ≤ ρ →\n          (∀ b ∈ B, ∀ b' ∈ B, |b - b'| ≤ ρ) →\n            0 < η →\n              BddAbove B ∧\n                BddBelow B ∧\n                  IsLUB B (sSup B) ∧\n                    IsGLB B (sInf B) ∧\n                      sSup B - sInf B ≤ ρ ∧\n                        B ⊆ Set.Ioo (sInf B - η / 2) (sSup B + η / 2) ∧\n                          sInf B - η / 2 < sSup B + η / 2 ∧ sSup B + η / 2 - (sInf B - η / 2) ≤ ρ + η) →\n    ∀ (δ : ℝ) (U : ℕ → Set ℝ), 0 < δ → GPcover GPI δ U → 1 ≤ ∑' (i : ℕ), Metric.ediam (U i)\n'Translation.T015' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+    "stderr": "",
+    "wall_seconds": 3.538971833884716,
+    "source_path": "/Users/syyui/projects/Yui-results/test/geometry-product-dimension/rigorous-proof/20261030T202021Z-c89c859804/native-checks/ccb126b3507742308cc38dcc9c551c21.lean",
+    "source_sha256": "e8fe559cb42ce8d17cfe1865b39cfbafc1895809ec1991ee62e1d71ecbdb9065",
+    "status": "LOCAL-PROOF-CHECKED",
+    "contract_sha256": "77fa234da1b950f1b1752e064c51b45608b7dd471e61cf88f86abeaec5732152",
+    "lean_sha256": "e8fe559cb42ce8d17cfe1865b39cfbafc1895809ec1991ee62e1d71ecbdb9065",
+    "scope": "T015",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "accepted": true,
+    "stage_complete": true
+  }
+}

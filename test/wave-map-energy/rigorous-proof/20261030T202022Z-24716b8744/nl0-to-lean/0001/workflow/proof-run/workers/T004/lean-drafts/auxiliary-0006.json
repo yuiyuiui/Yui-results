@@ -1,0 +1,23 @@
+{
+  "statement": "ContDiffOn ℝ ∞ (fun p : V n × ℝ => e u p.1 p.2) (domain n) ∧ (∀ j, ContDiffOn ℝ ∞ (fun p : V n × ℝ => g u j p.1 p.2) (domain n))",
+  "proof": "  classical\n  have ho : IsOpen (domain n) := isOpen_lt continuous_const continuous_snd\n  have hd : ∀ {F : Type} [NormedAddCommGroup F] [NormedSpace ℝ F]\n      (f : V n × ℝ → F), ContDiffOn ℝ ∞ f (domain n) →\n      ∀ p ∈ domain n, DifferentiableAt ℝ f p := by\n    intro F _ _ f hf p hp\n    exact (hf.contDiffAt (ho.mem_nhds hp)).differentiableAt (by simp)\n  have bridge : ∀ {F : Type} [NormedAddCommGroup F] [NormedSpace ℝ F]\n      (f : V n × ℝ → F) (x : V n) (t : ℝ), DifferentiableAt ℝ f (x,t) →\n      (deriv (fun s => f (x,s)) t = fderiv ℝ f (x,t) (0,1)) ∧\n      (∀ v : V n, fderiv ℝ (fun y => f (y,t)) x v = fderiv ℝ f (x,t) (v,0)) := by\n    intro F _ _ f x t hf\n    constructor\n    · exact (hf.hasFDerivAt.comp_hasDerivAt t ((hasDerivAt_const t x).prodMk (hasDerivAt_id t))).deriv\n    · intro v\n      have hi : HasFDerivAt (fun y : V n => (y,t)) ((ContinuousLinearMap.id ℝ (V n)).prod (0 : V n →L[ℝ] ℝ)) x := (hasFDerivAt_id x).prodMk (hasFDerivAt_const t x)\n      have h := hf.hasFDerivAt.comp x hi\n      exact congrArg (fun L : V n →L[ℝ] F => L v) h.fderiv\n  have dt : ∀ {F : Type} [NormedAddCommGroup F] [NormedSpace ℝ F]\n      (f : V n × ℝ → F), ContDiffOn ℝ ∞ f (domain n) →\n      ContDiffOn ℝ ∞ (fun p : V n × ℝ => deriv (fun s => f (p.1,s)) p.2) (domain n) := by\n    intro F _ _ f hf\n    have hf' : ContDiffOn ℝ ∞ (fderiv ℝ f) (domain n) :=\n      hf.fderiv_of_isOpen ho (by simp)\n    apply (hf'.clm_apply (contDiffOn_const (c := ((0 : V n), (1 : ℝ))))).congr\n    intro p hp\n    exact (bridge f p.1 p.2 (hd f hf p hp)).1\n  have dx : ∀ {F : Type} [NormedAddCommGroup F] [NormedSpace ℝ F]\n      (f : V n × ℝ → F), ContDiffOn ℝ ∞ f (domain n) →\n      ∀ v : V n, ContDiffOn ℝ ∞\n        (fun p : V n × ℝ => fderiv ℝ (fun y => f (y,p.2)) p.1 v) (domain n) := by\n    intro F _ _ f hf v\n    have hf' : ContDiffOn ℝ ∞ (fderiv ℝ f) (domain n) :=\n      hf.fderiv_of_isOpen ho (by simp)\n    apply (hf'.clm_apply (contDiffOn_const (c := (v,(0 : ℝ))))).congr\n    intro p hp\n    exact (bridge f p.1 p.2 (hd f hf p hp)).2 v\n  have hut : ContDiffOn ℝ ∞ (fun p : V n × ℝ => ut u p.1 p.2) (domain n) :=\n    dt u h_H002\n  have hux : ∀ j, ContDiffOn ℝ ∞ (fun p : V n × ℝ => ux u j p.1 p.2) (domain n) :=\n    fun j => dx u h_H002 (Pi.single j 1)\n  have hutt : ContDiffOn ℝ ∞ (fun p : V n × ℝ => utt u p.1 p.2) (domain n) :=\n    dt _ hut\n  have huxx : ∀ j, ContDiffOn ℝ ∞ (fun p : V n × ℝ => uxx u j p.1 p.2) (domain n) :=\n    fun j => dx _ (hux j) (Pi.single j 1)\n  have huxt : ∀ j, ContDiffOn ℝ ∞ (fun p : V n × ℝ => uxt u j p.1 p.2) (domain n) :=\n    fun j => dx _ hut (Pi.single j 1)\n  have he : ContDiffOn ℝ ∞ (fun p : V n × ℝ => e u p.1 p.2) (domain n) :=\n    (hut.norm_sq (𝕜 := ℝ)).add (ContDiffOn.sum (fun j _ => (hux j).norm_sq (𝕜 := ℝ)))\n  have hg : ∀ j, ContDiffOn ℝ ∞ (fun p : V n × ℝ => g u j p.1 p.2) (domain n) :=\n    fun j => hut.inner ℝ (hux j)\n\n  exact ⟨he, hg⟩",
+  "check": {
+    "exit_code": 0,
+    "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-tjejcuua/output/Auxiliary.lean:56:53: warning: Variable name `q` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (n m : ℕ) (u : V n × ℝ → W m) (q : W m),\n  ContDiffOn ℝ ∞ u (domain n) →\n    ContDiffOn ℝ ∞ (fun p => e u p.1 p.2) (domain n) ∧ ∀ (j : Fin n), ContDiffOn ℝ ∞ (fun p => g u j p.1 p.2) (domain n)\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+    "stderr": "",
+    "wall_seconds": 3.460176083724946,
+    "source_path": "/Users/syyui/projects/Yui-results/test/wave-map-energy/rigorous-proof/20261030T202022Z-24716b8744/native-checks/ab3360c6a6bc43e78d74e74ef989c447.lean",
+    "source_sha256": "4f004cfab3b2057d7df3cc25d3df3d0f3501ffedd392c444f831f14f2dfa0ea4",
+    "auxiliary_valid": true,
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+    "context_port": "T004",
+    "candidate": 6,
+    "accepted": true,
+    "stage_complete": false
+  }
+}

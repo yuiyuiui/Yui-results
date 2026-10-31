@@ -1,0 +1,1182 @@
+{
+  "contract_version": 2,
+  "case_id": "wave-map-energy",
+  "graph_sha256": "8644d6e522d995a96c5279b39639cea8e030debd274b7d31d4baacc58f01a5cc",
+  "spec_sha256": "19ea8a845faf09b5c301ea448bb5b3f1a8eaec699a54ad4365773d6329b58960",
+  "parameters": [
+    {
+      "symbol": "n",
+      "type": "natural number used as an integer dimension"
+    },
+    {
+      "symbol": "m",
+      "type": "natural number used as an integer dimension"
+    },
+    {
+      "symbol": "u",
+      "type": "function R^n×(0,∞)→R^m"
+    },
+    {
+      "symbol": "q",
+      "type": "vector in R^m"
+    }
+  ],
+  "logic": {
+    "classical": true,
+    "rules": [
+      "direct",
+      "forall_introduction",
+      "exists_elimination",
+      "implication_introduction",
+      "case_elimination"
+    ],
+    "calculations": [
+      "equality: Equality reflexivity, symmetry, transitivity and substitution.",
+      "definitions: Unfold an explicitly supplied definition; this proves no extra property.",
+      "finite_algebra: Routine finite semiring/ring/field arithmetic, including zero/one laws, distributivity, associativity and finite polynomial identities. Correct elementary compression is permitted; a substantive missing argument is not.",
+      "finite_order: Routine ordered-field reasoning with actual signs/domains: order laws, adding inequalities, multiplication/division with sign conditions, and real square nonnegativity. Ordinary valid elementary inferences need no exhaustive displayed chain. Check that the conclusion follows; substantial named theorems still require inputs or verified-background admission.",
+      "finite_sums: Unfold and rearrange finite sums/products with explicitly given finite indices."
+    ],
+    "primitives": [
+      {
+        "symbol": "0",
+        "type": "typed numeral",
+        "meaning": "Zero of the explicitly specified mathematical type."
+      },
+      {
+        "symbol": "1",
+        "type": "typed numeral",
+        "meaning": "One of the explicitly specified mathematical type."
+      },
+      {
+        "symbol": "2",
+        "type": "typed numeral",
+        "meaning": "Two of the explicitly specified mathematical type, including an exponent two."
+      },
+      {
+        "symbol": "ℕ",
+        "type": "number system",
+        "meaning": "The natural numbers with their usual arithmetic."
+      },
+      {
+        "symbol": "ℤ",
+        "type": "number system",
+        "meaning": "The integers with their usual arithmetic."
+      },
+      {
+        "symbol": "ℚ",
+        "type": "number system",
+        "meaning": "The rational numbers with their usual ordered-field operations."
+      },
+      {
+        "symbol": "ℝ",
+        "type": "number system",
+        "meaning": "The real numbers with their usual ordered-field structure."
+      },
+      {
+        "symbol": "ℂ",
+        "type": "number system",
+        "meaning": "The complex numbers with their usual field structure."
+      },
+      {
+        "symbol": "∅",
+        "type": "typed set notation",
+        "meaning": "The empty set in the explicitly specified ambient type."
+      },
+      {
+        "symbol": "∞",
+        "type": "typed order notation",
+        "meaning": "The top element in an explicitly specified extended ordered codomain."
+      }
+    ]
+  },
+  "pins": {
+    "lean_version": "4.32.2",
+    "mathlib_commit": "905b95818eb32af7874a58b427f50c1711a5e96c",
+    "mathlib_root": "/Users/syyui/formalization-tools/lean-mathlib-v4.32.2/mathlib"
+  },
+  "foundation_profile": "elementary-language-4",
+  "standard_language": "Ordinary typed mathematical language: logical connectives, quantifiers, equality, sets, functions, tuples, finite indices and their usual notation. A type explicitly named natural numbers, integers, rationals, reals or complex numbers means that standard structure, with its usual numerals and arithmetic operations; these operation tokens need not be redeclared as project objects. The fixed finite calculation rules below, including a+0=a, are controller permissions, not an author claim. The core symbol table below is not a dictionary of all allowed mathematics. Objects and notation from any subject are introduced by this problem's parameters, D definitions or scoped locals, with their types and dependencies. Their properties need direct inputs or displayed local proofs; a familiar name or symbol supplies no theorem.",
+  "background_policy": "verified-background-1",
+  "definitions": [
+    {
+      "id": "D001",
+      "symbol": "V",
+      "type": "real Euclidean vector space with measure",
+      "definition": "V=R^n, realized as tuples (x_1,...,x_n). Its topology is the Euclidean topology and its measure dx is the product of n one-dimensional Lebesgue measures. Compactness, continuity and derivatives use these topologies; integrable means Lebesgue absolutely integrable.",
+      "depends_on": [],
+      "requires": [],
+      "binders": [],
+      "objects": [
+        "n"
+      ]
+    },
+    {
+      "id": "D002",
+      "symbol": "W",
+      "type": "real Euclidean vector space",
+      "definition": "W=R^m with inner product v·w=sum_{k=1}^m v_k w_k and norm |v|=(sum_{k=1}^m v_k^2)^(1/2). On V the same convention uses n coordinates. The squared norm and dot product in all formulas have this meaning.",
+      "depends_on": [],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "v",
+          "type": "vector in W"
+        },
+        {
+          "symbol": "w",
+          "type": "vector in W"
+        }
+      ],
+      "objects": [
+        "m",
+        "n"
+      ]
+    },
+    {
+      "id": "D003",
+      "symbol": "u_t",
+      "type": "function V×(0,∞)→W",
+      "definition": "u_t(x,r) is the derivative at r of the one-variable map ρ↦u(x,ρ). Derivatives are ordinary Fréchet derivatives in coordinate directions; outside their differentiability set use the total derivative convention zero. This convention grants no differentiability.",
+      "depends_on": [
+        "D001",
+        "D002"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "x",
+          "type": "point of V"
+        },
+        {
+          "symbol": "r",
+          "type": "positive real"
+        }
+      ],
+      "objects": [
+        "u",
+        "V",
+        "W"
+      ]
+    },
+    {
+      "id": "D004",
+      "symbol": "u_tt",
+      "type": "function V×(0,∞)→W",
+      "definition": "u_tt(x,r)=∂_r u_t(x,r).",
+      "depends_on": [
+        "D003"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "x",
+          "type": "point of V"
+        },
+        {
+          "symbol": "r",
+          "type": "positive real"
+        }
+      ],
+      "objects": [
+        "u_t"
+      ]
+    },
+    {
+      "id": "D005",
+      "symbol": "u_j",
+      "type": "family indexed by j=1,...,n of functions V×(0,∞)→W",
+      "definition": "u_j(x,r)=∂_{x_j}u(x,r), the coordinate derivative in the jth spatial direction.",
+      "depends_on": [
+        "D001",
+        "D002"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "j",
+          "type": "integer with 1≤j≤n"
+        },
+        {
+          "symbol": "x",
+          "type": "point of V"
+        },
+        {
+          "symbol": "r",
+          "type": "positive real"
+        }
+      ],
+      "objects": [
+        "u",
+        "n",
+        "V",
+        "W"
+      ]
+    },
+    {
+      "id": "D006",
+      "symbol": "u_jj",
+      "type": "family indexed by j=1,...,n of functions V×(0,∞)→W",
+      "definition": "u_jj(x,r)=∂_{x_j}u_j(x,r).",
+      "depends_on": [
+        "D005"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "j",
+          "type": "integer with 1≤j≤n"
+        },
+        {
+          "symbol": "x",
+          "type": "point of V"
+        },
+        {
+          "symbol": "r",
+          "type": "positive real"
+        }
+      ],
+      "objects": [
+        "u_j",
+        "n"
+      ]
+    },
+    {
+      "id": "D007",
+      "symbol": "u_jt",
+      "type": "family indexed by j=1,...,n of functions V×(0,∞)→W",
+      "definition": "u_jt(x,r)=∂_{x_j}u_t(x,r). Commutation with ∂_r u_j is a claim to be proved, not part of this definition.",
+      "depends_on": [
+        "D003",
+        "D005"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "j",
+          "type": "integer with 1≤j≤n"
+        },
+        {
+          "symbol": "x",
+          "type": "point of V"
+        },
+        {
+          "symbol": "r",
+          "type": "positive real"
+        }
+      ],
+      "objects": [
+        "u_t",
+        "n"
+      ]
+    },
+    {
+      "id": "D008",
+      "symbol": "Δu",
+      "type": "function V×(0,∞)→W",
+      "definition": "Δu(x,r)=sum_{j=1}^n u_jj(x,r), component by component. The gradient D_x u has columns u_j; its Frobenius square is sum_{j=1}^n |u_j|^2.",
+      "depends_on": [
+        "D006",
+        "D002"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "x",
+          "type": "point of V"
+        },
+        {
+          "symbol": "r",
+          "type": "positive real"
+        }
+      ],
+      "objects": [
+        "u_jj",
+        "u_j",
+        "n"
+      ]
+    },
+    {
+      "id": "D009",
+      "symbol": "e",
+      "type": "function V×(0,∞)→R",
+      "definition": "e(x,r)=|u_t(x,r)|^2+sum_{j=1}^n |u_j(x,r)|^2.",
+      "depends_on": [
+        "D003",
+        "D005",
+        "D002"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "x",
+          "type": "point of V"
+        },
+        {
+          "symbol": "r",
+          "type": "positive real"
+        }
+      ],
+      "objects": [
+        "u_t",
+        "u_j",
+        "n"
+      ]
+    },
+    {
+      "id": "D010",
+      "symbol": "e_t",
+      "type": "function V×(0,∞)→R",
+      "definition": "e_t(x,r)=∂_r e(x,r), with the total derivative convention of D003.",
+      "depends_on": [
+        "D009"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "x",
+          "type": "point of V"
+        },
+        {
+          "symbol": "r",
+          "type": "positive real"
+        }
+      ],
+      "objects": [
+        "e"
+      ]
+    },
+    {
+      "id": "D011",
+      "symbol": "A",
+      "type": "function V×(0,∞)→R",
+      "definition": "A(x,r)=u_t(x,r)·u_tt(x,r).",
+      "depends_on": [
+        "D003",
+        "D004",
+        "D002"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "x",
+          "type": "point of V"
+        },
+        {
+          "symbol": "r",
+          "type": "positive real"
+        }
+      ],
+      "objects": [
+        "u_t",
+        "u_tt"
+      ]
+    },
+    {
+      "id": "D012",
+      "symbol": "B",
+      "type": "family indexed by j=1,...,n of real functions V×(0,∞)",
+      "definition": "B_j(x,r)=u_j(x,r)·u_jt(x,r). The symbol B denotes this whole family, not a bound constant.",
+      "depends_on": [
+        "D005",
+        "D007",
+        "D002"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "j",
+          "type": "integer with 1≤j≤n"
+        },
+        {
+          "symbol": "x",
+          "type": "point of V"
+        },
+        {
+          "symbol": "r",
+          "type": "positive real"
+        }
+      ],
+      "objects": [
+        "u_j",
+        "u_jt",
+        "n"
+      ]
+    },
+    {
+      "id": "D013",
+      "symbol": "T",
+      "type": "family indexed by j=1,...,n of real functions V×(0,∞)",
+      "definition": "T_j(x,r)=u_t(x,r)·u_jj(x,r).",
+      "depends_on": [
+        "D003",
+        "D006",
+        "D002"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "j",
+          "type": "integer with 1≤j≤n"
+        },
+        {
+          "symbol": "x",
+          "type": "point of V"
+        },
+        {
+          "symbol": "r",
+          "type": "positive real"
+        }
+      ],
+      "objects": [
+        "u_t",
+        "u_jj",
+        "n"
+      ]
+    },
+    {
+      "id": "D014",
+      "symbol": "g",
+      "type": "family indexed by j=1,...,n of real functions V×(0,∞)",
+      "definition": "g_j(x,r)=u_t(x,r)·u_j(x,r).",
+      "depends_on": [
+        "D003",
+        "D005",
+        "D002"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "j",
+          "type": "integer with 1≤j≤n"
+        },
+        {
+          "symbol": "x",
+          "type": "point of V"
+        },
+        {
+          "symbol": "r",
+          "type": "positive real"
+        }
+      ],
+      "objects": [
+        "u_t",
+        "u_j",
+        "n"
+      ]
+    }
+  ],
+  "inputs": [
+    {
+      "id": "H001",
+      "kind": "hypothesis",
+      "statement": "n and m are integers with n≥1 and m≥1 (represented as natural-number dimensions).",
+      "definitions": [],
+      "binders": [],
+      "objects": [
+        "n",
+        "m"
+      ]
+    },
+    {
+      "id": "H002",
+      "kind": "hypothesis",
+      "statement": "u:R^n×(0,∞)→R^m is jointly smooth: every finite-order coordinate partial derivative exists and is continuous on this open domain.",
+      "definitions": [
+        "D001",
+        "D002"
+      ],
+      "binders": [],
+      "objects": [
+        "u",
+        "n",
+        "m"
+      ]
+    },
+    {
+      "id": "H006",
+      "kind": "hypothesis",
+      "statement": "For every pair of real numbers 0<s<t<∞ there exists a compact set C_[s,t]⊂R^n such that u(x,r)=q for every x∉C_[s,t] and every r∈[s,t].",
+      "definitions": [
+        "D001",
+        "D002"
+      ],
+      "binders": [
+        {
+          "symbol": "s",
+          "type": "real"
+        },
+        {
+          "symbol": "t",
+          "type": "real"
+        },
+        {
+          "symbol": "C_[s,t]",
+          "type": "existential compact subset of V"
+        },
+        {
+          "symbol": "x",
+          "type": "point of V"
+        },
+        {
+          "symbol": "r",
+          "type": "real"
+        }
+      ],
+      "objects": [
+        "u",
+        "q",
+        "n",
+        "s",
+        "t",
+        "C_[s,t]",
+        "x",
+        "r"
+      ]
+    },
+    {
+      "id": "M003",
+      "kind": "mathlib",
+      "statement": "Let X carry a measurable structure and a topology with every open set measurable, let Z be a normed additive commutative group, let μ be a measure on X finite on compact sets, and let φ:X→Z. If φ is continuous and the closure of {z∈X:φ(z)≠0} is compact (HasCompactSupport), then φ is Bochner integrable with respect to μ.",
+      "definitions": [],
+      "binders": [
+        {
+          "symbol": "X",
+          "type": "topological measurable space with measurable open sets"
+        },
+        {
+          "symbol": "Z",
+          "type": "normed additive commutative group"
+        },
+        {
+          "symbol": "μ",
+          "type": "measure on X finite on compact sets"
+        },
+        {
+          "symbol": "φ",
+          "type": "map X→Z"
+        },
+        {
+          "symbol": "z",
+          "type": "point of X"
+        }
+      ],
+      "objects": [
+        "X",
+        "Z",
+        "μ",
+        "φ",
+        "z"
+      ],
+      "source_contract": {
+        "hypotheses": [
+          "X and Z carry the stated structures; μ is finite on compact sets.",
+          "φ is continuous.",
+          "φ has compact support."
+        ],
+        "declaration": "Continuous.integrable_of_hasCompactSupport",
+        "signature": "@Continuous.integrable_of_hasCompactSupport : ∀ {X : Type u_1} {E : Type u_6} [inst : MeasurableSpace.{u_1} X] [inst_1 : TopologicalSpace.{u_1} X]\n  [inst_2 : NormedAddCommGroup.{u_6} E] {μ : MeasureTheory.Measure.{u_1} X} [OpensMeasurableSpace.{u_1} X] {f : X → E}\n  [MeasureTheory.IsFiniteMeasureOnCompacts.{u_1} μ],\n  Continuous.{u_1, u_6} f → HasCompactSupport.{u_1, u_6} f → MeasureTheory.Integrable.{u_6, u_1} f μ"
+      }
+    },
+    {
+      "id": "M009",
+      "kind": "mathlib",
+      "statement": "For a topological space X, a seminormed additive group Z, a set K⊂X and a map φ:X→Z, compactness of K and continuity of φ on K imply that there exists a real L such that |φ(z)|≤L for every z∈K.",
+      "definitions": [],
+      "binders": [
+        {
+          "symbol": "X",
+          "type": "topological space"
+        },
+        {
+          "symbol": "Z",
+          "type": "seminormed additive group"
+        },
+        {
+          "symbol": "K",
+          "type": "subset of X"
+        },
+        {
+          "symbol": "φ",
+          "type": "map X→Z"
+        },
+        {
+          "symbol": "L",
+          "type": "existential real"
+        },
+        {
+          "symbol": "z",
+          "type": "point of X"
+        }
+      ],
+      "objects": [
+        "X",
+        "Z",
+        "K",
+        "φ",
+        "L",
+        "z"
+      ],
+      "source_contract": {
+        "hypotheses": [
+          "X is topological and Z is a seminormed additive group.",
+          "K is compact.",
+          "φ is continuous on K."
+        ],
+        "declaration": "IsCompact.exists_bound_of_continuousOn",
+        "signature": "@IsCompact.exists_bound_of_continuousOn : ∀ {α : Type u_1} {E : Type u_2} [inst : SeminormedAddGroup.{u_2} E] [inst_1 : TopologicalSpace.{u_1} α]\n  {s : Set.{u_1} α},\n  IsCompact.{u_1} s →\n    ∀ {f : α → E},\n      ContinuousOn.{u_1, u_2} f s → ∃ C, ∀ (x : α), Membership.mem.{u_1, u_1} s x → LE.le.{0} (norm.{u_2} (f x)) C"
+      }
+    },
+    {
+      "id": "M010",
+      "kind": "mathlib",
+      "statement": "For any finite type I and functions a,b:I→R, the product Lebesgue measure of the coordinate box {z:I→R:∀i, a(i)≤z(i)≤b(i)} is ∏_{i∈I} ofReal(b(i)−a(i)), where ofReal maps a real to its nonnegative part in the extended nonnegative reals.",
+      "definitions": [],
+      "binders": [
+        {
+          "symbol": "I",
+          "type": "finite type"
+        },
+        {
+          "symbol": "a",
+          "type": "map I→R"
+        },
+        {
+          "symbol": "b",
+          "type": "map I→R"
+        },
+        {
+          "symbol": "z",
+          "type": "map I→R"
+        },
+        {
+          "symbol": "i",
+          "type": "element of I"
+        }
+      ],
+      "objects": [
+        "I",
+        "a",
+        "b",
+        "z",
+        "i"
+      ],
+      "source_contract": {
+        "hypotheses": [
+          "I is a finite type with its finite enumeration."
+        ],
+        "declaration": "Real.volume_Icc_pi",
+        "signature": "@Real.volume_Icc_pi : ∀ {ι : Type u_1} [inst : Fintype.{u_1} ι] {a b : ι → ℝ},\n  Eq.{1} (MeasureTheory.volume.{u_1} (Set.Icc.{u_1} a b)) (∏ i, ENNReal.ofReal (HSub.hSub.{0, 0, 0} (b i) (a i)))"
+      }
+    }
+  ],
+  "output": {
+    "id": "N002",
+    "kind": "internal",
+    "statement": "For every t0>0 there exist a compact C⊂V and R>0 such that, with J=[t0/2,3t0/2] and Q=[−R,R]^n, C⊂(−R,R)^n, u(x,r)=q for x∉C and r∈J, and every positive-order coordinate partial derivative of u is zero on (V\\C)×int J. For each r∈int J the sections of e,e_t,A,B_j,T_j,g_j and ∂_{x_j}g_j (1≤j≤n) are continuous, vanish outside C, have compact support, and are Lebesgue integrable on V. Each is bounded in absolute value on Q and its absolute integral is at most its bound times |Q|. The box Q is compact, measurable, has Lebesgue measure (2R)^n<∞, and C⊂int Q, so all these sections vanish on a neighborhood of ∂Q. In particular e(·,r) is integrable for every r>0.",
+    "definitions": [
+      "D001",
+      "D002",
+      "D003",
+      "D004",
+      "D005",
+      "D006",
+      "D007",
+      "D008",
+      "D009",
+      "D010",
+      "D011",
+      "D012",
+      "D013",
+      "D014"
+    ],
+    "binders": [
+      {
+        "symbol": "t0",
+        "type": "positive real"
+      },
+      {
+        "symbol": "C",
+        "type": "existential compact subset of V depending on t0"
+      },
+      {
+        "symbol": "R",
+        "type": "existential positive real depending on t0 and C"
+      },
+      {
+        "symbol": "J",
+        "type": "closed time interval [t0/2,3t0/2]"
+      },
+      {
+        "symbol": "Q",
+        "type": "spatial box [−R,R]^n"
+      },
+      {
+        "symbol": "x",
+        "type": "point of V"
+      },
+      {
+        "symbol": "r",
+        "type": "time in J or positive time as quantified"
+      },
+      {
+        "symbol": "j",
+        "type": "integer with 1≤j≤n"
+      }
+    ],
+    "objects": [
+      "u",
+      "q",
+      "e",
+      "e_t",
+      "A",
+      "B",
+      "T",
+      "g",
+      "V",
+      "n",
+      "t0",
+      "C",
+      "R",
+      "J",
+      "Q",
+      "x",
+      "r",
+      "j"
+    ]
+  },
+  "inference": {
+    "id": "R002",
+    "inputs": [
+      "H001",
+      "H002",
+      "H006",
+      "M003",
+      "M009",
+      "M010"
+    ],
+    "output": "N002",
+    "definitions": [
+      "D001",
+      "D002",
+      "D003",
+      "D004",
+      "D005",
+      "D006",
+      "D007",
+      "D008",
+      "D009",
+      "D010",
+      "D011",
+      "D012",
+      "D013",
+      "D014"
+    ],
+    "rules": [
+      "direct",
+      "forall_introduction",
+      "exists_elimination"
+    ],
+    "locals": [
+      {
+        "symbol": "t0",
+        "type": "positive real",
+        "scope": "R002/argument",
+        "start": "S001",
+        "end": "S005",
+        "kind": "arbitrary",
+        "declaration": "Fix t0>0.",
+        "objects": [],
+        "from_inputs": [],
+        "from_local": []
+      },
+      {
+        "symbol": "J",
+        "type": "closed real interval",
+        "scope": "R002/argument",
+        "start": "S001",
+        "end": "S005",
+        "kind": "definition",
+        "declaration": "Put J=[t0/2,3t0/2].",
+        "objects": [
+          "t0"
+        ],
+        "from_inputs": [],
+        "from_local": []
+      },
+      {
+        "symbol": "C",
+        "type": "compact subset of V",
+        "scope": "R002/argument",
+        "start": "S001",
+        "end": "S005",
+        "kind": "witness",
+        "declaration": "Apply H006 to the positive endpoints t0/2<3t0/2 and choose its compact set C.",
+        "objects": [
+          "V",
+          "t0",
+          "J"
+        ],
+        "from_inputs": [
+          "H006"
+        ],
+        "from_local": []
+      },
+      {
+        "symbol": "L",
+        "type": "real",
+        "scope": "R002/argument",
+        "start": "S003",
+        "end": "S005",
+        "kind": "witness",
+        "declaration": "Choose the bound L supplied by F001.",
+        "objects": [
+          "C"
+        ],
+        "from_inputs": [],
+        "from_local": [
+          "F001"
+        ]
+      },
+      {
+        "symbol": "R",
+        "type": "positive real",
+        "scope": "R002/argument",
+        "start": "S003",
+        "end": "S005",
+        "kind": "definition",
+        "declaration": "Set R=max(L,0)+1.",
+        "objects": [
+          "L"
+        ],
+        "from_inputs": [],
+        "from_local": []
+      },
+      {
+        "symbol": "Q",
+        "type": "subset of V",
+        "scope": "R002/argument",
+        "start": "S003",
+        "end": "S005",
+        "kind": "definition",
+        "declaration": "Set Q=[−R,R]^n.",
+        "objects": [
+          "R",
+          "n",
+          "V"
+        ],
+        "from_inputs": [],
+        "from_local": []
+      },
+      {
+        "symbol": "r",
+        "type": "time in int J",
+        "scope": "R002/argument",
+        "start": "S004",
+        "end": "S004",
+        "kind": "arbitrary",
+        "declaration": "For the section argument fix arbitrary r∈int J.",
+        "objects": [
+          "J"
+        ],
+        "from_inputs": [],
+        "from_local": []
+      }
+    ],
+    "argument": [
+      {
+        "id": "S001",
+        "text": "Fix t0>0 and put J=[t0/2,3t0/2]. Its endpoints satisfy 0<t0/2<3t0/2, so H006 supplies a compact spatial set C on whose complement u=q for every time in J. Compact sets in Euclidean space are closed; hence (V\\C)×int J is open. At each of its points u agrees with the constant q on a neighborhood. Every positive-order derivative is therefore zero there: difference quotients of a locally constant function are zero, and this applies successively to all orders. H002 gives continuity of all derivatives on the entire open domain.",
+        "uses": [
+          "H002",
+          "H006"
+        ],
+        "uses_local": [],
+        "objects": [
+          "u",
+          "q",
+          "n",
+          "m",
+          "V",
+          "W",
+          "e",
+          "e_t",
+          "A",
+          "B",
+          "T",
+          "g",
+          "u_t",
+          "u_tt",
+          "u_j",
+          "u_jj",
+          "u_jt",
+          "t0",
+          "J",
+          "C"
+        ],
+        "produces": [],
+        "introduces": [],
+        "discharges": []
+      },
+      {
+        "id": "S002",
+        "text": "Apply M009 to the compact set C and the identity map V→V. The identity is continuous, so it gives a real uniform norm bound even when C is empty.",
+        "uses": [
+          "M009"
+        ],
+        "uses_local": [],
+        "objects": [
+          "u",
+          "q",
+          "n",
+          "m",
+          "V",
+          "W",
+          "e",
+          "e_t",
+          "A",
+          "B",
+          "T",
+          "g",
+          "u_t",
+          "u_tt",
+          "u_j",
+          "u_jj",
+          "u_jt",
+          "t0",
+          "C"
+        ],
+        "produces": [
+          {
+            "id": "F001",
+            "statement": "There exists a real L with |x|≤L for all x∈C.",
+            "binders": [
+              {
+                "symbol": "L",
+                "type": "existential real"
+              },
+              {
+                "symbol": "x",
+                "type": "point of V"
+              }
+            ],
+            "objects": [
+              "C",
+              "V"
+            ],
+            "assumptions": []
+          }
+        ],
+        "introduces": [],
+        "discharges": []
+      },
+      {
+        "id": "S003",
+        "text": "Choose L with the bound of F001 and set R=max(L,0)+1>0 and Q=[−R,R]^n. For x∈C, every coordinate satisfies |x_j|≤|x|≤L<R, so C⊂(−R,R)^n=int Q. H001 gives positive finite dimensions; Q is a compact measurable coordinate box. M010 with all lower endpoints −R and upper endpoints R gives |Q|=∏_{j=1}^n(2R)=(2R)^n<∞.",
+        "uses": [
+          "H001",
+          "M010"
+        ],
+        "uses_local": [
+          "F001"
+        ],
+        "objects": [
+          "u",
+          "q",
+          "n",
+          "m",
+          "V",
+          "W",
+          "e",
+          "e_t",
+          "A",
+          "B",
+          "T",
+          "g",
+          "u_t",
+          "u_tt",
+          "u_j",
+          "u_jj",
+          "u_jt",
+          "t0",
+          "J",
+          "C",
+          "L",
+          "R",
+          "Q"
+        ],
+        "produces": [
+          {
+            "id": "F002",
+            "statement": "R>0, Q=[−R,R]^n is compact and measurable, C⊂int Q, |Q|=(2R)^n<∞, and all positive-order derivatives of u vanish on (V\\C)×int J.",
+            "binders": [],
+            "objects": [
+              "R",
+              "Q",
+              "C",
+              "V",
+              "n",
+              "u",
+              "J"
+            ],
+            "assumptions": []
+          }
+        ],
+        "introduces": [],
+        "discharges": []
+      },
+      {
+        "id": "S004",
+        "text": "Fix r∈int J. Smoothness in H002 and the finite component formulas defining e,A,B_j,T_j,g_j imply continuity of these functions and of e_t and ∂_{x_j}g_j. The zero derivatives proved in S001 make all of these sections zero outside C. Their nonzero sets have closures contained in the closed compact set C, so each has compact support. Apply M003 to each section with X=V, Z=R and μ=dx: Euclidean Borel open sets are measurable, and Lebesgue measure is finite on compact sets. Thus every listed section is integrable. Apply M009 on Q to each continuous scalar section to obtain a finite absolute bound on Q; together with zero values off Q, the usual absolute integral bound is that constant times |Q|. This also proves the supplied bounded-support estimate.",
+        "uses": [
+          "H002",
+          "M003",
+          "M009"
+        ],
+        "uses_local": [
+          "F002"
+        ],
+        "objects": [
+          "u",
+          "q",
+          "n",
+          "m",
+          "V",
+          "W",
+          "e",
+          "e_t",
+          "A",
+          "B",
+          "T",
+          "g",
+          "u_t",
+          "u_tt",
+          "u_j",
+          "u_jj",
+          "u_jt",
+          "t0",
+          "J",
+          "C",
+          "L",
+          "R",
+          "Q",
+          "r"
+        ],
+        "produces": [
+          {
+            "id": "F003",
+            "statement": "For every ρ∈int J, all sections e(·,ρ), e_t(·,ρ), A(·,ρ), B_i(·,ρ), T_i(·,ρ), g_i(·,ρ), ∂_{x_i}g_i(·,ρ), for 1≤i≤n, are continuous, compactly supported in C, integrable, and have an absolute integral bounded by a finite uniform-in-space bound times |Q|.",
+            "binders": [
+              {
+                "symbol": "ρ",
+                "type": "time in int J"
+              },
+              {
+                "symbol": "i",
+                "type": "integer with 1≤i≤n"
+              }
+            ],
+            "objects": [
+              "e",
+              "e_t",
+              "A",
+              "B",
+              "T",
+              "g",
+              "C",
+              "Q",
+              "J",
+              "n"
+            ],
+            "assumptions": []
+          }
+        ],
+        "introduces": [],
+        "discharges": []
+      },
+      {
+        "id": "S005",
+        "text": "Since V\\C is open and contains ∂Q, every section in F003 vanishes on a neighborhood of ∂Q. The time t0 belongs to int J, so e(·,t0) is integrable. Generalize over the arbitrary t0. The same argument supplies the complete existential common-support assertion and all the asserted bounds for each t0; in particular it proves integrability at every positive time.",
+        "uses": [],
+        "uses_local": [
+          "F002",
+          "F003"
+        ],
+        "objects": [
+          "u",
+          "q",
+          "n",
+          "m",
+          "V",
+          "W",
+          "e",
+          "e_t",
+          "A",
+          "B",
+          "T",
+          "g",
+          "u_t",
+          "u_tt",
+          "u_j",
+          "u_jj",
+          "u_jt",
+          "t0",
+          "J",
+          "C",
+          "L",
+          "R",
+          "Q"
+        ],
+        "produces": [],
+        "introduces": [],
+        "discharges": []
+      }
+    ],
+    "applications": [
+      {
+        "id": "A001",
+        "input": "M009",
+        "at": "S002",
+        "bindings": "Set X=Z=V, K=C and φ=the identity.",
+        "hypothesis_checks": [
+          "Finite-dimensional Euclidean V is topological and a seminormed additive group.",
+          "H006 supplies compact C, chosen in S001.",
+          "The identity map is continuous on C."
+        ]
+      },
+      {
+        "id": "A002",
+        "input": "M010",
+        "at": "S003",
+        "bindings": "Set I={1,...,n}, a(j)=−R, b(j)=R.",
+        "hypothesis_checks": [
+          "n is a finite natural-number dimension; H001 gives n≥1."
+        ]
+      },
+      {
+        "id": "A003",
+        "input": "M003",
+        "at": "S004",
+        "bindings": "For each r∈int J apply to each of e(·,r), e_t(·,r), A(·,r), B_j(·,r), T_j(·,r), g_j(·,r), ∂_{x_j}g_j(·,r), X=V, Z=R, μ=dx.",
+        "hypothesis_checks": [
+          "V has its Euclidean Borel structure with measurable opens, R is normed additive, and Lebesgue measure is finite on compact sets.",
+          "H002 and the finite smooth defining expressions give continuity, as derived in S004.",
+          "S001 and F002 give vanishing off the closed compact C; its closed subsets, including these support closures, are compact."
+        ]
+      },
+      {
+        "id": "A004",
+        "input": "M009",
+        "at": "S004",
+        "bindings": "For each listed section at the fixed r, set X=V, Z=R, K=Q and φ=that section.",
+        "hypothesis_checks": [
+          "V is topological and R is seminormed additive.",
+          "F002 gives compact Q.",
+          "The section is continuous by the smooth expressions in H002, as derived in S004."
+        ]
+      }
+    ]
+  },
+  "warning": "Direct inputs and fixed logic are supplied. Audit A may record positively checked routine background under the declared policy, with logged pinned-library evidence. No ancestor proof or extra H is available. A packet is not an audit certificate.",
+  "packet_sha256": "17a086c6f7e8d41333f11eabf440668fa7bc7519bdb6d2751cea55da753b1a04"
+}

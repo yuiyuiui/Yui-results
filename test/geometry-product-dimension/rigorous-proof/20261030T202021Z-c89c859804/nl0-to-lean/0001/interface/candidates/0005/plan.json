@@ -1,0 +1,372 @@
+{
+  "version": 2,
+  "contract_sha256": "77fa234da1b950f1b1752e064c51b45608b7dd471e61cf88f86abeaec5732152",
+  "representation_notes": "GPEucl k abbreviates EuclideanSpace ℝ (Fin k), inspected in PiL2.lean: EuclideanSpace is PiLp 2, where 2 is the L2 norm exponent, not a dimension; Fin k is the finite coordinate index. EuclideanSpace.dist_eq/dist_sq_eq give the square root of the sum of squared real coordinate distances. WithLp.toLp 2 wraps coordinate functions and Fin.snoc appends the last real coordinate; GPhead uses castSucc and Fin.last k is the final index in Fin(k+1). GPproduct E is exactly the set of vectors whose first n coordinates lie in E and whose last coordinate lies in Icc 0 1; T001 checks its metric and reconstruction identities. No alternative product norm appears. GPcover uses arbitrary countable ℕ-indexed sets, allowing finite covers by empty padding, with Metric.ediam (the supremum of pairwise edists) bounded by ofReal δ. GPcost uses ENNReal real powers and nonnegative extended sums; for s>0 empty/singleton costs are zero and infinite diameters have infinite cost. GPcontent and GPmass are exactly D003's infimum and positive-scale supremum, rather than assuming equality with native measure. T002 proves the native comparison both for Euclidean sets and for the real line used in D006. dimH is the inspected native ENNReal supremum over nonnegative real exponents of infinite native measure; top is infinity, and no toReal truncation of dimension is used. ofReal maps a real to its nonnegative part; all scale/cost-threshold conversions have positivity guards. A comparison dimH A < ofReal q forces q>0, so it is exactly the source real-exponent condition q>dim_H A even when dimH A may be infinite. Finite diameter toReal conversions occur only after GPcover bounds them by finite ofReal δ. At native critical-exponent calls s>0 identifies s.toNNReal with s in both ℝ and ENNReal. Lebesgue integration uses the actual real-line volume and measurable interval indicators; covering sets remain arbitrary. H001-H003 are retained, no M or Audit A note is a premise. All library applications remain proof obligations, not accepted definitions. The inspected ENNReal.tsum_eq_iSup_sum identifies ∑' with the supremum of finite subsums, exactly D002's convention, so no summability assumption is encoded.",
+  "steps": [
+    {
+      "id": "T001",
+      "statement": "(∀ (k : ℕ) (x : GPEucl k) (t : ℝ),\n    GPhead (GPappend x t) = x ∧ (GPappend x t) (Fin.last k) = t) ∧\n  (∀ (k : ℕ) (z : GPEucl (k + 1)), GPappend (GPhead z) (z (Fin.last k)) = z) ∧\n  (∀ (k : ℕ) (x y : GPEucl k) (t u : ℝ),\n    dist (GPappend x t) (GPappend y u) =\n      Real.sqrt (dist x y ^ 2 + |t - u| ^ 2)) ∧\n  (∀ (k : ℕ) (z w : GPEucl (k + 1)),\n    dist (GPhead z) (GPhead w) ≤ dist z w ∧\n    |z (Fin.last k) - w (Fin.last k)| ≤ dist z w)",
+      "inputs": [],
+      "source_steps": [
+        "S010",
+        "S012",
+        "S015",
+        "S024"
+      ],
+      "explanation": "Implementation geometry for D001/D007: use Fin.snoc_castSucc, Fin.snoc_last and finite-coordinate extensionality for inverse identities, then EuclideanSpace.dist_sq_eq and the last-coordinate finite-sum split. Prove the two projection contractions from nonnegative squared summands. This is the coordinate calculation already used in the four cited paragraphs; it changes no metric.",
+      "background_notes": [
+        "R004.BG001",
+        "R004.BG002",
+        "R004.BG003",
+        "R004.BG004",
+        "R004.BG014",
+        "R004.BG015",
+        "R004.BG016",
+        "R004.BG017",
+        "R004.BG018",
+        "R004.BG020",
+        "R005.BG001",
+        "R005.BG002",
+        "R007.BG002"
+      ]
+    },
+    {
+      "id": "T002",
+      "statement": "(∀ (k : ℕ) (A : Set (GPEucl k)) (s : ℝ), 0 < s →\n    GPmass s A = MeasureTheory.Measure.hausdorffMeasure s A) ∧\n  (∀ (A : Set ℝ) (s : ℝ), 0 < s →\n    GPmass s A = MeasureTheory.Measure.hausdorffMeasure s A)",
+      "inputs": [],
+      "source_steps": [
+        "S001"
+      ],
+      "explanation": "Unfold hausdorffMeasure_apply and compare its extended-radius covering infimum with GPcover/GPcost. For positive s the empty-set term is zero, so the nonemptiness supremum can be removed; infinite radius adds no larger value than radius 1. Finite positive extended radii correspond exactly to positive real radii via ofReal/toReal. The same definition comparison on ℝ implements D006's real-line convention without adding a premise or changing the exported N001 domain.",
+      "background_notes": []
+    },
+    {
+      "id": "T003",
+      "statement": "∀ (k : ℕ) (A : Set (GPEucl k)) (s : ℝ), 0 < s →\n  GPmass s A = MeasureTheory.Measure.hausdorffMeasure s A ∧\n  0 ≤ dimH A ∧\n  (dimH A < ENNReal.ofReal s → GPmass s A = 0) ∧\n  (ENNReal.ofReal s < dimH A → GPmass s A = ⊤) ∧\n  (GPmass s A = 0 → dimH A ≤ ENNReal.ofReal s) ∧\n  (GPmass s A = ⊤ → ENNReal.ofReal s ≤ dimH A) ∧\n  (∀ (δ₁ δ₂ : ℝ), 0 < δ₁ → 0 < δ₂ → δ₁ ≤ δ₂ →\n    GPcontent s δ₂ A ≤ GPcontent s δ₁ A) ∧\n  (GPmass s A = 0 → ∀ (δ ε : ℝ), 0 < δ → 0 < ε →\n    ∃ U : ℕ → Set (GPEucl k), GPcover A δ U ∧ GPcost s U < ENNReal.ofReal ε) ∧\n  (GPmass s A = ⊤ → ∀ (L δ₀ : ℝ), 0 < L → 0 < δ₀ →\n    ∃ δ : ℝ, 0 < δ ∧ δ ≤ δ₀ ∧ ENNReal.ofReal L < GPcontent s δ A)",
+      "inputs": [
+        "T002"
+      ],
+      "source_steps": [
+        "S002",
+        "S003"
+      ],
+      "explanation": "Export all clauses of N001 on Eucl(k). Use the Euclidean part of T002 and the native dimension critical-exponent declarations at the nonnegative real exponent s.toNNReal (s>0 proves the cast identity). Prove scale antitonicity by restricting admissible covers. Zero infimum yields arbitrarily cheap covers; an infinite supremum yields a large scale content, then replace the scale by min(δ,δ₀).",
+      "background_notes": [
+        "R001.BG001"
+      ]
+    },
+    {
+      "id": "T004",
+      "statement": "Bornology.IsBounded E ∧\n  (∃ R : ℝ, 0 < R ∧ ∀ x ∈ E, ∀ j : Fin n, -R ≤ x j ∧ x j ≤ R) ∧\n  (∀ (s δ : ℝ), 0 < s → 0 < δ →\n  ∃ T : Finset (GPEucl n),\n    (E ⊆ ⋃ x ∈ T, Metric.ball x (δ / 2)) ∧\n    (∀ x ∈ T, Metric.ediam (Metric.ball x (δ / 2)) ≤ ENNReal.ofReal δ) ∧\n    (∑ x ∈ T, (Metric.ediam (Metric.ball x (δ / 2))) ^ s) < (⊤ : ENNReal)) ∧\n  (∀ (s δ : ℝ), 0 < s → 0 < δ → GPcontent s δ E < ⊤)",
+      "inputs": [
+        "H002"
+      ],
+      "source_steps": [
+        "S004",
+        "S005",
+        "S006"
+      ],
+      "explanation": "Use IsCompact.isBounded with the actual metric bornology; bound coordinates by the Euclidean norm and enlarge the bound to positive R. Use compactness on the open balls of radius δ/2 to get a finite subcover. The triangle inequality bounds each extended diameter by ofReal δ; a finite sum of these finite positive-exponent costs is finite. Enumerate the finite cover and pad by empty sets when comparing with GPcontent.",
+      "background_notes": [
+        "R002.BG001",
+        "R002.BG002",
+        "R002.BG003",
+        "R002.BG004"
+      ]
+    },
+    {
+      "id": "T005",
+      "statement": "Bornology.IsBounded E ∧\n  (∃ R : ℝ, 0 < R ∧ ∀ x ∈ E, ∀ j : Fin n, -R ≤ x j ∧ x j ≤ R) ∧\n  (∀ (s δ : ℝ), 0 < s → 0 < δ →\n  ∃ T : Finset (GPEucl n),\n    (E ⊆ ⋃ x ∈ T, Metric.ball x (δ / 2)) ∧\n    (∀ x ∈ T, Metric.ediam (Metric.ball x (δ / 2)) ≤ ENNReal.ofReal δ) ∧\n    (∑ x ∈ T, (Metric.ediam (Metric.ball x (δ / 2))) ^ s) < (⊤ : ENNReal)) ∧\n  (∀ (s δ : ℝ), 0 < s → 0 < δ → GPcontent s δ E < ⊤) ∧\n  (0 ≤ dimH E ∧ dimH E ≤ (n : ENNReal) ∧ dimH E < ⊤) ∧\n  (n = 0 → E = Set.univ ∧ E.Subsingleton ∧ dimH E = 0)",
+      "inputs": [
+        "H001",
+        "T003",
+        "T004"
+      ],
+      "source_steps": [
+        "S007"
+      ],
+      "explanation": "Export N002, retaining T004's boundedness/box/finite-ball-cover and finite-content clauses. For n≥1 use the supplied coordinate grid in the fixed box, count at most C h^(-n) cubes and bound diameter by √n h. tendsto_rpow_neg_atTop at y=s-n proves arbitrarily small cost for s>n. Apply N001 and the strict-between argument to bound dimH E≤n, hence finiteness. If n=0, nonemptiness makes E all of the singleton ambient space, whose positive-exponent costs vanish. No finiteness is assumed.",
+      "background_notes": [
+        "R002.BG005",
+        "R002.BG006",
+        "R002.BG007",
+        "R002.BG008",
+        "R002.BG009",
+        "R002.BG010",
+        "R002.BG011",
+        "R002.BG012",
+        "R002.BG013",
+        "R002.BG014",
+        "R002.BG015"
+      ]
+    },
+    {
+      "id": "T006",
+      "statement": "∀ (B : Set ℝ) (ρ η : ℝ), B.Nonempty → 0 ≤ ρ →\n  (∀ b ∈ B, ∀ b' ∈ B, |b - b'| ≤ ρ) → 0 < η →\n  BddAbove B ∧ BddBelow B ∧ IsLUB B (sSup B) ∧ IsGLB B (sInf B) ∧\n  sSup B - sInf B ≤ ρ ∧\n  B ⊆ Set.Ioo (sInf B - η / 2) (sSup B + η / 2) ∧\n  (sInf B - η / 2 < sSup B + η / 2) ∧\n  ((sSup B + η / 2) - (sInf B - η / 2) ≤ ρ + η)",
+      "inputs": [],
+      "source_steps": [
+        "S008",
+        "S009"
+      ],
+      "explanation": "Export N003 with the actual endpoints and their least/greatest-bound properties. A chosen member bounds B on both sides. Real completeness supplies IsLUB/IsGLB, identified with conditional sSup/sInf only after these boundedness conditions. The source order argument proves sup-inf≤ρ, and enlarging by η/2 gives the stated nonempty open interval and length bound, including ρ=0. No measurability of B is used.",
+      "background_notes": [
+        "R003.BG001"
+      ]
+    },
+    {
+      "id": "T007",
+      "statement": "n = 0 →\n  dimH (GPproduct E) ≤ dimH E + 1 ∧\n  ∀ (q δ : ℝ), dimH E < ENNReal.ofReal q → 0 < δ →\n    GPcontent (q + 1) δ (GPproduct E) = 0 ∧ GPmass (q + 1) (GPproduct E) = 0",
+      "inputs": [
+        "T001",
+        "T003",
+        "T005"
+      ],
+      "source_steps": [
+        "S010"
+      ],
+      "explanation": "For n=0, N002 identifies E with the singleton and D=0. Append the N equal closed interval pieces, using T001's distance identity. Their maximum diameter is 1/N and their a-cost is N^(1-a), tending to zero for a>1 by tendsto_rpow_neg_atTop. At every scale obtain zero content and mass; N001 gives the dimension upper bound by strict-between.",
+      "background_notes": [
+        "R004.BG001",
+        "R004.BG002",
+        "R004.BG003",
+        "R004.BG004"
+      ]
+    },
+    {
+      "id": "T008",
+      "statement": "1 ≤ n → ∀ (q r ε : ℝ),\n  dimH E < ENNReal.ofReal q → 0 < r → r ≤ 1 → 0 < ε →\n  ∃ U : ℕ → Set (GPEucl n),\n    GPcover E r U ∧\n    (∀ i, (U i).Nonempty → 0 < Metric.ediam (U i)) ∧\n    GPcost q U < ENNReal.ofReal ε",
+      "inputs": [
+        "T003",
+        "T005"
+      ],
+      "source_steps": [
+        "S011"
+      ],
+      "explanation": "Start with N001's r-cover of q-cost below ε/2. Empty members may be retained as zero-cost padding. A nonempty zero-diameter member is a singleton; replace it by a sufficiently small ball with strictly positive diameter, available because 1≤n, and q-cost less than ε 2^(-i-2). Bound the added cost by the geometric series. Countable choice stays inside this existence statement.",
+      "background_notes": [
+        "R004.BG005",
+        "R004.BG006",
+        "R004.BG007",
+        "R004.BG008",
+        "R004.BG009",
+        "R004.BG010",
+        "R004.BG011",
+        "R004.BG012",
+        "R004.BG013"
+      ]
+    },
+    {
+      "id": "T009",
+      "statement": "1 ≤ n → ∀ (q r ε : ℝ),\n  dimH E < ENNReal.ofReal q → 0 < r → r ≤ 1 → 0 < ε →\n  ∃ W : ℕ → Set (GPEucl (n + 1)),\n    GPcover (GPproduct E) (Real.sqrt 2 * r) W ∧\n    GPcost (q + 1) W <\n      ENNReal.ofReal (2 * (Real.sqrt 2) ^ (q + 1) * ε)",
+      "inputs": [
+        "T001",
+        "T008"
+      ],
+      "source_steps": [
+        "S012"
+      ],
+      "explanation": "Choose T008's U. On nonempty indices, convert finite positive ediam to the real r_i, set N_i=ceil(1/r_i), and partition I into N_i pieces. Form their coordinate-appended cylinders. T001 bounds each diameter by √2 r_i. The ceiling bounds give cost≤2(√2)^(q+1)Σr_i^q, hence the strict displayed estimate. Enumerate the countable dependent index set with empty padding; regroup only nonnegative sums.",
+      "background_notes": [
+        "R004.BG014",
+        "R004.BG015",
+        "R004.BG016",
+        "R004.BG017",
+        "R004.BG018",
+        "R004.BG020"
+      ]
+    },
+    {
+      "id": "T010",
+      "statement": "dimH (GPproduct E) ≤ dimH E + 1 ∧\n  ∀ (q δ : ℝ), dimH E < ENNReal.ofReal q → 0 < δ →\n    GPcontent (q + 1) δ (GPproduct E) = 0 ∧\n    GPmass (q + 1) (GPproduct E) = 0",
+      "inputs": [
+        "T003",
+        "T005",
+        "T007",
+        "T009"
+      ],
+      "source_steps": [
+        "S013",
+        "S014"
+      ],
+      "explanation": "Export N004. In positive dimension choose r=min(1,δ/√2) in T009 and make ε arbitrarily small, obtaining zero content at every δ and zero mass for each q>D. Apply N001 to get dimH F≤ofReal(q+1). N002 makes D finite, so a strict-between argument as q↓D proves dimH F≤D+1, also excluding infinite dimH F. Combine with T007 for n=0; do not assert a measure conclusion at q=D.",
+      "background_notes": [
+        "R004.BG019",
+        "R004.BG021"
+      ]
+    },
+    {
+      "id": "T011",
+      "statement": "∀ (s δ ε : ℝ) (V : ℕ → Set (GPEucl (n + 1))),\n  0 < s → 0 < δ → 0 < ε → GPcover (GPproduct E) δ V →\n  (∀ i, Metric.ediam (GPhead '' V i) ≤ Metric.ediam (V i)) ∧\n  ∃ a b : ℕ → ℝ, ∀ i, (V i).Nonempty →\n    a i < b i ∧\n    (∀ z ∈ V i, z (Fin.last n) ∈ Set.Ioo (a i) (b i)) ∧\n    b i - a i ≤ (Metric.ediam (V i)).toReal +\n      ε * (2 : ℝ) ^ (-(i : ℝ) - 1) /\n        (1 + (Metric.ediam (V i)).toReal ^ s)",
+      "inputs": [
+        "T001",
+        "T006"
+      ],
+      "source_steps": [
+        "S015"
+      ],
+      "explanation": "For each nonempty V_i, T001 gives contraction of the horizontal and vertical projections. GPcover bounds every ediam by the finite ofReal δ, justifying toReal and reconstruction by ofReal. Apply N003 to the vertical image with ρ_i=ediam(V_i).toReal and η_i=ε 2^(-i-1)/(1+ρ_i^s). Choose real endpoints simultaneously on nonempty indices and arbitrary endpoints on empty indices. No projection measurability is introduced.",
+      "background_notes": [
+        "R005.BG001",
+        "R005.BG002"
+      ]
+    },
+    {
+      "id": "T012",
+      "statement": "∀ (s δ : ℝ) (V : ℕ → Set (GPEucl (n + 1))),\n  0 < s → 0 < δ → GPcover (GPproduct E) δ V →\n  ∀ ε : ℝ, 0 < ε →\n    GPcontent s δ E ≤ GPcost (s + 1) V + ENNReal.ofReal ε",
+      "inputs": [
+        "T005",
+        "T011"
+      ],
+      "source_steps": [
+        "S016",
+        "S017"
+      ],
+      "explanation": "Use T011's intervals. For t∈I the horizontal projections with t∈J_i cover E, so their weighted indicator sum bounds c=GPcontent s δ E. The functions ρ_i^s 1_(J_i∩I) are measurable since J_i is open; c is finite by N002. Apply lintegral_mono, lintegral_tsum and lintegral_indicator_const, with volume_Icc=1 and volume_Ioo equal to interval length. Bound the error sum by ε using the chosen η_i and geometric weights. Extended nonnegative sums require no integrability or finite total right-hand cost.",
+      "background_notes": [
+        "R005.BG003",
+        "R005.BG004",
+        "R005.BG005",
+        "R005.BG006",
+        "R005.BG007",
+        "R005.BG008",
+        "R005.BG009",
+        "R005.BG010",
+        "R005.BG011",
+        "R005.BG012",
+        "R005.BG013",
+        "R005.BG014"
+      ]
+    },
+    {
+      "id": "T013",
+      "statement": "∀ (s δ : ℝ), 0 < s → 0 < δ →\n  GPcontent s δ E ≤ GPcontent (s + 1) δ (GPproduct E)",
+      "inputs": [
+        "T005",
+        "T012"
+      ],
+      "source_steps": [
+        "S018"
+      ],
+      "explanation": "Export N005. For an arbitrary cover, an infinite cost gives the inequality immediately; otherwise T012 and finiteness of c allow ε↓0. Empty members have zero cost because s+1>0. Take the infimum over all admissible covers, retaining arbitrary nonmeasurable covers.",
+      "background_notes": [
+        "R005.BG015"
+      ]
+    },
+    {
+      "id": "T014",
+      "statement": "dimH GPI ≤ 1 ∧ ∀ a : ℝ, 1 < a → GPmass a GPI = 0",
+      "inputs": [
+        "T002"
+      ],
+      "source_steps": [
+        "S019"
+      ],
+      "explanation": "Divide the real interval into N equal closed pieces. At every fixed scale, N large gives an admissible cover of a-cost N^(1-a)→0 for a>1. Hence GPmass a GPI=0. Use T002's real-line equality and the native dimension critical-exponent theorem, then the strict-between argument to obtain dimH GPI≤1. This is D006's usual real metric; no supremum product norm is used.",
+      "background_notes": [
+        "R006.BG001",
+        "R006.BG002",
+        "R006.BG003",
+        "R006.BG004"
+      ]
+    },
+    {
+      "id": "T015",
+      "statement": "∀ (δ : ℝ) (U : ℕ → Set ℝ), 0 < δ →\n  GPcover GPI δ U → (1 : ENNReal) ≤ ∑' i, Metric.ediam (U i)",
+      "inputs": [
+        "T006"
+      ],
+      "source_steps": [
+        "S020"
+      ],
+      "explanation": "Enclose the nonempty members of U in N003's open intervals of length≤ρ_i+ε 2^(-i-1). Finite scale bounds justify the real diameters. The intervals cover I, so volume_Icc, volume_Ioo, monotonicity and measure_iUnion_le give 1≤Σρ_i+ε. Remove ε, considering infinite and finite sums separately. Empty members contribute zero.",
+      "background_notes": [
+        "R006.BG005",
+        "R006.BG006"
+      ]
+    },
+    {
+      "id": "T016",
+      "statement": "dimH GPI = 1 ∧\n  ∀ s : ℝ, 0 < s → s < 1 → GPmass s GPI = ⊤",
+      "inputs": [
+        "T002",
+        "T014",
+        "T015"
+      ],
+      "source_steps": [
+        "S021"
+      ],
+      "explanation": "For 0<s<1 and δ>0, use ρ^s≥δ^(s-1)ρ for 0≤ρ≤δ, treating ρ=0 separately. T015 implies GPcontent s δ GPI≥ofReal(δ^(s-1)). tendsto_rpow_neg_nhdsGT_zero at s-1<0 makes the mass infinite. T002 transfers this to native real Hausdorff measure; native le_dimH_of_hausdorffMeasure_eq_top and the strict-between argument yield dimH GPI≥1. Combine with T014.",
+      "background_notes": [
+        "R006.BG007",
+        "R006.BG009",
+        "R006.BG010",
+        "R006.BG011"
+      ]
+    },
+    {
+      "id": "T017",
+      "statement": "dimH GPI = 1 ∧\n  (∀ s : ℝ, 0 < s → s < 1 → GPmass s GPI = ⊤) ∧\n  (∀ (k : ℕ) (A : Set (GPEucl k)) (e : GPI → GPEucl k),\n    (∀ t, e t ∈ A) →\n    (∀ t u, dist (e t) (e u) = |(t : ℝ) - (u : ℝ)|) →\n    (1 : ENNReal) ≤ dimH A ∧\n    ∀ (s δ : ℝ), 0 < s → 0 < δ →\n      GPcontent s δ GPI ≤ GPcontent s δ A)",
+      "inputs": [
+        "T003",
+        "T016"
+      ],
+      "source_steps": [
+        "S022"
+      ],
+      "explanation": "Export N006, retaining T016's interval clauses. Pull an arbitrary δ-cover V of A back along e to P_i={t∈I:e(t)∈V_i}; the subtype domain makes all values of e lie in I's intended domain. Distance preservation gives ediam(P_i)≤ediam(V_i), so compare costs and then infima to obtain the content inequality for every positive s,δ. Take scale suprema; T016's infinite mass and N001 at A force dimH A≥1. No measurability of V or e is required.",
+      "background_notes": [
+        "R006.BG008",
+        "R006.BG012"
+      ]
+    },
+    {
+      "id": "T018",
+      "statement": "0 < dimH E → dimH E + 1 ≤ dimH (GPproduct E)",
+      "inputs": [
+        "T003",
+        "T005",
+        "T013"
+      ],
+      "source_steps": [
+        "S023"
+      ],
+      "explanation": "For 0<s<D, N001 gives GPmass s E=∞. Take scale suprema in N005 to transfer infinity to GPmass(s+1)F, and apply N001 to bound dimH F≥ofReal(s+1). N002 supplies finite D; the source strict-between argument as s↑D yields D+1≤dimH F. Keep the D>0 antecedent.",
+      "background_notes": [
+        "R007.BG001",
+        "R007.BG003"
+      ]
+    },
+    {
+      "id": "T019",
+      "statement": "dimH E = 0 → dimH E + 1 ≤ dimH (GPproduct E)",
+      "inputs": [
+        "H001",
+        "T001",
+        "T017"
+      ],
+      "source_steps": [
+        "S024"
+      ],
+      "explanation": "Choose x₀∈E by H001. The subtype map t↦GPappend x₀ (t:ℝ) lands in GPproduct E by T001's inverse-coordinate identities and preserves real distances by its square-root formula. Apply N006's embedding clause to get dimH F≥1; substitute D=0. This includes n=0.",
+      "background_notes": [
+        "R007.BG002"
+      ]
+    },
+    {
+      "id": "T020",
+      "statement": "dimH (GPproduct E) = dimH E + 1",
+      "inputs": [
+        "T005",
+        "T010",
+        "T018",
+        "T019"
+      ],
+      "source_steps": [
+        "S025"
+      ],
+      "explanation": "Split D≥0 into D>0 and D=0, apply the corresponding lower bound, and combine with N004's upper bound by antisymmetry. H003 is retained in premise_types as the redundant natural-number range assumption, with no new source dependency. The arbitrary parameters n:ℕ and E, and the nonempty/compact assumptions supplied through H001/H002, give the full target on the coordinate-appended Euclidean product.",
+      "background_notes": []
+    }
+  ],
+  "terminal": "T020"
+}

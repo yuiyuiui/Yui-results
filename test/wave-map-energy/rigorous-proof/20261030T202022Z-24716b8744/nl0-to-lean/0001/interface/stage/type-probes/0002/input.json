@@ -1,0 +1,29 @@
+{
+  "header": "import Mathlib\nopen scoped ContDiff Topology BigOperators\nopen Set MeasureTheory\nnoncomputable section\nnamespace WaveMap\nabbrev V (n : ℕ) := Fin n → ℝ\nabbrev W (m : ℕ) := EuclideanSpace ℝ (Fin m)\ndef domain (n : ℕ) : Set (V n × ℝ) := {p | 0 < p.2}\ndef box (n : ℕ) (R : ℝ) : Set (V n) := Set.Icc (fun _ => -R) (fun _ => R)\ndef innerBox (n : ℕ) (R : ℝ) : Set (V n) := {x | ∀ j, -R < x j ∧ x j < R}\ndef ut {n m : ℕ} (u : V n × ℝ → W m) (x : V n) (t : ℝ) : W m :=\n  deriv (fun s => u (x,s)) t\ndef utt {n m : ℕ} (u : V n × ℝ → W m) (x : V n) (t : ℝ) : W m :=\n  deriv (fun s => ut u x s) t\ndef ux {n m : ℕ} (u : V n × ℝ → W m) (j : Fin n) (x : V n) (t : ℝ) : W m :=\n  fderiv ℝ (fun y => u (y,t)) x (Pi.single j 1)\ndef uxx {n m : ℕ} (u : V n × ℝ → W m) (j : Fin n) (x : V n) (t : ℝ) : W m :=\n  fderiv ℝ (fun y => ux u j y t) x (Pi.single j 1)\ndef uxt {n m : ℕ} (u : V n × ℝ → W m) (j : Fin n) (x : V n) (t : ℝ) : W m :=\n  fderiv ℝ (fun y => ut u y t) x (Pi.single j 1)\ndef lap {n m : ℕ} (u : V n × ℝ → W m) (x : V n) (t : ℝ) : W m :=\n  ∑ j, uxx u j x t\ndef e {n m : ℕ} (u : V n × ℝ → W m) (x : V n) (t : ℝ) : ℝ :=\n  ‖ut u x t‖ ^ 2 + ∑ j, ‖ux u j x t‖ ^ 2\ndef et {n m : ℕ} (u : V n × ℝ → W m) (x : V n) (t : ℝ) : ℝ :=\n  deriv (fun s => e u x s) t\ndef A {n m : ℕ} (u : V n × ℝ → W m) (x : V n) (t : ℝ) : ℝ :=\n  inner ℝ (ut u x t) (utt u x t)\ndef B {n m : ℕ} (u : V n × ℝ → W m) (j : Fin n) (x : V n) (t : ℝ) : ℝ :=\n  inner ℝ (ux u j x t) (uxt u j x t)\ndef T {n m : ℕ} (u : V n × ℝ → W m) (j : Fin n) (x : V n) (t : ℝ) : ℝ :=\n  inner ℝ (ut u x t) (uxx u j x t)\ndef g {n m : ℕ} (u : V n × ℝ → W m) (j : Fin n) (x : V n) (t : ℝ) : ℝ :=\n  inner ℝ (ut u x t) (ux u j x t)\ndef dg {n m : ℕ} (u : V n × ℝ → W m) (j : Fin n) (x : V n) (t : ℝ) : ℝ :=\n  fderiv ℝ (fun y => g u j y t) x (Pi.single j 1)\ndef energy {n m : ℕ} (u : V n × ℝ → W m) (t : ℝ) : ℝ :=\n  ∫ x, e u x t\ndef fields {n m : ℕ} (u : V n × ℝ → W m) : Set ((V n × ℝ) → ℝ) :=\n  {f | f = (fun p => e u p.1 p.2) ∨ f = (fun p => et u p.1 p.2) ∨\n    f = (fun p => A u p.1 p.2) ∨\n    (∃ j, f = (fun p => B u j p.1 p.2)) ∨\n    (∃ j, f = (fun p => T u j p.1 p.2)) ∨\n    (∃ j, f = (fun p => g u j p.1 p.2)) ∨\n    (∃ j, f = (fun p => dg u j p.1 p.2))}\nend WaveMap\nopen WaveMap\n",
+  "parameters": [
+    {
+      "name": "n",
+      "type": "ℕ"
+    },
+    {
+      "name": "m",
+      "type": "ℕ"
+    },
+    {
+      "name": "u",
+      "type": "V n × ℝ → W m"
+    },
+    {
+      "name": "q",
+      "type": "W m"
+    }
+  ],
+  "types": [
+    "∀ x t, 0 < t →\ninner ℝ (u (x,t)) (ut u x t) = 0 ∧\ninner ℝ (ut u x t) (utt u x t - lap u x t) = 0 ∧\ninner ℝ (u (x,t)) (utt u x t) = -(‖ut u x t‖^2) ∧\n(∀ j : Fin n, inner ℝ (u (x,t)) (uxx u j x t) = -(‖ux u j x t‖^2)) ∧\n(∀ a : ℝ, utt u x t - lap u x t = a • u (x,t) →\na = (∑ j, ‖ux u j x t‖^2) - ‖ut u x t‖^2) ∧\nutt u x t - lap u x t = ((∑ j, ‖ux u j x t‖^2) - ‖ut u x t‖^2) • u (x,t)",
+    "(∀ t0 : ℝ, 0 < t0 → ∃ C : Set (V n), ∃ R : ℝ,\nIsCompact C ∧ 0 < R ∧ C ⊆ innerBox n R ∧ C ⊆ interior (box n R) ∧\nIsCompact (box n R) ∧ MeasurableSet (box n R) ∧\nvolume (box n R) = ENNReal.ofReal ((2*R)^n) ∧ volume (box n R) < ⊤ ∧\n(∀ x, x ∉ C → ∀ r ∈ Set.Icc (t0/2) (3*t0/2), u (x,r) = q) ∧\n(∀ k : ℕ, 0 < k → ∀ x, x ∉ C → ∀ r ∈ Set.Ioo (t0/2) (3*t0/2),\niteratedFDeriv ℝ k u (x,r) = 0 ) ∧ (∀ f ∈ fields u, ∀ r ∈ Set.Ioo (t0/2) (3*t0/2),\nContinuous (fun x => f (x,r)) ∧\n(∀ x, x ∉ C → f (x,r) = 0) ∧\nHasCompactSupport (fun x => f (x,r)) ∧ Integrable (fun x => f (x,r)) ∧\n(∃ K : ℝ, 0 ≤ K ∧ (∀ x ∈ box n R, |f (x,r)| ≤ K) ∧\n(∫ x, |f (x,r)|) ≤ K * (volume (box n R)).toReal) ∧\n(∃ U : Set (V n), IsOpen U ∧ frontier (box n R) ⊆ U ∧ ∀ x ∈ U, f (x,r) = 0))) ∧ (∀ r : ℝ, 0 < r → Integrable (fun x => e u x r))",
+    "ContDiffOn ℝ ∞ (fun p : V n × ℝ => e u p.1 p.2) (domain n) ∧\n(∀ j : Fin n, ContDiffOn ℝ ∞ (fun p : V n × ℝ => g u j p.1 p.2) (domain n)) ∧\n(∀ x t, 0 < t →\n(∀ j : Fin n, deriv (fun s => ux u j x s) t = uxt u j x t) ∧\net u x t = 2*A u x t + 2*(∑ j, B u j x t) ∧\n(∀ j : Fin n, dg u j x t = B u j x t + T u j x t)) ∧\n(∀ f ∈ fields u, ContinuousOn f (domain n)) ∧\n(∀ j : Fin n, ContinuousOn (fun p : V n × ℝ => uxt u j p.1 p.2) (domain n))",
+    "(∀ t0 : ℝ, 0 < t0 →\nHasDerivAt (energy u) (∫ x, et u x t0) t0 ∧\nderiv (energy u) t0 = ∫ x, et u x t0) ∧ DifferentiableOn ℝ (energy u) (Set.Ioi 0)",
+    "∀ t0 : ℝ, 0 < t0 → ∀ j : Fin n,\nIntegrable (fun x => dg u j x t0) ∧ Integrable (fun x => B u j x t0) ∧\nIntegrable (fun x => T u j x t0) ∧\n(∫ x, dg u j x t0) = 0 ∧\n(∫ x, B u j x t0) = -(∫ x, T u j x t0) ∧\n(∫ x, inner ℝ (ux u j x t0) (uxt u j x t0)) =\n-(∫ x, inner ℝ (ut u x t0) (uxx u j x t0))",
+    "(∀ r : ℝ, 0 < r → Integrable (fun x => e u x r)) ∧\nDifferentiableOn ℝ (energy u) (Set.Ioi 0) ∧\n(∀ r : ℝ, 0 < r → deriv (energy u) r = 0) ∧\n(∀ s t : ℝ, 0 < s → 0 < t → energy u s = energy u t)"
+  ]
+}

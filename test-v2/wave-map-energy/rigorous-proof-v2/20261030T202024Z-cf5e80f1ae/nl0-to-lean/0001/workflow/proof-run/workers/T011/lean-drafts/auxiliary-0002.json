@@ -1,0 +1,24 @@
+{
+  "statement": "∀ j : Fin n, MeasurableEmbedding (WaveEnergy.insert j) ∧ MeasurePreserving (WaveEnergy.insert j) ((otherMu j).prod volume) (mu n)",
+  "proof": "intro j\nclassical\nhave hmeas : Measurable (WaveEnergy.insert j) := by\n  apply measurable_pi_lambda\n  intro i\n  by_cases h : i = j\n  · simpa [WaveEnergy.insert, h] using (measurable_snd : Measurable (fun p : Other n j × ℝ => p.2))\n  · simpa [WaveEnergy.insert, h] using ((measurable_pi_apply (⟨i,h⟩ : {i : Fin n // i ≠ j})).comp measurable_fst)\nlet e : (Other n j × ℝ) ≃ᵐ X n :=\n  { toFun := WaveEnergy.insert j\n    invFun := fun x => (fun i => x i, x j)\n    left_inv := by\n      intro p\n      apply Prod.ext\n      · funext i\n        simp [WaveEnergy.insert, i.property]\n      · simp [WaveEnergy.insert]\n    right_inv := by\n      intro x\n      funext i\n      by_cases h : i = j <;> simp [WaveEnergy.insert, h]\n    measurable_toFun := hmeas\n    measurable_invFun := (measurable_pi_lambda _ (fun i => measurable_pi_apply i.val)).prodMk (measurable_pi_apply j) }\nrefine ⟨e.measurableEmbedding, hmeas, ?_⟩\napply Eq.symm\napply Measure.pi_eq\nintro s hs\nhave hp : WaveEnergy.insert j ⁻¹' (Set.univ.pi s) =\n    (Set.univ.pi (fun i : {i : Fin n // i ≠ j} => s i.val)) ×ˢ s j := by\n  ext p\n  simp only [mem_preimage, mem_univ_pi, mem_prod]\n  constructor\n  · intro h\n    exact ⟨fun i => by simpa [WaveEnergy.insert, i.property] using h i.val,\n      by simpa [WaveEnergy.insert] using h j⟩\n  · rintro ⟨hy,hz⟩ i\n    by_cases h : i = j\n    · simpa [WaveEnergy.insert, h] using hz\n    · simpa [WaveEnergy.insert, h] using hy ⟨i,h⟩\nrw [Measure.map_apply hmeas (MeasurableSet.univ_pi hs), hp,\n  Measure.prod_prod, otherMu, Measure.pi_pi]\nrw [Fintype.prod_eq_mul_prod_subtype_ne (fun i => volume (s i)) j, mul_comm]",
+  "check": {
+    "exit_code": 1,
+    "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-g7__l3fj/output/Auxiliary.lean:86:6: error: Type mismatch: After simplification, term\n  Measurable.comp (measurable_pi_apply ⟨i, h⟩) measurable_fst\n has type\n  @Measurable (({ i // ¬i = j } → ℝ) × ℝ) ℝ Prod.instMeasurableSpace Real.measurableSpace\n    ((fun f => f ⟨i, h⟩) ∘ Prod.fst)\nbut is expected to have type\n  @Measurable (Other n j × ℝ) ℝ Prod.instMeasurableSpace Real.measurableSpace fun c => c.1 ⟨i, ⋯⟩\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-g7__l3fj/output/Auxiliary.lean:116:8: error: Type mismatch: After simplification, term\n  hz\n has type\n  p.2 ∈ s j\nbut is expected to have type\n  p.2 ∈ s i\nchecked : ∀ (n m : ℕ) (u : X n × ℝ → V m) (q : V m),\n  1 ≤ n ∧ 1 ≤ m →\n    ContDiffOn ℝ ∞ u (domain n) →\n      ((∀ (t0 : ℝ), 0 < t0 → ∃ C R, Window u q t0 C R) ∧\n          ContDiffOn ℝ ∞ (density u) (domain n) ∧\n            ContDiffOn ℝ ∞ (dt (density u)) (domain n) ∧\n              ∀ (t : ℝ), 0 < t → Integrable (fun x => density u (x, t)) (mu n)) →\n        (∀ (t0 : ℝ),\n            0 < t0 →\n              ∀ (j : Fin n),\n                (ContDiff ℝ ∞ fun x => flux u j (x, t0)) ∧\n                  (∀ (x : X n),\n                      dx (flux u j) j (x, t0) = inner ℝ (dx (dt u) j (x, t0)) (dx u j (x, t0)) + lapTerm u j (x, t0)) ∧\n                    (∀ (x : X n),\n                        HasDerivAt (fun z => flux u j (Function.update x j z, t0)) (dx (flux u j) j (x, t0)) (x j)) ∧\n                      ∀ (C : Set (X n)) (R : ℝ),\n                        Window u q t0 C R → ∀ (x : X n), x j = -R ∨ x j = R → flux u j (x, t0) = 0) →\n          (∀ (t0 : ℝ),\n              0 < t0 →\n                ∀ (j : Fin n) (C : Set (X n)) (R : ℝ),\n                  Window u q t0 C R →\n                    ∀ (x : X n), ∫ (z : ℝ) in -R..R, dx (flux u j) j (Function.update x j z, t0) = 0) →\n            ∀ (j : Fin n),\n              MeasurableEmbedding (WaveEnergy.insert j) ∧\n                MeasurePreserving (WaveEnergy.insert j) ((otherMu j).prod volume) (mu n)\n'YuiAuxiliary.checked' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]\n",
+    "stderr": "",
+    "wall_seconds": 4.095533915795386,
+    "source_path": "/Users/syyui/projects/Yui-results/test-v2/wave-map-energy/rigorous-proof-v2/20261030T202024Z-cf5e80f1ae/native-checks/923c96c795824d27a84ff7471d8ce3b8.lean",
+    "source_sha256": "7896f23dbeb9e5a3b7b0fe7a9e37a70c9da273de458f88eadfd3b6001b3e4ae0",
+    "auxiliary_valid": false,
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext",
+      "sorryAx"
+    ],
+    "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+    "context_port": "T011",
+    "candidate": 2,
+    "accepted": false,
+    "stage_complete": false
+  }
+}

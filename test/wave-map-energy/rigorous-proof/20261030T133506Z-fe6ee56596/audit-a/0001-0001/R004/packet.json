@@ -1,0 +1,979 @@
+{
+  "contract_version": 2,
+  "case_id": "wave-map-energy",
+  "graph_sha256": "46a60a7997e77f2b786171aaae393651d4c3ca83977c8bcba942a0b3cc03d3fc",
+  "spec_sha256": "1a2c302cb1108c64659ed4d50e6b333edbec09fd7cfce943101b7e4f95bb0a1e",
+  "parameters": [
+    {
+      "symbol": "n",
+      "type": "natural number"
+    },
+    {
+      "symbol": "m",
+      "type": "natural number"
+    },
+    {
+      "symbol": "u",
+      "type": "map ℝ^n × (0,∞) → ℝ^m; the Euclidean spaces carry their standard dot products, norms, topology, and Lebesgue measures"
+    },
+    {
+      "symbol": "q",
+      "type": "vector in ℝ^m"
+    }
+  ],
+  "logic": {
+    "classical": true,
+    "rules": [
+      "direct",
+      "forall_introduction",
+      "exists_elimination",
+      "implication_introduction"
+    ],
+    "calculations": [
+      "equality: Equality reflexivity, symmetry, transitivity and substitution.",
+      "definitions: Unfold an explicitly supplied definition; this proves no extra property.",
+      "finite_algebra: Routine finite semiring/ring/field arithmetic, including zero/one laws, distributivity, associativity and finite polynomial identities. Correct elementary compression is permitted; a substantive missing argument is not.",
+      "finite_order: Routine ordered-field reasoning with actual signs/domains: order laws, adding inequalities, multiplication/division with sign conditions, and real square nonnegativity. Ordinary valid elementary inferences need no exhaustive displayed chain. Check that the conclusion follows; substantial named theorems still require inputs or verified-background admission.",
+      "finite_sums: Unfold and rearrange finite sums/products with explicitly given finite indices."
+    ],
+    "primitives": [
+      {
+        "symbol": "0",
+        "type": "typed numeral",
+        "meaning": "Zero of the explicitly specified mathematical type."
+      },
+      {
+        "symbol": "1",
+        "type": "typed numeral",
+        "meaning": "One of the explicitly specified mathematical type."
+      },
+      {
+        "symbol": "2",
+        "type": "typed numeral",
+        "meaning": "Two of the explicitly specified mathematical type, including an exponent two."
+      },
+      {
+        "symbol": "ℕ",
+        "type": "number system",
+        "meaning": "The natural numbers with their usual arithmetic."
+      },
+      {
+        "symbol": "ℤ",
+        "type": "number system",
+        "meaning": "The integers with their usual arithmetic."
+      },
+      {
+        "symbol": "ℚ",
+        "type": "number system",
+        "meaning": "The rational numbers with their usual ordered-field operations."
+      },
+      {
+        "symbol": "ℝ",
+        "type": "number system",
+        "meaning": "The real numbers with their usual ordered-field structure."
+      },
+      {
+        "symbol": "ℂ",
+        "type": "number system",
+        "meaning": "The complex numbers with their usual field structure."
+      },
+      {
+        "symbol": "∅",
+        "type": "typed set notation",
+        "meaning": "The empty set in the explicitly specified ambient type."
+      },
+      {
+        "symbol": "∞",
+        "type": "typed order notation",
+        "meaning": "The top element in an explicitly specified extended ordered codomain."
+      }
+    ]
+  },
+  "pins": {
+    "lean_version": "4.32.2",
+    "mathlib_commit": "905b95818eb32af7874a58b427f50c1711a5e96c",
+    "mathlib_root": "/Users/syyui/formalization-tools/lean-mathlib-v4.32.2/mathlib"
+  },
+  "foundation_profile": "elementary-language-4",
+  "standard_language": "Ordinary typed mathematical language: logical connectives, quantifiers, equality, sets, functions, tuples, finite indices and their usual notation. A type explicitly named natural numbers, integers, rationals, reals or complex numbers means that standard structure, with its usual numerals and arithmetic operations; these operation tokens need not be redeclared as project objects. The fixed finite calculation rules below, including a+0=a, are controller permissions, not an author claim. The core symbol table below is not a dictionary of all allowed mathematics. Objects and notation from any subject are introduced by this problem's parameters, D definitions or scoped locals, with their types and dependencies. Their properties need direct inputs or displayed local proofs; a familiar name or symbol supplies no theorem.",
+  "background_policy": "verified-background-1",
+  "definitions": [
+    {
+      "id": "D001",
+      "symbol": "u_t",
+      "type": "map ℝ^n × (0,∞) → ℝ^m",
+      "definition": "u_t(x,t)=∂u(x,t)/∂t, component by component. Derivatives are the usual real derivatives; a derivative not existing is assigned the total derivative convention value zero. When u is smooth on its open domain these are classical derivatives.",
+      "depends_on": [],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "x",
+          "type": "point of ℝ^n"
+        },
+        {
+          "symbol": "t",
+          "type": "real number in (0,∞)"
+        }
+      ],
+      "objects": [
+        "u",
+        "n",
+        "m",
+        "x",
+        "t"
+      ]
+    },
+    {
+      "id": "D002",
+      "symbol": "u_tt",
+      "type": "map ℝ^n × (0,∞) → ℝ^m",
+      "definition": "u_tt(x,t)=∂u_t(x,t)/∂t, component by component, with the same total derivative convention.",
+      "depends_on": [
+        "D001"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "x",
+          "type": "point of ℝ^n"
+        },
+        {
+          "symbol": "t",
+          "type": "real number in (0,∞)"
+        }
+      ],
+      "objects": [
+        "u_t",
+        "x",
+        "t",
+        "n",
+        "m"
+      ]
+    },
+    {
+      "id": "D003",
+      "symbol": "u_j",
+      "type": "family indexed by j∈{1,…,n} of maps ℝ^n × (0,∞) → ℝ^m",
+      "definition": "u_j(j,x,t)=∂_{x_j}u(x,t), the derivative along the jth standard coordinate direction, component by component with the total derivative convention. We also write u_j when the index j is explicitly fixed.",
+      "depends_on": [],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "j",
+          "type": "integer in {1,…,n}"
+        },
+        {
+          "symbol": "x",
+          "type": "point of ℝ^n"
+        },
+        {
+          "symbol": "t",
+          "type": "real number in (0,∞)"
+        }
+      ],
+      "objects": [
+        "u",
+        "n",
+        "m",
+        "j",
+        "x",
+        "t"
+      ]
+    },
+    {
+      "id": "D004",
+      "symbol": "u_jj",
+      "type": "family indexed by j∈{1,…,n} of maps ℝ^n × (0,∞) → ℝ^m",
+      "definition": "u_jj(j,x,t)=∂_{x_j}u_j(j,x,t), with the total derivative convention. The notation u_jj with fixed j has this same meaning.",
+      "depends_on": [
+        "D003"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "j",
+          "type": "integer in {1,…,n}"
+        },
+        {
+          "symbol": "x",
+          "type": "point of ℝ^n"
+        },
+        {
+          "symbol": "t",
+          "type": "real number in (0,∞)"
+        }
+      ],
+      "objects": [
+        "u_j",
+        "j",
+        "x",
+        "t",
+        "n",
+        "m"
+      ]
+    },
+    {
+      "id": "D005",
+      "symbol": "v_j",
+      "type": "family indexed by j∈{1,…,n} of maps ℝ^n × (0,∞) → ℝ^m",
+      "definition": "v_j(j,x,t)=∂_{x_j}u_t(x,t), with the total derivative convention. With fixed j we abbreviate this by v_j.",
+      "depends_on": [
+        "D001"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "j",
+          "type": "integer in {1,…,n}"
+        },
+        {
+          "symbol": "x",
+          "type": "point of ℝ^n"
+        },
+        {
+          "symbol": "t",
+          "type": "real number in (0,∞)"
+        }
+      ],
+      "objects": [
+        "u_t",
+        "j",
+        "x",
+        "t",
+        "n",
+        "m"
+      ]
+    },
+    {
+      "id": "D006",
+      "symbol": "Δu",
+      "type": "map ℝ^n × (0,∞) → ℝ^m",
+      "definition": "Δu(x,t)=∑_{j=1}^n u_jj(j,x,t), the componentwise spatial Laplacian Δ_xu of the input.",
+      "depends_on": [
+        "D004"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "x",
+          "type": "point of ℝ^n"
+        },
+        {
+          "symbol": "t",
+          "type": "real number in (0,∞)"
+        }
+      ],
+      "objects": [
+        "u_jj",
+        "x",
+        "t",
+        "n",
+        "m"
+      ]
+    },
+    {
+      "id": "D007",
+      "symbol": "e",
+      "type": "map ℝ^n × (0,∞) → ℝ",
+      "definition": "e(x,t)=|u_t(x,t)|²+∑_{j=1}^n |u_j(j,x,t)|². Here |z|²=z·z is the Euclidean norm square on ℝ^m, so the spatial sum is exactly the Frobenius square |Du|². All integrals in the proof are Lebesgue integrals, and dx denotes standard volume on ℝ^n.",
+      "depends_on": [
+        "D001",
+        "D003"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "x",
+          "type": "point of ℝ^n"
+        },
+        {
+          "symbol": "t",
+          "type": "real number in (0,∞)"
+        },
+        {
+          "symbol": "z",
+          "type": "vector in ℝ^m, locally bound in the norm-square identity"
+        }
+      ],
+      "objects": [
+        "u_t",
+        "u_j",
+        "x",
+        "t",
+        "n",
+        "m",
+        "z"
+      ]
+    },
+    {
+      "id": "D008",
+      "symbol": "e_t",
+      "type": "map ℝ^n × (0,∞) → ℝ",
+      "definition": "e_t(x,t)=∂e(x,t)/∂t, using the total derivative convention, whose classical existence and formula will be proved.",
+      "depends_on": [
+        "D007"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "x",
+          "type": "point of ℝ^n"
+        },
+        {
+          "symbol": "t",
+          "type": "real number in (0,∞)"
+        }
+      ],
+      "objects": [
+        "e",
+        "x",
+        "t",
+        "n"
+      ]
+    }
+  ],
+  "inputs": [
+    {
+      "id": "N002",
+      "kind": "internal",
+      "statement": "n≥1 and m≥1. The map u and all its partial derivatives are smooth on ℝ^n×(0,∞); in particular, for every x∈ℝ^n, t>0 and j∈{1,…,n}, ∂_t u_j(j,x,t)=v_j(j,x,t), and for every x∈ℝ^n and t>0, e_t(x,t)=2u_t(x,t)·u_tt(x,t)+2∑_{j=1}^n u_j(j,x,t)·v_j(j,x,t). For every t0>0, let J=[t0/2,3t0/2]. There exist a compact C⊆ℝ^n and R>0 such that C⊆(−R,R)^n, u(x,r)=q for x∉C and r∈J, and every positive-order derivative of u vanishes for x∉C and r∈int J. Put Q=[−R,R]^n, whose Lebesgue measure is (2R)^n. For every r∈int J the following scalar spatial functions are continuous, zero outside C, and Lebesgue integrable: e(·,r), e_t(·,r), u_t(·,r)·u_tt(·,r), and, for each j, u_j(j,·,r)·v_j(j,·,r), u_t(·,r)·u_jj(j,·,r), u_t(·,r)·u_j(j,·,r), and ∂_{x_j}(u_t(·,r)·u_j(j,·,r)). Their absolute integrals are finite, each bounded by a finite supremum on Q times (2R)^n. In particular e(·,t) is integrable for every t>0.",
+      "definitions": [
+        "D001",
+        "D002",
+        "D003",
+        "D004",
+        "D005",
+        "D006",
+        "D007",
+        "D008"
+      ],
+      "binders": [
+        {
+          "symbol": "x",
+          "type": "point of ℝ^n"
+        },
+        {
+          "symbol": "t",
+          "type": "positive real number"
+        },
+        {
+          "symbol": "t0",
+          "type": "positive real number"
+        },
+        {
+          "symbol": "J",
+          "type": "closed time interval"
+        },
+        {
+          "symbol": "C",
+          "type": "compact subset of ℝ^n, existential"
+        },
+        {
+          "symbol": "R",
+          "type": "positive real number, existential"
+        },
+        {
+          "symbol": "Q",
+          "type": "closed spatial box"
+        },
+        {
+          "symbol": "r",
+          "type": "real time"
+        },
+        {
+          "symbol": "j",
+          "type": "integer in {1,…,n}"
+        }
+      ],
+      "objects": [
+        "n",
+        "m",
+        "u",
+        "q",
+        "u_t",
+        "u_tt",
+        "u_j",
+        "u_jj",
+        "v_j",
+        "Δu",
+        "e",
+        "e_t",
+        "x",
+        "t",
+        "t0",
+        "J",
+        "C",
+        "R",
+        "Q",
+        "r",
+        "j"
+      ]
+    },
+    {
+      "id": "M003",
+      "kind": "mathlib",
+      "statement": "Let W be a complete real normed space and f:ℝ→W, with real endpoints a,b. If f is differentiable at every point of the unordered closed interval with endpoints a,b and deriv f is interval-integrable with respect to real Lebesgue measure from a to b, then the oriented interval integral ∫_a^b deriv f(z) dz equals f(b)−f(a).",
+      "definitions": [],
+      "binders": [
+        {
+          "symbol": "W",
+          "type": "complete real normed space"
+        },
+        {
+          "symbol": "f",
+          "type": "map ℝ→W"
+        },
+        {
+          "symbol": "a",
+          "type": "real number"
+        },
+        {
+          "symbol": "b",
+          "type": "real number"
+        },
+        {
+          "symbol": "z",
+          "type": "real number"
+        }
+      ],
+      "objects": [
+        "W",
+        "f",
+        "a",
+        "b",
+        "z"
+      ],
+      "source_contract": {
+        "hypotheses": [
+          "W is a normed additive commutative group, real normed space and complete space.",
+          "f is differentiable at every point of the unordered closed interval between a and b.",
+          "deriv f is Lebesgue interval-integrable from a to b."
+        ],
+        "declaration": "intervalIntegral.integral_deriv_eq_sub",
+        "signature": "@intervalIntegral.integral_deriv_eq_sub : ∀ {E : Type u_3} [inst : NormedAddCommGroup.{u_3} E] [inst_1 : NormedSpace.{0, u_3} ℝ E] {a b : ℝ}\n  [CompleteSpace.{u_3} E] {f : ℝ → E},\n  (∀ (x : ℝ), Membership.mem.{0, 0} (Set.uIcc.{0} a b) x → DifferentiableAt.{0, 0, u_3} ℝ f x) →\n    IntervalIntegrable.{u_3} (deriv.{0, u_3} f) MeasureTheory.volume.{0} a b →\n      Eq.{u_3 + 1} (∫ (y : ℝ) in a..b, deriv.{0, u_3} f y) (HSub.hSub.{u_3, u_3, u_3} (f b) (f a))"
+      }
+    },
+    {
+      "id": "M006",
+      "kind": "mathlib",
+      "statement": "Let K be an RCLike field, W an inner product space over K (and normed additive commutative group) also carrying a real normed-space structure, and f,g:ℝ→W. If f and g are real differentiable at a real point z, then deriv(t↦⟨f(t),g(t)⟩_K)(z)=⟨f(z),deriv g(z)⟩_K+⟨deriv f(z),g(z)⟩_K.",
+      "definitions": [],
+      "binders": [
+        {
+          "symbol": "K",
+          "type": "RCLike field"
+        },
+        {
+          "symbol": "W",
+          "type": "normed additive commutative group, inner product space over K, and real normed space"
+        },
+        {
+          "symbol": "f",
+          "type": "map ℝ→W"
+        },
+        {
+          "symbol": "g",
+          "type": "map ℝ→W"
+        },
+        {
+          "symbol": "z",
+          "type": "real number"
+        },
+        {
+          "symbol": "t",
+          "type": "real number"
+        }
+      ],
+      "objects": [
+        "K",
+        "W",
+        "f",
+        "g",
+        "z",
+        "t"
+      ],
+      "source_contract": {
+        "hypotheses": [
+          "K is RCLike; W has the stated normed group, K-inner-product and real normed-space structures.",
+          "f is real differentiable at z.",
+          "g is real differentiable at z."
+        ],
+        "declaration": "deriv_inner_apply",
+        "signature": "@deriv_inner_apply : ∀ (𝕜 : Type u_1) {E : Type u_2} [inst : RCLike.{u_1} 𝕜] [inst_1 : NormedAddCommGroup.{u_2} E]\n  [inst_2 : InnerProductSpace.{u_1, u_2} 𝕜 E] [inst_3 : NormedSpace.{0, u_2} ℝ E] {f g : ℝ → E} {x : ℝ},\n  DifferentiableAt.{0, 0, u_2} ℝ f x →\n    DifferentiableAt.{0, 0, u_2} ℝ g x →\n      Eq.{u_1 + 1} (deriv.{0, u_1} (fun t => inner.{u_1, u_2} 𝕜 (f t) (g t)) x)\n        (HAdd.hAdd.{u_1, u_1, u_1} (inner.{u_1, u_2} 𝕜 (f x) (deriv.{0, u_2} g x))\n          (inner.{u_1, u_2} 𝕜 (deriv.{0, u_2} f x) (g x)))"
+      }
+    },
+    {
+      "id": "M009",
+      "kind": "mathlib",
+      "statement": "For every natural k, family A_i of measure spaces indexed by i∈Fin(k+1), each with sigma-finite volume, and index i∈Fin(k+1), the measurable equivalence which sends a tuple x to (x_i,(x_{i.succAbove(j)})_{j∈Fin k}) preserves volume from the finite product of the A_i to A_i times the product of the remaining spaces. Here i.succAbove lists the remaining indices in order.",
+      "definitions": [],
+      "binders": [
+        {
+          "symbol": "k",
+          "type": "natural number"
+        },
+        {
+          "symbol": "A",
+          "type": "family of measure spaces indexed by Fin(k+1)"
+        },
+        {
+          "symbol": "i",
+          "type": "element of Fin(k+1)"
+        },
+        {
+          "symbol": "x",
+          "type": "tuple in the product of A"
+        },
+        {
+          "symbol": "j",
+          "type": "element of Fin k"
+        }
+      ],
+      "objects": [
+        "k",
+        "A",
+        "i",
+        "x",
+        "j"
+      ],
+      "source_contract": {
+        "hypotheses": [
+          "Each A_i is a measure space.",
+          "Each coordinate volume is sigma-finite.",
+          "i is an index in Fin(k+1)."
+        ],
+        "declaration": "MeasureTheory.volume_preserving_piFinSuccAbove",
+        "signature": "@MeasureTheory.volume_preserving_piFinSuccAbove : ∀ {n : ℕ} (α : Fin (HAdd.hAdd.{0, 0, 0} n 1) → Type u)\n  [inst : (i : Fin (HAdd.hAdd.{0, 0, 0} n 1)) → MeasureTheory.MeasureSpace.{u} (α i)]\n  [∀ (i : Fin (HAdd.hAdd.{0, 0, 0} n 1)), MeasureTheory.SigmaFinite.{u} MeasureTheory.volume.{u}]\n  (i : Fin (HAdd.hAdd.{0, 0, 0} n 1)),\n  MeasureTheory.MeasurePreserving.{u, u} (⇑(MeasurableEquiv.piFinSuccAbove.{u} α i)) MeasureTheory.volume.{u}\n    MeasureTheory.volume.{u}"
+      }
+    },
+    {
+      "id": "M010",
+      "kind": "mathlib",
+      "statement": "Let A,B be measurable spaces with s-finite measures μ,ν respectively, and W a normed additive commutative group and real normed space. For every f:A×B→W integrable with respect to μ×ν, ∫_{A×B}f d(μ×ν)=∫_B(∫_A f(x,y)dμ(x))dν(y).",
+      "definitions": [],
+      "binders": [
+        {
+          "symbol": "A",
+          "type": "measurable space"
+        },
+        {
+          "symbol": "B",
+          "type": "measurable space"
+        },
+        {
+          "symbol": "μ",
+          "type": "s-finite measure on A"
+        },
+        {
+          "symbol": "ν",
+          "type": "s-finite measure on B"
+        },
+        {
+          "symbol": "W",
+          "type": "normed additive commutative group and real normed space"
+        },
+        {
+          "symbol": "f",
+          "type": "map A×B→W"
+        },
+        {
+          "symbol": "x",
+          "type": "element of A"
+        },
+        {
+          "symbol": "y",
+          "type": "element of B"
+        }
+      ],
+      "objects": [
+        "A",
+        "B",
+        "μ",
+        "ν",
+        "W",
+        "f",
+        "x",
+        "y"
+      ],
+      "source_contract": {
+        "hypotheses": [
+          "A,B are measurable spaces with s-finite measures μ,ν; W is a normed additive commutative group and real normed space.",
+          "f is integrable for the product measure μ×ν."
+        ],
+        "declaration": "MeasureTheory.integral_prod_symm",
+        "signature": "@MeasureTheory.integral_prod_symm : ∀ {α : Type u_1} {β : Type u_2} {E : Type u_3} [inst : MeasurableSpace.{u_1} α] [inst_1 : MeasurableSpace.{u_2} β]\n  {μ : MeasureTheory.Measure.{u_1} α} {ν : MeasureTheory.Measure.{u_2} β} [inst_2 : NormedAddCommGroup.{u_3} E]\n  [MeasureTheory.SFinite.{u_2} ν] [inst_4 : NormedSpace.{0, u_3} ℝ E] [MeasureTheory.SFinite.{u_1} μ]\n  (f : Prod.{u_1, u_2} α β → E),\n  MeasureTheory.Integrable.{u_3, max u_1 u_2} f (MeasureTheory.Measure.prod.{u_1, u_2} μ ν) →\n    Eq.{u_3 + 1} (∫ (z : Prod.{u_1, u_2} α β), f z ∂MeasureTheory.Measure.prod.{u_1, u_2} μ ν)\n      (∫ (y : β), ∫ (x : α), f (Prod.mk.{u_1, u_2} x y) ∂μ ∂ν)"
+      }
+    }
+  ],
+  "output": {
+    "id": "N004",
+    "kind": "internal",
+    "statement": "For every t0>0 and j∈{1,…,n}, both integrands below are Lebesgue integrable and ∫_{ℝ^n}u_j(j,x,t0)·v_j(j,x,t0) dx=−∫_{ℝ^n}u_t(x,t0)·u_jj(j,x,t0) dx.",
+    "definitions": [
+      "D001",
+      "D003",
+      "D004",
+      "D005"
+    ],
+    "binders": [
+      {
+        "symbol": "t0",
+        "type": "positive real number"
+      },
+      {
+        "symbol": "j",
+        "type": "integer in {1,…,n}"
+      },
+      {
+        "symbol": "x",
+        "type": "point of ℝ^n"
+      }
+    ],
+    "objects": [
+      "u_j",
+      "v_j",
+      "u_t",
+      "u_jj",
+      "t0",
+      "j",
+      "x",
+      "n"
+    ]
+  },
+  "inference": {
+    "id": "R004",
+    "inputs": [
+      "N002",
+      "M003",
+      "M006",
+      "M009",
+      "M010"
+    ],
+    "output": "N004",
+    "definitions": [
+      "D001",
+      "D003",
+      "D004",
+      "D005"
+    ],
+    "rules": [
+      "direct",
+      "forall_introduction",
+      "exists_elimination"
+    ],
+    "locals": [
+      {
+        "symbol": "t0",
+        "type": "positive real number",
+        "scope": "R004/argument",
+        "start": "S001",
+        "end": "S003",
+        "kind": "arbitrary",
+        "declaration": "Fix arbitrary t0>0.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": []
+      },
+      {
+        "symbol": "j",
+        "type": "integer in {1,…,n}",
+        "scope": "R004/argument",
+        "start": "S001",
+        "end": "S003",
+        "kind": "arbitrary",
+        "declaration": "Fix arbitrary j∈{1,…,n}.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "n"
+        ]
+      },
+      {
+        "symbol": "C",
+        "type": "compact subset of ℝ^n",
+        "scope": "R004/argument",
+        "start": "S001",
+        "end": "S003",
+        "kind": "witness",
+        "declaration": "Choose C from N002 for t0.",
+        "from_inputs": [
+          "N002"
+        ],
+        "from_local": [],
+        "objects": [
+          "t0",
+          "n"
+        ]
+      },
+      {
+        "symbol": "R",
+        "type": "positive real number",
+        "scope": "R004/argument",
+        "start": "S001",
+        "end": "S003",
+        "kind": "witness",
+        "declaration": "Choose its enclosing radius R>0 from N002.",
+        "from_inputs": [
+          "N002"
+        ],
+        "from_local": [],
+        "objects": [
+          "t0",
+          "C",
+          "n"
+        ]
+      },
+      {
+        "symbol": "Q",
+        "type": "closed spatial box",
+        "scope": "R004/argument",
+        "start": "S001",
+        "end": "S003",
+        "kind": "definition",
+        "declaration": "Define Q=[−R,R]^n.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "R",
+          "n"
+        ]
+      },
+      {
+        "symbol": "g",
+        "type": "smooth map ℝ^n→ℝ",
+        "scope": "R004/argument",
+        "start": "S001",
+        "end": "S003",
+        "kind": "definition",
+        "declaration": "Set g(x)=u_t(x,t0)·u_j(j,x,t0).",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "u_t",
+          "u_j",
+          "j",
+          "t0",
+          "n"
+        ]
+      },
+      {
+        "symbol": "d",
+        "type": "map ℝ^n→ℝ",
+        "scope": "R004/argument",
+        "start": "S001",
+        "end": "S003",
+        "kind": "definition",
+        "declaration": "Set d(x)=∂_{x_j}g(x).",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "g",
+          "j",
+          "n"
+        ]
+      },
+      {
+        "symbol": "ι",
+        "type": "coordinate insertion bijection ℝ×ℝ^(n−1)→ℝ^n",
+        "scope": "R004/argument",
+        "start": "S002",
+        "end": "S003",
+        "kind": "definition",
+        "declaration": "Let ι(z,y) put z in coordinate j and the coordinates of y in the remaining positions in increasing order.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "n",
+          "j"
+        ]
+      },
+      {
+        "symbol": "y",
+        "type": "point of ℝ^(n−1)",
+        "scope": "R004/coordinate section",
+        "start": "S002",
+        "end": "S002",
+        "kind": "arbitrary",
+        "declaration": "Fix arbitrary remaining coordinates y to evaluate the one-variable section.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "n"
+        ]
+      }
+    ],
+    "argument": [
+      {
+        "id": "S001",
+        "text": "Fix t0>0 and j∈{1,…,n}; N002 gives n≥1 and the compact set C, radius R>0, and Q=[−R,R]^n. Define g(x)=u_t(x,t0)·u_j(j,x,t0) and d=∂_{x_j}g. They are smooth by N002. Apply M006 along the jth spatial coordinate line to the sections of u_t and u_j. The product rule gives d=v_j·u_j+u_t·u_jj. N002 states integrability of d and of its two summands, and also g=0 outside C. Since C⊆int Q, g vanishes on an open neighborhood of the boundary of Q, in particular at each pair of opposite j-coordinate faces.",
+        "uses": [
+          "N002",
+          "M006"
+        ],
+        "uses_local": [],
+        "objects": [
+          "n",
+          "j",
+          "t0",
+          "C",
+          "R",
+          "Q",
+          "g",
+          "d",
+          "u_t",
+          "u_j",
+          "u_jj",
+          "v_j"
+        ],
+        "produces": [
+          {
+            "id": "F001",
+            "statement": "d(x)=v_j(j,x,t0)·u_j(j,x,t0)+u_t(x,t0)·u_jj(j,x,t0). The three scalar functions in this equality are continuous, integrable, and zero outside C. The function g is smooth and zero off C⊆int Q, so it vanishes at the j-coordinate endpoints ±R for every choice of the remaining coordinates.",
+            "binders": [
+              {
+                "symbol": "x",
+                "type": "point of ℝ^n"
+              }
+            ],
+            "objects": [
+              "d",
+              "v_j",
+              "u_j",
+              "u_t",
+              "u_jj",
+              "j",
+              "x",
+              "t0",
+              "C",
+              "Q",
+              "g",
+              "R",
+              "n"
+            ],
+            "assumptions": []
+          }
+        ],
+        "introduces": [],
+        "discharges": []
+      },
+      {
+        "id": "S002",
+        "text": "Define the insertion map ι. Fix arbitrary remaining coordinates y∈ℝ^(n−1). The function z↦g(ι(z,y)) is smooth on ℝ and its derivative is z↦d(ι(z,y)). The derivative is continuous on [−R,R], hence interval-integrable there. Apply M003 with endpoints −R,R: ∫_{−R}^R d(ι(z,y)) dz=g(ι(R,y))−g(ι(−R,y))=0 by F001. These sections of d vanish when |z|>R. Thus their full real integrals equal the interval integrals and are zero. The oriented interval integral here equals the Lebesgue integral on [−R,R], since −R<R and the two endpoints have measure zero. This argument holds for every y; when n=1 there are no remaining coordinates and ℝ^0 is a one-point product with total measure one.",
+        "uses": [
+          "M003"
+        ],
+        "uses_local": [
+          "F001"
+        ],
+        "objects": [
+          "n",
+          "j",
+          "g",
+          "d",
+          "ι",
+          "y",
+          "R",
+          "Q"
+        ],
+        "produces": [
+          {
+            "id": "F002",
+            "statement": "For every y0∈ℝ^(n−1), the section z↦d(ι(z,y0)) is integrable on ℝ and ∫_ℝ d(ι(z,y0)) dz=0.",
+            "binders": [
+              {
+                "symbol": "y0",
+                "type": "point of ℝ^(n−1)"
+              },
+              {
+                "symbol": "z",
+                "type": "real number"
+              }
+            ],
+            "objects": [
+              "y0",
+              "z",
+              "d",
+              "ι",
+              "n"
+            ],
+            "assumptions": []
+          }
+        ],
+        "introduces": [],
+        "discharges": []
+      },
+      {
+        "id": "S003",
+        "text": "Under the coordinate extraction inverse to ι, M009 identifies Lebesgue measure on ℝ^n with Lebesgue measure on ℝ times the product measure on ℝ^(n−1). Use k=n−1, each coordinate space ℝ, and index j−1 in Fin n; n≥1 makes n=(n−1)+1. Hence the integrable function d from F001 has the same integral and integrability as (z,y)↦d(ι(z,y)) on the product. Apply M010 to that product function; its integral is ∫_{ℝ^(n−1)}(∫_ℝ d(ι(z,y)) dz)dy=0 by F002. Equivalently this is the supplied Fubini calculation over Q, since every term is zero outside Q and all terms are absolutely integrable. In particular ∫d=0. By F001 and linearity for integrable functions, 0=∫v_j·u_j+∫u_t·u_jj. Symmetry of the real dot product and rearrangement give ∫u_j·v_j=−∫u_t·u_jj, with all integrals finite. Arbitrary t0 and j yield the asserted integration-by-parts identity.",
+        "uses": [
+          "N002",
+          "M009",
+          "M010"
+        ],
+        "uses_local": [
+          "F001",
+          "F002"
+        ],
+        "objects": [
+          "n",
+          "j",
+          "t0",
+          "d",
+          "g",
+          "ι",
+          "Q",
+          "u_j",
+          "v_j",
+          "u_t",
+          "u_jj"
+        ],
+        "produces": [],
+        "introduces": [],
+        "discharges": []
+      }
+    ],
+    "applications": [
+      {
+        "input": "M006",
+        "at": "S001",
+        "bindings": "K=ℝ,W=ℝ^m; f and g(source) are the j-coordinate sections of u_t(·,t0) and u_j(j,·,t0).",
+        "hypothesis_checks": [
+          "Euclidean ℝ^m is a real inner-product and normed space.",
+          "N002 exports smoothness of u_t, giving differentiability of its spatial section.",
+          "N002 exports smoothness of u_j, giving differentiability of its spatial section."
+        ]
+      },
+      {
+        "input": "M003",
+        "at": "S002",
+        "bindings": "W=ℝ,f(z)=g(ι(z,y)),a=−R,b=R.",
+        "hypothesis_checks": [
+          "ℝ is a complete real normed space.",
+          "F001 and the coordinate insertion give a smooth section on all ℝ, so differentiability holds including endpoints.",
+          "Its derivative d∘ι is continuous on [−R,R] by F001, hence integrable on this compact finite-measure interval."
+        ]
+      },
+      {
+        "input": "M009",
+        "at": "S003",
+        "bindings": "k=n−1,A_i=ℝ for every i∈Fin n,i=j−1; the native extraction map is ι inverse.",
+        "hypothesis_checks": [
+          "Every coordinate has the standard real Lebesgue measure-space structure.",
+          "Real Lebesgue measure is sigma-finite, by the increasing cover by bounded intervals.",
+          "N002 gives n≥1 and j∈{1,…,n}, so the converted index is in Fin((n−1)+1)."
+        ]
+      },
+      {
+        "input": "M010",
+        "at": "S003",
+        "bindings": "A=ℝ,B=ℝ^(n−1),μ and ν their Lebesgue measures,W=ℝ,f(z,y)=d(ι(z,y)).",
+        "hypothesis_checks": [
+          "These are standard measurable product spaces with sigma-finite, hence s-finite, Lebesgue measures; the empty product for n=1 has measure one; ℝ is a real normed space.",
+          "F001 gives integrability of d on ℝ^n, and M009 in S003 transports it through the volume-preserving measurable coordinate equivalence."
+        ]
+      }
+    ]
+  },
+  "warning": "Direct inputs and fixed logic are supplied. Audit A may record positively checked routine background under the declared policy, with logged pinned-library evidence. No ancestor proof or extra H is available. A packet is not an audit certificate.",
+  "packet_sha256": "111cb709fdb0fcceca0cadac448d3402e60d660e53c58cf16e0c3f8abf4d10f7"
+}

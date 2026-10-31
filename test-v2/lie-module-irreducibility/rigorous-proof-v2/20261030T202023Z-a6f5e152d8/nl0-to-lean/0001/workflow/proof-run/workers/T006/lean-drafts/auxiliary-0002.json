@@ -1,0 +1,24 @@
+{
+  "statement": "∀ (B : Module.Basis (Fin (lam.toNat + 1)) ℂ V), (∀ i, B i = e y v i.val) → ∀ i j, unit B i j = ((Nat.choose lam.toNat j.val : ℂ)⁻¹) • (dp x (lam.toNat - i.val) * dp y lam.toNat * dp x lam.toNat * dp y (lam.toNat - j.val))",
+  "proof": "classical\nrcases h_T004 with ⟨hpos, hcard, hcoords, hstrings, hkill, hact, hx, hy⟩\nlet top : Fin (lam.toNat + 1) := ⟨lam.toNat, by omega⟩\nlet bot : Fin (lam.toNat + 1) := ⟨0, by omega⟩\nhave hX (k : Fin (lam.toNat + 1)) :\n    dp x lam.toNat (e y v k.val) = if k.val = lam.toNat then e y v 0 else 0 := by\n  rw [hx]\n  by_cases hk : k.val = lam.toNat\n  · simp [hk]\n  · have hlt : k.val < lam.toNat := by omega\n    simp [Nat.not_le.mpr hlt, hk]\nhave hY : dp y lam.toNat (e y v 0) = e y v lam.toNat := by\n  simpa using hy lam.toNat bot\nhave hXi (i : Fin (lam.toNat + 1)) :\n    dp x (lam.toNat - i.val) (e y v lam.toNat) = e y v i.val := by\n  have hi : i.val ≤ lam.toNat := by omega\n  have heq : lam.toNat - (lam.toNat - i.val) = i.val := by omega\n  have heq' : lam.toNat - lam.toNat + (lam.toNat - i.val) = lam.toNat - i.val := by omega\n  simpa [top, Nat.sub_le, heq, heq'] using hx (lam.toNat - i.val) top\nlet Q := dp y lam.toNat * dp x lam.toNat\nhave hQ (k : Fin (lam.toNat + 1)) :\n    Q (e y v k.val) = if k.val = lam.toNat then e y v lam.toNat else 0 := by\n  change dp y lam.toNat (dp x lam.toNat (e y v k.val)) = _\n  rw [hX]\n  split_ifs <;> simp_all only [map_zero]\nhave hQY (j k : Fin (lam.toNat + 1)) :\n    Q (dp y (lam.toNat - j.val) (e y v k.val)) =\n      if k = j then (Nat.choose lam.toNat j.val : ℂ) • e y v lam.toNat else 0 := by\n  rw [hy]\n  by_cases hkj : k = j\n  · subst k\n    have hj : j.val ≤ lam.toNat := by omega\n    have hs : j.val + (lam.toNat - j.val) = lam.toNat := by omega\n    simp only [hs, le_refl, ↓reduceIte, map_smul]\n    rw [show e y v lam.toNat = e y v top.val from rfl, hQ]\n    simp only [top, ↓reduceIte]\n    rw [Nat.choose_symm hj]\n  · by_cases hle : k.val + (lam.toNat - j.val) ≤ lam.toNat\n    · let l : Fin (lam.toNat + 1) := ⟨k.val + (lam.toNat - j.val), by omega⟩\n      have hne : l.val ≠ lam.toNat := by\n        have hv : k.val ≠ j.val := fun hh => hkj (Fin.ext hh)\n        dsimp [l]\n        omega\n      simp only [hle, ↓reduceIte, map_smul]\n      rw [show e y v (k.val + (lam.toNat - j.val)) = e y v l.val from rfl, hQ]\n      simp [hne, hkj]\n    · simp [hle, hkj]\nintro B hB i j\nhave hc : (Nat.choose lam.toNat j.val : ℂ) ≠ 0 := by\n  exact_mod_cast (Nat.choose_pos (show j.val ≤ lam.toNat by omega)).ne'\napply B.ext\nintro k\nchange unit B i j (B k) = _\nrw [hB k]\nchange unit B i j (e y v k.val) =\n  (Nat.choose lam.toNat j.val : ℂ)⁻¹ •\n    dp x (lam.toNat - i.val) (Q (dp y (lam.toNat - j.val) (e y v k.val)))\nrw [hQY]\nby_cases hk : k = j\n· subst k\n  simp only [↓reduceIte, map_smul, hXi, smul_smul, inv_mul_cancel₀ hc, one_smul]\n  rw [← hB j]\n  simp [unit, hB i]\n· simp only [hk, ↓reduceIte, map_zero, smul_zero]\n  rw [← hB k]\n  simp [unit, Ne.symm hk]\n",
+  "check": {
+    "exit_code": 1,
+    "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-3othibn6/output/Auxiliary.lean:192:4: error: Type mismatch: After simplification, term\n  hy lam.toNat bot\n has type\n  (dp y lam.toNat) (e y v ↑bot) =\n    if bot = 0 then ↑((↑bot + lam.toNat).choose lam.toNat) • e y v (↑bot + lam.toNat) else 0\nbut is expected to have type\n  (dp y lam.toNat) (e y v 0) = e y v lam.toNat\nchecked : ∀ (p : ℕ) (K : Type u_1) [fieldK : Field K] (lam : ℤ) (V : Type u_2) [addV : AddCommGroup V]\n  [moduleV : _root_.Module ℂ V] (x y h : Module.End ℂ V) (v : V) (M : Submodule ℤ V),\n  Nat.Prime p ∧ CharP K p ∧ 0 ≤ lam ∧ lam < ↑p →\n    ComplexOutput lam x y h v →\n      LocalBasics p lam M x y →\n        ∀ (B : Module.Basis (Fin (lam.toNat + 1)) ℂ V),\n          (∀ (i : Fin (lam.toNat + 1)), B i = e y v ↑i) →\n            ∀ (i j : Fin (lam.toNat + 1)),\n              unit B i j =\n                (↑(lam.toNat.choose ↑j))⁻¹ •\n                  (dp x (lam.toNat - ↑i) * dp y lam.toNat * dp x lam.toNat * dp y (lam.toNat - ↑j))\n'YuiAuxiliary.checked' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]\n",
+    "stderr": "",
+    "wall_seconds": 6.614228582940996,
+    "source_path": "/Users/syyui/projects/Yui-results/test-v2/lie-module-irreducibility/rigorous-proof-v2/20261030T202023Z-a6f5e152d8/native-checks/5a9c8d50a9194f73a094f61188c87c01.lean",
+    "source_sha256": "91a1c42d4d996ad890c41a5733821b8bf2caef841496bfef7cd20ee36f638a23",
+    "auxiliary_valid": false,
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext",
+      "sorryAx"
+    ],
+    "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+    "context_port": "T006",
+    "candidate": 2,
+    "accepted": false,
+    "stage_complete": false
+  }
+}

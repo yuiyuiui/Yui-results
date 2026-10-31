@@ -1,0 +1,24 @@
+{
+  "statement": "∀ f ∈ scalarTerms u, ContDiffOn ℝ ∞ f (domain n)",
+  "proof": "classical\nhave hop : ∀ {F : Type} [NormedAddCommGroup F] [NormedSpace ℝ F] (f : X n × ℝ → F),\n    ContDiffOn ℝ ∞ f (domain n) → ContDiffOn ℝ ∞ (dt f) (domain n) ∧\n    ∀ j, ContDiffOn ℝ ∞ (dx f j) (domain n) := by\n  intro F _ _ f hf\n  have ho : IsOpen (domain n) := isOpen_lt continuous_const continuous_snd\n  constructor\n  · intro p hp\n    have hf' : ContDiffAt ℝ ∞ (fun z : (X n × ℝ) × ℝ => f (z.1.1, z.2)) (p, p.2) :=\n      (hf.contDiffAt (ho.mem_nhds hp)).comp _ (contDiffAt_fst.fst.prodMk contDiffAt_snd)\n    have hh : ContDiffAt ℝ ∞ (fun p : X n × ℝ => fderiv ℝ (fun r : ℝ => f (p.1,r)) p.2) p :=\n      hf'.fderiv contDiffAt_snd (by simp)\n    have he : (fun p : X n × ℝ => (fderiv ℝ (fun r : ℝ => f (p.1,r)) p.2) 1) = dt f := by\n      funext p\n      exact fderiv_apply_one_eq_deriv\n    rw [← he]\n    exact (hh.clm_apply contDiffAt_const).contDiffWithinAt\n  · intro j p hp\n    have hf' : ContDiffAt ℝ ∞ (fun z : (X n × ℝ) × X n => f (z.2, z.1.2)) (p, p.1) :=\n      (hf.contDiffAt (ho.mem_nhds hp)).comp _ (contDiffAt_snd.prodMk contDiffAt_fst.snd)\n    exact ((hf'.fderiv contDiffAt_fst (by simp)).clm_apply contDiffAt_const).contDiffWithinAt\nhave ht := (hop u h_H002).1\nhave hx := (hop u h_H002).2\nhave htt := (hop (dt u) ht).1\nhave hxt := (hop (dt u) ht).2\nhave hxx := fun j => (hop (dx u j) (hx j)).2 j\nhave he : ContDiffOn ℝ ∞ (density u) (domain n) := by\n  exact (ht.norm_sq ℝ).add (ContDiffOn.sum (fun j _ => (hx j).norm_sq ℝ))\nhave het := (hop (density u) he).1\nhave hk : ContDiffOn ℝ ∞ (kinetic u) (domain n) := ht.inner htt\nhave hm : ∀ j, ContDiffOn ℝ ∞ (mixed u j) (domain n) := fun j => (hx j).inner (hxt j)\nhave hl : ∀ j, ContDiffOn ℝ ∞ (lapTerm u j) (domain n) := fun j => ht.inner (hxx j)\nhave hf : ∀ j, ContDiffOn ℝ ∞ (flux u j) (domain n) := fun j => ht.inner (hx j)\nhave hdf : ∀ j, ContDiffOn ℝ ∞ (dx (flux u j) j) (domain n) := fun j => (hop _ (hf j)).2 j\nintro f h\nrcases h with rfl | rfl | rfl | ⟨j, rfl | rfl | rfl | rfl⟩\n· exact he\n· exact het\n· exact hk\n· exact hm j\n· exact hl j\n· exact hf j\n· exact hdf j",
+  "check": {
+    "exit_code": 1,
+    "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-q1sxd231/output/Auxiliary.lean:98:62: error: Application type mismatch: The argument\n  htt\nhas type\n  ContDiffOn ℝ ∞ (dt (dt u)) (domain n)\nof sort `Prop` but is expected to have type\n  Type ?u.391\nof sort `Type (?u.391 + 1)` in the application\n  @ContDiffOn.inner htt\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-q1sxd231/output/Auxiliary.lean:99:80: error: Application type mismatch: The argument\n  hxt j\nhas type\n  ContDiffOn ℝ ∞ (dx (dt u) j) (domain n)\nof sort `Prop` but is expected to have type\n  Type ?u.405\nof sort `Type (?u.405 + 1)` in the application\n  @ContDiffOn.inner (hxt j)\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-q1sxd231/output/Auxiliary.lean:100:78: error: Application type mismatch: The argument\n  hxx j\nhas type\n  ContDiffOn ℝ ∞ (dx (dx u j) j) (domain n)\nof sort `Prop` but is expected to have type\n  Type ?u.419\nof sort `Type (?u.419 + 1)` in the application\n  @ContDiffOn.inner (hxx j)\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-q1sxd231/output/Auxiliary.lean:101:75: error: Application type mismatch: The argument\n  hx j\nhas type\n  ContDiffOn ℝ ∞ (dx u j) (domain n)\nof sort `Prop` but is expected to have type\n  Type ?u.433\nof sort `Type (?u.433 + 1)` in the application\n  @ContDiffOn.inner (hx j)\nchecked : ∀ (n m : ℕ) (u : X n × ℝ → V m) (q : V m),\n  1 ≤ n ∧ 1 ≤ m →\n    ContDiffOn ℝ ∞ u (domain n) →\n      ‖q‖ = 1 →\n        (∀ (s t : ℝ), 0 < s → s < t → ∃ C, IsCompact C ∧ ∀ x ∉ C, ∀ r ∈ Icc s t, u (x, r) = q) →\n          (∀ (t0 : ℝ),\n              0 < t0 →\n                ∃ C R,\n                  IsCompact C ∧\n                    0 < R ∧\n                      (∀ x ∈ C, ∀ (j : Fin n), x j ∈ Ioo (-R) R) ∧\n                        ∀ x ∉ C, ∀ r ∈ Icc (t0 / 2) (3 * t0 / 2), u (x, r) = q) →\n            ∀ f ∈ scalarTerms u, ContDiffOn ℝ ∞ f (domain n)\n'YuiAuxiliary.checked' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]\n",
+    "stderr": "",
+    "wall_seconds": 3.514766416978091,
+    "source_path": "/Users/syyui/projects/Yui-results/test-v2/wave-map-energy/rigorous-proof-v2/20261030T202024Z-cf5e80f1ae/native-checks/1732736eabaa43128c5e91eec489dabb.lean",
+    "source_sha256": "e334f25c8aa26c015b42bb3050a0dd223991518019d4c69322470790f009e59e",
+    "auxiliary_valid": false,
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext",
+      "sorryAx"
+    ],
+    "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+    "context_port": "T004",
+    "candidate": 6,
+    "accepted": false,
+    "stage_complete": false
+  }
+}

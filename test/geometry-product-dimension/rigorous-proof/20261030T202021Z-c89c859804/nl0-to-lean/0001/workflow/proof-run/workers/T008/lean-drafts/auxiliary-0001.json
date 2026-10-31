@@ -1,0 +1,9 @@
+{
+  "statement": "∀ (hn : 1 ≤ n) (q r b : ℝ), 0 < q → 0 < r → 0 < b → ∀ x : GPEucl n, ∃ V : Set (GPEucl n), x ∈ V ∧ 0 < Metric.ediam V ∧ Metric.ediam V ≤ ENNReal.ofReal r ∧ (Metric.ediam V) ^ q < ENNReal.ofReal b",
+  "proof": "by\n  intro hn q r b hq hr hb x\n  letI : Nonempty (Fin n) := ⟨⟨0, by omega⟩⟩\n  letI : Nontrivial (GPEucl n) := inferInstance\n  let ρ : ℝ := min r (b ^ q⁻¹) / 4\n  have hp : 0 < ρ := div_pos (lt_min hr (Real.rpow_pos_of_pos hb _)) (by norm_num)\n  have hd : Metric.ediam (Metric.ball x ρ) = ENNReal.ofReal (2 * ρ) := by\n    rw [← Metric.diam_ball_eq x hp.le]\n    exact (ENNReal.ofReal_toReal Metric.isBounded_ball.ediam_ne_top).symm\n  refine ⟨Metric.ball x ρ, Metric.mem_ball_self hp, ?_, ?_, ?_⟩\n  · rw [hd]; exact ENNReal.ofReal_pos.mpr (by positivity)\n  · rw [hd]\n    apply ENNReal.ofReal_le_ofReal\n    have := min_le_left r (b ^ q⁻¹)\n    dsimp [ρ]; linarith\n  · rw [hd, ENNReal.ofReal_rpow_of_pos (by positivity)]\n    apply (ENNReal.ofReal_lt_ofReal_iff hb).mpr\n    have hlt : 2 * ρ < b ^ q⁻¹ := by\n      have := min_le_right r (b ^ q⁻¹)\n      have := Real.rpow_pos_of_pos hb q⁻¹\n      dsimp [ρ]; linarith\n    simpa only [Real.rpow_inv_rpow hb.le hq.ne'] using Real.rpow_lt_rpow (by positivity : 0 ≤ 2 * ρ) hlt hq",
+  "check": {
+    "accepted": false,
+    "error": "supply tactic body after by",
+    "feedback_kind": "candidate_rejected"
+  }
+}

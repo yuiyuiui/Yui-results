@@ -1,34 +1,51 @@
-# Benchmark startup
+# Independent Yui benchmark operator
 
-These instructions govern the invoking operator, not a measured direct-model
-session. The direct supervisor disables project instructions, memories, plugins
-and delegation for that isolated session.
+These instructions govern the invoking task, not an additional measured model
+stage. This directory is self-contained. Read its own README.md and
+settings.json; use exactly that file's `skill_name` and `benchmark_name`.
 
-1. Before starting either arm, run `python3 benchmark/skill_check.py` from the
-   repository root, or use its actual path from another working directory.
-   It must find the explicitly selected enabled installed skill in
-   Codex's current skill registry. A nearby checkout or
-   `rigorous-proof-development` is not a substitute. Stop with the actual error
-   if installation, discovery or the required runtime is unavailable.
-   The default is exactly `rigorous-proof` (V1). For V2 use
-   `skill_check.py --skill rigorous-proof-v2`; never substitute one variant for
-   the other when its installation is missing.
-2. Start the Yui arm by explicitly invoking `$rigorous-proof` and reading the
-   installed `SKILL.md` returned by that check. Use
-   `benchmark/prepare_yui.py --workers N` to prepare the concrete invocation
-   after N has been confirmed. Follow that skill's own target selection,
-   configuration collection and detached execution. The preparation command
-   itself starts no model and is not a successful or completed benchmark.
-   For V2 explicitly invoke `$rigorous-proof-v2` and prepare with
-   `--skill rigorous-proof-v2 --workers N`; each variant owns separate outputs.
-3. After dispatch, register one actual host heartbeat every ten minutes, record
-   its ID and end the foreground turn. Each scheduled check is bounded. If host
-   scheduling is unavailable, disclose it and return manual observation commands.
-4. The direct arm uses `benchmark/pure-model-result/runner.py`. It checks the
-   installed skill and resolves only its generic native-session supervisor.
-   Its measured prompt remains `prompt.py`; never add Yui proof rules, strategy
-   cards, other-arm results or other proof skills to that session.
-5. Never hard-code a Yui checkout location, assume the repositories are siblings,
-   or fetch an arbitrary runtime when the installed skill is missing. Record the
-   actual installed version, profile, inputs, execution faults and missing usage.
-   Keep model construction and independent acceptance distinct.
+1. Before dispatch, run this directory's `prepare_yui.py --verify-preparation`.
+   If local preparation is absent or stale, recheck its portable configuration
+   and run `prepare_yui.py --write-preparation`. These commands only inspect
+   registry/environment/input metadata; they never start a mathematical job.
+   A preparation is not authorization: wait for the human's explicit start.
+2. Explicitly invoke the exact registered `$skill_name` from settings.json and
+   read the actual installed SKILL.md returned by the local skill check. Missing,
+   disabled, incomplete or ambiguous installations block startup. Never select
+   another variant, a neighboring checkout, or rigorous-proof-development.
+3. Use only this directory's original PDF as initial mathematical material.
+   Resolve the complete Theorem 1 from it, verify extraction fidelity and freeze
+   every source hypothesis/quantifier/definition/conclusion. The local settings
+   explicitly retain both model profiles and 20 workers from the user's chosen
+   benchmark configuration. Do not silently choose another count or profile.
+4. Read `.prepared/task.md` as the reviewable dispatch instruction. Execute the
+   installed skill's full normal workflow only after actual start authorization.
+   Supply a fresh explicit `--out` under this directory's `results/<run-id>/`.
+   Do not prepare/launch a direct-model arm or use a skill-default output path.
+5. Do not read another benchmark, a direct-model subtree, archived tests, old
+   run outputs, or an owner comparison as construction material. No mathematical
+   hints, proofs, source caches or verdicts cross runs. Only declared materials
+   and the selected installed skill's rules reach measured isolated stages.
+6. After detached dispatch, verify PID/start identity/PGID, register one real
+   host heartbeat every ten minutes, record its ID and end the foreground turn.
+   Each wake is one bounded observation. Notify briefly in Chinese on meaningful
+   change/fault/completion or required action; unchanged checks stay quiet.
+   Do not use foreground sleep/poll loops. Disclose unavailable scheduling.
+7. Let normal controllers own diagnosis and local repair. Never restart live
+   work, bypass recovery guards or resample a mathematical nonpass. Preserve all
+   faults, stopped attempts, inherited evidence and continuation costs.
+8. At termination inspect real gates, validate bound artifacts without a new
+   model/proof run, confirm exact owned process/group exits, preserve
+   FINAL_OUTCOME.json and delete this run's completed heartbeat. Report assembly,
+   native trust, complete independent A/B, target/external correspondence, source
+   warnings, health and usage completeness separately. No unqualified PASS for
+   missing primary-source verification; compilation is not independent B.
+9. Do not compare partial mathematical outputs. The coordinating owner writes
+   the requested cross-version comparison only after both selected runs are
+   terminal, outside either construction session. Shared host/account resource
+   contention prevents an isolated-speed causal claim.
+
+No absolute checkout path is a portable requirement. Resolve the skill from the
+registry, tool paths from its runtime configuration, and local inputs/outputs
+from this directory. Preparation paths are host-local and must be regenerated
+after relocation, an input/configuration edit, or an installed runtime change.

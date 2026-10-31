@@ -1,0 +1,23 @@
+{
+  "proof": "constructor\n· classical\n  have hp : Prime (p : ℤ) := Int.prime_iff_natAbs_prime.mpr (by simpa using h_H001.1)\n  have hOne : ¬ (p : ℤ) ∣ 1 := hp.not_dvd_one\n  have hmul : ∀ b d : ℤ, ¬ (p : ℤ) ∣ b → ¬ (p : ℤ) ∣ d → ¬ (p : ℤ) ∣ b*d := by\n    intro b d hb hd hbd\n    exact (Int.Prime.dvd_mul' h_H001.1 hbd).elim hb hd\n  let S : Subring ℚ :=\n    { carrier := {q : ℚ | ∃ a b : ℤ, b ≠ 0 ∧ ¬ (p : ℤ) ∣ b ∧ q = (a : ℚ) / b}\n      zero_mem' := by exact ⟨0, 1, one_ne_zero, hOne, by norm_num⟩\n      one_mem' := by exact ⟨1, 1, one_ne_zero, hOne, by norm_num⟩\n      add_mem' := by\n        rintro q r ⟨a, b, hb, hpb, rfl⟩ ⟨c, d, hd, hpd, rfl⟩\n        refine ⟨a*d+c*b, b*d, mul_ne_zero hb hd, hmul b d hpb hpd, ?_⟩\n        push_cast\n        have hbq : (b : ℚ) ≠ 0 := by exact_mod_cast hb\n        have hdq : (d : ℚ) ≠ 0 := by exact_mod_cast hd\n        simpa only [mul_comm (b : ℚ) (c : ℚ)] using div_add_div (a : ℚ) (c : ℚ) hbq hdq\n      neg_mem' := by\n        rintro q ⟨a, b, hb, hpb, rfl⟩\n        exact ⟨-a, b, hb, hpb, by push_cast; ring⟩\n      mul_mem' := by\n        rintro q r ⟨a, b, hb, hpb, rfl⟩ ⟨c, d, hd, hpd, rfl⟩\n        refine ⟨a*c, b*d, mul_ne_zero hb hd, hmul b d hpb hpd, ?_⟩\n        push_cast\n        exact div_mul_div_comm _ _ _ _ }\n  have hRS : LR.R p = S := by\n    apply le_antisymm\n    · exact Subring.closure_le.mpr (fun q hq => hq)\n    · intro q hq\n      exact Subring.subset_closure hq\n  have hmem : ∀ q : ℚ, q ∈ LR.R p ↔ ∃ a b : ℤ, b ≠ 0 ∧ ¬ (p : ℤ) ∣ b ∧ q = (a : ℚ) / b := by\n    intro q\n    rw [hRS]\n    rfl\n  refine ⟨hmem, ?_⟩\n  intro b hpb\n  have hb : b ≠ 0 := by\n    intro h\n    apply hpb\n    simp [h]\n  have hbq : (b : ℚ) ≠ 0 := by exact_mod_cast hb\n  let c : LR.R p := ⟨1 / (b : ℚ), (hmem _).mpr ⟨1, b, hb, hpb, by norm_num⟩⟩\n  refine ⟨⟨(b : LR.R p), c, ?_, ?_⟩, rfl⟩\n  · apply Subtype.ext\n    change (b : ℚ) * (1 / (b : ℚ)) = 1\n    field_simp\n  · apply Subtype.ext\n    change (1 / (b : ℚ)) * (b : ℚ) = 1\n    field_simp\n  \n· classical\n  letI : FiniteDimensional ℂ V := h_H002.2.2.2.1\n  rcases h_H004.1 with ⟨ι, m, bc, hmb⟩\n  letI : Finite ι := Module.Finite.finite_basis bc\n  letI : Fintype ι := Fintype.ofFinite ι\n  have hc : Fintype.card ι = Fintype.card (LR.I l) := by\n    rw [← Module.finrank_eq_card_basis bc, h_H002.2.2.2.2.1]\n    simp [LR.I]\n  obtain ⟨e⟩ := Fintype.card_eq.mp hc\n  refine ⟨m.reindex e, bc.reindex e, ?_⟩\n  intro i\n  simpa only [Module.Basis.reindex_apply] using hmb (e.symm i)",
+  "statement": "LR.LocalRingSpec p ∧ ∃ (m : Module.Basis (LR.I l) ℤ M) (bc : Module.Basis (LR.I l) ℂ V), ∀ i, (m i : V) = bc i",
+  "check": {
+    "exit_code": 0,
+    "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/nl0-ir-check-j1nssm2j/output/Check.lean:263:341: warning: Variable name `h_T005` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nT006 : ∀ (K : Type u_1) [fieldK : Field K] (V : Type u_2) [addV : AddCommGroup V] [modV : Module ℂ V] (p : ℕ) (l : ℤ)\n  (M : Submodule ℤ V) (rho : ↥LR.L →ₗ[ℂ] Module.End ℂ V) (x y h : ↥LR.L) (v : V),\n  Nat.Prime p ∧ CharP K p ∧ 0 ≤ l ∧ l < ↑p →\n    LR.ComplexHyp l rho x y h →\n      LR.Admissible rho x y M →\n        LR.N1 l (rho x) (rho y) (rho h) v → LR.LocalRingSpec p ∧ ∃ m bc, ∀ (i : LR.I l), ↑(m i) = bc i\n'Translation.T006' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+    "stderr": "",
+    "wall_seconds": 6.817384792026132,
+    "source_path": "/Users/syyui/projects/Yui-results/test/lie-module-irreducibility/rigorous-proof/20261030T202021Z-c161389626/native-checks/7dc010d050f645fcb8551bc4c7ea06c3.lean",
+    "source_sha256": "8e0cafdae3eaa57fabb790970c5015e8c2338e9cb46906b343226935408a8840",
+    "status": "LOCAL-PROOF-CHECKED",
+    "contract_sha256": "545b9318510f0eec66107c8abe623d3bad571cf47a1f14ed0097efbf9718aed5",
+    "lean_sha256": "8e0cafdae3eaa57fabb790970c5015e8c2338e9cb46906b343226935408a8840",
+    "scope": "T006",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "accepted": true,
+    "stage_complete": true
+  }
+}

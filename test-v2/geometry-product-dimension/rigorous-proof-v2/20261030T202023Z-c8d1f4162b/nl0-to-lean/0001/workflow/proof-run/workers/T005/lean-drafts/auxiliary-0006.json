@@ -1,0 +1,24 @@
+{
+  "statement": "∀ (s δ : ℝ), 0 < s → 0 < δ → YContent s δ E < ⊤",
+  "proof": "classical\nintro s δ hs hδ\nhave hδ2 : 0 < δ / 2 := half_pos hδ\nhave hc : E ⊆ ⋃ a : E, Metric.ball a.val (δ / 2) := by\n  intro x hx\n  exact Set.mem_iUnion.mpr ⟨⟨x, hx⟩, Metric.mem_ball_self hδ2⟩\nobtain ⟨t, ht⟩ := h_H002.elim_finite_subcover\n  (fun a : E => Metric.ball a.val (δ / 2)) (fun a => Metric.isOpen_ball) hc\nlet e : t ≃ Fin t.card := t.equivFin\nlet U : ℕ → Set (YEucl n) := fun j =>\n  if hj : j < t.card then Metric.ball (e.symm ⟨j, hj⟩).val.val (δ / 2) else ∅\nhave hcov : E ⊆ ⋃ j, U j := by\n  intro x hx\n  obtain ⟨a, ha, hxa⟩ := Set.mem_iUnion₂.mp (ht hx)\n  let a' : t := ⟨a, ha⟩\n  let j : Fin t.card := e a'\n  have hU : U j.val = Metric.ball a.val (δ / 2) := by\n    dsimp only [U]\n    rw [dif_pos j.isLt]\n    change Metric.ball (e.symm (e a')).val.val (δ / 2) = _\n    rw [e.symm_apply_apply]\n  exact Set.mem_iUnion.mpr ⟨j.val, by rw [hU]; exact hxa⟩\nhave hb : ∀ c : YEucl n, Metric.ediam (Metric.ball c (δ / 2)) ≤ ENNReal.ofReal δ := by\n  intro c\n  apply Metric.ediam_le_of_forall_dist_le\n  intro x hx y hy\n  have hx' : dist x c < δ / 2 := Metric.mem_ball.mp hx\n  have hy' : dist c y < δ / 2 := by simpa only [dist_comm] using Metric.mem_ball.mp hy\n  have htri : dist x y ≤ dist x c + dist c y := dist_triangle x c y\n  linarith\nhave hd : ∀ j, Metric.ediam (U j) ≤ ENNReal.ofReal δ := by\n  intro j\n  dsimp only [U]\n  split_ifs with hj\n  · exact hb _\n  · simp only [Metric.ediam_empty]; exact zero_le _\nhave hcover : YCover δ E U := ⟨hcov, hd⟩\nhave hzero : ∀ j, j ∉ Finset.range t.card → (Metric.ediam (U j)) ^ s = 0 := by\n  intro j hj\n  have hj' : ¬ j < t.card := by simpa only [Finset.mem_range] using hj\n  simp only [U, dif_neg hj', Metric.ediam_empty, ENNReal.zero_rpow_of_pos hs]\nhave hcost : YCost s U < ⊤ := by\n  unfold YCost\n  rw [tsum_eq_sum hzero]\n  apply ENNReal.sum_lt_top.mpr\n  intro j hj\n  apply (ENNReal.rpow_lt_top_iff_of_pos hs).mpr\n  exact (hd j).trans_lt ENNReal.ofReal_lt_top\nhave hle : YContent s δ E ≤ YCost s U := by\n  unfold YContent\n  exact iInf_le_of_le U (iInf_le_of_le hcover le_rfl)\nexact hle.trans_lt hcost",
+  "check": {
+    "exit_code": 1,
+    "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-yg0rux0b/output/Auxiliary.lean:78:44: error: Function expected at\n  zero_le\nbut this term has type\n  0 ≤ ?m.400\n\nNote: Expected a function because this term is being applied to the argument\n  _\nchecked : ∀ (n : ℕ) (E : Set (YEucl n)), IsCompact E → ∀ (s δ : ℝ), 0 < s → 0 < δ → YContent s δ E < ∞\n'YuiAuxiliary.checked' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]\n",
+    "stderr": "",
+    "wall_seconds": 3.2471009166911244,
+    "source_path": "/Users/syyui/projects/Yui-results/test-v2/geometry-product-dimension/rigorous-proof-v2/20261030T202023Z-c8d1f4162b/native-checks/5551b26985594452960f53b4520f2852.lean",
+    "source_sha256": "2cf0f926f5a6223d2b90af0ec1f23306eeb3082eea1a8dee09f78a9ddf213355",
+    "auxiliary_valid": false,
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext",
+      "sorryAx"
+    ],
+    "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+    "context_port": "T005",
+    "candidate": 6,
+    "accepted": false,
+    "stage_complete": false
+  }
+}

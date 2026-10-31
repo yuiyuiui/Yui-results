@@ -1,0 +1,65 @@
+{
+  "header": "import Mathlib\nopen scoped TensorProduct\nnamespace LR\nabbrev L := LieAlgebra.SpecialLinear.sl (Fin 2) ℂ\nabbrev R (p : ℕ) := Subring.closure {q : ℚ | ∃ a b : ℤ, b ≠ 0 ∧ ¬ (p : ℤ) ∣ b ∧ q = (a : ℚ) / b}\nabbrev C (p : ℕ) := RestrictScalars (R p) ℚ ℂ\nabbrev I (l : ℤ) := Fin (l.toNat + 1)\nabbrev MR (p : ℕ) {V : Type*} [AddCommGroup V] [Module ℂ V] (M : Submodule ℤ V) := (R p) ⊗[ℤ] M\nabbrev VK (K : Type*) [Field K] {V : Type*} [AddCommGroup V] [Module ℂ V] (M : Submodule ℤ V) := K ⊗[ℤ] M\nnoncomputable def dp {V : Type*} [AddCommGroup V] [Module ℂ V] (f : Module.End ℂ V) (r : ℕ) : Module.End ℂ V := ((r.factorial : ℂ)⁻¹) • f ^ r\n\nvariable {V : Type*} [AddCommGroup V] [Module ℂ V]\nnoncomputable def eNat (y : Module.End ℂ V) (v : V) (i : ℕ) : V := dp y i v\ndef Stable {F A : Type*} [Field F] [AddCommGroup A] [Module F A] (W : Submodule F A) (f : Module.End F A) : Prop := ∀ w ∈ W, f w ∈ W\ndef ComplexHyp (l : ℤ) (rho : L →ₗ[ℂ] Module.End ℂ V) (x y h : L) : Prop :=\n  IsSl2Triple h x y ∧ Submodule.span ℂ ({x,y,h} : Set L) = ⊤ ∧\n  (∀ s t : L, rho ⁅s,t⁆ = rho s * rho t - rho t * rho s) ∧\n  FiniteDimensional ℂ V ∧ Module.finrank ℂ V = l.toNat + 1 ∧\n  Nontrivial V ∧\n  (∀ W : Submodule ℂ V, (∀ t : L, Stable W (rho t)) → W = ⊥ ∨ W = ⊤) ∧\n  (∃ w : V, w ≠ 0 ∧ rho x w = 0 ∧ rho h w = (l : ℂ) • w)\ndef Admissible (rho : L →ₗ[ℂ] Module.End ℂ V) (x y : L) (M : Submodule ℤ V) : Prop :=\n  (∃ (ι : Type) (b : Module.Basis ι ℤ M) (bc : Module.Basis ι ℂ V), ∀ i, (b i : V) = bc i) ∧\n  (∀ r : ℕ, ∀ m ∈ M, dp (rho x) r m ∈ M ∧ dp (rho y) r m ∈ M)\ndef Strings (l : ℤ) (a d t : Module.End ℂ V) (v : V) : Prop :=\n  (∀ r : ℕ, t ((d ^ r) v) = ((l : ℂ) - 2 * (r : ℂ)) • (d ^ r) v) ∧\n  (∀ r : ℕ, 0 < r → a ((d ^ r) v) = ((r : ℂ) * ((l : ℂ) - (r : ℂ) + 1)) • (d ^ (r-1)) v)\ndef BasisString (l : ℤ) (d : Module.End ℂ V) (v : V) : Prop :=\n  ∃ b : Module.Basis (I l) ℂ V, (∀ i, b i = eNat d v i.val) ∧\n    (∀ r : ℕ, l.toNat < r → (d ^ r) v = 0)\ndef Matrices {F A : Type*} [Field F] [AddCommGroup A] [Module F A]\n    (l : ℤ) (a d t : Module.End F A) (e : ℕ → A) : Prop :=\n  a (e 0) = 0 ∧\n  (∀ i : ℕ, 1 ≤ i → i ≤ l.toNat → a (e i) = ((l : F) - (i : F) + 1) • e (i-1)) ∧\n  (∀ i : ℕ, i < l.toNat → d (e i) = ((i : F)+1) • e (i+1)) ∧\n  d (e l.toNat) = 0 ∧\n  (∀ i : ℕ, i ≤ l.toNat → t (e i) = ((l : F) - 2*(i : F)) • e i)\ndef DividedMatrices (l : ℤ) (a d : Module.End ℂ V) (v : V) : Prop :=\n  ∀ r i : ℕ, i ≤ l.toNat →\n    dp a r (eNat d v i) =\n      (if r ≤ i then (Nat.choose (l.toNat-i+r) r : ℂ) • eNat d v (i-r) else 0) ∧\n    dp d r (eNat d v i) =\n      (if i+r ≤ l.toNat then (Nat.choose (i+r) r : ℂ) • eNat d v (i+r) else 0)\ndef N1 (l : ℤ) (a d t : Module.End ℂ V) (v : V) : Prop :=\n  0 < l+1 ∧ Fintype.card (I l) = (l+1).toNat ∧ Strings l a d t v ∧\n  BasisString l d v ∧ Matrices l a d t (eNat d v) ∧ DividedMatrices l a d v\nnoncomputable def unit (l : ℤ) (b : Module.Basis (I l) ℂ V) (i j : I l) : Module.End ℂ V :=\n  (b.coord j).smulRight (b i)\ndef BasisSpec (l : ℤ) (d : Module.End ℂ V) (v : V) (b : Module.Basis (I l) ℂ V) : Prop :=\n  ∀ i, b i = eNat d v i.val\ndef LocalRingSpec (p : ℕ) : Prop :=\n  (∀ q : ℚ, q ∈ R p ↔ ∃ a b : ℤ, b ≠ 0 ∧ ¬ (p : ℤ) ∣ b ∧ q = (a : ℚ) / b) ∧\n  (∀ b : ℤ, ¬ (p : ℤ) ∣ b → IsUnit (b : R p))\ndef SmallUnits (p : ℕ) (l : ℤ) : Prop :=\n  (∀ r : ℕ, r ≤ l.toNat → ¬ p ∣ r.factorial ∧ IsUnit (r.factorial : R p)) ∧\n  (∀ j : I l, IsUnit (Nat.choose l.toNat j.val : R p))\ndef IotaSpec (p : ℕ) (M : Submodule ℤ V) (f : MR p M →ₗ[ℤ] V) : Prop :=\n  (∀ (r : R p) (m : M), f (r ⊗ₜ[ℤ] m) = (((r : ℚ) : ℂ)) • (m : V)) ∧\n  (∀ (r : R p) (z : MR p M), f (r • z) = (((r : ℚ) : ℂ)) • f z)\ndef LocalBasis (p : ℕ) (l : ℤ) (M : Submodule ℤ V) (f : MR p M →ₗ[ℤ] V) : Prop :=\n  Function.Injective f ∧\n  Nonempty (Module.Basis (I l) (R p) (MR p M)) ∧\n  Submodule.span ℂ (Set.range f) = ⊤\ndef Preserved (p : ℕ) (M : Submodule ℤ V) (f : MR p M →ₗ[ℤ] V) (a d : Module.End ℂ V) : Prop :=\n  (∀ r : ℕ, ∀ m ∈ M, dp a r m ∈ M ∧ dp d r m ∈ M) ∧\n  (∀ r : ℕ, ∀ z : MR p M, dp a r (f z) ∈ Set.range f ∧ dp d r (f z) ∈ Set.range f)\ndef UnitIdentities (l : ℤ) (a d : Module.End ℂ V) (b : Module.Basis (I l) ℂ V) : Prop :=\n  ∀ i j : I l,\n    dp d l.toNat * dp a l.toNat = unit l b (Fin.last l.toNat) (Fin.last l.toNat) ∧\n    dp a (l.toNat-i.val) * (dp d l.toNat * dp a l.toNat) = unit l b i (Fin.last l.toNat) ∧\n    (dp d l.toNat * dp a l.toNat) * dp d (l.toNat-j.val) = (Nat.choose l.toNat j.val : ℂ) • unit l b (Fin.last l.toNat) j\ndef AllUnits (p : ℕ) (l : ℤ) (M : Submodule ℤ V) (f : MR p M →ₗ[ℤ] V)\n    (a d : Module.End ℂ V) (b : Module.Basis (I l) ℂ V) : Prop :=\n  ∀ i j : I l,\n    unit l b i j = ((Nat.choose l.toNat j.val : ℂ)⁻¹) •\n      (dp a (l.toNat-i.val) * (dp d l.toNat * dp a l.toNat) * dp d (l.toNat-j.val)) ∧\n    (∀ z : MR p M, unit l b i j (f z) ∈ Set.range f)\nend LR\n",
+  "parameters": [
+    {
+      "name": "K",
+      "type": "Type"
+    },
+    {
+      "name": "fieldK",
+      "type": "Field K",
+      "binder_kind": "instance"
+    },
+    {
+      "name": "V",
+      "type": "Type"
+    },
+    {
+      "name": "addV",
+      "type": "AddCommGroup V",
+      "binder_kind": "instance"
+    },
+    {
+      "name": "modV",
+      "type": "Module ℂ V",
+      "binder_kind": "instance"
+    },
+    {
+      "name": "p",
+      "type": "ℕ"
+    },
+    {
+      "name": "l",
+      "type": "ℤ"
+    },
+    {
+      "name": "M",
+      "type": "Submodule ℤ V"
+    },
+    {
+      "name": "rho",
+      "type": "LR.L →ₗ[ℂ] Module.End ℂ V"
+    },
+    {
+      "name": "x",
+      "type": "LR.L"
+    },
+    {
+      "name": "y",
+      "type": "LR.L"
+    },
+    {
+      "name": "h",
+      "type": "LR.L"
+    },
+    {
+      "name": "v",
+      "type": "V"
+    }
+  ],
+  "types": [
+    "LR.N1 l (rho x) (rho y) (rho h) v",
+    "LR.LocalRingSpec p",
+    "∀ f : LR.MR p M →ₗ[ℤ] V, LR.IotaSpec p M f"
+  ]
+}
