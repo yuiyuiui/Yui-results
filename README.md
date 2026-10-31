@@ -14,9 +14,14 @@ distributed separately as the installed `$rigorous-proof` skill, from
   It remains unchanged and is excluded from fresh Yui construction inputs.
 - `test/` retains the three problem statements and archived attempts with their
   original runtime identities, gate reports, faults, costs and qualifications.
-  These historical detailed-workflow runs are not relabeled as executions of
-  the new default workflow. The last paused test was explicitly cancelled and
-  its owned background resources and monitor were retired.
+  Historical runs retain their original workflow and outcome. The earlier
+  paused Lie run was explicitly cancelled and its owned resources retired.
+  The 2026-10-31 translation-only retest used complete copied accepted NL0/A
+  inputs and canonical Yui commit `372046341c3523a0939d19df218b02d5b0bb67eb`.
+  All three translations passed bound-artifact validation; their owned process
+  groups exited and the completed monitor was deleted. See the
+  [final report](test/geometry-product-dimension/rigorous-proof/20261031T112807Z-nl02lean-retest-6348e09d/nl02lean/FINAL_REPORT.md)
+  for actual gates, timings and partial usage qualifications.
 
 The duplicate `benchmark-v2/` and `test-v2/` trees were removed from the current
 checkout after a complete eligible archive was committed and pushed. Their

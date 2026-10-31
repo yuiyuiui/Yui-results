@@ -1,0 +1,24 @@
+{
+  "statement": "∀ (s δ : ℝ), 0 < s → 0 < δ → yContent s δ E < ⊤",
+  "proof": "classical\nintro s δ hs hδ\nobtain ⟨t, htE, htfin, htcover⟩ := h_H003.finite_cover_balls (half_pos hδ)\nletI : Fintype t := htfin.fintype\nlet e := Fintype.equivFin t\nlet U : ℕ → Set (YEuclid n) := fun i => if hi : i < Fintype.card t then Metric.ball (e.symm ⟨i, hi⟩).val (δ/2) else ∅\nhave hc : E ⊆ ⋃ i, U i := by\n  intro x hx\n  obtain ⟨y, hy, hxy⟩ := Set.mem_iUnion₂.mp (htcover hx)\n  let j := e ⟨y, hy⟩\n  apply Set.mem_iUnion.mpr\n  refine ⟨j.val, ?_⟩\n  dsimp only [U]\n  rw [dif_pos j.isLt]\n  simpa only [j, Equiv.symm_apply_apply] using hxy\nhave hd : ∀ i, Metric.ediam (U i) ≤ ENNReal.ofReal δ := by\n  intro i\n  dsimp only [U]\n  split_ifs with hi\n  · rw [← Metric.eball_ofReal]\n    calc\n      Metric.ediam _ ≤ 2 * ENNReal.ofReal (δ/2) := Metric.ediam_eball_le\n      _ = ENNReal.ofReal δ := by\n        calc\n          (2 : ℝ≥0∞) * ENNReal.ofReal (δ/2) = ENNReal.ofReal (2 * (δ/2)) := by\n            rw [ENNReal.ofReal_mul (by norm_num : (0:ℝ) ≤ 2)]; norm_num\n          _ = ENNReal.ofReal δ := by congr 1; ring\n  · simp only [Metric.ediam_empty, zero_le]\nhave hfin : (∑' i, Metric.ediam (U i) ^ s) < ⊤ := by\n  rw [tsum_eq_sum (s := Finset.range (Fintype.card t)) (fun i hi => ?_)]\n  · exact ENNReal.sum_lt_top.mpr (fun i hi => ENNReal.rpow_lt_top_of_nonneg hs.le (lt_of_le_of_lt (hd i) ENNReal.ofReal_lt_top).ne)\n  · have hi' : ¬ i < Fintype.card t := by simpa only [Finset.mem_range] using hi\n    simp only [U, dif_neg hi', Metric.ediam_empty, ENNReal.zero_rpow_of_pos hs]\nexact lt_of_le_of_lt (iInf_le_of_le U (iInf_le_of_le hc (iInf_le_of_le hd le_rfl))) hfin",
+  "check": {
+    "exit_code": 1,
+    "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-_c97tt7j/output/Auxiliary.lean:53:4: error: Type mismatch: After simplification, term\n  hxy\n has type\n  x ∈ Metric.ball y (δ / 2)\nbut is expected to have type\n  x ∈ Metric.ball (↑(e.symm ⟨↑(e ⟨y, hy⟩), ⋯⟩)) (δ / 2)\nchecked : ∀ (n : ℕ) (E : Set (YEuclid n)),\n  0 ≤ n →\n    E.Nonempty →\n      IsCompact E → (∀ (m : ℕ), yCritical (YEuclid m)) ∧ yCritical ℝ → ∀ (s δ : ℝ), 0 < s → 0 < δ → yContent s δ E < ∞\n'YuiAuxiliary.checked' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]\n",
+    "stderr": "",
+    "wall_seconds": 2.918110833968967,
+    "source_path": "/Users/syyui/projects/Yui-results/test/geometry-product-dimension/rigorous-proof/20261031T112807Z-nl02lean-retest-6348e09d/nl02lean/native-checks/aa3018fbab084523ac7c0247e079640c.lean",
+    "source_sha256": "3d97d33a7494dff4a6fd1c042628fea920038e7c80bd056fd4f8854a86eab992",
+    "auxiliary_valid": false,
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext",
+      "sorryAx"
+    ],
+    "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+    "context_port": "T002",
+    "candidate": 9,
+    "accepted": false,
+    "stage_complete": false
+  }
+}

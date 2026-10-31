@@ -1,0 +1,204 @@
+{
+  "header": "import Mathlib\nopen scoped ENNReal NNReal\nnamespace GP\nabbrev Space (n : ℕ) := EuclideanSpace ℝ (Fin n)\ndef unitInterval : Set ℝ := Set.Icc 0 1\ndef join {n : ℕ} (x : Space n) (t : ℝ) : Space (n + 1) :=\n  WithLp.toLp 2 (Fin.snoc (fun i => x i) t)\ndef horizontal {n : ℕ} (z : Space (n + 1)) : Space n :=\n  WithLp.toLp 2 (fun i => z i.castSucc)\ndef vertical {n : ℕ} (z : Space (n + 1)) : ℝ := z (Fin.last n)\ndef cylinder {n : ℕ} (E : Set (Space n)) : Set (Space (n + 1)) :=\n  {z | horizontal z ∈ E ∧ vertical z ∈ unitInterval}\ndef Cover {X : Type*} [EMetricSpace X] (A : Set X) (δ : ℝ)\n    (U : ℕ → Set X) : Prop :=\n  A ⊆ ⋃ i, U i ∧ ∀ i, Metric.ediam (U i) ≤ ENNReal.ofReal δ\nnoncomputable def cost {X : Type*} [EMetricSpace X] (s : ℝ)\n    (U : ℕ → Set X) : ℝ≥0∞ :=\n  ∑' i, ⨆ (_ : (U i).Nonempty), (Metric.ediam (U i)) ^ s\nnoncomputable def content {X : Type*} [EMetricSpace X] (s δ : ℝ)\n    (A : Set X) : ℝ≥0∞ :=\n  ⨅ (U : ℕ → Set X) (_ : Cover A δ U), cost s U\nnoncomputable def hausdorff {X : Type*} [EMetricSpace X] (s : ℝ)\n    (A : Set X) : ℝ≥0∞ :=\n  ⨆ (δ : ℝ) (_ : 0 < δ), content s δ A\nend GP\n",
+  "parameters": [
+    {
+      "name": "n",
+      "type": "ℕ"
+    },
+    {
+      "name": "E",
+      "type": "Set (GP.Space n)"
+    }
+  ],
+  "premise_types": {
+    "H001": "0 ≤ n",
+    "H002": "E.Nonempty",
+    "H003": "IsCompact E"
+  },
+  "conclusion_type": "dimH (GP.cylinder E) = dimH E + 1",
+  "representation": "GP.Space n is EuclideanSpace ℝ (Fin n), whose Fin n index has exactly n coordinates and whose PiLp parameter 2 selects the L2 metric. GP.join appends a real as the last coordinate of GP.Space (n+1); GP.horizontal and GP.vertical recover the first n coordinates and last coordinate. The cylinder is precisely the coordinate image of E×[0,1], in the Euclidean metric; no max product metric is used. The real line is kept for interval length and integration. T001 includes the scalar-line measure bridge as the dimension-one instance: establish the isometric bijection t ↦ WithLp.toLp 2 (fun _ : Fin 1 => t), with inverse x ↦ x 0, and transport covers (or establish the same cover formula directly on ℝ). This adds no hypothesis. diam is Metric.ediam in ℝ≥0∞, with Metric.diam its finite real value only under a positive finite cover bound. GP.Cover uses sequences, padding finite covers by empty sets. GP.cost uses a supremum over Nonempty witnesses to make the empty cost zero, and ENNReal real power otherwise. GP.content is the infimum over admissible covers and GP.hausdorff the supremum over positive real scales, exactly D002. All uses have positive exponents/scales. Native dimH is the ENNReal supremum over NNReal exponents with infinite native Hausdorff measure. ENNReal.ofReal s embeds the positive real exponent in order comparisons; source real D is used as (dimH E).toReal only after T002 proves finiteness. All dimensions and final +1 remain ENNReal. H001 explicitly retains natural nonnegativity; E.Nonempty and IsCompact E are the original hypotheses. All M roots are resolved directly from the pinned library; notes supply no premise ports.",
+  "objects": [],
+  "steps": [
+    {
+      "id": "T001",
+      "statement": "(∀ (m : ℕ) (A : Set (GP.Space m)), 0 ≤ dimH A ∧\n  ∀ (s : ℝ), 0 < s →\n    GP.hausdorff s A = MeasureTheory.Measure.hausdorffMeasure s A ∧\n    (dimH A < ENNReal.ofReal s → GP.hausdorff s A = 0) ∧\n    (ENNReal.ofReal s < dimH A → GP.hausdorff s A = ⊤) ∧\n    (GP.hausdorff s A = 0 → dimH A ≤ ENNReal.ofReal s) ∧\n    (GP.hausdorff s A = ⊤ → ENNReal.ofReal s ≤ dimH A)) ∧ (∀ (A : Set ℝ) (s : ℝ), 0 < s →\n    GP.hausdorff s A = MeasureTheory.Measure.hausdorffMeasure s A)",
+      "inputs": [],
+      "source_steps": [
+        "S001",
+        "S002",
+        "S003"
+      ],
+      "explanation": "N001. Compare GP.content and GP.hausdorff with MeasureTheory.Measure.hausdorffMeasure_apply. Merge the two admissibility guards with GP.Cover; remove the infinite outer scale because its infimum is bounded by the scale-1 value. Empty/nonempty costs agree by construction. Transport the four critical-exponent conclusions using the pinned dimH lemmas at NNReal exponent ⟨s, le_of_lt hs⟩; its ENNReal coercion equals ENNReal.ofReal s under hs. Nonnegativity is bottom_le. Also establish the scalar-line equality, the concrete m=1 instance under the isometric bijection t ↦ constant Fin 1 vector (inverse evaluation at 0); this conversion is a proof obligation here, not an assumed definition. The same native cover formula can prove that scalar equality directly without converting any downstream set."
+    },
+    {
+      "id": "T002",
+      "statement": "dimH E < ⊤ ∧ 0 ≤ dimH E ∧ dimH E ≤ (n : ℝ≥0∞) ∧\n  (n = 0 → E = Set.univ ∧ (∃ x : GP.Space n, E = {x}) ∧ dimH E = 0) ∧\n  ∀ (s δ : ℝ), 0 < s → 0 < δ → GP.content s δ E < ⊤",
+      "inputs": [
+        "H001",
+        "H002",
+        "H003",
+        "T001"
+      ],
+      "source_steps": [
+        "S004",
+        "S005",
+        "S006",
+        "S007"
+      ],
+      "explanation": "N002. Preserve compact-to-box, mesh cubes of diameter sqrt(n)h with a-cost C*n^(a/2)*h^(a-n), and a↓n. Prove n=0 separately from uniqueness of empty-coordinate vectors and nonemptiness. Obtain every finite scale content from a finite subcover by balls of radius δ/2. Do not replace the supplied covering route by a different dimension theorem. Finiteness precedes every toReal use."
+    },
+    {
+      "id": "T003",
+      "statement": "dimH GP.unitInterval = 1 ∧\n  (∀ a : ℝ, 1 < a → GP.hausdorff a GP.unitInterval = 0) ∧\n  (∀ s : ℝ, 0 < s → s < 1 → GP.hausdorff s GP.unitInterval = ⊤)",
+      "inputs": [
+        "T001"
+      ],
+      "source_steps": [
+        "S008",
+        "S009",
+        "S010"
+      ],
+      "explanation": "N003. Use equal interval subdivisions for the upper bound. For arbitrary covers use bounded real sup/inf and open enlargements of total added length ε to prove the sum of diameters ≥1 without assuming cover measurability. Then use ρ^s ≥ δ^(s-1)ρ for 0<s<1, infima and the small-scale divergence. The scalar bridge in T001 and the native critical-exponent API transfer these statements to dimH. All limits and infinite-sum cases remain local obligations."
+    },
+    {
+      "id": "T004",
+      "statement": "n = 0 → dimH (GP.cylinder E) ≤ dimH E + 1",
+      "inputs": [
+        "T001",
+        "T002",
+        "T003"
+      ],
+      "source_steps": [
+        "S011"
+      ],
+      "explanation": "R004 zero-dimensional branch. From T002, E is the entire singleton space and dimH E=0. GP.join maps the real interval isometrically onto the cylinder. Push interval covers forward, use zero a-measure for a>1 from T003, then a↓1. Establish the distance equality from EuclideanSpace.dist_sq_eq and the empty first-coordinate sum."
+    },
+    {
+      "id": "T005",
+      "statement": "1 ≤ n → ∀ (q : ℝ), dimH E < ENNReal.ofReal q →\n  ∀ (δ ε : ℝ), 0 < δ → 0 < ε →\n    GP.content (q + 1) δ (GP.cylinder E) ≤\n      ENNReal.ofReal (2 * (Real.sqrt 2) ^ (q + 1) * ε)",
+      "inputs": [
+        "T001",
+        "T002"
+      ],
+      "source_steps": [
+        "S012",
+        "S013",
+        "S014"
+      ],
+      "explanation": "R004 positive-dimensional covering construction. For q>dimH E and r=min(1,δ/sqrt 2), choose an r-cover W of q-cost <ε/2. Replace zero-diameter nonempty sets by tiny balls with the specified geometric cost budget; discard empty sets. Partition the interval into ceil(1/r_i) pieces and enumerate their products using GP.join. The Euclidean squared-distance identity bounds each diameter by sqrt(2)r_i; summing with ceil(1/r_i)≤2/r_i gives the displayed scale-content estimate. Choices and mesh sets stay local; only the numerical bound is exported."
+    },
+    {
+      "id": "T006",
+      "statement": "dimH (GP.cylinder E) ≤ dimH E + 1 ∧ dimH (GP.cylinder E) < ⊤",
+      "inputs": [
+        "T001",
+        "T002",
+        "T004",
+        "T005"
+      ],
+      "source_steps": [
+        "S015",
+        "S016"
+      ],
+      "explanation": "N004. For n≥1, first let ε↓0 in T005 for each positive δ, then take the supremum in δ to obtain H^(q+1)=0. T001 gives dimH(cylinder E)≤ofReal(q+1). With D finite by T002 let real q↓D, handling an allegedly infinite left side by any fixed q>D. Combine with T004 for n=0 and deduce finiteness of the cylinder dimension."
+    },
+    {
+      "id": "T007",
+      "statement": "∀ (s δ : ℝ), 0 < s → 0 < δ →\n  ∀ (V : ℕ → Set (GP.Space (n + 1))), GP.Cover (GP.cylinder E) δ V →\n  ∀ ε : ℝ, 0 < ε → ∃ J : ℕ → Set ℝ,\n    (∀ i, IsOpen (J i)) ∧\n    (∀ i, GP.vertical '' (V i) ⊆ J i) ∧\n    (∀ i, MeasureTheory.volume (J i) ≤ Metric.ediam (V i) +\n      ENNReal.ofReal (ε * (1 / 2 : ℝ) ^ (i + 1) /\n        (1 + (Metric.diam (V i)) ^ s))) ∧\n    (∀ t ∈ GP.unitInterval,\n      GP.content s δ E ≤\n        ∑' i, (J i).indicator (fun _ => (Metric.ediam (V i)) ^ s) t)",
+      "inputs": [
+        "T002"
+      ],
+      "source_steps": [
+        "S017",
+        "S018",
+        "S019"
+      ],
+      "explanation": "R005 measurable majorants and fiber covers. Prove both coordinate projections are 1-Lipschitz using the actual Euclidean squared-distance sum. Each finite diameter has real value Metric.diam(V i). For ε>0 use η_i=ε*2^(-i-1)/(1+ρ_i^s), and open sup/inf enlargements J_i; take J_i empty when V_i is empty. Their lengths satisfy the displayed bound. For t∈I, the horizontal projections with t∈J_i cover E, hence the content bound by the indicator-weighted sum. Do not assume the covering sets or their projections measurable. No chosen J escapes: this statement exports its existence with every property required by the integration step."
+    },
+    {
+      "id": "T008",
+      "statement": "∀ (s δ : ℝ), 0 < s → 0 < δ →\n  ∀ (V : ℕ → Set (GP.Space (n + 1))), GP.Cover (GP.cylinder E) δ V →\n  ∀ ε : ℝ, 0 < ε →\n    GP.content s δ E ≤ GP.cost (s + 1) V + ENNReal.ofReal ε",
+      "inputs": [
+        "T002",
+        "T007"
+      ],
+      "source_steps": [
+        "S020"
+      ],
+      "explanation": "R005 integration. For each ε choose J from T007 and use μ=volume.restrict GP.unitInterval, whose total mass is one. Each summand is a measurable indicator with fixed finite coefficient; apply MeasureTheory.lintegral_tsum at countable index ℕ and AEMeasurable summands. Monotonicity, indicator integrals and the J-length bounds give c≤sum ρ_i^(s+1)+sum η_iρ_i^s≤GP.cost(s+1)V+ofReal ε. Empty costs agree because s+1>0; finite positive cover scales justify ediam-toReal identifications. Retain ENNReal sums so infinite values require no integrability hypothesis. T002 supplies c<∞."
+    },
+    {
+      "id": "T009",
+      "statement": "∀ (s δ : ℝ), 0 < s → 0 < δ →\n  GP.content s δ E ≤ GP.content (s + 1) δ (GP.cylinder E)",
+      "inputs": [
+        "T008"
+      ],
+      "source_steps": [
+        "S021"
+      ],
+      "explanation": "N005. For each fixed admissible V, if GP.cost(s+1)V is infinite the inequality is immediate; otherwise let ε↓0 in T008. Then take the infimum over all δ-covers to get exactly the source scale inequality. Discharge every cover/scale/exponent binder."
+    },
+    {
+      "id": "T010",
+      "statement": "0 < dimH E → dimH E + 1 ≤ dimH (GP.cylinder E)",
+      "inputs": [
+        "T001",
+        "T002",
+        "T009"
+      ],
+      "source_steps": [
+        "S022",
+        "S023",
+        "S024",
+        "S025"
+      ],
+      "explanation": "N006. Under D>0 and 0<s<D, T001 gives H^s(E)=∞. For every positive finite threshold choose δ with content>T, apply T009 and take the supremum to get H^(s+1)(cylinder E)=∞. Apply T001's critical-exponent bound and let s↑D. Use T002's finite positive D when passing between real and ENNReal comparisons; monotonicity of scale contents comes from cover inclusion."
+    },
+    {
+      "id": "T011",
+      "statement": "dimH E = 0 → (1 : ℝ≥0∞) ≤ dimH (GP.cylinder E) ∧\n  (1 : ℝ≥0∞) = dimH E + 1",
+      "inputs": [
+        "H002",
+        "T001",
+        "T003"
+      ],
+      "source_steps": [
+        "S026",
+        "S027",
+        "S028"
+      ],
+      "explanation": "N007. Choose x₀∈E. The map t↦GP.join x₀ t preserves distance, including n=0, directly from the Euclidean metric formula. Pull an arbitrary cylinder cover back along this map; diameters can only decrease, hence H^s(I)≤H^s(cylinder E). T003 gives infinity for 0<s<1; T001 gives dimH(cylinder E)≥s. Let s↑1 and use D=0 to identify 1=D+1. Keep the actual pulled-back covers; do not assume a metric change."
+    },
+    {
+      "id": "T012",
+      "statement": "dimH (GP.cylinder E) = dimH E + 1",
+      "inputs": [
+        "T002",
+        "T006",
+        "T010",
+        "T011"
+      ],
+      "source_steps": [
+        "S029"
+      ],
+      "explanation": "P. T002 gives finite D≥0; split D>0 or D=0, use T010 or T011 for the lower bound and T006 for the upper bound, then antisymmetry. Unfold cylinder and the original coordinate identification to read this as dim_H(E×[0,1])=dim_H(E)+1."
+    }
+  ],
+  "terminal": "T012",
+  "source_outputs": {
+    "N001": "T001",
+    "N002": "T002",
+    "N003": "T003",
+    "N004": "T006",
+    "N005": "T009",
+    "N006": "T010",
+    "N007": "T011",
+    "P": "T012"
+  },
+  "endpoint_correspondence": {
+    "P": {
+      "mode": "direct",
+      "explanation": "For every natural n (the original nonnegative integer) and every subset E of Euclidean R^n, the retained hypotheses 0≤n, E.Nonempty and IsCompact E are exactly H001–H003, including the approved nonemptiness addition. GP.Space n has the L2 Euclidean metric. The first n and last coordinates give mutually inverse identifications of GP.cylinder E with E×[0,1]; GP.join appends the last coordinate, including when n=0. Thus the target uses precisely the source Euclidean R^(n+1) subset, not a different product norm. Native dimH is D004, with ENNReal addition of one; T001 identifies the supplied unnormalized H with native measure at positive exponents. Parameters remain universally exported, and no extra assumptions or external premises are added."
+    }
+  }
+}

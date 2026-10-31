@@ -1,0 +1,24 @@
+{
+  "statement": "∀ (K a : ℝ), 0 ≤ K → (n : ℝ) < a → (∀ k : ℕ, 0 < k → (k : ℝ≥0∞) ^ n * (ENNReal.ofReal (K / k)) ^ a = ENNReal.ofReal (K ^ a / (k : ℝ) ^ (a - n))) ∧ Filter.Tendsto (fun k : ℕ => ENNReal.ofReal (K ^ a / (k : ℝ) ^ (a - n))) Filter.atTop (nhds 0)",
+  "proof": "intro K a hK ha\nhave ha0 : 0 < a := lt_of_le_of_lt (Nat.cast_nonneg n) ha\nconstructor\n· intro k hk\n  have hkR : 0 < (k : ℝ) := Nat.cast_pos.mpr hk\n  have he : (k : ℝ) ^ n * (K / k) ^ a = K ^ a / (k : ℝ) ^ (a - n) := by\n    rw [Real.div_rpow hK hkR.le, Real.rpow_sub hkR a (n : ℝ), Real.rpow_natCast]\n    have hnz : (k : ℝ) ^ a ≠ 0 := (Real.rpow_pos_of_pos hkR a).ne'\n    field_simp\n  rw [← ENNReal.ofReal_rpow_of_nonneg (div_nonneg hK hkR.le) ha0.le]\n  rw [← ENNReal.ofReal_natCast k, ← ENNReal.ofReal_pow hkR.le, ← ENNReal.ofReal_mul (pow_nonneg hkR.le n), he]\n· have ht : Filter.Tendsto (fun k : ℕ => (k : ℝ) ^ (a - n)) Filter.atTop Filter.atTop :=\n    (Real.tendsto_rpow_atTop (sub_pos.mpr ha)).comp tendsto_natCast_atTop_atTop\n  have hz : Filter.Tendsto (fun k : ℕ => K ^ a / (k : ℝ) ^ (a - n)) Filter.atTop (nhds 0) :=\n    tendsto_const_nhds.div_atTop ht\n  simpa using ENNReal.continuous_ofReal.continuousAt.tendsto.comp hz",
+  "check": {
+    "exit_code": 1,
+    "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-23qbmqgc/output/Auxiliary.lean:51:8: error: Tactic `rewrite` failed: Did not find an occurrence of the pattern\n  ENNReal.ofReal ((K / ↑k) ^ a)\nin the target expression\n  ↑k ^ n * ENNReal.ofReal (K / ↑k) ^ a = ENNReal.ofReal (K ^ a / ↑k ^ (a - ↑n))\n\ncase left\nn : ℕ\nE : Set (GP.Space n)\nh_H001 : 0 ≤ n\nh_H002 : E.Nonempty\nh_H003 : IsCompact E\nh_T001 :\n  (∀ (m : ℕ) (A : Set (GP.Space m)),\n      0 ≤ dimH A ∧\n        ∀ (s : ℝ),\n          0 < s →\n            GP.hausdorff s A = (MeasureTheory.Measure.hausdorffMeasure s) A ∧\n              (dimH A < ENNReal.ofReal s → GP.hausdorff s A = 0) ∧\n                (ENNReal.ofReal s < dimH A → GP.hausdorff s A = ∞) ∧\n                  (GP.hausdorff s A = 0 → dimH A ≤ ENNReal.ofReal s) ∧\n                    (GP.hausdorff s A = ∞ → ENNReal.ofReal s ≤ dimH A)) ∧\n    ∀ (A : Set ℝ) (s : ℝ), 0 < s → GP.hausdorff s A = (MeasureTheory.Measure.hausdorffMeasure s) A\nK a : ℝ\nhK : 0 ≤ K\nha : ↑n < a\nha0 : 0 < a\nk : ℕ\nhk : 0 < k\nhkR : 0 < ↑k\nhe : ↑k ^ n * (K / ↑k) ^ a = K ^ a / ↑k ^ (a - ↑n)\n⊢ ↑k ^ n * ENNReal.ofReal (K / ↑k) ^ a = ENNReal.ofReal (K ^ a / ↑k ^ (a - ↑n))\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-23qbmqgc/output/Auxiliary.lean:54:7: error(lean.unknownIdentifier): Unknown constant `Real.tendsto_rpow_atTop`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-23qbmqgc/output/Auxiliary.lean:57:4: error: Type mismatch: After simplification, term\n  Filter.Tendsto.comp (ContinuousAt.tendsto (Continuous.continuousAt ENNReal.continuous_ofReal)) hz\n has type\n  @Filter.Tendsto ℕ ℝ≥0∞ (ENNReal.ofReal ∘ fun k => K ^ a / ↑k ^ (a - ↑n)) Filter.atTop (nhds 0)\nbut is expected to have type\n  @Filter.Tendsto ℕ ℝ≥0∞ (fun k => ENNReal.ofReal (K ^ a / ↑k ^ (a - ↑n))) Filter.atTop (nhds 0)\nchecked : ∀ (n : ℕ) (E : Set (GP.Space n)),\n  0 ≤ n →\n    E.Nonempty →\n      IsCompact E →\n        ((∀ (m : ℕ) (A : Set (GP.Space m)),\n              0 ≤ dimH A ∧\n                ∀ (s : ℝ),\n                  0 < s →\n                    GP.hausdorff s A = (MeasureTheory.Measure.hausdorffMeasure s) A ∧\n                      (dimH A < ENNReal.ofReal s → GP.hausdorff s A = 0) ∧\n                        (ENNReal.ofReal s < dimH A → GP.hausdorff s A = ∞) ∧\n                          (GP.hausdorff s A = 0 → dimH A ≤ ENNReal.ofReal s) ∧\n                            (GP.hausdorff s A = ∞ → ENNReal.ofReal s ≤ dimH A)) ∧\n            ∀ (A : Set ℝ) (s : ℝ), 0 < s → GP.hausdorff s A = (MeasureTheory.Measure.hausdorffMeasure s) A) →\n          ∀ (K a : ℝ),\n            0 ≤ K →\n              ↑n < a →\n                (∀ (k : ℕ), 0 < k → ↑k ^ n * ENNReal.ofReal (K / ↑k) ^ a = ENNReal.ofReal (K ^ a / ↑k ^ (a - ↑n))) ∧\n                  Filter.Tendsto (fun k => ENNReal.ofReal (K ^ a / ↑k ^ (a - ↑n))) Filter.atTop (nhds 0)\n'YuiAuxiliary.checked' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]\n",
+    "stderr": "",
+    "wall_seconds": 3.258746166713536,
+    "source_path": "/Users/syyui/projects/Yui-results/test/geometry-product-dimension/rigorous-proof/20261031T073001Z-cec2aae050/native-checks/030cf149a31d4dd98ad73a90db5afdb2.lean",
+    "source_sha256": "0bff51d23ba0c476360e5df4938ce56a0e1fd3030f6d00d29cb275edc5dad5bd",
+    "auxiliary_valid": false,
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext",
+      "sorryAx"
+    ],
+    "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+    "context_port": "T002",
+    "candidate": 13,
+    "accepted": false,
+    "stage_complete": false
+  }
+}

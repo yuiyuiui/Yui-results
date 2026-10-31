@@ -1,0 +1,164 @@
+{
+  "header": "import Mathlib\nopen scoped BigOperators\nopen MeasureTheory Set Filter Topology\n\nabbrev WM.Space (n : ℕ) := Fin n → ℝ\nabbrev WM.Target (m : ℕ) := EuclideanSpace ℝ (Fin m)\nabbrev WM.Domain (n : ℕ) := WM.Space n × ℝ\n\ndef WM.smoothOrder : WithTop ℕ∞ := ((⊤ : ℕ∞) : WithTop ℕ∞)\ndef WM.positive (n : ℕ) : Set (WM.Domain n) := {p | 0 < p.2}\ndef WM.box (n : ℕ) (R : ℝ) : Set (WM.Space n) := Set.pi Set.univ (fun _ => Set.Icc (-R) R)\ndef WM.openBox (n : ℕ) (R : ℝ) : Set (WM.Space n) := Set.pi Set.univ (fun _ => Set.Ioo (-R) R)\ndef WM.timeBand (t : ℝ) : Set ℝ := Set.Icc (t / 2) (3 * t / 2)\n\nnoncomputable def WM.dt {n : ℕ} {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]\n    (f : WM.Domain n → F) (p : WM.Domain n) : F :=\n  fderiv ℝ f p (0, 1)\nnoncomputable def WM.dx {n : ℕ} {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]\n    (f : WM.Domain n → F) (j : Fin n) (p : WM.Domain n) : F :=\n  fderiv ℝ f p (Pi.single j 1, 0)\nnoncomputable def WM.dtt {n m : ℕ} (u : WM.Domain n → WM.Target m) := WM.dt (WM.dt u)\nnoncomputable def WM.dxx {n m : ℕ} (u : WM.Domain n → WM.Target m) (j : Fin n) := WM.dx (WM.dx u j) j\nnoncomputable def WM.lap {n m : ℕ} (u : WM.Domain n → WM.Target m) (p : WM.Domain n) := ∑ j, WM.dxx u j p\nnoncomputable def WM.gradSq {n m : ℕ} (u : WM.Domain n → WM.Target m) (p : WM.Domain n) : ℝ :=\n  ∑ j, ‖WM.dx u j p‖ ^ 2\nnoncomputable def WM.density {n m : ℕ} (u : WM.Domain n → WM.Target m) (p : WM.Domain n) : ℝ :=\n  ‖WM.dt u p‖ ^ 2 + WM.gradSq u p\nnoncomputable def WM.densityT {n m : ℕ} (u : WM.Domain n → WM.Target m) := WM.dt (WM.density u)\nnoncomputable def WM.energy {n m : ℕ} (u : WM.Domain n → WM.Target m) (t : ℝ) : ℝ :=\n  ∫ x : WM.Space n, WM.density u (x, t)\nnoncomputable def WM.accelProduct {n m : ℕ} (u : WM.Domain n → WM.Target m) (p : WM.Domain n) : ℝ :=\n  inner ℝ (WM.dt u p) (WM.dtt u p)\nnoncomputable def WM.gradProduct {n m : ℕ} (u : WM.Domain n → WM.Target m) (j : Fin n) (p : WM.Domain n) : ℝ :=\n  inner ℝ (WM.dx u j p) (WM.dx (WM.dt u) j p)\nnoncomputable def WM.lapProduct {n m : ℕ} (u : WM.Domain n → WM.Target m) (j : Fin n) (p : WM.Domain n) : ℝ :=\n  inner ℝ (WM.dt u p) (WM.dxx u j p)\nnoncomputable def WM.flux {n m : ℕ} (u : WM.Domain n → WM.Target m) (j : Fin n) (p : WM.Domain n) : ℝ :=\n  inner ℝ (WM.dt u p) (WM.dx u j p)\n\ndef WM.fields {n m : ℕ} (u : WM.Domain n → WM.Target m) : Set (WM.Domain n → ℝ) :=\n  {f | f = WM.density u ∨ f = WM.densityT u ∨ f = WM.accelProduct u ∨\n    ∃ j : Fin n, f = WM.gradProduct u j ∨ f = WM.lapProduct u j ∨\n      f = WM.flux u j ∨ f = WM.dx (WM.flux u j) j}\n\ndef WM.sectionGood {n : ℕ} (f : WM.Domain n → ℝ) (C Q : Set (WM.Space n)) (t : ℝ) : Prop :=\n  Continuous (fun x => f (x, t)) ∧ Function.support (fun x => f (x, t)) ⊆ C ∧\n  (∃ b : ℝ, ∀ x ∈ Q, |f (x, t)| ≤ b) ∧\n  Measurable (fun x => f (x, t)) ∧ Integrable (fun x => f (x, t))\n\ndef WM.commonSupport {n m : ℕ} (u : WM.Domain n → WM.Target m) (q : WM.Target m)\n    (t : ℝ) (C : Set (WM.Space n)) (R η B : ℝ) : Prop :=\n  IsCompact C ∧ 0 < R ∧ 0 < η ∧ 0 ≤ B ∧ C ⊆ WM.openBox n R ∧\n  volume (WM.box n R) = ENNReal.ofReal ((2 * R) ^ n) ∧\n  volume (WM.box n R) < ⊤ ∧\n  Set.Icc (t - η) (t + η) ⊆ interior (WM.timeBand t) ∧\n  (∀ x r, x ∉ C → r ∈ WM.timeBand t → u (x, r) = q) ∧\n  (∀ x r, x ∉ C → r ∈ interior (WM.timeBand t) →\n    ∀ k : ℕ, 1 ≤ k → iteratedFDeriv ℝ k u (x, r) = 0) ∧\n  (∀ r ∈ interior (WM.timeBand t), ∀ f ∈ WM.fields u, WM.sectionGood f C (WM.box n R) r) ∧\n  (∀ x ∈ WM.box n R, ∀ r ∈ Set.Icc (t - η) (t + η), |WM.densityT u (x, r)| ≤ B)\n\ndef WM.supportFacts {n m : ℕ} (u : WM.Domain n → WM.Target m) (q : WM.Target m) : Prop :=\n  (∀ t : ℝ, 0 < t → Integrable (fun x => WM.density u (x, t))) ∧\n  ContDiffOn ℝ WM.smoothOrder (WM.density u) (WM.positive n) ∧\n  ContDiffOn ℝ WM.smoothOrder (WM.densityT u) (WM.positive n) ∧\n  (∀ t : ℝ, 0 < t → ∃ C : Set (WM.Space n), ∃ R η B : ℝ, WM.commonSupport u q t C R η B)\n\ndef WM.tangency {n m : ℕ} (u : WM.Domain n → WM.Target m) : Prop :=\n  ∀ x t, 0 < t →\n    inner ℝ (u (x,t)) (WM.dt u (x,t)) = 0 ∧\n    inner ℝ (WM.dt u (x,t)) (WM.dtt u (x,t) - WM.lap u (x,t)) = 0 ∧\n    inner ℝ (u (x,t)) (WM.dtt u (x,t)) = -(‖WM.dt u (x,t)‖ ^ 2) ∧\n    (∀ j : Fin n, inner ℝ (u (x,t)) (WM.dxx u j (x,t)) = -(‖WM.dx u j (x,t)‖ ^ 2)) ∧\n    (∀ a : ℝ, WM.dtt u (x,t) - WM.lap u (x,t) = a • u (x,t) →\n      a = WM.gradSq u (x,t) - ‖WM.dt u (x,t)‖ ^ 2) ∧\n    WM.dtt u (x,t) - WM.lap u (x,t) =\n      (WM.gradSq u (x,t) - ‖WM.dt u (x,t)‖ ^ 2) • u (x,t)\n\ndef WM.energyDerivative {n m : ℕ} (u : WM.Domain n → WM.Target m) : Prop :=\n  (∀ t : ℝ, 0 < t →\n    HasDerivAt (WM.energy u) (∫ x : WM.Space n, WM.densityT u (x,t)) t) ∧\n  (∀ x t, 0 < t → WM.densityT u (x,t) =\n    2 * WM.accelProduct u (x,t) + 2 * ∑ j, WM.gradProduct u j (x,t)) ∧\n  (∀ t : ℝ, 0 < t →\n    Integrable (fun x => WM.densityT u (x,t)) ∧\n    Integrable (fun x => WM.accelProduct u (x,t)) ∧\n    ∀ j : Fin n, Integrable (fun x => WM.gradProduct u j (x,t)))\n\ndef WM.integrationByParts {n m : ℕ} (u : WM.Domain n → WM.Target m) : Prop :=\n  ∀ t : ℝ, 0 < t → ∀ j : Fin n,\n    Integrable (fun x => WM.gradProduct u j (x,t)) ∧\n    Integrable (fun x => WM.lapProduct u j (x,t)) ∧\n    (∫ x : WM.Space n, WM.gradProduct u j (x,t)) =\n      -(∫ x : WM.Space n, WM.lapProduct u j (x,t))\n\ndef WM.conservation {n m : ℕ} (u : WM.Domain n → WM.Target m) : Prop :=\n  (∀ t : ℝ, 0 < t → Integrable (fun x => WM.density u (x,t))) ∧\n  (∀ t : ℝ, 0 < t → HasDerivAt (WM.energy u) 0 t) ∧\n  (∀ s t : ℝ, 0 < s → 0 < t → WM.energy u s = WM.energy u t)\n",
+  "parameters": [
+    {
+      "name": "n",
+      "type": "ℕ"
+    },
+    {
+      "name": "m",
+      "type": "ℕ"
+    },
+    {
+      "name": "u",
+      "type": "WM.Domain n → WM.Target m"
+    },
+    {
+      "name": "q",
+      "type": "WM.Target m"
+    }
+  ],
+  "premise_types": {
+    "H001": "1 ≤ n ∧ 1 ≤ m",
+    "H002": "ContDiffOn ℝ WM.smoothOrder u (WM.positive n)",
+    "H003": "‖q‖ = 1",
+    "H004": "∀ x : WM.Space n, ∀ t : ℝ, 0 < t → ‖u (x,t)‖ = 1",
+    "H005": "∀ x : WM.Space n, ∀ t : ℝ, 0 < t → ∃ a : ℝ, WM.dtt u (x,t) - WM.lap u (x,t) = a • u (x,t)",
+    "H006": "∀ s t : ℝ, 0 < s → s < t → ∃ C : Set (WM.Space n), IsCompact C ∧ ∀ x : WM.Space n, ∀ r : ℝ, x ∉ C → r ∈ Set.Icc s t → u (x,r) = q"
+  },
+  "conclusion_type": "WM.conservation u",
+  "representation": "Use WM.Space n = Fin n → ℝ for spatial coordinates with product Lebesgue volume, and WM.Target m = EuclideanSpace ℝ (Fin m) = PiLp 2 (fun _ => ℝ) for values, with its L² norm and real inner product. Fin n labels exactly the original coordinates 1,…,n via j ↦ j.val+1; finite sums run over every coordinate once. The spatial Pi type carries the sup norm; this gives the same topology, compact sets and Fréchet derivative as the Euclidean norm in finite dimension, so it changes no domain or analytic assertion. It is the sole spatial representation used in the proof. The actual volume_pi declaration identifies volume with the product of real Lebesgue measures, including the measure-one empty product. Encode u on WM.Space n × ℝ with H002 smooth only on the open set t>0. Restriction gives the original positive-time map; conversely any original map has an arbitrary extension (e.g. value q at nonpositive times). Every hypothesis and conclusion is restricted to positive times, and all derivatives depend only on the germ there, so these operations are inverse at the level of the stated theorem. No smoothness, value or energy assertion at t≤0 is imposed. WM.smoothOrder is explicitly the coercion of (⊤ : ℕ∞) into WithTop ℕ∞, the C∞ index, not the top of WithTop ℕ∞ (the analytic index). WM.dt and WM.dx apply fderiv ℝ to the time direction (0,1) and spatial coordinate direction (Pi.single j 1,0); H002 makes these the classical componentwise partials on t>0. Iteration gives u_tt and u_xjxj. inner ℝ on the value type is the Euclidean dot product, ‖·‖² the Euclidean squared norm, and a • u is real scalar multiplication. WM.density is exactly the time square plus the finite sum of spatial squares, with no half factor. WM.energy is its real Bochner/Lebesgue integral; the total definition asserts no integrability, which T002 proves at every positive time before integral linearity is used. supportFacts, tangency, energyDerivative, integrationByParts and conservation are transparent proposition abbreviations, not assumed results. sectionGood spells out continuity, support containment, boundedness, measurability and absolute integrability. Vanishing of every positive-order iterated Fréchet derivative is the all-coordinate-derivatives assertion on the open constant region: evaluation on coordinate directions gives each mixed partial, and multilinearity in a finite basis gives the converse. Mathlib M001–M004 are used directly, not added as hypotheses. Audit A notes remain optional references and supply no ports.",
+  "objects": [],
+  "steps": [
+    {
+      "id": "T001",
+      "statement": "WM.tangency u",
+      "inputs": [
+        "H002",
+        "H004",
+        "H005"
+      ],
+      "source_steps": [
+        "S001",
+        "S002",
+        "S003"
+      ],
+      "explanation": "N001 in full. Differentiate the unit constraint once and twice on the open positive-time region using real inner-product differentiation. Obtain orthogonality and the two second-derivative constraints; choose a scalar from H005 pointwise, never differentiate it, then dot the equation with u. Determine every admissible scalar and substitute. Keep all identities, including the explicit equation, even though cancellation uses only one."
+    },
+    {
+      "id": "T002",
+      "statement": "WM.supportFacts u q",
+      "inputs": [
+        "H001",
+        "H002",
+        "H006"
+      ],
+      "source_steps": [
+        "S004",
+        "S005",
+        "S006",
+        "S007",
+        "S008"
+      ],
+      "explanation": "N002 in full, with the common witnesses retained in commonSupport. Fix t>0, use J=[t/2,3t/2], choose C from H006 and a positive bounding R, and choose η=t/4. The complement of the compact C times interior J is open; u is locally constant there, so every iterated derivative of positive order vanishes. Smoothness of the scalar fields on t>0, support containment and a compact-box bound give the sectionGood properties by domination with a constant times the box indicator. Real.volume_Icc_pi gives volume Q=ofReal((2R)^n); also prove its finiteness, rather than infer it from a toReal value. Compactness of Q times the closed time window bounds |densityT| by B≥0. Generalize the base time for density integrability. No norm condition on q is used."
+    },
+    {
+      "id": "T003",
+      "statement": "(∀ x : WM.Space n, ∀ t : ℝ, 0 < t → HasDerivAt (fun r : ℝ => WM.density u (x,r)) (WM.densityT u (x,t)) t ∧ WM.densityT u (x,t) = 2 * WM.accelProduct u (x,t) + 2 * ∑ j : Fin n, WM.gradProduct u j (x,t)) ∧ (∀ x : WM.Space n, ∀ t : ℝ, 0 < t → ∀ j : Fin n, WM.dt (WM.dx u j) (x,t) = WM.dx (WM.dt u) j (x,t) ∧ WM.dx (WM.flux u j) j (x,t) = WM.gradProduct u j (x,t) + WM.lapProduct u j (x,t))",
+      "inputs": [
+        "H002"
+      ],
+      "source_steps": [
+        "S009",
+        "S014"
+      ],
+      "explanation": "Shared implementation calculus, already present in these paragraphs: differentiate squared norms and inner products and identify mixed coordinate derivatives by symmetry of the second Fréchet derivative on the open positive-time region. In particular prove the displayed HasDerivAt by composing with r↦(x,r). Real inner symmetry puts the flux product rule into gradProduct+lapProduct order. This port gives both consumers the exact directional/line-derivative identification; it changes neither source route nor hypotheses."
+    },
+    {
+      "id": "T004",
+      "statement": "∀ t : ℝ, 0 < t → ∃ η : ℝ, 0 < η ∧ ∃ w : WM.Space n → ℝ, Integrable w ∧ ∀ h : ℝ, 0 < |h| → |h| < η → 0 < t + h ∧ ∀ x : WM.Space n, |(WM.density u (x,t+h) - WM.density u (x,t)) / h| ≤ w x",
+      "inputs": [
+        "T002",
+        "T003"
+      ],
+      "source_steps": [
+        "S010",
+        "S011"
+      ],
+      "explanation": "Extract the common C,R,η,B from T002 for this base time and take w=B times the indicator of Q. For x∈Q use exists_hasDerivAt_eq_slope on the ordered endpoints min(t,t+h),max(t,t+h); T003 supplies the line derivative, T002 the derivative bound and positive-time window. Treat both signs of h. Outside Q both densities vanish. Finite box volume proves Integrable w. Continuity of spatial density sections from T002 makes every quotient measurable; the subsequent DCT step retains this fact through T002."
+    },
+    {
+      "id": "T005",
+      "statement": "WM.integrationByParts u",
+      "inputs": [
+        "H001",
+        "H002",
+        "T002",
+        "T003"
+      ],
+      "source_steps": [
+        "S014",
+        "S015",
+        "S016"
+      ],
+      "explanation": "N004, using the original coordinate FTC and Fubini route. At t>0 fix j, g=flux u j, choose C,R,Q from T002, and use T003 for its derivative. g vanishes near the boundary. Write n=k+1 using H001 and split off j with MeasurableEquiv.piFinSuccAbove; its inverse sends (r,y) to j.insertNth r y. The checked volume_preserving_piFinSuccAbove identifies coordinate volume with real volume × remaining-coordinate volume. Restrict to the corresponding boxes and use the product identification for the set integral, interchanging factors if necessary. At fixed remaining coordinates apply intervalIntegral.integral_eq_sub_of_hasDerivAt on [-R,R] with zero endpoint values and a continuous, interval-integrable derivative. Convert the oriented interval integral to the restricted Lebesgue integral, accounting for null endpoints. Apply MeasureTheory.integral_prod to the integrable derivative on the finite product box. The remaining coordinate space is Fin k → ℝ, including k=0 with measure one. Extend from Q to all space by the support facts, then use linearity of finite integrals and inner symmetry. The coordinate split and restricted-measure identification are local checked implementation facts in this worker, not extra premises."
+    },
+    {
+      "id": "T006",
+      "statement": "WM.energyDerivative u",
+      "inputs": [
+        "T002",
+        "T003",
+        "T004"
+      ],
+      "source_steps": [
+        "S009",
+        "S010",
+        "S011",
+        "S012",
+        "S013"
+      ],
+      "explanation": "N003 in full. At each positive base time take the punctured window and integrable majorant from T004. For each sequence of nonzero increments in that window tending to zero, the continuous spatial quotients are AE strongly measurable, bounded by w, and converge pointwise to densityT by T003. Apply the checked MeasureTheory.tendsto_integral_of_dominated_convergence with real codomain and spatial volume. T002 provides integrability at the shifted positive times, so integral linearity identifies the quotients of the actual energy. Use the sequential criterion for the punctured real limit, then the difference-quotient characterization of HasDerivAt. T003 gives the density derivative formula and T002 supplies integrability of densityT and every summand. This uses no differentiability-under-integral theorem in place of the supplied DCT route."
+    },
+    {
+      "id": "T007",
+      "statement": "∀ t : ℝ, 0 < t → HasDerivAt (WM.energy u) 0 t",
+      "inputs": [
+        "T001",
+        "T002",
+        "T005",
+        "T006"
+      ],
+      "source_steps": [
+        "S017"
+      ],
+      "explanation": "Substitute T006, apply T005 coordinatewise, move the finite sum and real factors through the integrals using T002, and combine dtt−lap. T001 makes its dot product with dt identically zero. Rewriting the derivative value in HasDerivAt gives zero. All integrals used in linearity have already been proved integrable."
+    },
+    {
+      "id": "T008",
+      "statement": "WM.conservation u",
+      "inputs": [
+        "T002",
+        "T007"
+      ],
+      "source_steps": [
+        "S018"
+      ],
+      "explanation": "The full target P: retain density integrability from T002 and the zero derivative from T007. For 0<s<t, apply exists_hasDerivAt_eq_slope to energy on [s,t], with continuity from T007 and derivative function zero, yielding E(t)=E(s). Equality and the reversed ordering handle every pair of positive times. H003 remains an original endpoint premise in premise_types, without adding it to the accepted R005 local boundary; the source proof does not use its norm condition. HasDerivAt 0 records differentiability and derivative zero together; all statements concern t>0."
+    }
+  ],
+  "terminal": "T008",
+  "source_outputs": {
+    "N001": "T001",
+    "N002": "T002",
+    "N003": "T006",
+    "N004": "T005",
+    "P": "T008"
+  },
+  "endpoint_correspondence": {
+    "P": {
+      "mode": "equivalent",
+      "explanation": "All original parameters and H001–H006 are retained: positive natural dimensions, the smooth positive-time sphere-valued map, the fixed unit vector, pointwise existence of a real normality scalar without regularity, and one compact spatial support set for each closed positive time interval. Fin coordinates enumerate the same real coordinate spaces, with Euclidean value norm and product Lebesgue measure. The total-time u encoding restricts to the original map; every original map extends arbitrarily to nonpositive times, and all positive-time derivatives and hypotheses are unchanged because they are local on an open set. Thus restriction and extension preserve both directions of the conditional theorem, with no extra boundary condition. Under these hypotheses WM.conservation asserts integrability at every positive time, HasDerivAt E 0 at every positive time, and equality of energies for every positive pair. HasDerivAt E 0 is equivalent to differentiability together with E'=0 (HasDerivAt.deriv and the derivative of a differentiable function give the two directions). The energy definition is exactly ∫(‖u_t‖²+Σj‖u_xj‖²), with no factor 1/2. Its integral has the usual finite real value by the first conjunct. This is the whole source target, including constancy, with no time-zero assertion. There are no external E roots in this source; M001–M004 are library theorems rather than project assumptions."
+    }
+  }
+}

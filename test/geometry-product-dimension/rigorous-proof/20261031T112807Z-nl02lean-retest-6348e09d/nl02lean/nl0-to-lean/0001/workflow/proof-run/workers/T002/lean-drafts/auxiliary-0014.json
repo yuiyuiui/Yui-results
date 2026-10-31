@@ -1,0 +1,24 @@
+{
+  "statement": "n = 0 → E = Set.univ ∧ (∃ x : YEuclid n, E = {x}) ∧ dimH E = 0",
+  "proof": "classical\nintro hn\nsubst n\nhave hsub : Subsingleton (YEuclid 0) := inferInstance\nobtain ⟨x, hx⟩ := h_H002\nhave he : E = {x} := by\n  ext y\n  constructor\n  · intro _; exact Set.mem_singleton_iff.mpr (Subsingleton.elim y x)\n  · intro hy; simpa only [Set.mem_singleton_iff.mp hy] using hx\nhave hu : E = Set.univ := by\n  ext y\n  simp only [he, Set.mem_singleton_iff, Set.mem_univ, iff_true]\n  exact Subsingleton.elim y x\nhave hy : ∀ s : ℝ, 0 < s → yHaus s E = 0 := by\n  intro s hs\n  apply le_antisymm _ bot_le\n  apply iSup_le\n  intro δ\n  apply iSup_le\n  intro hδ\n  let U : ℕ → Set (YEuclid 0) := fun _ => {x}\n  have hc : E ⊆ ⋃ i, U i := by\n    rw [he]\n    exact Set.subset_iUnion U 0\n  have hd : ∀ i, Metric.ediam (U i) ≤ ENNReal.ofReal δ := by\n    intro i; simp only [U, Metric.ediam_singleton, zero_le]\n  have hcost : (∑' i, Metric.ediam (U i) ^ s) = 0 := by\n    simp only [U, Metric.ediam_singleton, ENNReal.zero_rpow_of_pos hs, tsum_zero]\n  exact (iInf_le_of_le U (iInf_le_of_le hc (iInf_le_of_le hd le_rfl))).trans_eq hcost\nhave hdz : dimH E = 0 := by\n  apply le_antisymm _ ((h_T001.1 0).1 E)\n  by_contra! hpos\n  obtain ⟨a, ha, had⟩ := ENNReal.lt_iff_exists_nnreal_btwn.mp hpos\n  have har : (0 : ℝ) < (a : ℝ) := by exact_mod_cast ha\n  have hd := ((h_T001.1 0).2 E a har).2.2.2.1 (hy a har)\n  rw [ENNReal.ofReal_coe_nnreal] at hd\n  exact (not_lt_of_ge hd) had\nexact ⟨hu, ⟨x, he⟩, hdz⟩",
+  "check": {
+    "exit_code": 1,
+    "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-kbxnocu8/output/Auxiliary.lean:68:42: error: Application type mismatch: The argument\n  hc\nhas type\n  E ⊆ ⋃ i, U i\nof sort `Prop` but is expected to have type\n  ℕ\nof sort `Type` in the application\n  iInf_le_of_le hc\nchecked : ∀ (n : ℕ) (E : Set (YEuclid n)),\n  0 ≤ n →\n    E.Nonempty →\n      IsCompact E → (∀ (m : ℕ), yCritical (YEuclid m)) ∧ yCritical ℝ → n = 0 → E = univ ∧ (∃ x, E = {x}) ∧ dimH E = 0\n'YuiAuxiliary.checked' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]\n",
+    "stderr": "",
+    "wall_seconds": 2.946200834121555,
+    "source_path": "/Users/syyui/projects/Yui-results/test/geometry-product-dimension/rigorous-proof/20261031T112807Z-nl02lean-retest-6348e09d/nl02lean/native-checks/faa0b147569a44b78801f0a2ca9c8922.lean",
+    "source_sha256": "3183c60ad95bfe1b37b1e7663f9558b82f980c45a43b1f28d934e54c0dc26dce",
+    "auxiliary_valid": false,
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext",
+      "sorryAx"
+    ],
+    "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+    "context_port": "T002",
+    "candidate": 14,
+    "accepted": false,
+    "stage_complete": false
+  }
+}

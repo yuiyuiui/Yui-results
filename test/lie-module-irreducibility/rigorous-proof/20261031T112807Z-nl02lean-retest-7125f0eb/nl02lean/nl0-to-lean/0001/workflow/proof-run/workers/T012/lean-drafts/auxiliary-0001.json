@@ -1,0 +1,9 @@
+{
+  "statement": "∀ q : ℚ, q ≠ 0 → ∃ (η : ℤ) (u : R p), IsUnit u ∧ q = (p : ℚ) ^ η * (u : ℚ)",
+  "proof": "by\n  classical\n  intro q hq\n  have hp := h_H001.1\n  have pp : (p : ℚ) ≠ 0 := by exact_mod_cast hp.ne_zero\n  have strip : ∀ z : ℤ, z ≠ 0 → ∃ (n : ℕ) (a : ℤ), z = (p : ℤ)^n * a ∧ ¬ (p : ℤ) ∣ a := by\n    intro z hz\n    have hf : FiniteMultiplicity (p : ℤ) z :=\n      Int.finiteMultiplicity_iff.mpr ⟨by simpa using hp.ne_one, hz⟩\n    obtain ⟨a, ha, hpa⟩ := hf.exists_eq_pow_mul_and_not_dvd\n    exact ⟨_, a, ha, hpa⟩\n  obtain ⟨n, a, ha, hpa⟩ := strip q.num (Rat.num_ne_zero.mpr hq)\n  obtain ⟨m, b, hb, hpb⟩ := strip (q.den : ℤ) (by exact_mod_cast q.den_ne_zero)\n  have a0 : a ≠ 0 := by intro h; simp [h] at hpa\n  have b0 : b ≠ 0 := by intro h; simp [h] at hpb\n  let u : R p := ⟨(a : ℚ) / (b : ℚ), (h_T005.1 _).mpr ⟨a,b,b0,hpb,rfl⟩⟩\n  let w : R p := ⟨(b : ℚ) / (a : ℚ), (h_T005.1 _).mpr ⟨b,a,a0,hpa,rfl⟩⟩\n  have huw : u * w = 1 := by\n    apply Subtype.ext\n    change (a : ℚ) / b * ((b : ℚ) / a) = 1\n    have aa : (a : ℚ) ≠ 0 := by exact_mod_cast a0\n    have bb : (b : ℚ) ≠ 0 := by exact_mod_cast b0\n    field_simp\n  refine ⟨(n : ℤ) - m, u, isUnit_iff_exists_inv.mpr ⟨w, huw⟩, ?_⟩\n  have haQ : (q.num : ℚ) = (p : ℚ)^n * a := by exact_mod_cast ha\n  have hbQ : (q.den : ℚ) = (p : ℚ)^m * b := by exact_mod_cast hb\n  rw [← Rat.num_div_den q, haQ, hbQ]\n  change (p : ℚ)^n * a / ((p : ℚ)^m * b) = (p : ℚ)^((n : ℤ) - m) * ((a : ℚ) / b)\n  rw [zpow_sub₀ pp, zpow_natCast, zpow_natCast]\n  ring\n",
+  "check": {
+    "accepted": false,
+    "error": "supply tactic body after by",
+    "feedback_kind": "candidate_rejected"
+  }
+}

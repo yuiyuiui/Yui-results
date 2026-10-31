@@ -1,0 +1,61 @@
+{
+  "header": "import Mathlib\nnoncomputable section\nopen scoped TensorProduct\nnamespace LatticeSL2\ndef scalarRing (p : ℕ) : Subring ℚ :=\n  Subring.closure {q | ∃ b : ℤ, ¬ (p : ℤ) ∣ b ∧ q = (b : ℚ)⁻¹}\nabbrev R (p : ℕ) := ↥(scalarRing p)\ninstance (p : ℕ) : Algebra (R p) ℂ :=\n  ((algebraMap ℚ ℂ).comp (scalarRing p).subtype).toAlgebra\ninstance (p : ℕ) (V : Type*) [AddCommGroup V] [Module ℂ V] : Module (R p) V :=\n  Module.compHom V (algebraMap (R p) ℂ)\ndef divided {V : Type*} [AddCommGroup V] [Module ℂ V]\n    (a : Module.End ℂ V) (r : ℕ) : Module.End ℂ V :=\n  ((r.factorial : ℂ)⁻¹) • a ^ r\ndef ev {V : Type*} [AddCommGroup V] [Module ℂ V]\n    (y : Module.End ℂ V) (v : V) (i : ℕ) : V := divided y i v\nabbrev Ix (l : ℤ) := Fin (l.toNat + 1)\ndef Stable {F U : Type*} [Field F] [AddCommGroup U] [Module F U]\n    (W : Submodule F U) (a : Module.End F U) : Prop :=\n  ∀ u ∈ W, a u ∈ W\ndef SimpleTriple {F U : Type*} [Field F] [AddCommGroup U] [Module F U]\n    (x y h : Module.End F U) : Prop :=\n  Nontrivial U ∧ ∀ W : Submodule F U,\n    Stable W x → Stable W y → Stable W h → W = ⊥ ∨ W = ⊤\ndef Preserves {V : Type*} [AddCommGroup V] [Module ℂ V]\n    (M : Submodule ℤ V) (a : Module.End ℂ V) : Prop :=\n  ∀ m : M, a (m : V) ∈ M\nabbrev MR {V : Type*} [AddCommGroup V] [Module ℂ V]\n    (p : ℕ) (M : Submodule ℤ V) := R p ⊗[ℤ] M\nabbrev VK {V : Type*} [AddCommGroup V] [Module ℂ V]\n    (K : Type*) [Field K] (M : Submodule ℤ V) := K ⊗[ℤ] M\ndef LiftOf {V : Type*} [AddCommGroup V] [Module ℂ V]\n    (M : Submodule ℤ V) (a : Module.End ℂ V) (f : Module.End ℤ M) : Prop :=\n  ∀ m : M, (f m : V) = a (m : V)\ndef E {V : Type*} [AddCommGroup V] [Module ℂ V]\n    {l : ℤ} (B : Module.Basis (Ix l) ℂ V) (i j : Ix l) : Module.End ℂ V :=\n  (B.coord j).smulRight (B i)\ninstance (p : ℕ) (V : Type*) [AddCommGroup V] [Module ℂ V] :\n    IsScalarTower (R p) ℂ V := IsScalarTower.of_compHom\ninstance (p : ℕ) (V : Type*) [AddCommGroup V] [Module ℂ V] :\n    SMulCommClass (R p) ℂ V := SMulCommClass.of_commMonoid\ndef L {V : Type*} [AddCommGroup V] [Module ℂ V] (p : ℕ)\n    (M : Submodule ℤ V) : Submodule (R p) V :=\n  Submodule.span (R p) (M : Set V)\ndef J {V : Type*} [AddCommGroup V] [Module ℂ V] (p : ℕ)\n    (M : Submodule ℤ V) (e : V) : Submodule (R p) ℂ :=\n  (L p M).comap ((LinearMap.id : ℂ →ₗ[ℂ] ℂ).smulRight e |>.restrictScalars (R p))\ndef pPart {V : Type*} [AddCommGroup V] [Module ℂ V]\n    (p : ℕ) (M : Submodule ℤ V) : Submodule (R p) (MR p M) :=\n  Submodule.span (R p) (Set.range (fun u : MR p M => (p : ℤ) • u))\nabbrev Red {V : Type*} [AddCommGroup V] [Module ℂ V]\n    (p : ℕ) (M : Submodule ℤ V) := ZMod p ⊗[ℤ] MR p M\nend LatticeSL2\nopen LatticeSL2\n",
+  "parameters": [
+    {
+      "name": "p",
+      "type": "ℕ"
+    },
+    {
+      "name": "K",
+      "type": "Type",
+      "binder_kind": "explicit"
+    },
+    {
+      "name": "instK",
+      "type": "Field K",
+      "binder_kind": "instance"
+    },
+    {
+      "name": "l",
+      "type": "ℤ"
+    },
+    {
+      "name": "V",
+      "type": "Type"
+    },
+    {
+      "name": "instV",
+      "type": "AddCommGroup V",
+      "binder_kind": "instance"
+    },
+    {
+      "name": "instCV",
+      "type": "Module ℂ V",
+      "binder_kind": "instance"
+    },
+    {
+      "name": "x",
+      "type": "Module.End ℂ V"
+    },
+    {
+      "name": "y",
+      "type": "Module.End ℂ V"
+    },
+    {
+      "name": "h",
+      "type": "Module.End ℂ V"
+    },
+    {
+      "name": "v",
+      "type": "V"
+    },
+    {
+      "name": "M",
+      "type": "Submodule ℤ V"
+    }
+  ],
+  "types": [
+    "IsScalarTower (R p) ℂ V",
+    "J p M (ev y v 0)"
+  ]
+}

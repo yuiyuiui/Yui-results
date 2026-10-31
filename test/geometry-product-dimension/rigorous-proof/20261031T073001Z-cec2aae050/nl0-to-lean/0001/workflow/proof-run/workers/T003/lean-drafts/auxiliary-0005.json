@@ -1,0 +1,24 @@
+{
+  "statement": "∀ (δ : ℝ), 0 < δ → ∀ (V : ℕ → Set ℝ), GP.Cover GP.unitInterval δ V → (1 : ℝ≥0∞) ≤ ∑' i, Metric.ediam (V i)",
+  "proof": "classical\nintro δ hδ V hV\nhave hb (i : ℕ) : Bornology.IsBounded (V i) :=\n  Metric.isBounded_iff_ediam_ne_top.mpr\n    (ne_top_of_le_ne_top ENNReal.ofReal_ne_top (hV.2 i))\napply ENNReal.le_of_forall_pos_le_add\nintro ε hε _\nlet w : ℕ → ℝ := fun i => (ε : ℝ) / 2 / 2 ^ i\nlet h : ℕ → ℝ := fun i => w i / 2\nhave hw (i : ℕ) : 0 < w i := by dsimp [w]; positivity\nhave hh (i : ℕ) : 0 < h i := half_pos (hw i)\nlet J : ℕ → Set ℝ := fun i =>\n  if (V i).Nonempty then Set.Ioo (sInf (V i) - h i) (sSup (V i) + h i) else ∅\nhave hsub (i : ℕ) : V i ⊆ J i := by\n  intro x hx\n  have hne : (V i).Nonempty := ⟨x, hx⟩\n  rw [J, if_pos hne]\n  obtain ⟨hl, hu⟩ := (hb i).subset_Icc_sInf_sSup hx\n  constructor <;> linarith [hh i]\nhave hopen (i : ℕ) : IsOpen (J i) := by\n  dsimp [J]\n  split_ifs <;> simp only [isOpen_Ioo, isOpen_empty]\nhave hJ (i : ℕ) :\n    MeasureTheory.volume (J i) ≤ Metric.ediam (V i) + ENNReal.ofReal (w i) := by\n  by_cases hne : (V i).Nonempty\n  · rw [J, if_pos hne, Real.volume_Ioo, Real.ediam_eq (hb i)]\n    calc\n      ENNReal.ofReal (sSup (V i) + h i - (sInf (V i) - h i)) =\n          ENNReal.ofReal ((sSup (V i) - sInf (V i)) + w i) := by\n        congr 1\n        dsimp [h]\n        ring\n      _ ≤ _ := ENNReal.ofReal_add_le\n  · simp only [J, if_neg hne, MeasureTheory.measure_empty, zero_le]\nhave hcover : GP.unitInterval ⊆ ⋃ i, J i :=\n  hV.1.trans (Set.iUnion_mono hsub)\nhave hsum : (∑' i, ENNReal.ofReal (w i)) = (ε : ℝ≥0∞) := by\n  rw [← ENNReal.ofReal_tsum_of_nonneg (fun i => (hw i).le)\n    (summable_geometric_two' (ε : ℝ))]\n  simp only [w, tsum_geometric_two', ENNReal.ofReal_coe_nnreal]\ncalc\n  (1 : ℝ≥0∞) = MeasureTheory.volume GP.unitInterval := by\n    simp [GP.unitInterval, Real.volume_Icc]\n  _ ≤ MeasureTheory.volume (⋃ i, J i) := MeasureTheory.measure_mono hcover\n  _ ≤ ∑' i, MeasureTheory.volume (J i) := MeasureTheory.measure_iUnion_le _\n  _ ≤ ∑' i, (Metric.ediam (V i) + ENNReal.ofReal (w i)) :=\n    ENNReal.tsum_le_tsum hJ\n  _ = (∑' i, Metric.ediam (V i)) + ε := by rw [ENNReal.tsum_add, hsum]",
+  "check": {
+    "exit_code": 1,
+    "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-7tteiqiv/output/Auxiliary.lean:58:8: error: Invalid rewrite argument: Expected an equality or iff proof or definition name, but `J ?a✝ ?a✝¹` is a value of type\n  Prop\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-7tteiqiv/output/Auxiliary.lean:67:10: error: Invalid rewrite argument: Expected an equality or iff proof or definition name, but `J ?a✝ ?a✝¹` is a value of type\n  Prop\nchecked : ∀ (n : ℕ) (E : Set (GP.Space n)),\n  ((∀ (m : ℕ) (A : Set (GP.Space m)),\n        0 ≤ dimH A ∧\n          ∀ (s : ℝ),\n            0 < s →\n              GP.hausdorff s A = (MeasureTheory.Measure.hausdorffMeasure s) A ∧\n                (dimH A < ENNReal.ofReal s → GP.hausdorff s A = 0) ∧\n                  (ENNReal.ofReal s < dimH A → GP.hausdorff s A = ∞) ∧\n                    (GP.hausdorff s A = 0 → dimH A ≤ ENNReal.ofReal s) ∧\n                      (GP.hausdorff s A = ∞ → ENNReal.ofReal s ≤ dimH A)) ∧\n      ∀ (A : Set ℝ) (s : ℝ), 0 < s → GP.hausdorff s A = (MeasureTheory.Measure.hausdorffMeasure s) A) →\n    ∀ (δ : ℝ), 0 < δ → ∀ (V : ℕ → Set ℝ), GP.Cover GP.unitInterval δ V → 1 ≤ ∑' (i : ℕ), Metric.ediam (V i)\n'YuiAuxiliary.checked' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]\n",
+    "stderr": "",
+    "wall_seconds": 3.049993082880974,
+    "source_path": "/Users/syyui/projects/Yui-results/test/geometry-product-dimension/rigorous-proof/20261031T073001Z-cec2aae050/native-checks/e17d1a0b11d64f7082feaf2245ce18cf.lean",
+    "source_sha256": "aaa8997ee5532b6be4b4c04322025b013e9fc10eaab68f17e579c6563856b85e",
+    "auxiliary_valid": false,
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext",
+      "sorryAx"
+    ],
+    "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+    "context_port": "T003",
+    "candidate": 5,
+    "accepted": false,
+    "stage_complete": false
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "header": "import Mathlib\nopen scoped TensorProduct\nnoncomputable section\nnamespace SL2Reduction\ndef Index (lam : ℤ) := Fin (lam.toNat + 1)\ndef localRing (p : ℕ) : Subalgebra ℤ ℚ :=\n  Algebra.adjoin ℤ {q : ℚ | ∃ a b : ℤ, b ≠ 0 ∧ ¬ (p : ℤ) ∣ b ∧ q = (a : ℚ) / (b : ℚ)}\nabbrev R (p : ℕ) := ↥(localRing p)\ninstance complexAlgebra (p : ℕ) : Algebra (R p) ℂ :=\n  ((algebraMap ℚ ℂ).comp (localRing p).val.toRingHom).toAlgebra\ninstance ratComplexTower (p : ℕ) : IsScalarTower (R p) ℚ ℂ :=\n  IsScalarTower.of_algebraMap_eq (fun _ => rfl)\nvariable {V : Type*} [AddCommGroup V] [Module ℂ V]\ninstance (priority := 50) localModule (p : ℕ) : Module (R p) V := Module.restrictScalars (R p) ℂ V\ninstance (priority := 50) localTower (p : ℕ) : IsScalarTower (R p) ℂ V := IsScalarTower.restrictScalars (R p) ℂ V\ndef divided (f : Module.End ℂ V) (r : ℕ) : Module.End ℂ V :=\n  ((r.factorial : ℂ)⁻¹) • f ^ r\ndef e (y : Module.End ℂ V) (v : V) (i : ℕ) : V := divided y i v\nabbrev MR (p : ℕ) (M : Submodule ℤ V) := R p ⊗[ℤ] M\nabbrev VK (K : Type*) [Field K] (M : Submodule ℤ V) := K ⊗[ℤ] M\ndef iota (p : ℕ) (M : Submodule ℤ V) : MR p M →ₗ[R p] V :=\n  M.subtype.liftBaseChange (R p)\ndef localizedImage (p : ℕ) (M : Submodule ℤ V) : Submodule (R p) V :=\n  (iota p M).range\ndef Ji (p : ℕ) (M : Submodule ℤ V) (y : Module.End ℂ V) (v : V) (i : ℕ) : Submodule (R p) ℂ :=\n  (localizedImage p M).comap ((LinearMap.toSpanSingleton ℂ V (e y v i)).restrictScalars (R p))\ndef J (p : ℕ) (M : Submodule ℤ V) (y : Module.End ℂ V) (v : V) := Ji p M y v 0\ndef qmul (p : ℕ) (M : Submodule ℤ V) (y : Module.End ℂ V) (v : V) :\n  (ℚ ⊗[R p] J p M y v) →ₗ[ℚ] ℂ :=\n  (J p M y v).subtype.liftBaseChange ℚ\n\ndef Preserves (M : Submodule ℤ V) (f : Module.End ℂ V) : Prop :=\n  ∀ m : M, f (m : V) ∈ M\ndef RPreserves (p : ℕ) (M : Submodule ℤ V) (f : Module.End ℂ V) : Prop :=\n  ∀ u ∈ localizedImage p M, f u ∈ localizedImage p M\nstructure LatticeOps (M : Submodule ℤ V) where\n  x : Module.End ℤ M\n  y : Module.End ℤ M\n  h : Module.End ℤ M\n  X : ℕ → Module.End ℤ M\n  Y : ℕ → Module.End ℤ M\ndef Agrees (M : Submodule ℤ V) (x y h : Module.End ℂ V) (a : LatticeOps M) : Prop :=\n  (∀ m : M, (a.x m : V) = x (m : V)) ∧\n  (∀ m : M, (a.y m : V) = y (m : V)) ∧\n  (∀ m : M, (a.h m : V) = h (m : V)) ∧\n  (∀ r (m : M), (a.X r m : V) = divided x r (m : V)) ∧\n  (∀ r (m : M), (a.Y r m : V) = divided y r (m : V))\ndef Invariant {F U : Type*} [Field F] [AddCommGroup U] [Module F U]\n    (W : Submodule F U) (f : Module.End F U) : Prop :=\n  ∀ u ∈ W, f u ∈ W\ndef Simple {F U : Type*} [Field F] [AddCommGroup U] [Module F U]\n    (x y h : Module.End F U) : Prop :=\n  Nontrivial U ∧ ∀ W : Submodule F U,\n    Invariant W x → Invariant W y → Invariant W h → W = ⊥ ∨ W = ⊤\ndef Highest (lam : ℤ) (x h : Module.End ℂ V) : Prop :=\n  ∃ w : V, w ≠ 0 ∧ x w = 0 ∧ h w = (lam : ℂ) • w\ndef Admissible (M : Submodule ℤ V) (x y : Module.End ℂ V) : Prop :=\n  (∃ (d : ℕ) (b : Module.Basis (Fin d) ℤ M) (c : Module.Basis (Fin d) ℂ V),\n    ∀ i, (b i : V) = c i) ∧\n  ∀ r : ℕ, Preserves M (divided x r) ∧ Preserves M (divided y r)\ndef extendFamily {F U : Type*} [Field F] [AddCommGroup U] [Module F U]\n    (lam : ℤ) (b : Index lam → U) (i : ℕ) : U :=\n  if hi : i < lam.toNat + 1 then b ⟨i, hi⟩ else 0\ndef GeneratorFormulas {F U : Type*} [Field F] [AddCommGroup U] [Module F U]\n    (lam : ℤ) (b : Index lam → U) (x y h : Module.End F U) : Prop :=\n  ∀ i : Index lam,\n    x (b i) = (if i.val = 0 then 0 else\n      (((lam - (i.val : ℤ) + 1 : ℤ) : F) • extendFamily (F := F) lam b (i.val - 1))) ∧\n    y (b i) = ((i.val + 1 : ℕ) : F) • extendFamily (F := F) lam b (i.val + 1) ∧\n    h (b i) = (((lam - 2 * (i.val : ℤ) : ℤ) : F) • b i)\ndef DividedFormulas {F U : Type*} [Field F] [AddCommGroup U] [Module F U]\n    (lam : ℤ) (b : Index lam → U) (X Y : ℕ → Module.End F U) : Prop :=\n  ∀ (i : Index lam) (r : ℕ),\n    X r (b i) = (if r ≤ i.val then\n      ((Nat.choose (lam.toNat - i.val + r) r : ℕ) : F) • extendFamily (F := F) lam b (i.val - r)\n      else 0) ∧\n    Y r (b i) = ((Nat.choose (i.val + r) r : ℕ) : F) • extendFamily (F := F) lam b (i.val + r)\ndef E (lam : ℤ) (b : Module.Basis (Index lam) ℂ V) (i j : Index lam) : Module.End ℂ V :=\n  (b.coord j).smulRight (b i)\ndef MatrixWord {F U : Type*} [Field F] [AddCommGroup U] [Module F U]\n    (lam : ℤ) (X Y : ℕ → Module.End F U) (i j : Index lam) : Module.End F U :=\n  ((Nat.choose lam.toNat j.val : F)⁻¹) •\n    (X (lam.toNat - i.val) * (Y lam.toNat * X lam.toNat) * Y (lam.toNat - j.val))\ndef BasisLift (p : ℕ) (lam : ℤ) (M : Submodule ℤ V)\n    (y : Module.End ℂ V) (v : V) (b : ℂ) : Prop :=\n  ∃ c : Module.Basis (Index lam) (R p) (MR p M),\n    ∀ i, iota p M (c i) = b • e y v i.val\ndef Principal (p : ℕ) (M : Submodule ℤ V) (y : Module.End ℂ V) (v : V) (b : ℂ) : Prop :=\n  b ≠ 0 ∧ J p M y v = Submodule.span (R p) {b}\ndef Target (K : Type*) [Field K] (M : Submodule ℤ V) (x y h : Module.End ℂ V) : Prop :=\n  ∃ a : LatticeOps M, Agrees M x y h a ∧\n    Simple (a.x.baseChange K) (a.y.baseChange K) (a.h.baseChange K)\n\nend SL2Reduction\nopen SL2Reduction\n\n",
+  "parameters": [
+    {
+      "name": "V",
+      "type": "Type",
+      "binder_kind": "implicit"
+    },
+    {
+      "name": "instVAdd",
+      "type": "AddCommGroup V",
+      "binder_kind": "instance"
+    },
+    {
+      "name": "instVMod",
+      "type": "Module ℂ V",
+      "binder_kind": "instance"
+    },
+    {
+      "name": "p",
+      "type": "ℕ"
+    },
+    {
+      "name": "lam",
+      "type": "ℤ"
+    },
+    {
+      "name": "K",
+      "type": "Type"
+    },
+    {
+      "name": "instK",
+      "type": "Field K",
+      "binder_kind": "instance"
+    },
+    {
+      "name": "x",
+      "type": "Module.End ℂ V"
+    },
+    {
+      "name": "y",
+      "type": "Module.End ℂ V"
+    },
+    {
+      "name": "h",
+      "type": "Module.End ℂ V"
+    },
+    {
+      "name": "v",
+      "type": "V"
+    },
+    {
+      "name": "M",
+      "type": "Submodule ℤ V"
+    }
+  ],
+  "types": [
+    "Target K M x y h",
+    "GeneratorFormulas lam (fun i : Index lam => e y v i.val) x y h"
+  ]
+}

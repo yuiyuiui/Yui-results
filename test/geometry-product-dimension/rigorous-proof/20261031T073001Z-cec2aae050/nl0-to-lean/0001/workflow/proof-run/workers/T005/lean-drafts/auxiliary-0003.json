@@ -1,0 +1,23 @@
+{
+  "statement": "∀ (r : ℝ), 0 < r → r ≤ 1 →\n  ∃ (N : ℕ) (J : Fin N → Set ℝ), 0 < N ∧\n    (↑N : ℝ) ≤ 2 / r ∧\n    GP.unitInterval ⊆ ⋃ j, J j ∧\n    (∀ j, Metric.ediam (J j) ≤ ENNReal.ofReal r)",
+  "proof": "intro r hr hr1\nlet N : ℕ := ⌈1 / r⌉₊\nhave hN : 0 < N := Nat.ceil_pos.mpr (one_div_pos.mpr hr)\nhave hNr : 0 < (N : ℝ) := Nat.cast_pos.mpr hN\nhave hceil : 1 / r ≤ (N : ℝ) := Nat.le_ceil _\nhave hsize : (N : ℝ) ≤ 2 / r := by\n  have h := (Nat.ceil_lt_add_one (le_of_lt (one_div_pos.mpr hr))).le\n  have h1 : 1 ≤ 1 / r := (le_div_iff₀ hr).mpr (by simpa using hr1)\n  dsimp [N]\n  calc _ ≤ 1 / r + 1 := h\n       _ ≤ 1 / r + 1 / r := add_le_add_right h1 _\n       _ = 2 / r := by ring\nhave hinv : 1 / (N : ℝ) ≤ r := by\n  apply (div_le_iff₀ hNr).mpr\n  have h := (div_le_iff₀ hr).mp hceil\n  nlinarith\nlet J : Fin N → Set ℝ := fun j => Set.Icc ((j : ℝ) / N) (((j : ℝ) + 1) / N)\nrefine ⟨N, J, hN, hsize, ?_, ?_⟩\n· have cov : ∀ k : ℕ, k ≤ N → ∀ t : ℝ, 0 ≤ t → t ≤ (k : ℝ) / N →\n      ∃ j : Fin N, t ∈ J j := by\n    intro k\n    induction k with\n    | zero =>\n      intro _ t ht ht'\n      have ht0 : t ≤ 0 := by simpa using ht'\n      have ht0 : t = 0 := le_antisymm ht0 ht\n      subst t\n      refine ⟨⟨0, hN⟩, ?_⟩\n      simp [J, le_of_lt (one_div_pos.mpr hNr)]\n    | succ k ih =>\n      intro hk t ht ht'\n      by_cases htk : t ≤ (k : ℝ) / N\n      · exact ih (by omega) t ht htk\n      · refine ⟨⟨k, by omega⟩, ?_, ?_⟩\n        · exact (lt_of_not_ge htk).le\n        · simpa [Nat.cast_add, Nat.cast_one] using ht'\n  intro t ht\n  obtain ⟨j, hj⟩ := cov N le_rfl t ht.1 (by simpa [ne_of_gt hNr] using ht.2)\n  exact Set.mem_iUnion.mpr ⟨j, hj⟩\n· intro j\n  dsimp [J]\n  rw [Real.ediam_Icc]\n  apply ENNReal.ofReal_le_ofReal\n  calc ((j : ℝ) + 1) / N - (j : ℝ) / N = 1 / N := by ring\n       _ ≤ r := hinv",
+  "check": {
+    "exit_code": 0,
+    "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-_j58n9tr/output/Auxiliary.lean:34:48: warning: Variable name `h_T001` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-_j58n9tr/output/Auxiliary.lean:41:69: warning: Variable name `h_T002` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-_j58n9tr/output/Auxiliary.lean:72:17: warning: This simp argument is unused:\n  le_of_lt (one_div_pos.mpr hNr)\n\nHint: Omit it from the simp argument list.\n  simp [J,̵ ̵l̵e̵_̵o̵f̵_̵l̵t̵ ̵(̵o̵n̵e̵_̵d̵i̵v̵_̵p̵o̵s̵.̵m̵p̵r̵ ̵h̵N̵r̵)̵]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nchecked : ∀ (n : ℕ) (E : Set (GP.Space n)),\n  ((∀ (m : ℕ) (A : Set (GP.Space m)),\n        0 ≤ dimH A ∧\n          ∀ (s : ℝ),\n            0 < s →\n              GP.hausdorff s A = (MeasureTheory.Measure.hausdorffMeasure s) A ∧\n                (dimH A < ENNReal.ofReal s → GP.hausdorff s A = 0) ∧\n                  (ENNReal.ofReal s < dimH A → GP.hausdorff s A = ∞) ∧\n                    (GP.hausdorff s A = 0 → dimH A ≤ ENNReal.ofReal s) ∧\n                      (GP.hausdorff s A = ∞ → ENNReal.ofReal s ≤ dimH A)) ∧\n      ∀ (A : Set ℝ) (s : ℝ), 0 < s → GP.hausdorff s A = (MeasureTheory.Measure.hausdorffMeasure s) A) →\n    (dimH E < ∞ ∧\n        0 ≤ dimH E ∧\n          dimH E ≤ ↑n ∧\n            (n = 0 → E = Set.univ ∧ (∃ x, E = {x}) ∧ dimH E = 0) ∧ ∀ (s δ : ℝ), 0 < s → 0 < δ → GP.content s δ E < ∞) →\n      ∀ (r : ℝ),\n        0 < r →\n          r ≤ 1 →\n            ∃ N J,\n              0 < N ∧ ↑N ≤ 2 / r ∧ GP.unitInterval ⊆ ⋃ j, J j ∧ ∀ (j : Fin N), Metric.ediam (J j) ≤ ENNReal.ofReal r\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+    "stderr": "",
+    "wall_seconds": 3.8227528748102486,
+    "source_path": "/Users/syyui/projects/Yui-results/test/geometry-product-dimension/rigorous-proof/20261031T073001Z-cec2aae050/native-checks/d465775db4ee44c4843e4ecd73ce226c.lean",
+    "source_sha256": "7a6fcdef25298146f49268b4cee45b8def6ae56b3fb039faec914c74f9c550a8",
+    "auxiliary_valid": true,
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+    "context_port": "T005",
+    "candidate": 3,
+    "accepted": true,
+    "stage_complete": false
+  }
+}

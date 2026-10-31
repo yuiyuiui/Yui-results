@@ -1,0 +1,183 @@
+{
+  "header": "import Mathlib\nopen MeasureTheory Set Filter\nopen scoped BigOperators ContDiff\nnoncomputable section\nnamespace WaveMap\nabbrev Space (d : ℕ) := EuclideanSpace ℝ (Fin d)\ndef positive (n : ℕ) : Set (Space n × ℝ) := {p | 0 < p.2}\ndef box (n : ℕ) (R : ℝ) : Set (Space n) := {x | ∀ j, x j ∈ Icc (-R) R}\ndef openBox (n : ℕ) (R : ℝ) : Set (Space n) := {x | ∀ j, x j ∈ Ioo (-R) R}\ndef timeInterval (t : ℝ) : Set ℝ := Icc (t / 2) (3 * t / 2)\ndef timeInterior (t : ℝ) : Set ℝ := Ioo (t / 2) (3 * t / 2)\ndef spatial {n : ℕ} {F : Type} [NormedAddCommGroup F] [NormedSpace ℝ F]\n    (f : Space n → F) (j : Fin n) (x : Space n) : F :=\n  fderiv ℝ f x (PiLp.single 2 j 1)\ndef ut {n m : ℕ} (u : Space n × ℝ → Space m) (x : Space n) (t : ℝ) : Space m :=\n  deriv (fun r => u (x, r)) t\ndef utt {n m : ℕ} (u : Space n × ℝ → Space m) (x : Space n) (t : ℝ) : Space m :=\n  deriv (ut u x) t\ndef ux {n m : ℕ} (u : Space n × ℝ → Space m) (j : Fin n) (x : Space n) (t : ℝ) : Space m :=\n  spatial (fun y => u (y, t)) j x\ndef uxx {n m : ℕ} (u : Space n × ℝ → Space m) (j : Fin n) (x : Space n) (t : ℝ) : Space m :=\n  spatial (fun y => ux u j y t) j x\ndef utx {n m : ℕ} (u : Space n × ℝ → Space m) (j : Fin n) (x : Space n) (t : ℝ) : Space m :=\n  spatial (fun y => ut u y t) j x\ndef laplace {n m : ℕ} (u : Space n × ℝ → Space m) (x : Space n) (t : ℝ) : Space m :=\n  ∑ j, uxx u j x t\ndef density {n m : ℕ} (u : Space n × ℝ → Space m) (x : Space n) (t : ℝ) : ℝ :=\n  ‖ut u x t‖ ^ 2 + ∑ j, ‖ux u j x t‖ ^ 2\ndef densityTime {n m : ℕ} (u : Space n × ℝ → Space m) (x : Space n) (t : ℝ) : ℝ :=\n  deriv (density u x) t\ndef energy {n m : ℕ} (u : Space n × ℝ → Space m) (t : ℝ) : ℝ :=\n  ∫ x, density u x t\ndef kineticProduct {n m : ℕ} (u : Space n × ℝ → Space m) (t : ℝ) (x : Space n) : ℝ :=\n  inner ℝ (ut u x t) (utt u x t)\ndef gradientProduct {n m : ℕ} (u : Space n × ℝ → Space m) (j : Fin n) (t : ℝ) (x : Space n) : ℝ :=\n  inner ℝ (ux u j x t) (utx u j x t)\ndef laplaceProduct {n m : ℕ} (u : Space n × ℝ → Space m) (j : Fin n) (t : ℝ) (x : Space n) : ℝ :=\n  inner ℝ (ut u x t) (uxx u j x t)\ndef flux {n m : ℕ} (u : Space n × ℝ → Space m) (j : Fin n) (t : ℝ) (x : Space n) : ℝ :=\n  inner ℝ (ut u x t) (ux u j x t)\ndef terms {n m : ℕ} (u : Space n × ℝ → Space m) (t : ℝ) (j : Fin n) : List (Space n → ℝ) :=\n  [fun x => density u x t, fun x => densityTime u x t, kineticProduct u t,\n   gradientProduct u j t, laplaceProduct u j t, flux u j t, spatial (flux u j t) j]\ndef quotient {n m : ℕ} (u : Space n × ℝ → Space m) (t h : ℝ) (x : Space n) : ℝ :=\n  (density u x (t + h) - density u x t) / h\ndef bound (n : ℕ) (R B : ℝ) : Space n → ℝ :=\n  (box n R).indicator (fun _ => B)\nend WaveMap\n",
+  "parameters": [
+    {
+      "name": "n",
+      "type": "ℕ"
+    },
+    {
+      "name": "m",
+      "type": "ℕ"
+    },
+    {
+      "name": "u",
+      "type": "WaveMap.Space n × ℝ → WaveMap.Space m"
+    },
+    {
+      "name": "q",
+      "type": "WaveMap.Space m"
+    }
+  ],
+  "premise_types": {
+    "H001": "1 ≤ n ∧ 1 ≤ m",
+    "H002": "ContDiffOn ℝ (∞ : ℕ∞ω) u (WaveMap.positive n)",
+    "H003": "‖q‖ = 1",
+    "H004": "∀ (x : WaveMap.Space n) (t : ℝ), 0 < t → ‖u (x,t)‖ = 1",
+    "H005": "∀ (x : WaveMap.Space n) (t : ℝ), 0 < t → ∃ a : ℝ, WaveMap.utt u x t - WaveMap.laplace u x t = a • u (x,t)",
+    "H006": "∀ (s t : ℝ), 0 < s → s < t → ∃ C : Set (WaveMap.Space n), IsCompact C ∧ ∀ x : WaveMap.Space n, x ∉ C → ∀ r ∈ Icc s t, u (x,r) = q"
+  },
+  "conclusion_type": "(∀ t : ℝ, 0 < t → Integrable (fun x => WaveMap.density u x t)) ∧\n  (∀ t : ℝ, 0 < t → HasDerivAt (WaveMap.energy u) 0 t) ∧\n  (∀ (s t : ℝ), 0 < s → 0 < t → WaveMap.energy u s = WaveMap.energy u t)",
+  "representation": "Use one ambient Euclidean representation throughout: Space d = EuclideanSpace ℝ (Fin d) = PiLp 2 (fun _ => ℝ). Its norm and real inner product are the Euclidean ones; PiLp.inner_apply identifies the latter with the coordinate dot product. Fin n labels the original n coordinates by j.val + 1; it introduces neither a missing endpoint nor an extra coordinate. PiLp.single 2 j 1 is the unit vector in coordinate j, so spatial is the Fréchet derivative evaluated on that vector. ut and utt are successive ordinary time derivatives, uxx successive same-coordinate spatial derivatives, and utx is the spatial derivative of ut. Under H002 equality of mixed derivatives identifies utx with the time derivative of ux; proving this identification is part of T004/T007, not a hidden assumption. densityTime is the ACTUAL time derivative of the density, not an assumed product formula. The parameter u is an arbitrary total ambient representative; H002 and all geometric hypotheses concern only positive times. Any source map extends by zero for t≤0, without requiring boundary regularity, and restriction recovers it. Since positive times form an open set, derivatives of all orders and energy germs there depend only on that restriction. No conclusion concerns the chosen exterior values. ContDiffOn uses (∞ : ℕ∞ω), meaning every finite derivative order, not ω (analyticity) or the top element of ℕ∞ω. Header definitions assert no regularity or integrability. The total Bochner integral in energy gains its intended finite Lebesgue meaning only after T003 proves integrability. volume is standard normalized Euclidean Lebesgue measure; EuclideanSpace.volume_preserving_symm_measurableEquiv_toLp identifies it with product coordinate Lebesgue measure. In N002, iteratedFDeriv of positive natural order is the multilinear encoding of all mixed space/time derivatives: evaluation on coordinate unit vectors recovers them, and multilinearity plus the coordinate basis gives the converse. All this is in the same Euclidean representation; local product-coordinate measure transport in T008 is checked inside that obligation. No M ports are retained: the four supplied library theorems are used directly under their actual hypotheses. H003 is preserved although the source proof never needs the norm of q.",
+  "objects": [],
+  "steps": [
+    {
+      "id": "T001",
+      "statement": "∀ (x : WaveMap.Space n) (t : ℝ), 0 < t →\n  inner ℝ (u (x,t)) (WaveMap.ut u x t) = 0 ∧\n  inner ℝ (WaveMap.ut u x t) (WaveMap.utt u x t - WaveMap.laplace u x t) = 0 ∧\n  inner ℝ (u (x,t)) (WaveMap.utt u x t) = -(‖WaveMap.ut u x t‖ ^ 2) ∧\n  (∀ j : Fin n, inner ℝ (u (x,t)) (WaveMap.uxx u j x t) = -(‖WaveMap.ux u j x t‖ ^ 2)) ∧\n  (∀ a : ℝ, WaveMap.utt u x t - WaveMap.laplace u x t = a • u (x,t) →\n    a = (∑ j, ‖WaveMap.ux u j x t‖ ^ 2) - ‖WaveMap.ut u x t‖ ^ 2) ∧\n  WaveMap.utt u x t - WaveMap.laplace u x t =\n    ((∑ j, ‖WaveMap.ux u j x t‖ ^ 2) - ‖WaveMap.ut u x t‖ ^ 2) • u (x,t)",
+      "inputs": [
+        "H002",
+        "H004",
+        "H005"
+      ],
+      "source_steps": [
+        "S001",
+        "S002",
+        "S003"
+      ],
+      "explanation": "Full N001. Differentiate the unit constraint once and twice in time and in each coordinate on the positive-time open set; dot normality with u and ut. Choose a only pointwise and prove its value for every scalar satisfying normality; never differentiate a."
+    },
+    {
+      "id": "T002",
+      "statement": "∀ t0 : ℝ, 0 < t0 → ∃ (C : Set (WaveMap.Space n)) (R : ℝ),\n  IsCompact C ∧ 0 < R ∧ C ⊆ WaveMap.openBox n R ∧\n  (∀ x : WaveMap.Space n, x ∉ C → ∀ r ∈ WaveMap.timeInterval t0, u (x,r) = q) ∧\n  (∀ (k : ℕ) (x : WaveMap.Space n) (r : ℝ), 0 < k → x ∉ C →\n    r ∈ WaveMap.timeInterior t0 → iteratedFDeriv ℝ k u (x,r) = 0)",
+      "inputs": [
+        "H001",
+        "H002",
+        "H006"
+      ],
+      "source_steps": [
+        "S004",
+        "S005"
+      ],
+      "explanation": "Existing common-support subargument. Use J=[t0/2,3t0/2], choose C by H006, enlarge its bound to the open coordinate box, and use local equality with the fixed constant q on the open complement times int J. Establish all positive-order iterated derivatives vanish there; no condition on the norm of q is needed."
+    },
+    {
+      "id": "T003",
+      "statement": "(∀ t : ℝ, 0 < t → Integrable (fun x => WaveMap.density u x t)) ∧\n  ContDiffOn ℝ (∞ : ℕ∞ω) (fun p => WaveMap.density u p.1 p.2) (WaveMap.positive n) ∧\n  ContDiffOn ℝ (∞ : ℕ∞ω) (fun p => WaveMap.densityTime u p.1 p.2) (WaveMap.positive n) ∧\n  ∀ t0 : ℝ, 0 < t0 → ∃ (C : Set (WaveMap.Space n)) (R η B : ℝ),\n    IsCompact C ∧ 0 < R ∧ 0 < η ∧ 0 ≤ B ∧\n    C ⊆ WaveMap.openBox n R ∧ IsCompact (WaveMap.box n R) ∧\n    volume (WaveMap.box n R) = ENNReal.ofReal ((2 * R) ^ n) ∧\n    volume (WaveMap.box n R) ≠ ⊤ ∧\n    Icc (t0 - η) (t0 + η) ⊆ WaveMap.timeInterior t0 ∧\n    (∀ x : WaveMap.Space n, x ∉ C → ∀ r ∈ WaveMap.timeInterval t0, u (x,r) = q) ∧\n    (∀ (k : ℕ) (x : WaveMap.Space n) (r : ℝ), 0 < k → x ∉ C →\n      r ∈ WaveMap.timeInterior t0 → iteratedFDeriv ℝ k u (x,r) = 0) ∧\n    (∀ r ∈ WaveMap.timeInterior t0, ∀ (j : Fin n) (f : WaveMap.Space n → ℝ),\n      f ∈ WaveMap.terms u r j →\n      Continuous f ∧ Function.support f ⊆ C ∧\n      (∃ K : ℝ, 0 ≤ K ∧ ∀ x ∈ WaveMap.box n R, |f x| ≤ K) ∧\n      Measurable f ∧ Integrable f) ∧\n    (∀ x ∈ WaveMap.box n R, ∀ r ∈ Icc (t0 - η) (t0 + η), |WaveMap.densityTime u x r| ≤ B)",
+      "inputs": [
+        "H001",
+        "H002",
+        "T002"
+      ],
+      "source_steps": [
+        "S006",
+        "S007",
+        "S008"
+      ],
+      "explanation": "Full N002 with the same common witnesses. Prove smoothness of density and its actual time derivative; continuity, support, measurability, box bounds and absolute integrability for exactly the seven listed terms. The list quantifies every coordinate; H001 supplies a coordinate when extracting the coordinate-independent entries. Coordinate product volume gives (2R)^n and compactness of the box. Set η=t0/4 and bound |e_t| on the compact space-time box to choose B. Keep C,R,η,B jointly quantified. Apply this at an arbitrary positive time to export energy-density integrability separately."
+    },
+    {
+      "id": "T004",
+      "statement": "∀ (x : WaveMap.Space n) (t : ℝ), 0 < t →\n  HasDerivAt (WaveMap.density u x) (WaveMap.densityTime u x t) t ∧\n  WaveMap.densityTime u x t = 2 * WaveMap.kineticProduct u t x +\n    2 * ∑ j, WaveMap.gradientProduct u j t x",
+      "inputs": [
+        "H002"
+      ],
+      "source_steps": [
+        "S009"
+      ],
+      "explanation": "Pointwise product-rule subargument of N003. Derive time differentiability of density from smoothness, identify utx with the time derivative of ux by equality of mixed coordinate derivatives, and compute the exact factor-2 formula. Derivative existence is explicit, since deriv alone defaults to zero when no derivative exists."
+    },
+    {
+      "id": "T005",
+      "statement": "∀ t0 : ℝ, 0 < t0 → ∃ R η B : ℝ,\n  0 < R ∧ 0 < η ∧ 0 ≤ B ∧ Icc (t0 - η) (t0 + η) ⊆ Ioi (0 : ℝ) ∧\n  Integrable (WaveMap.bound n R B) ∧\n  ∀ h : ℝ, 0 < |h| → |h| < η → ∀ x : WaveMap.Space n,\n    |WaveMap.quotient u t0 h x| ≤ WaveMap.bound n R B x",
+      "inputs": [
+        "T003",
+        "T004"
+      ],
+      "source_steps": [
+        "S010"
+      ],
+      "explanation": "Existing domination subargument. Choose the common witnesses from N002, apply exists_hasDerivAt_eq_slope to density at ordered endpoints min(t0,t0+h), max(t0,t0+h), use the uniform |densityTime|≤B bound, and handle both increment signs. Outside the box both density values vanish. The dominating function is exactly B times the box indicator and is integrable by finite box measure."
+    },
+    {
+      "id": "T006",
+      "statement": "∀ t : ℝ, 0 < t →\n  HasDerivAt (WaveMap.energy u) (∫ x, WaveMap.densityTime u x t) t ∧\n  (∀ x : WaveMap.Space n, WaveMap.densityTime u x t =\n    2 * WaveMap.kineticProduct u t x + 2 * ∑ j, WaveMap.gradientProduct u j t x) ∧\n  Integrable (fun x => WaveMap.densityTime u x t) ∧\n  Integrable (WaveMap.kineticProduct u t) ∧\n  (∀ j : Fin n, Integrable (WaveMap.gradientProduct u j t))",
+      "inputs": [
+        "H002",
+        "T003",
+        "T004",
+        "T005"
+      ],
+      "source_steps": [
+        "S011",
+        "S012",
+        "S013"
+      ],
+      "explanation": "Full N003. For every nonzero increment sequence in the η-window tending to zero, establish measurability and pointwise convergence of the density quotients using T004, and dominate using T005. Apply MeasureTheory.tendsto_integral_of_dominated_convergence with μ=volume, codomain ℝ, sequence quotient u t0 (h k), limit densityTime, and the box indicator bound. Linearity uses the finite integrals from N002. Pass from all such sequences to the punctured real limit by the source sequential criterion and conclude HasDerivAt of the actual energy integral. Retain the product formula and integrability of every summand."
+    },
+    {
+      "id": "T007",
+      "statement": "∀ (t : ℝ), 0 < t → ∀ j : Fin n,\n  ContDiff ℝ (∞ : ℕ∞ω) (WaveMap.flux u j t) ∧ HasCompactSupport (WaveMap.flux u j t) ∧\n  (∀ x : WaveMap.Space n, WaveMap.spatial (WaveMap.flux u j t) j x =\n    WaveMap.gradientProduct u j t x + WaveMap.laplaceProduct u j t x) ∧\n  Integrable (WaveMap.spatial (WaveMap.flux u j t) j) ∧\n  Integrable (WaveMap.gradientProduct u j t) ∧ Integrable (WaveMap.laplaceProduct u j t)",
+      "inputs": [
+        "H002",
+        "T003"
+      ],
+      "source_steps": [
+        "S014"
+      ],
+      "explanation": "Existing flux subargument of N004. At fixed positive t, smoothness of u yields spatial smoothness of the flux; the compact support in N002 yields HasCompactSupport. Compute its coordinate derivative by the product rule, symmetry of the real inner product, and the definitions. Retain integrability of the derivative and both terms. N002 also supplies the common box for the following FTC/Fubini step."
+    },
+    {
+      "id": "T008",
+      "statement": "∀ (t : ℝ), 0 < t → ∀ j : Fin n,\n  (∫ x, WaveMap.gradientProduct u j t x) = -(∫ x, WaveMap.laplaceProduct u j t x) ∧\n  Integrable (WaveMap.gradientProduct u j t) ∧ Integrable (WaveMap.laplaceProduct u j t)",
+      "inputs": [
+        "H001",
+        "T003",
+        "T007"
+      ],
+      "source_steps": [
+        "S015",
+        "S016"
+      ],
+      "explanation": "Full N004 using exactly coordinate FTC followed by Fubini. Choose C,R from N002 and a coordinate j. Reindex coordinates into the distinguished real coordinate and the remaining n−1 coordinates, proving the product-Lebesgue transport before using it. The flux vanishes at ±R. Apply intervalIntegral.integral_eq_sub_of_hasDerivAt on each line; continuous derivatives on the closed interval give interval integrability. Apply MeasureTheory.integral_prod to the integrable derivative on the compact box with restricted finite measures, so its integral is zero. Restore the integral on all space by support, integrate T007's product identity, and rearrange finite integrals. Include the n=1 case with a singleton remaining-coordinate space of measure one; no dimension is silently excluded."
+    },
+    {
+      "id": "T009",
+      "statement": "∀ t : ℝ, 0 < t → HasDerivAt (WaveMap.energy u) 0 t",
+      "inputs": [
+        "T001",
+        "T003",
+        "T006",
+        "T008"
+      ],
+      "source_steps": [
+        "S017"
+      ],
+      "explanation": "Substitute N003's derivative formula, use N004 coordinate by coordinate, and use finite-sum linearity with N002 integrability to obtain 2 times the integral of inner ut (utt−laplace). N001 makes this integrand zero pointwise. This proves genuine differentiability with zero derivative, not merely a statement about the total deriv operator."
+    },
+    {
+      "id": "T010",
+      "statement": "(∀ t : ℝ, 0 < t → Integrable (fun x => WaveMap.density u x t)) ∧\n  (∀ t : ℝ, 0 < t → HasDerivAt (WaveMap.energy u) 0 t) ∧\n  (∀ (s t : ℝ), 0 < s → 0 < t → WaveMap.energy u s = WaveMap.energy u t)",
+      "inputs": [
+        "T003",
+        "T009"
+      ],
+      "source_steps": [
+        "S018"
+      ],
+      "explanation": "Full P. Keep density integrability from N002 and HasDerivAt zero from T009. For 0<s<t, apply exists_hasDerivAt_eq_slope to energy with derivative function zero on [s,t], where T009 gives differentiability and hence continuity. Multiply by t−s>0. Order arbitrary positive times or use reflexivity to obtain constancy for every pair. The defined density and energy have exactly the original normalization, without a factor 1/2 or an assertion at time zero."
+    }
+  ],
+  "terminal": "T010",
+  "source_outputs": {
+    "N001": "T001",
+    "N002": "T003",
+    "N003": "T006",
+    "N004": "T008",
+    "P": "T010"
+  },
+  "endpoint_correspondence": {
+    "P": {
+      "mode": "equivalent",
+      "explanation": "The parameters n,m are natural dimensions with H001 enforcing n,m≥1. Space d is standard real Euclidean d-space, with Fin d enumerating precisely the d original coordinates. H002 is joint C∞ regularity on the positive-time open set: ∞ in ℕ∞ω denotes all finite derivative orders and does not demand analyticity. The ambient total u represents the source positive-time map by restriction; conversely extend any source map arbitrarily (e.g. zero) on nonpositive times. All hypotheses and positive-time derivatives depend only on the restriction, so neither direction imposes an extension or boundary regularity assumption. H003 fixes a unit q; H004 is the original sphere condition. H005 is pointwise existence of a real scalar for the same normal acceleration, with no smooth scalar selection. H006 is the same compact support of u−q, locally uniform on each 0<s<t interval. Under smoothness, Fréchet derivatives on coordinate unit vectors and ordinary time derivatives give precisely the source component derivatives and Laplacian. volume is normalized Euclidean Lebesgue measure, and density is exactly ‖ut‖²+Σj‖uxj‖². The conclusion asserts integrability for every positive time, HasDerivAt energy 0 at every positive time, and equality of the energies at all positive time pairs. HasDerivAt is equivalent to differentiability together with derivative zero; the converse uses uniqueness of derivatives. Germ locality at t>0 makes this equivalent to the source energy on (0,∞), independent of the exterior representative. Thus the entire target, including all six hypotheses, time and spatial quantifiers, normalization and domain, is preserved in both directions. There are no E roots in the supplied source map."
+    }
+  }
+}

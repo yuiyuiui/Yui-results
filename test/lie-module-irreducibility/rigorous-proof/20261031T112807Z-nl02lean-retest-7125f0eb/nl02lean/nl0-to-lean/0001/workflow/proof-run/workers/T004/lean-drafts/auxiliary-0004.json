@@ -1,0 +1,24 @@
+{
+  "statement": "∀ i : Index lam, ∀ r : ℕ, divided y r (e y v i.val) = (Nat.choose (i.val + r) r : ℂ) • extendFamily (F := ℂ) lam (fun j : Index lam => e y v j.val) (i.val + r)",
+  "proof": "classical\nhave hn : (lam.toNat : ℤ) = lam := Int.toNat_of_nonneg h_H002.1\nhave hstep : ∀ (f : Module.End ℂ V) (r : ℕ) (w : V),\n    divided f (r + 1) w = ((r + 1 : ℕ) : ℂ)⁻¹ • f (divided f r w) := by\n  intro f r w\n  simp [divided, Nat.factorial_succ, pow_succ', mul_smul, mul_comm]\n  exact smul_comm _ _ _\nhave hc : ∀ n r : ℕ,\n    ((r + 1 : ℕ) : ℂ)⁻¹ * (Nat.choose n r : ℂ) * ((n + 1 : ℕ) : ℂ) =\n      (Nat.choose (n + 1) (r + 1) : ℂ) := by\n  intro n r\n  have he : ((n + 1 : ℕ) : ℂ) * (Nat.choose n r : ℂ) =\n      (Nat.choose (n + 1) (r + 1) : ℂ) * ((r + 1 : ℕ) : ℂ) := by\n    exact_mod_cast Nat.add_one_mul_choose_eq n r\n  have hr : ((r + 1 : ℕ) : ℂ) ≠ 0 := by exact_mod_cast Nat.succ_ne_zero r\n  calc\n    _ = ((r + 1 : ℕ) : ℂ)⁻¹ *\n        (((n + 1 : ℕ) : ℂ) * (Nat.choose n r : ℂ)) := by ring\n    _ = _ := by rw [he]; field_simp\nlet b : ℕ → V := extendFamily (F := ℂ) lam (fun i : Index lam => e y v i.val)\nhave hb : ∀ i : Index lam, b i.val = e y v i.val := by\n  intro i\n  simp [b, extendFamily, i.isLt]\nhave hz : ∀ k : ℕ, lam.toNat + 1 ≤ k → b k = 0 := by\n  intro k hk\n  simp [b, extendFamily, not_lt.mpr hk]\nhave hy : ∀ k : ℕ, y (b k) = ((k + 1 : ℕ) : ℂ) • b (k + 1) := by\n  intro k\n  by_cases hk : k < lam.toNat + 1\n  · have hh := (h_T003.2.2 ⟨k, hk⟩).2.1\n    change y (e y v k) = ((k + 1 : ℕ) : ℂ) • b (k + 1) at hh\n    rw [hb ⟨k, hk⟩]\n    exact hh\n  · rw [hz k (by omega), map_zero, hz (k + 1) (by omega), smul_zero]\n\nintro i r\nchange divided y r (e y v i.val) = (Nat.choose (i.val + r) r : ℂ) • b (i.val + r)\ninduction r with\n| zero => simp [divided, ← hb i]\n| succ r ih =>\n  rw [hstep, ih, map_smul, hy]\n  simp only [smul_smul]\n  rw [hc]\n  congr 2 <;> omega\n",
+  "check": {
+    "exit_code": 1,
+    "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-er8l3t0q/output/Auxiliary.lean:252:8: error: Tactic `rewrite` failed: Did not find an occurrence of the pattern\n  (↑(?r + 1))⁻¹ * ↑(Nat.choose ?n ?r) * ↑(?n + 1)\nin the target expression\n  ((↑(r + 1))⁻¹ * (↑((↑i + r).choose r) * ↑(↑i + r + 1))) • b (↑i + r + 1) =\n    ↑((↑i + (r + 1)).choose (r + 1)) • b (↑i + (r + 1))\n\ncase succ\nV : Type\ninstVAdd : AddCommGroup V\ninstVMod : _root_.Module ℂ V\np : ℕ\nlam : ℤ\nK : Type\ninstK : Field K\nx y h : Module.End ℂ V\nv : V\nM : Submodule ℤ V\nh_H002 : 0 ≤ lam ∧ lam < ↑p\nh_T001 : Lowering lam x y h v\nh_T002 : ∀ (i : Index lam), e y v ↑i ≠ 0 ∧ h (e y v ↑i) = ↑(lam - 2 * ↑↑i) • e y v ↑i\nh_T003 : CoordinateCore lam x y h v\nhn : ↑lam.toNat = lam\nhstep : ∀ (f : Module.End ℂ V) (r : ℕ) (w : V), (divided f (r + 1)) w = (↑(r + 1))⁻¹ • f ((divided f r) w)\nhc : ∀ (n r : ℕ), (↑(r + 1))⁻¹ * ↑(n.choose r) * ↑(n + 1) = ↑((n + 1).choose (r + 1))\nb : ℕ → V := extendFamily lam fun i => e y v ↑i\nhb : ∀ (i : Index lam), b ↑i = e y v ↑i\nhz : ∀ (k : ℕ), lam.toNat + 1 ≤ k → b k = 0\nhy : ∀ (k : ℕ), y (b k) = ↑(k + 1) • b (k + 1)\ni : Index lam\nr : ℕ\nih : (divided y r) (e y v ↑i) = ↑((↑i + r).choose r) • b (↑i + r)\n⊢ ((↑(r + 1))⁻¹ * (↑((↑i + r).choose r) * ↑(↑i + r + 1))) • b (↑i + r + 1) =\n    ↑((↑i + (r + 1)).choose (r + 1)) • b (↑i + (r + 1))\n@checked : ∀ {V : Type} [instVAdd : AddCommGroup V] [instVMod : _root_.Module ℂ V] (p : ℕ) (lam : ℤ) (K : Type)\n  [instK : Field K] (x y h : Module.End ℂ V) (v : V) (M : Submodule ℤ V),\n  0 ≤ lam ∧ lam < ↑p →\n    Lowering lam x y h v →\n      (∀ (i : Index lam), e y v ↑i ≠ 0 ∧ h (e y v ↑i) = ↑(lam - 2 * ↑↑i) • e y v ↑i) →\n        CoordinateCore lam x y h v →\n          ∀ (i : Index lam) (r : ℕ),\n            (divided y r) (e y v ↑i) = ↑((↑i + r).choose r) • extendFamily lam (fun j => e y v ↑j) (↑i + r)\n'YuiAuxiliary.checked' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]\n",
+    "stderr": "",
+    "wall_seconds": 7.141259375028312,
+    "source_path": "/Users/syyui/projects/Yui-results/test/lie-module-irreducibility/rigorous-proof/20261031T112807Z-nl02lean-retest-7125f0eb/nl02lean/native-checks/00f06da4b84f4123adaf26127a44e29f.lean",
+    "source_sha256": "24034082e54f940c56b6a9b94bd2691ce02d27ae95798c644aaad08a0da6677c",
+    "auxiliary_valid": false,
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext",
+      "sorryAx"
+    ],
+    "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+    "context_port": "T004",
+    "candidate": 4,
+    "accepted": false,
+    "stage_complete": false
+  }
+}

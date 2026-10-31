@@ -1,0 +1,72 @@
+{
+  "base_sha256": "0b1bdcfd3898590aed7a3f980bfe89b04ef0fd0d83eaced4c4b1bb4c3c72e45c",
+  "patches": [
+    {
+      "op": "replace",
+      "path": "/spec/header",
+      "value": "import Mathlib\nnoncomputable section\nopen scoped TensorProduct\nnamespace LatticeSL2\ndef scalarRing (p : ℕ) : Subring ℚ :=\n  Subring.closure {q | ∃ b : ℤ, ¬ (p : ℤ) ∣ b ∧ q = (b : ℚ)⁻¹}\nabbrev R (p : ℕ) := ↥(scalarRing p)\ninstance (p : ℕ) : Algebra (R p) ℂ :=\n  ((algebraMap ℚ ℂ).comp (scalarRing p).subtype).toAlgebra\ninstance (p : ℕ) (V : Type*) [AddCommGroup V] [Module ℂ V] : Module (R p) V :=\n  Module.compHom V (algebraMap (R p) ℂ)\ndef divided {V : Type*} [AddCommGroup V] [Module ℂ V]\n    (a : Module.End ℂ V) (r : ℕ) : Module.End ℂ V :=\n  ((r.factorial : ℂ)⁻¹) • a ^ r\ndef ev {V : Type*} [AddCommGroup V] [Module ℂ V]\n    (y : Module.End ℂ V) (v : V) (i : ℕ) : V := divided y i v\nabbrev Ix (l : ℤ) := Fin (l.toNat + 1)\ndef Stable {F U : Type*} [Field F] [AddCommGroup U] [Module F U]\n    (W : Submodule F U) (a : Module.End F U) : Prop :=\n  ∀ u ∈ W, a u ∈ W\ndef SimpleTriple {F U : Type*} [Field F] [AddCommGroup U] [Module F U]\n    (x y h : Module.End F U) : Prop :=\n  Nontrivial U ∧ ∀ W : Submodule F U,\n    Stable W x → Stable W y → Stable W h → W = ⊥ ∨ W = ⊤\ndef Preserves {V : Type*} [AddCommGroup V] [Module ℂ V]\n    (M : Submodule ℤ V) (a : Module.End ℂ V) : Prop :=\n  ∀ m : M, a (m : V) ∈ M\nabbrev MR {V : Type*} [AddCommGroup V] [Module ℂ V]\n    (p : ℕ) (M : Submodule ℤ V) := R p ⊗[ℤ] M\nabbrev VK {V : Type*} [AddCommGroup V] [Module ℂ V]\n    (K : Type*) [Field K] (M : Submodule ℤ V) := K ⊗[ℤ] M\ndef LiftOf {V : Type*} [AddCommGroup V] [Module ℂ V]\n    (M : Submodule ℤ V) (a : Module.End ℂ V) (f : Module.End ℤ M) : Prop :=\n  ∀ m : M, (f m : V) = a (m : V)\ninstance (p : ℕ) (V : Type*) [AddCommGroup V] [Module ℂ V] :\n    IsScalarTower (R p) ℂ V := IsScalarTower.of_compHom (R p) ℂ V\ndef L {V : Type*} [AddCommGroup V] [Module ℂ V] (p : ℕ)\n    (M : Submodule ℤ V) : Submodule (R p) V :=\n  Submodule.span (R p) (M : Set V)\ndef J {V : Type*} [AddCommGroup V] [Module ℂ V] (p : ℕ)\n    (M : Submodule ℤ V) (e : V) : Submodule (R p) ℂ :=\n  (L p M).comap ((LinearMap.id : ℂ →ₗ[ℂ] ℂ).smulRight e |>.restrictScalars (R p))\ndef pPart {V : Type*} [AddCommGroup V] [Module ℂ V]\n    (p : ℕ) (M : Submodule ℤ V) : Submodule (R p) (MR p M) :=\n  Submodule.span (R p) (Set.range (fun u : MR p M => (p : ℤ) • u))\nabbrev Red {V : Type*} [AddCommGroup V] [Module ℂ V]\n    (p : ℕ) (M : Submodule ℤ V) := ZMod p ⊗[ℤ] MR p M\nabbrev RK {V : Type*} [AddCommGroup V] [Module ℂ V]\n    {p : ℕ} {K : Type*} [Field K] (κ : R p →+* K) (M : Submodule ℤ V) :=\n  letI := κ.toAlgebra\n  K ⊗[R p] MR p M\nabbrev FK {V : Type*} [AddCommGroup V] [Module ℂ V]\n    (p : ℕ) (K : Type*) [Field K] [CharP K p] (M : Submodule ℤ V) :=\n  letI := ZMod.algebra K p\n  K ⊗[ZMod p] Red p M\ndef throughR {V : Type*} [AddCommGroup V] [Module ℂ V]\n    {p : ℕ} {K : Type*} [Field K] (κ : R p →+* K)\n    {M : Submodule ℤ V} (f : Module.End ℤ M) : Module.End K (RK κ M) :=\n  letI := κ.toAlgebra\n  (f.baseChange (R p)).baseChange K\ndef throughF {V : Type*} [AddCommGroup V] [Module ℂ V]\n    (p : ℕ) (K : Type*) [Field K] [CharP K p]\n    {M : Submodule ℤ V} (f : Module.End ℤ M) : Module.End K (FK p K M) :=\n  letI := ZMod.algebra K p\n  (((f.baseChange (R p)).restrictScalars ℤ).baseChange (ZMod p)).baseChange K\ndef matrixUnit {F U : Type*} [Field F] [AddCommGroup U] [Module F U]\n    {l : ℤ} (B : Module.Basis (Ix l) F U) (i j : Ix l) : Module.End F U :=\n  (B.coord j).smulRight (B i)\ndef genFormulas {F U : Type*} [Field F] [AddCommGroup U] [Module F U]\n    (l : ℤ) (x y h : Module.End F U) (b : Ix l → U) : Prop :=\n  (∀ i : Ix l, x (b i) = if hi : 0 < i.val then\n      ((l - (i.val : ℤ) + 1 : ℤ) : F) • b ⟨i.val - 1, Nat.lt_of_le_of_lt (Nat.sub_le i.val 1) i.isLt⟩\n      else 0) ∧\n  (∀ i : Ix l, y (b i) = if hi : i.val + 1 < l.toNat + 1 then\n      ((i.val + 1 : ℕ) : F) • b ⟨i.val + 1, hi⟩ else 0) ∧\n  (∀ i : Ix l, h (b i) = ((l - 2 * (i.val : ℤ) : ℤ) : F) • b i)\ndef iotaSpec {V : Type*} [AddCommGroup V] [Module ℂ V]\n    (p : ℕ) (M : Submodule ℤ V) (f : MR p M →ₗ[R p] V) : Prop :=\n  ∀ (r : R p) (m : M), f (r ⊗ₜ[ℤ] m) = (algebraMap (R p) ℂ r) • (m : V)\ndef canonicalR {V : Type*} [AddCommGroup V] [Module ℂ V]\n    {p : ℕ} {K : Type*} [Field K] (κ : R p →+* K)\n    (M : Submodule ℤ V) (C : RK κ M ≃ₗ[K] VK K M) : Prop :=\n  letI := κ.toAlgebra\n  ∀ (c : K) (r : R p) (m : M),\n    C (c ⊗ₜ[R p] (r ⊗ₜ[ℤ] m)) = (κ r * c) ⊗ₜ[ℤ] m\ndef pureR {V : Type*} [AddCommGroup V] [Module ℂ V]\n    {p : ℕ} {K : Type*} [Field K] (κ : R p →+* K)\n    {M : Submodule ℤ V} (c : K) (u : MR p M) : RK κ M :=\n  letI := κ.toAlgebra\n  c ⊗ₜ[R p] u\ndef canonicalF {V : Type*} [AddCommGroup V] [Module ℂ V]\n    {p : ℕ} {K : Type*} [Field K] [CharP K p]\n    (κ : R p →+* K) (M : Submodule ℤ V)\n    (D : FK p K M ≃ₗ[K] VK K M) : Prop :=\n  letI := ZMod.algebra K p\n  ∀ (c : K) (a : ZMod p) (r : R p) (m : M),\n    D (c ⊗ₜ[ZMod p] (a ⊗ₜ[ℤ] (r ⊗ₜ[ℤ] m))) =\n      ((ZMod.cast a : K) * κ r * c) ⊗ₜ[ℤ] m\ndef basisOrigin {V : Type*} [AddCommGroup V] [Module ℂ V]\n    {p : ℕ} {K : Type*} [Field K] {l : ℤ}\n    (M : Submodule ℤ V) (y : Module.End ℂ V) (v : V)\n    (β : Module.Basis (Ix l) K (VK K M)) : Prop :=\n  ∃ b : ℂ, b ∈ J p M (ev y v 0) ∧ b ≠ 0 ∧\n  ∃ ι : MR p M →ₗ[R p] V, iotaSpec p M ι ∧ Function.Injective ι ∧\n  ∃ B : Module.Basis (Ix l) (R p) (MR p M),\n    (∀ i, ι (B i) = b • ev y v i.val) ∧\n  ∃ κ : R p →+* K, ∃ C : RK κ M ≃ₗ[K] VK K M,\n    canonicalR κ M C ∧ ∀ i, β i = C (pureR κ 1 (B i))\nend LatticeSL2\nopen LatticeSL2\n"
+    },
+    {
+      "op": "replace",
+      "path": "/spec/steps/0/statement",
+      "value": "((l.toNat : ℤ) = l) ∧\n(∀ i : Ix l, 0 ≤ (i.val : ℤ) ∧ (i.val : ℤ) ≤ l) ∧\n(∀ i : ℤ, 0 ≤ i → i ≤ l → ∃ j : Ix l, (j.val : ℤ) = i) ∧\n((0 < l.toNat + 1 ∧ Fintype.card (Ix l) = l.toNat + 1) ∧\n(∀ t : ℕ, h ((y ^ t) v) = ((l - 2 * (t : ℤ) : ℤ) : ℂ) • ((y ^ t) v)) ∧\n(∀ t : ℕ, 0 < t → x ((y ^ t) v) = (((t : ℤ) * (l - (t : ℤ) + 1) : ℤ) : ℂ) • ((y ^ (t - 1)) v)))"
+    },
+    {
+      "op": "replace",
+      "path": "/spec/steps/4/statement",
+      "value": "(((l.toNat : ℤ) = l) ∧\n(∀ i : Ix l, 0 ≤ (i.val : ℤ) ∧ (i.val : ℤ) ≤ l) ∧\n(∀ i : ℤ, 0 ≤ i → i ≤ l → ∃ j : Ix l, (j.val : ℤ) = i) ∧\n((0 < l.toNat + 1 ∧ Fintype.card (Ix l) = l.toNat + 1) ∧\n(∀ t : ℕ, h ((y ^ t) v) = ((l - 2 * (t : ℤ) : ℤ) : ℂ) • ((y ^ t) v)) ∧\n(∀ t : ℕ, 0 < t → x ((y ^ t) v) = (((t : ℤ) * (l - (t : ℤ) + 1) : ℤ) : ℂ) • ((y ^ (t - 1)) v)))) ∧ (∀ i : Ix l, ev y v i.val ≠ 0 ∧ h (ev y v i.val) = ((l - 2 * (i.val : ℤ) : ℤ) : ℂ) • ev y v i.val) ∧ (∃ B : Module.Basis (Ix l) ℂ V, ∀ i, B i = ev y v i.val) ∧ ((∀ t : ℕ, l.toNat + 1 ≤ t → (y ^ t) v = 0) ∧ genFormulas l x y h (fun i : Ix l => ev y v i.val)) ∧ ((∀ (i : Ix l) (r : ℕ), divided x r (ev y v i.val) =\n  if r ≤ i.val then ((Nat.choose (l.toNat - i.val + r) r : ℕ) : ℂ) • ev y v (i.val - r) else 0) ∧\n(∀ (i : Ix l) (r : ℕ), divided y r (ev y v i.val) =\n  if i.val + r ≤ l.toNat then ((Nat.choose (i.val + r) r : ℕ) : ℂ) • ev y v (i.val + r) else 0))"
+    },
+    {
+      "op": "replace",
+      "path": "/spec/steps/4/inputs",
+      "value": [
+        "H002",
+        "T001",
+        "T002",
+        "T003",
+        "T004"
+      ]
+    },
+    {
+      "op": "replace",
+      "path": "/spec/steps/7/statement",
+      "value": "(∀ q : ℚ, q ∈ scalarRing p ↔ ∃ a b : ℤ, ¬ (p : ℤ) ∣ b ∧ q = (a : ℚ) / (b : ℚ)) ∧ (((∃ ι : MR p M →ₗ[R p] V, iotaSpec p M ι ∧ Function.Injective ι ∧ LinearMap.range ι = L p M) ∧\nNonempty (Module.Basis (Ix l) (R p) (MR p M)) ∧\nSubmodule.span ℂ (M : Set V) = ⊤ ∧\n(∀ r : ℕ, Preserves M (divided x r) ∧ Preserves M (divided y r)) ∧\nPreserves M x ∧ Preserves M y ∧ Preserves M h ∧\n(∀ r : ℕ, (∀ u ∈ L p M, divided x r u ∈ L p M) ∧ (∀ u ∈ L p M, divided y r u ∈ L p M)) ∧\n(∀ u ∈ L p M, x u ∈ L p M ∧ y u ∈ L p M ∧ h u ∈ L p M) ∧\n(∃ fx fy fh : Module.End ℤ M, LiftOf M x fx ∧ LiftOf M y fy ∧ LiftOf M h fh) ∧\n(∃ DX DY : ℕ → Module.End ℤ M, ∀ r, LiftOf M (divided x r) (DX r) ∧ LiftOf M (divided y r) (DY r))) ∧ (∀ (B : Module.Basis (Ix l) ℂ V), (∀ i, B i = ev y v i.val) →\n  (divided y l.toNat * divided x l.toNat = matrixUnit B (Fin.last l.toNat) (Fin.last l.toNat)) ∧\n  (∀ i : Ix l, divided x (l.toNat - i.val) * (divided y l.toNat * divided x l.toNat) = matrixUnit B i (Fin.last l.toNat)) ∧\n  (∀ j : Ix l, (divided y l.toNat * divided x l.toNat) * divided y (l.toNat - j.val) =\n    ((Nat.choose l.toNat j.val : ℕ) : ℂ) • matrixUnit B (Fin.last l.toNat) j) ∧\n  (∀ j : Ix l, IsUnit ((Nat.choose l.toNat j.val : ℕ) : R p))) ∧ (∀ (B : Module.Basis (Ix l) ℂ V), (∀ i, B i = ev y v i.val) →\n  ∀ i j : Ix l,\n  matrixUnit B i j = (((Nat.choose l.toNat j.val : ℕ) : ℂ)⁻¹) •\n    (divided x (l.toNat - i.val) * (divided y l.toNat * divided x l.toNat) * divided y (l.toNat - j.val)) ∧\n  ∀ u ∈ L p M, matrixUnit B i j u ∈ L p M))"
+    },
+    {
+      "op": "replace",
+      "path": "/spec/steps/11/inputs",
+      "value": [
+        "H001",
+        "T008",
+        "T011"
+      ]
+    },
+    {
+      "op": "replace",
+      "path": "/spec/steps/14/inputs",
+      "value": [
+        "H001",
+        "H002",
+        "T008",
+        "T011",
+        "T014"
+      ]
+    },
+    {
+      "op": "replace",
+      "path": "/spec/steps/12/explanation",
+      "value": "Use the pinned Module.finrank_baseChange (both coefficient rings satisfy StrongRankCondition, and the source module is free) and Module.finrank_pi_fintype (finite index, every factor free and finite) directly. R is a subring of ℚ, so both rings are domains with strong rank condition. N002 supplies an R-basis; T012 makes QJ finite-dimensional over ℚ, hence free and finite. Tensor the N003 coordinate isomorphism, obtain n=n*r and r=1 since n>0. No M premise port or flatness assumption is needed."
+    },
+    {
+      "op": "replace",
+      "path": "/spec/steps/0/explanation",
+      "value": "Check the explicit identification Fin(l.toNat+1)↔{i:ℤ | 0≤i≤l} under H002, including l.toNat=l. Then perform the supplied simultaneous induction on nonnegative lowering exponents with the complex commutators."
+    },
+    {
+      "op": "replace",
+      "path": "/spec/steps/7/explanation",
+      "value": "Compose the factor identities and use R-module closure to prove preservation by every matrix unit; collect N002. Also retain T006's identification of the rational subring as an implementation bridge reused in the rank and valuation calculations."
+    }
+  ],
+  "base_candidate": 4
+}

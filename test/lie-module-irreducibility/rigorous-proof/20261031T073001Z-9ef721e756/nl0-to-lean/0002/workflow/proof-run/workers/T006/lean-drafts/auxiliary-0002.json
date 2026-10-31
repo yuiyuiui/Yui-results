@@ -1,0 +1,24 @@
+{
+  "statement": "∀ q : ℚ, q ∈ scalarRing p ↔ ∃ a b : ℤ, ¬ (p : ℤ) ∣ b ∧ q = (a : ℚ) / (b : ℚ)",
+  "proof": "have hp : Prime (p : ℤ) := Int.prime_iff_natAbs_prime.mpr (by simpa using h_H001.1)\nhave hb0 : ∀ b : ℤ, ¬ (p : ℤ) ∣ b → (b : ℚ) ≠ 0 := by\n  intro b hb\n  exact_mod_cast (show b ≠ 0 from fun he => hb (he ▸ dvd_zero _))\nintro q\nconstructor\n· intro hq\n  induction hq using Subring.closure_induction with\n  | mem q hq =>\n    obtain ⟨b, hb, rfl⟩ := hq\n    exact ⟨1, b, hb, by simp⟩\n  | zero => exact ⟨0, 1, hp.not_dvd_one, by simp⟩\n  | one => exact ⟨1, 1, hp.not_dvd_one, by simp⟩\n  | add q r hq hr iq ir =>\n    obtain ⟨a, b, hb, rfl⟩ := iq\n    obtain ⟨c, d, hd, rfl⟩ := ir\n    refine ⟨a*d+c*b, b*d, ?_, ?_⟩\n    · exact fun hh => (hp.dvd_mul.mp hh).elim hb hd\n    · push_cast\n      exact (div_add_div _ _ (hb0 b hb) (hb0 d hd)).symm\n  | neg q hq iq =>\n    obtain ⟨a, b, hb, rfl⟩ := iq\n    exact ⟨-a, b, hb, by push_cast; ring⟩\n  | mul q r hq hr iq ir =>\n    obtain ⟨a, b, hb, rfl⟩ := iq\n    obtain ⟨c, d, hd, rfl⟩ := ir\n    refine ⟨a*c, b*d, ?_, ?_⟩\n    · exact fun hh => (hp.dvd_mul.mp hh).elim hb hd\n    · push_cast; ring\n· rintro ⟨a, b, hb, rfl⟩\n  exact (scalarRing p).mul_mem ((scalarRing p).intCast_mem a)\n    (Subring.subset_closure ⟨b, hb, rfl⟩)",
+  "check": {
+    "exit_code": 1,
+    "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-64zgt7ni/output/Auxiliary.lean:71:28: warning: Variable name `hi` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-64zgt7ni/output/Auxiliary.lean:150:8: error: Type mismatch\n  Eq.symm (div_add_div ?m.623 ?m.624 (hb0 b hb) (hb0 d hd))\nhas type\n  (?m.623 * ↑d + ↑b * ?m.624) / (↑b * ↑d) = ?m.623 / ↑b + ?m.624 / ↑d\nbut is expected to have type\n  ↑a / ↑b + ↑c / ↑d = (↑a * ↑d + ↑c * ↑b) / (↑b * ↑d)\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-64zgt7ni/output/Auxiliary.lean:161:49: error(lean.invalidField): Invalid field `intCast_mem`: The environment does not contain `Subring.intCast_mem`, so it is not possible to project the field `intCast_mem` from an expression\n  scalarRing p\nof type `Subring ℚ`\nchecked : ∀ (p : ℕ) (K : Type) [instK : Field K] (l : ℤ) (V : Type) [instV : AddCommGroup V]\n  [instCV : _root_.Module ℂ V] (x y h : Module.End ℂ V) (v : V) (M : Submodule ℤ V),\n  Nat.Prime p ∧ CharP K p →\n    0 ≤ l ∧ l < ↑p →\n      (Module.Finite ℂ V ∧\n          Module.finrank ℂ V = l.toNat + 1 ∧\n            SimpleTriple x y h ∧\n              h * x - x * h = 2 • x ∧\n                h * y - y * h = -2 • y ∧ x * y - y * x = h ∧ ∃ w, w ≠ 0 ∧ x w = 0 ∧ h w = ↑l • w) →\n        ((∃ d b B, ∀ (i : Fin d), ↑(b i) = B i) ∧ ∀ (r : ℕ), Preserves M (divided x r) ∧ Preserves M (divided y r)) →\n          ((↑l.toNat = l ∧\n                (∀ (i : Ix l), 0 ≤ ↑↑i ∧ ↑↑i ≤ l) ∧\n                  (∀ (i : ℤ), 0 ≤ i → i ≤ l → ∃ j, ↑↑j = i) ∧\n                    (0 < l.toNat + 1 ∧ Fintype.card (Ix l) = l.toNat + 1) ∧\n                      (∀ (t : ℕ), h ((y ^ t) v) = ↑(l - 2 * ↑t) • (y ^ t) v) ∧\n                        ∀ (t : ℕ), 0 < t → x ((y ^ t) v) = ↑(↑t * (l - ↑t + 1)) • (y ^ (t - 1)) v) ∧\n              (∀ (i : Ix l), ev y v ↑i ≠ 0 ∧ h (ev y v ↑i) = ↑(l - 2 * ↑↑i) • ev y v ↑i) ∧\n                (∃ B, ∀ (i : Ix l), B i = ev y v ↑i) ∧\n                  ((∀ (t : ℕ), l.toNat + 1 ≤ t → (y ^ t) v = 0) ∧ genFormulas l x y h fun i => ev y v ↑i) ∧\n                    (∀ (i : Ix l) (r : ℕ),\n                        (divided x r) (ev y v ↑i) =\n                          if r ≤ ↑i then ↑((l.toNat - ↑i + r).choose r) • ev y v (↑i - r) else 0) ∧\n                      ∀ (i : Ix l) (r : ℕ),\n                        (divided y r) (ev y v ↑i) =\n                          if ↑i + r ≤ l.toNat then ↑((↑i + r).choose r) • ev y v (↑i + r) else 0) →\n            ∀ (q : ℚ), q ∈ scalarRing p ↔ ∃ a b, ¬↑p ∣ b ∧ q = ↑a / ↑b\n'YuiAuxiliary.checked' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]\n",
+    "stderr": "",
+    "wall_seconds": 4.2600928749889135,
+    "source_path": "/Users/syyui/projects/Yui-results/test/lie-module-irreducibility/rigorous-proof/20261031T073001Z-9ef721e756/native-checks/ee764e42cb2d4461aae3847641f6c73d.lean",
+    "source_sha256": "17d702aff8b998d7b6dfcb12e0ebfd713385e9983e5af7d9fb386af26f385ac7",
+    "auxiliary_valid": false,
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext",
+      "sorryAx"
+    ],
+    "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+    "context_port": "T006",
+    "candidate": 2,
+    "accepted": false,
+    "stage_complete": false
+  }
+}

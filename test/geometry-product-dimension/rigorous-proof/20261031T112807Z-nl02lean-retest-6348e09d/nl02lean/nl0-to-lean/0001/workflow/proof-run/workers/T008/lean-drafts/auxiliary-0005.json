@@ -1,0 +1,24 @@
+{
+  "statement": "∀ (ι : Type) [Countable ι] (s δ : ℝ) (A : Set (YEuclid (n+1))) (V : ι → Set (YEuclid (n+1))), 0 < s → A ⊆ ⋃ i, V i → (∀ i, Metric.ediam (V i) ≤ ENNReal.ofReal δ) → yContent s δ A ≤ ∑' i, Metric.ediam (V i) ^ s",
+  "proof": "intro ι hι s δ A V hs hcov hdiam\nletI : Encodable ι := Encodable.ofCountable ι\nlet U : ℕ → Set (YEuclid (n+1)) := fun k => ⋃ b ∈ Encodable.decode₂ ι k, V b\nhave hUcov : A ⊆ ⋃ k, U k := by\n  simpa only [U, Encodable.iUnion_decode₂] using hcov\nhave hUdiam : ∀ k, Metric.ediam (U k) ≤ ENNReal.ofReal δ := by\n  intro k\n  apply Encodable.iUnion_decode₂_cases\n  · simp\n  · exact hdiam\nunfold yContent\nrefine (iInf_le_of_le U (iInf_le_of_le hUcov (iInf_le_of_le hUdiam le_rfl))).trans_eq ?_\nexact tsum_iUnion_decode₂ (fun B : Set (YEuclid (n+1)) => Metric.ediam B ^ s) (by simp [ENNReal.zero_rpow_of_pos hs]) V",
+  "check": {
+    "exit_code": 1,
+    "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-ghxkkfse/output/Auxiliary.lean:46:4: error: Tactic `apply` failed: could not unify the conclusion of `@Encodable.iUnion_decode₂_cases`\n  ?C (⋃ b ∈ Encodable.decode₂ ?β ?n, ?f b)\nwith the goal\n  Metric.ediam (U k) ≤ ENNReal.ofReal δ\n\nNote: The full type of `@Encodable.iUnion_decode₂_cases` is\n  ∀ {α : Type ?u.191} {β : Type ?u.190} [inst : Encodable β] {f : β → Set α} {C : Set α → Prop},\n    C ∅ → (∀ (b : β), C (f b)) → ∀ {n : ℕ}, C (⋃ b ∈ Encodable.decode₂ β n, f b)\n\nn : ℕ\nE : Set (YEuclid n)\nh_T001 : (∀ (m : ℕ), yCritical (YEuclid m)) ∧ yCritical ℝ\nh_T002 :\n  dimH E < ∞ ∧\n    0 ≤ dimH E ∧\n      dimH E ≤ ↑n ∧ (n = 0 → E = univ ∧ (∃ x, E = {x}) ∧ dimH E = 0) ∧ ∀ (s δ : ℝ), 0 < s → 0 < δ → yContent s δ E < ∞\nh_T007 :\n  1 ≤ n →\n    ∀ (q r ε : ℝ),\n      0 < q →\n        dimH E < ENNReal.ofReal q →\n          0 < r →\n            r ≤ 1 →\n              0 < ε →\n                ∃ U, yCover r E U ∧ (∀ (i : ℕ), (U i).Nonempty → 0 < Metric.ediam (U i)) ∧ yCost q U < ENNReal.ofReal ε\nι : Type\nhι : Countable ι\ns δ : ℝ\nA : Set (YEuclid (n + 1))\nV : ι → Set (YEuclid (n + 1))\nhs : 0 < s\nhcov : A ⊆ ⋃ i, V i\nhdiam : ∀ (i : ι), Metric.ediam (V i) ≤ ENNReal.ofReal δ\nthis : Encodable ι := Encodable.ofCountable ι\nU : ℕ → Set (YEuclid (n + 1)) := fun k => ⋃ b ∈ Encodable.decode₂ ι k, V b\nhUcov : A ⊆ ⋃ k, U k\nk : ℕ\n⊢ Metric.ediam (U k) ≤ ENNReal.ofReal δ\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-ghxkkfse/output/Auxiliary.lean:50:41: error: Application type mismatch: The argument\n  hUcov\nhas type\n  A ⊆ ⋃ k, U k\nof sort `Prop` but is expected to have type\n  ℕ\nof sort `Type` in the application\n  iInf_le_of_le hUcov\nchecked : ∀ (n : ℕ) (E : Set (YEuclid n)),\n  (∀ (m : ℕ), yCritical (YEuclid m)) ∧ yCritical ℝ →\n    (dimH E < ∞ ∧\n        0 ≤ dimH E ∧\n          dimH E ≤ ↑n ∧\n            (n = 0 → E = univ ∧ (∃ x, E = {x}) ∧ dimH E = 0) ∧ ∀ (s δ : ℝ), 0 < s → 0 < δ → yContent s δ E < ∞) →\n      (1 ≤ n →\n          ∀ (q r ε : ℝ),\n            0 < q →\n              dimH E < ENNReal.ofReal q →\n                0 < r →\n                  r ≤ 1 →\n                    0 < ε →\n                      ∃ U,\n                        yCover r E U ∧\n                          (∀ (i : ℕ), (U i).Nonempty → 0 < Metric.ediam (U i)) ∧ yCost q U < ENNReal.ofReal ε) →\n        ∀ (ι : Type) [Countable ι] (s δ : ℝ) (A : Set (YEuclid (n + 1))) (V : ι → Set (YEuclid (n + 1))),\n          0 < s →\n            A ⊆ ⋃ i, V i →\n              (∀ (i : ι), Metric.ediam (V i) ≤ ENNReal.ofReal δ) → yContent s δ A ≤ ∑' (i : ι), Metric.ediam (V i) ^ s\n'YuiAuxiliary.checked' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]\n",
+    "stderr": "",
+    "wall_seconds": 3.0561823747120798,
+    "source_path": "/Users/syyui/projects/Yui-results/test/geometry-product-dimension/rigorous-proof/20261031T112807Z-nl02lean-retest-6348e09d/nl02lean/native-checks/d01aea4bbc894d20b0135ec35091724b.lean",
+    "source_sha256": "633a3a4ae26ee31e3e0e889bbe5b08b1e28403eeef084555c68fac16cb643f83",
+    "auxiliary_valid": false,
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext",
+      "sorryAx"
+    ],
+    "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+    "context_port": "T008",
+    "candidate": 5,
+    "accepted": false,
+    "stage_complete": false
+  }
+}
