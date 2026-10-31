@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-SKILLS = {'benchmark': 'rigorous-proof', 'benchmark-v2': 'rigorous-proof-v2'}
+SKILLS = {'benchmark': 'rigorous-proof'}
 
 
 def local_path(value, *, root=ROOT):

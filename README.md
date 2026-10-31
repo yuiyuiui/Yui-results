@@ -1,51 +1,48 @@
 # Yui results and benchmark inputs
 
-This independent repository stores mathematical inputs, benchmark startup
-material and selected reference results. The harness is distributed separately
-as the installed `$rigorous-proof` skill. A sibling Yui checkout is not required.
-The harness source is maintained separately in [Yui](https://github.com/yuiyuiui/Yui).
+This private evidence repository stores supplied mathematical problems,
+benchmark startup material and retained reference runs. The harness is
+distributed separately as the installed `$rigorous-proof` skill, from
+[Yui](https://github.com/yuiyuiui/Yui). No sibling checkout path is required.
 
-- [`benchmark/`](benchmark/README.md): retained original benchmark startup for
-  the installed `$rigorous-proof`; new runs belong in `benchmark/results/`.
-  Its retained `pure-model-result/` is historical evidence, excluded from new
-  Yui construction inputs and left unchanged.
-- [`benchmark-v2/`](benchmark-v2/README.md): self-contained V2 startup for the
-  installed `$rigorous-proof-v2`, with its own identical input and matched setup;
-  new runs belong in `benchmark-v2/results/`. No sibling benchmark import is
-  required. The owner writes the post-termination comparison here according to
-  [the comparison plan](benchmark-v2/COMPARISON_PLAN.md).
-- `test/`: the three supplied mathematical problem statements and retained
-  attempt directories, including proofs, audits, native checks, execution
-  records and raw runtime logs. These are archived attempts with their original
-  identities and qualifications, not newly executed or relabeled results.
+- [`benchmark/`](benchmark/README.md) starts the canonical installed skill after
+  explicit human authorization. Yui `main` now uses concise mathematical NL0;
+  the earlier detailed workflow is preserved on
+  [nl0-detail](https://github.com/yuiyuiui/Yui/tree/nl0-detail).
+  New outputs belong in `benchmark/results/<run-id>/`.
+- `benchmark/pure-model-result/` retains the historical direct-model evidence.
+  It remains unchanged and is excluded from fresh Yui construction inputs.
+- `test/` retains the three problem statements and archived attempts with their
+  original runtime identities, gate reports, faults, costs and qualifications.
+  These historical detailed-workflow runs are not relabeled as executions of
+  the new default workflow. The last paused test was explicitly cancelled and
+  its owned background resources and monitor were retired.
 
-- [`test-v2/`](test-v2/README.md): the historical three-problem V2 inputs and actual run evidence,
-  with original identities, gates, faults and usage records. These are archives,
-  not an unstarted test queue.
+The duplicate `benchmark-v2/` and `test-v2/` trees were removed from the current
+checkout after a complete eligible archive was committed and pushed. Their
+original files remain available at archive commit `21e7e3ddadfa1ad8a4b54007b9c3ffb6788aacaf`:
 
-Before running the benchmark, follow its installation check and operator rules.
-Check result scope using actual NL0/Audit A, standalone Lean/native evidence and
-independent Audit B. Do not infer mathematical success from a directory, a
-normal model turn, a self-report or compilation alone.
+- [V2 benchmark archive](https://github.com/yuiyuiui/Yui-results/tree/21e7e3ddadfa1ad8a4b54007b9c3ffb6788aacaf/benchmark-v2)
+- [V2 three-problem test archive](https://github.com/yuiyuiui/Yui-results/tree/21e7e3ddadfa1ad8a4b54007b9c3ffb6788aacaf/test-v2)
 
-Keep proof/results and their provenance available for reference. The retained
-test runs include reviewed raw logs as part of this dedicated evidence archive;
-credentials, private runtime homes, caches and environment files remain
-excluded by the repository's ignore rules.
-Committing an old source-retrieval check does not establish a new full workflow.
+For example, inspect a retained file without restoring a second working tree:
 
-Software startup controls run without a model:
+```sh
+git show 21e7e3ddadfa1ad8a4b54007b9c3ffb6788aacaf:test-v2/README.md
+```
+
+Historical source paths, snapshots and receipt identities are kept as recorded.
+Use actual gate reports to determine acceptance: a directory, a normal model
+turn or compilation alone does not establish completion of the original target.
+Credentials, private runtime homes, caches and environment files are excluded
+from the Git archive. Removing a directory from the current checkout does not
+remove its archived Git history.
+
+Software startup checks make no model request:
 
 ```sh
 python3 -B -m unittest discover -s benchmark/tests -v
-python3 -B -m unittest discover -s benchmark-v2/tests -v
 ```
 
-Neither preparation nor software controls start a mathematical benchmark.
-Fresh-task dispatch waits for the human's explicit start authorization.
-
-This commit is the retained-evidence checkpoint before consolidating the two
-software versions. The last paused V1 test was explicitly cancelled, its monitor
-was removed, both test tasks were archived, and all 62 verified owned local
-process identities/groups exited. Scientific artifacts retain their original
-qualification; cancellation does not turn an unfinished proof into a PASS.
+Preparation is not benchmark execution. Follow `benchmark/AGENTS.md` and obtain
+explicit start authorization before a fresh mathematical run.

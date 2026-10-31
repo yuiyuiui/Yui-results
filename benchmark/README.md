@@ -29,10 +29,11 @@ ordinary retrieval and source-correspondence rules.
 | Owner observation | Detached; one bounded host heartbeat every 600 seconds |
 | Previous answers/proofs/source caches | No reuse |
 
-The two versions use the same startup program, operator contract, PDF and
-settings except their benchmark/skill identity. The selected skill's internal
-workflow is the experiment variable. Model nondeterminism, account quotas,
-external website availability and shared-host contention remain observable
+This entry uses the canonical installed `$rigorous-proof` skill. Yui `main`
+now contains the concise mathematical-NL0 workflow; the detailed alternative
+is preserved on its `nl0-detail` branch. The old separate V2 entry and results
+are historical evidence in Git, not a second installed skill. Model
+nondeterminism, quotas, external source availability and host contention remain
 qualifications rather than controlled guarantees.
 
 ## Prepare without starting
@@ -70,9 +71,7 @@ skill, and a missing variant never falls back to a different one.
 ## Start after human authorization
 
 The coordinating owner creates a **fresh Codex task** only after the human says
-to start. Before creating the two tasks, that owner rechecks equal PDF hashes
-and equal normalized portable settings. It sends each directory's generated
-`.prepared/task.md`, with explicit
+to start. It sends this directory's generated `.prepared/task.md` with explicit
 start authorization. That task reads this directory and the exact selected
 installed skill, rechecks prerequisites, freezes the original target, then
 dispatches the full workflow with a fresh explicit output directory.
@@ -113,7 +112,7 @@ IDs; cached input and reasoning output are subsets. Missing usage stays unknown.
 Separate mathematical acceptance, execution health and measurement validity.
 Requested Standard is not proof of an observed tier when the provider omits it.
 
-The coordinating owner compares selected **terminal** runs after both groups
-exit. It must not feed findings back into either construction or read another
-arm's unfinished proof. Equal settings do not make concurrent wall times an
-isolated speed experiment, and an unfinished arm cannot establish speedup.
+When a comparison is explicitly requested, the owner evaluates only selected
+terminal runs after their owned processes exit. Findings never feed back into
+construction. Equal settings do not make concurrent wall times an isolated
+speed experiment, and an unfinished arm cannot establish speedup.

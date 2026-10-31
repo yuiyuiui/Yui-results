@@ -21,7 +21,7 @@ import time
 from benchmark_config import load_config
 
 NAME = load_config()['skill_name']
-SUPPORTED_NAMES = {'rigorous-proof', 'rigorous-proof-v2'}
+SUPPORTED_NAMES = {'rigorous-proof'}
 
 
 class SkillUnavailable(ValueError):

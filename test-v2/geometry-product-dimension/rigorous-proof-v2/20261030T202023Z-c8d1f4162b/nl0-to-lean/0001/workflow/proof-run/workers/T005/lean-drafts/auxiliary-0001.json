@@ -1,9 +1,0 @@
-{
-  "statement": "∃ L : ℝ, 0 < L ∧ ∀ x ∈ E, ∀ i : Fin n, |x i| ≤ L",
-  "proof": "by\n  classical\n  let B : ℕ → Set (YEucl n) := fun k => {x | ∀ i : Fin n, |x i| < (k : ℝ) + 1}\n  have hBo : ∀ k, IsOpen (B k) := by\n    intro k\n    change IsOpen (⋂ i : Fin n, {x : YEucl n | |x i| < (k : ℝ) + 1})\n    exact isOpen_iInter_of_finite (fun i => isOpen_lt (PiLp.continuous_apply 2 (fun _ : Fin n => ℝ) i).abs continuous_const)\n  have hBc : E ⊆ ⋃ k, B k := by\n    intro x hx\n    obtain ⟨k, hk⟩ := exists_nat_gt ‖x‖\n    refine Set.mem_iUnion.mpr ⟨k, ?_⟩\n    intro i\n    have hi : |x i| ≤ ‖x‖ := by simpa only [Real.norm_eq_abs] using PiLp.norm_apply_le x i\n    dsimp [B]\n    linarith\n  obtain ⟨t, ht⟩ := h_H002.elim_finite_subcover B hBo hBc\n  let L : ℝ := (∑ k ∈ t, ((k : ℝ) + 1)) + 1\n  have hsum : 0 ≤ ∑ k ∈ t, ((k : ℝ) + 1) :=\n    Finset.sum_nonneg (fun k hk => by positivity)\n  refine ⟨L, by dsimp [L]; linarith, ?_⟩\n  intro x hx i\n  obtain ⟨k, hkt, hxk⟩ := Set.mem_iUnion₂.mp (ht hx)\n  have hk : (k : ℝ) + 1 ≤ ∑ j ∈ t, ((j : ℝ) + 1) :=\n    Finset.single_le_sum (fun j hj => by positivity) hkt\n  have hi : |x i| < (k : ℝ) + 1 := hxk i\n  dsimp [L]\n  linarith",
-  "check": {
-    "accepted": false,
-    "error": "supply tactic body after by",
-    "feedback_kind": "candidate_rejected"
-  }
-}

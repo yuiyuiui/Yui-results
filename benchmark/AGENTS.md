@@ -40,10 +40,9 @@ settings.json; use exactly that file's `skill_name` and `benchmark_name`.
    native trust, complete independent A/B, target/external correspondence, source
    warnings, health and usage completeness separately. No unqualified PASS for
    missing primary-source verification; compilation is not independent B.
-9. Do not compare partial mathematical outputs. The coordinating owner writes
-   the requested cross-version comparison only after both selected runs are
-   terminal, outside either construction session. Shared host/account resource
-   contention prevents an isolated-speed causal claim.
+9. Compare results only when the human requests it and the selected runs are
+   terminal. Keep that evaluation outside construction sessions. Shared host
+   and account resource contention prevents an isolated-speed causal claim.
 
 No absolute checkout path is a portable requirement. Resolve the skill from the
 registry, tool paths from its runtime configuration, and local inputs/outputs

@@ -23,7 +23,7 @@ class StartupTests(unittest.TestCase):
         self.root = Path(self.temp.name).resolve()
         self.config = benchmark_config.load_config()
         self.name = self.config['skill_name']
-        self.other = 'rigorous-proof-v2' if self.name == 'rigorous-proof' else 'rigorous-proof'
+        self.other = 'other-proof-skill'
         self.install = self.root / 'installed skill with spaces'
         for name in ['SKILL.md', 'config.json', 'nl0/scripts/yui.py',
                      'nl0/scripts/direct_runner.py', 'nl02lean/scripts/workflow.py', 'toolchain/lock.json']:
@@ -111,7 +111,7 @@ class StartupTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
         self.assertEqual(json.loads(result.stdout)['name'], self.name)
         self.assertFalse((local / 'pure-model-result').exists())
-        self.assertFalse((local.parent / ('benchmark' if BENCHMARK.name == 'benchmark-v2' else 'benchmark-v2')).exists())
+        self.assertFalse((local.parent / 'another-benchmark').exists())
 
     def test_portable_contract_rejects_wrong_pair_and_escaping_paths(self):
         local = self.root / BENCHMARK.name; local.mkdir()

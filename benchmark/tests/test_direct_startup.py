@@ -1,4 +1,4 @@
-"""Compatibility of the retained direct runner; excluded from the V2 benchmark."""
+"""Compatibility of the retained direct runner; excluded from fresh Yui construction."""
 import importlib.util
 from pathlib import Path
 import sys
