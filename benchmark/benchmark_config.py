@@ -34,8 +34,8 @@ def load_config(root=ROOT):
     if config.get('track') != 'full' or config.get('policy') != 'normal':
         raise ValueError('Use the full normal-policy benchmark')
     if config.get('limits') != dict(case_seconds=None, stage_seconds=None, tokens=None,
-                                    model_calls=None, native_seconds=300):
-        raise ValueError('Keep unlimited total budgets and the 300-second native-call limit')
+                                    model_calls=None, native_seconds=180):
+        raise ValueError('Keep unlimited total budgets and the 180-second native-call limit')
     if config.get('monitor') != dict(interval_seconds=600, foreground='end_turn_after_handoff',
                                      notifications='meaningful_changes_only'):
         raise ValueError('Keep the detached ten-minute monitoring contract')

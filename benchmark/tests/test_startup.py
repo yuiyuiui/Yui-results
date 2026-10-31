@@ -132,7 +132,7 @@ class StartupTests(unittest.TestCase):
         self.assertTrue(prompt.startswith('Use $'+self.name))
         for value in [str(paper), str(self.install / 'SKILL.md'), self.config['target'],
                       str(BENCHMARK / 'results'), 'gpt-6.1-sol / high / Standard',
-                      'count is 20', '300-second', 'independent Audit B', '--detach',
+                      'count is 20', '180-second', 'independent Audit B', '--detach',
                       'every 600 seconds', 'warn.json/warn.md', 'start authorization']:
             self.assertIn(value, prompt)
         self.assertNotIn('including the unfiltered method', prompt)
@@ -145,6 +145,36 @@ class StartupTests(unittest.TestCase):
                 prepare_yui.invocation(paper, n, self.selected())
         with self.assertRaisesRegex(ValueError, 'exactly'):
             prepare_yui.invocation(paper, 20, dict(self.selected(), name=self.other))
+
+    def test_real_environment_subprocess_accepts_180_seconds_and_rejects_policy_drift(self):
+        scripts=self.install/'nl0/scripts'
+        (self.install/'auth').mkdir();(self.install/'auth/auth.json').write_text('{"synthetic":true}')
+        (scripts/'runtime_config.py').write_text(
+            'import json\nfrom pathlib import Path\n'
+            'ROOT=Path(__file__).resolve().parents[2]\n'
+            'def verify():return {"synthetic_local_metadata":True}\n'
+            'def auth_home():return ROOT/"auth"\n'
+            'def native_timeout():return json.loads((ROOT/"config.json").read_text())["timeouts"]["native_seconds"]\n')
+        (scripts/'entrypoint.py').write_text(
+            'def preflight_profiles(job):\n'
+            ' assert job["profiles"]["lean"]["id"]=="gpt-6.1-sol"\n')
+        (scripts/'target_selection.py').write_text(
+            'def text(paper):return "Synthetic metadata-only extraction fixture."\n')
+        paper=self.root/'paper.pdf';paper.write_bytes(b'%PDF synthetic')
+        config={**self.config,'limits':{**self.config['limits'],'native_seconds':180}}
+        runtime={'timeouts':{'case_seconds':None,'stage_seconds':None,'native_seconds':180},'token_budget':None}
+        with patch.object(prepare_yui,'local_path',return_value=paper):
+            (self.install/'config.json').write_text(json.dumps(runtime))
+            result=prepare_yui.environment_check(self.selected(),config)
+            self.assertEqual(result['status'],'ENVIRONMENT-CHECKED')
+            self.assertFalse(result['model_started']);self.assertFalse(result['proof_check_started'])
+            for changed in [dict(runtime,timeouts={**runtime['timeouts'],'native_seconds':300}),
+                            dict(runtime,timeouts={**runtime['timeouts'],'case_seconds':60}),
+                            dict(runtime,token_budget=1000)]:
+                with self.subTest(changed=changed):
+                    (self.install/'config.json').write_text(json.dumps(changed))
+                    with self.assertRaisesRegex(ValueError,'policy differs'):
+                        prepare_yui.environment_check(self.selected(),config)
 
     def test_cli_rejects_wrong_worker_before_registry_or_environment_work(self):
         with patch.object(prepare_yui, 'require_skill') as discover, patch('sys.stdout', new=io.StringIO()) as out:

@@ -81,7 +81,7 @@ without fallback. The explicitly selected per-case worker count is {workers},
 for local R reviews and later local Lean proofs in separate phases. NL0 author,
 global A, preparation/interfaces, assembly and B keep their serial lanes.
 There is no total time, token or call budget. Each native Lean call retains
-the selected skill's 300-second limit and its ordinary located repair rules.
+the selected skill's {config['limits']['native_seconds']}-second limit and its ordinary located repair rules.
 
 Create a fresh unique run directory under {output} and supply it explicitly
 as --out. Never use a skill-default output elsewhere or overwrite an old run.
@@ -140,7 +140,7 @@ from target_selection import text
 preflight_profiles({'track':config['track'],'profiles':config['profiles']})
 if not (auth_home()/'auth.json').is_file():raise ValueError('Codex authentication file is absent')
 runtime=json.loads((root/'config.json').read_text())
-if runtime['timeouts']!={'case_seconds':None,'stage_seconds':None,'native_seconds':300} or runtime['token_budget'] is not None:
+if runtime['timeouts']!={'case_seconds':None,'stage_seconds':None,'native_seconds':config['limits']['native_seconds']} or runtime['token_budget'] is not None:
  raise ValueError('Installed timeout/token policy differs from this benchmark')
 if native_timeout()!=config['limits']['native_seconds']:raise ValueError('Native-call limit differs')
 environment=verify();extracted=text(paper)

@@ -25,9 +25,16 @@ ordinary retrieval and source-correspondence rules.
 | Parallel phases | Local R reviews, then local Lean proofs in a separate phase |
 | Serial lanes | NL0 author, global A, preparation/interfaces, assembly and B |
 | Whole-case/stage time, tokens, model calls | Unlimited |
-| One native Lean call | 300 seconds; normal diagnosed repair follows |
+| One native Lean call | 180 seconds; normal diagnosed repair follows |
 | Owner observation | Detached; one bounded host heartbeat every 600 seconds |
 | Previous answers/proofs/source caches | No reuse |
+
+Controller compatibility validation (2026-11-01): all 14 local startup tests
+pass with the 180-second native limit. The subprocess preflight also rejects
+300-second runtime drift, a finite whole-case limit and an unexpected token
+budget. These are metadata/software checks and start no model or proof job.
+Regenerate and verify `.prepared` after an installed Yui runtime commit changes;
+the prepared record binds that commit as well as the actual runtime files.
 
 This entry uses the canonical installed `$rigorous-proof` skill. Yui `main`
 now contains the concise mathematical-NL0 workflow; the detailed alternative
