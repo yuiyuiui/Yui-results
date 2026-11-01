@@ -1,0 +1,45 @@
+# Bare-model supplement: accepted candidate 002
+
+ACCEPTED under the recorded supplement acceptance contract at 2026-11-01T16:13:20.190520+00:00. All 33 mandatory mathematical/source/bridge/target/build gates pass, and operational/accounting closure is complete with the limitations below. The same sole native mathematical author was continued, rather than replaced.
+
+This result is a Lean-kernel-checked derivation under nine explicit original-literature input propositions, with separate-context model semantic evaluation of their fidelity and the full target. The published external theorems are retained as permitted explicit hypotheses; they were not reproved from foundations. No human peer certification is claimed.
+
+## Deliverables and evidence
+
+- [Frozen accepted source snapshot](/Users/syyui/projects/Yui-results/benchmark/pure-model-supplement/20261101T114606Z-5d3193f6/frozen-candidate-002) and [exact snapshot manifest](/Users/syyui/projects/Yui-results/benchmark/pure-model-supplement/20261101T114606Z-5d3193f6/owner-records/candidate-002-manifest.json).
+- [Original external inputs](/Users/syyui/projects/Yui-results/benchmark/pure-model-supplement/20261101T114606Z-5d3193f6/frozen-candidate-002/OriginalExternals.lean) and [source/bridge ledger](/Users/syyui/projects/Yui-results/benchmark/pure-model-supplement/20261101T114606Z-5d3193f6/frozen-candidate-002/source-and-bridge-ledger.md).
+- [CompletedProof.lean](/Users/syyui/projects/Yui-results/benchmark/pure-model-supplement/20261101T114606Z-5d3193f6/frozen-candidate-002/CompletedProof.lean) exports `BareModelCompletion.completed_theorem_1` by applying the unchanged historical `theorem_1`. Seven old ports are derived by closed bridges; two equivalent ports are retained directly.
+- [Solution correspondence](/Users/syyui/projects/Yui-results/benchmark/pure-model-supplement/20261101T114606Z-5d3193f6/frozen-candidate-002/SolutionCorrespondence.lean) and `completed_paper_theorem_1` express the complete result in the independent paper-selected solution convention. The original unfiltered method, full real mean-zero H^gamma data ball, 0<gamma<=1, constants depending only on T,gamma,R, all admissible tau=T/L, and n=0,...,L maximum are preserved.
+- [Final semantic acceptance](/Users/syyui/projects/Yui-results/benchmark/pure-model-supplement/20261101T114606Z-5d3193f6/review-003-output/acceptance-report.md) and [target scope audit](/Users/syyui/projects/Yui-results/benchmark/pure-model-supplement/20261101T114606Z-5d3193f6/review-003-output/scope-concordance-report.md). The latter positively checks the smooth-approximation certificate, canonical cutoff witnesses, initial trace, representative convention and both target directions.
+- [Independent eleven-module build](/Users/syyui/projects/Yui-results/benchmark/pure-model-supplement/20261101T114606Z-5d3193f6/review-002-output/review-build-status.json) and [recursive declaration/signature inspection](/Users/syyui/projects/Yui-results/benchmark/pure-model-supplement/20261101T114606Z-5d3193f6/review-002-output/review-recursive-inspection.log). Pinned Lean 4.32.2 / Mathlib 905b95818eb32af7874a58b427f50c1711a5e96c; required original SHA-256 bf73ff25c1c67c020023ad545649bd2e0444658191c6c0c637b86528ad0b0cd0 unchanged. Root foundational axioms are propext, Classical.choice and Quot.sound. No unproved project bridge or proof substitute remains in the exported chain.
+- [Machine-readable final result](/Users/syyui/projects/Yui-results/benchmark/pure-model-supplement/20261101T114606Z-5d3193f6/FINAL_RESULT.json), [accounting](/Users/syyui/projects/Yui-results/benchmark/pure-model-supplement/20261101T114606Z-5d3193f6/owner-records/accounting.json) and [per-turn raw-usage deltas](/Users/syyui/projects/Yui-results/benchmark/pure-model-supplement/20261101T114606Z-5d3193f6/owner-records/native-stage-usage.json).
+
+## Acceptance history and scope
+
+Candidate 001 was rejected for weakened BIT6.3 quantitative dependence and insufficient target-representation evidence. The same author session restored the full governing lower-norm dependence, proved the former sufficient specialization internally, and added the independent classical/rough solution correspondence. Candidate 002 rebuilt all eleven delivered modules. Probe-only `CheckContinuation.lean` is classified separately from those delivered modules in the evaluator inventory.
+
+Evaluation turn 2 accepted the source repair but still demanded an arbitrary-continuous-distributional-path converse. The owner checked actual target.pdf pp.2,3,11 and requested a scope-concordance audit. The same evaluator concluded its prior criterion was too broad: the paper explicitly selects the unique continuous real mean-zero flow obtained by smooth approximation. It then checked that the exact quantified approximation certificate is available for every selected flow and identifies that flow in both directions. The correction required no candidate source change and did not narrow the original target. Prior reports remain immutable and the exact evidence reuse is recorded.
+
+## Time and observed native tokens
+
+| Stage | Native interval sum (h:m:s) | Input | Output | Input + output |
+|---|---:|---:|---:|---:|
+| Historical imperfect-interface candidate | 06:43:02 | 190,088,829 | 861,602 | 190,950,431 |
+| Same author, two turns | 03:42:30 | 43,511,878 | 321,245 | 43,833,123 |
+| Independent evaluator, three turns | 00:30:34 | 13,702,476 | 62,171 | 13,764,647 |
+| Supplement native author + evaluator | 04:13:04 | 57,214,354 | 383,416 | 57,597,770 |
+| Historical + supplement native model work | 10:56:06 | 247,303,183 | 1,245,018 | 248,548,201 |
+
+Author-only historical-plus-supplement total: 234,783,554 tokens and 10:25:32 native interval time. Supplement end-to-end wall time through native goal completion is 15781.463698 seconds (04:23:01); historical elapsed plus that supplement wall is 39963.409199 seconds (11:06:03). These wall values include owner checks, source work, waits and repair and are distinct from summed native intervals. Overlapping waits are not added again.
+
+Each fresh native session has baseline zero. Per-turn totals are differences of terminal cumulative native snapshots, not sums of cumulative snapshots. Cached-input and reasoning-output counts are subsets. Both author turns use session 01a196f3-4972-7951-ac8d-0a7cc1b7e244; all three evaluations use separate session 01a197b1-0aeb-7fd1-b6d4-f1f63aab268a. Their complete raw logs, prompts, starts, ends and requested configurations remain in owner-records and isolated native homes.
+
+Accounting remains PARTIAL for unexposed operator/provider/account usage and financial charges. The owning-goal aggregate token observations are preserved separately and have no proven disjoint input/output basis, so they are not silently treated as zero or added to native totals. Earlier setup before the measurement start and deleted cancelled attempts have unavailable all-history costs. Source/extraction, self-check, compiler repair and tool retry tokens are included in native totals; finer semantic subphase splits are unavailable.
+
+Requested configuration throughout: gpt-6.1-sol / high / Standard (`service_tier=default`), no model fallback. Actual provider serving route/tier is UNVERIFIED. Initial WebSocket timeouts recovered through native HTTP transport fallback in the same author turn; nonfatal catalog timeouts and one expired completed-handle poll are recorded. Existing installed PyMuPDF handled missing pdftotext. This is an accepted task outcome with recorded execution faults, not a fault-free performance benchmark.
+
+## Closure
+
+All recorded native turns exited normally, and [the final process audit](/Users/syyui/projects/Yui-results/benchmark/pure-model-supplement/20261101T114606Z-5d3193f6/owner-records/final-owned-process-audit.json) confirms no recorded owned groups/PIDs or run-bound working-directory processes remain. [Copied credentials were removed](/Users/syyui/projects/Yui-results/benchmark/pure-model-supplement/20261101T114606Z-5d3193f6/owner-records/credential-cleanup.json), [the completed ten-minute monitor was deleted](/Users/syyui/projects/Yui-results/benchmark/pure-model-supplement/20261101T114606Z-5d3193f6/owner-records/monitor-deletion.json), and [the temporary checklist was removed](/Users/syyui/projects/Yui-results/benchmark/pure-model-supplement/20261101T114606Z-5d3193f6/owner-records/temporary-checklist-cleanup.json). Both candidate snapshots and all seven input bindings were reverified in [the final integrity receipt](/Users/syyui/projects/Yui-results/benchmark/pure-model-supplement/20261101T114606Z-5d3193f6/owner-records/final-input-and-candidate-integrity.json). No publication, push, baseline rerun or historical artifact deletion was performed. Native goal completion is recorded separately in owner-records/goal-completion.json.
+
+Native goal marked complete at 2026-11-01T16:13:44+00:00. Goal elapsed: 04:23:46; final owning-goal aggregate counter: 726,514 tokens, preserved separately from native author/evaluator totals. Final accounting endpoint is the goal-completion timestamp.

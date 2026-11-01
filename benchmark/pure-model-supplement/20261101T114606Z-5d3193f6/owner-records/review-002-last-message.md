@@ -1,0 +1,3 @@
+**NOT_ACCEPTED.** S8/H8 are repaired. All eleven modules rebuilt, and OriginalProof’s hash is unchanged. T4—and aggregate C1—remain unverified because full target solution-domain equivalence is not established.
+
+Reports: [Markdown](/Users/syyui/projects/Yui-results/benchmark/pure-model-supplement/20261101T114606Z-5d3193f6/review-002-output/acceptance-report.md) · [JSON](/Users/syyui/projects/Yui-results/benchmark/pure-model-supplement/20261101T114606Z-5d3193f6/review-002-output/acceptance-report.json).

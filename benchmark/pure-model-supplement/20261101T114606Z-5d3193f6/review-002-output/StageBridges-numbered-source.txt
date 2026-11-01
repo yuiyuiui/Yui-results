@@ -1,0 +1,91 @@
+1: import ExternalBridges
+2: noncomputable section
+3: open KdV
+4: namespace BareModelCompletion
+5: 
+6: theorem J_shift (a r : ℝ) (f g : Fourier) :
+7:     airy (-a) (J r (airy a f) (airy a g)) = J (a + r) f g := by
+8:   simp only [J, inverseDerivative_airy, ← airy_add_time]
+9:   rw [show -a + -r = -(a + r) by ring, show r + a = a + r by ring]
+10: 
+11: theorem source_stage_shift (a t : ℝ) (f g : Fourier) :
+12:     sourceBilinearStage a t f g =
+13:       airy (-a) (sourceBilinearStage 0 (t - a) (airy a f) (airy a g)) := by
+14:   simp only [← bilinearStage_eq_source, bilinearStage, airy_smul, airy_sub, J_shift]
+15:   rw [show a + (t - a) = t by ring, add_zero]
+16: 
+17: theorem source_stage_power_nonneg {γ ε β : ℝ} (hγ : 0 < γ) (_hγ1 : γ ≤ 1)
+18:     (hε : 0 < ε) (hβ : β ≤ 1 + γ) : 0 ≤ sourceStagePower γ ε β := by
+19:   have hd : 0 < 1 + γ - sourceStageLower γ ε := by
+20:     unfold sourceStageLower
+21:     split_ifs <;> linarith
+22:   exact div_nonneg (by linarith) hd.le
+23: 
+24: /-- Preserve the source's complete-grid quantification. An arbitrary shorter
+25: step is embedded in a grid with the *same* T; its grid step is between tau and
+26: 2*tau. Airy conjugation moves its start to grid point zero. -/
+27: theorem stage_grid_to_historical (h : LiWuLemma72Grid) : LiWuStageEstimate := by
+28:   intro T hT γ hγ hγ1 ε hε β hb hb1
+29:   obtain ⟨C, hC, hbound⟩ := h T hT γ hγ hγ1 ε hε β hb hb1
+30:   let q := sourceStagePower γ ε β
+31:   have hq : 0 ≤ q := source_stage_power_nonneg hγ hγ1 hε hb1
+32:   refine ⟨C * (2 : ℝ) ^ q, mul_pos hC (Real.rpow_pos_of_pos (by norm_num) _), ?_⟩
+33:   intro τ n t hτ hn ht f g hf hg hfm hgm
+34:   have hτT : τ ≤ T := by
+35:     have hn0 : 0 ≤ (n : ℝ) := Nat.cast_nonneg n
+36:     push_cast at hn
+37:     nlinarith
+38:   have hx : 1 ≤ T / τ := (le_div_iff₀ hτ).mpr (by simpa using hτT)
+39:   let L := ⌊T / τ⌋₊
+40:   have hL : 0 < L := Nat.floor_pos.mpr hx
+41:   have hLr : 0 < (L : ℝ) := by exact_mod_cast hL
+42:   have hL1 : 1 ≤ (L : ℝ) := by exact_mod_cast hL
+43:   have hfloor : (L : ℝ) ≤ T / τ := Nat.floor_le (by positivity)
+44:   have hfloor2 : T / τ < (L : ℝ) + 1 := Nat.lt_floor_add_one _
+45:   let θ := T / (L : ℝ)
+46:   have hθ : 0 < θ := div_pos hT hLr
+47:   have hτθ : τ ≤ θ := by
+48:     apply (le_div_iff₀ hLr).mpr
+49:     have hh := (le_div_iff₀ hτ).mp hfloor
+50:     nlinarith
+51:   have hθτ : θ ≤ 2 * τ := by
+52:     apply (div_le_iff₀ hLr).mpr
+53:     have hh : T / τ ≤ 2 * (L : ℝ) := by linarith
+54:     have hh' := (div_le_iff₀ hτ).mp hh
+55:     nlinarith
+56:   let a := (n : ℝ) * τ
+57:   have ht0 : t - a ∈ Set.Icc (0 : ℝ) θ := by
+58:     have h1 := ht.1
+59:     have h2 := ht.2
+60:     push_cast at h2
+61:     constructor <;> dsimp [a] <;> linarith
+62:   have hfm' : MeanZero (airy a f) := by simpa only [MeanZero, airy_mean] using hfm
+63:   have hgm' : MeanZero (airy a g) := by simpa only [MeanZero, airy_mean] using hgm
+64:   have hz := hbound L hL 0 hL (t - a)
+65:   simp only [Nat.cast_zero, zero_mul, Nat.zero_add, Nat.cast_one, one_mul] at hz
+66:   obtain ⟨hm, hbnd⟩ := hz ht0 (airy a f) (airy a g) (airy_inSobolev hf a) (airy_inSobolev hg a) hfm' hgm'
+67:   have hmember := airy_inSobolev hm (-a)
+68:   rw [← source_stage_shift] at hmember
+69:   refine ⟨hmember, ?_⟩
+70:   have hnrm : sourceNorm β (sourceBilinearStage a t f g) =
+71:       sourceNorm β (sourceBilinearStage 0 (t - a) (airy a f) (airy a g)) := by
+72:     rw [source_stage_shift]
+73:     simp only [sourceNorm, airy_hNorm]
+74:   change sourceNorm β (sourceBilinearStage a t f g) ≤ _
+75:   rw [hnrm]
+76:   simp only [sourceNorm, airy_hNorm] at hbnd
+77:   change sourceNorm β (sourceBilinearStage 0 (t - a) (airy a f) (airy a g)) ≤
+78:     C * θ ^ q * sourceNorm γ f * sourceNorm γ g at hbnd
+79:   have hpow : θ ^ q ≤ (2 : ℝ) ^ q * τ ^ q := by
+80:     calc
+81:       _ ≤ (2 * τ) ^ q := Real.rpow_le_rpow hθ.le hθτ hq
+82:       _ = _ := Real.mul_rpow (by norm_num) hτ.le
+83:   have hnf : 0 ≤ sourceNorm γ f := mul_nonneg sourceNormalization_pos.le (hNorm_nonneg _ _)
+84:   have hng : 0 ≤ sourceNorm γ g := mul_nonneg sourceNormalization_pos.le (hNorm_nonneg _ _)
+85:   calc
+86:     _ ≤ C * θ ^ q * sourceNorm γ f * sourceNorm γ g := hbnd
+87:     _ ≤ C * ((2 : ℝ) ^ q * τ ^ q) * sourceNorm γ f * sourceNorm γ g :=
+88:       mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_left hpow hC.le) hnf) hng
+89:     _ = _ := by ring
+90: 
+91: end BareModelCompletion

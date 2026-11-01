@@ -1,0 +1,2489 @@
+
+=== PDF PAGE 1 ===
+      AN UNFILTERED LOW-REGULARITY INTEGRATOR
+     FOR THE KDV EQUATION WITH SOLUTIONS BELOW H1
+
+
+                       BUYANG LI AND YIFEI WU
+
+
+                            Communicated by Arieh Iserles
+
+
+       Abstract. This article is concerned with the construction and analysis of new time dis-
+         cretizations for the KdV equation on a torus for low-regularity solutions below H1. New
+        harmonic analysis tools, including averaging approximations to the exponential phase func-
+         tions and trilinear estimates of the KdV operator, are established for the construction and
+         analysis of time discretizations with higher convergence orders under low-regularity condi-
+          tions. In addition, new perturbation techniques are introduced to establish stability estimates
+          of time discretizations under low-regularity conditions without using filters when the energy
+         techniques fail. The proposed method is proved to be convergent with order γ (up to a
+         logarithmic factor) in L2 under the regularity condition u ∈C([0, T]; Hγ) for γ ∈(0, 1].
+
+       Keywords: KdV equation, rough data, low-regularity integrator, stability, error estimates
+
+    AMS Subject Classification: 35Q53, 35B99, 65M12, 65M15.
+
+
+
+
+                             Contents
+
+1    Introduction  .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   1
+2    Notations and preliminary results.   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   5
+3   New tools for the construction of low-regularity integrators   .   .   .   .   .   .   .   .   .   8
+4    Construction of the low-regularity integrator  .   .   .   .   .   .   .   .   .   .   .   .   .   .   .  19
+5    Reduction to a perturbed KdV equation .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .  24
+6    Estimates for the local error Rn2[vn] .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .  26
+7    Estimates for the global remainder R(t)  .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .  32
+8    Stability estimates using low-high frequency decompositions  .   .   .   .   .   .   .   .   .  39
+9    Error estimates (Proof of Theorem 1.1)   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .  43
+10   Numerical experiments .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .  44
+11   Conclusions and extended studies.   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .   .  46
+
+
+
+
+                                 1. Introduction
+
+  The Korteweg–De Vries (KdV) equation is a nonlinear dispersive partial differential equa-
+tion that describes many physical phenomena, including shallow water waves, ion acoustic
+                                                    1
+
+=== PDF PAGE 2 ===
+2
+
+waves in plasmas, acoustic waves on crystal lattices, and so on. The development of compu-
+tational methods for the KdV equation has attracted much attention.
+   It is known that the KdV equation, either on a torus or on the whole space, is globally well-
+posed in Hs with s ≥0, i.e., there exists a unique solution in C([0, T]; Hs) for any initial value
+in Hs; see [1,10,12,33]. However, classical time discretizations for the KdV equation, including
+finite difference methods, splitting methods, discontinuous Galerkin methods, and classical
+exponential integrators, generally require much higher regularity for the numerical solutions
+to converge with certain orders, i.e., these methods typically require u ∈C([0, T]; H3) and
+u ∈C([0, T]; H6) to have first- and second-order convergence in L2, respectively. The error
+estimates under these regularity conditions (or stronger conditions) for the above-mentioned
+classical time discretizations have been established, for example, in [7–9,16,17,21,25,27,32].
+Such regularity conditions are not mere technical conditions required in the error analysis.
+When the solution of the KdV equation does not have the required regularity, its numerical
+approximations by the classical time discretizations generally have reduced order of conver-
+gence.
+  In practice, the solutions of the KdV equation may be rough due to measurement or
+randomness of the data [2, 5]. To address the numerical approximation to nonsmooth so-
+lutions, some low-regularity exponential integrators based on resonance analysis were re-
+cently developed to relax the regularity requirement in solving nonlinear dispersive equations.
+Such low-regularity integrators based on resonance analysis were initially introduced by Hof-
+manov´a & Schratz [6] and Ostermann & Schratz [18, 20] for solving the KdV equation and
+the nonlinear Schr¨odinger (NLS) equation, respectively.  In particular, for the KdV equa-
+tion, the low-regularity integrator proposed in [6] can have first-order convergence in H1 for
+u ∈C([0, T]; H3). Wu & Zhao [30] showed that another method outlined in [6] can have
+second-order convergence in Hγ for u ∈C([0, T]; Hγ+4) with γ ≥0. In a more recent arti-
+cle, Wu & Zhao [31] proposed two embedded low-regularity integrators for the KdV equation,
+which have first-order convergence in Hγ for u ∈C([0, T]; Hγ+1) with γ > 1 and second-order                                                                                   2
+convergence Hγ for u ∈C([0, T]; Hγ+3) with γ ≥0, respectively. The minimal regularity re-
+quirement for the convergence analysis of these unfiltered algorithms for the KdV equation is
+u ∈C([0, T]; Hγ) for γ > 3/2. This condition naturally arises in the energy type of stability
+analysis.
+  The convergence of a fully discrete finite difference method was proved in [4] for u ∈
+C([0, T]; Hγ) with γ ≥3/4 under the CFL condition ∆t ≤∆x3, where ∆t and ∆x denote
+the stepsize and mesh size in the temporal and spatial discretizations, respectively. The CFL
+condition in a finite difference method plays a similar role as the filters in a spectral method,
+i.e., to improve the stability of the method under low-regularity conditions. In the case of
+γ = 3/4, the method is proved convergent with order 1/42. Since the convergence analysis
+relies on the smoothing effect on R, the proof cannot be extended to the torus T.
+   Similarly, the development of low-regularity integrators for the NLS equations can be found
+in [13, 14, 23, 29]. The minimal regularity requirement for the convergence analysis of the
+unfiltered algorithms for the NLS equation is u ∈C([0, T]; Hγ) for γ > d/2, where d is the
+dimension of space. This condition also arises in the energy stability analysis, which require
+using the Kato–Ponce inequality ∥fg∥Hγ ≲∥f∥Hγ∥g∥Hγ with γ > d2. The question of whether
+
+=== PDF PAGE 3 ===
+                                                                                                       3
+
+any convergence rates can be achieved for rough solutions u ∈C([0, T]; Hγ), with an arbitrary
+small γ > 0, remained open for a long time for both the KdV equation and the NLS equation.
+  The convergence of numerical solutions for rough solutions in C([0, T]; Hγ) with an ar-
+bitrary small γ > 0 was addressed by Ostermann, Rousset & Schratz [19] and Rousset &
+Schratz [24] for the NLS and KdV equations, respectively, by introducing and utilizing the
+discrete Bourgain spaces. In particular, for the KdV equation, Rousset & Schratz [24] pro-
+posed three filtered time discretizations for the KdV equation on the torus T (which cut
+numerical solutions to frequencies below τ                                     −13 , where τ denotes the step size of time dis-
+cretization), including a filtered exponential integrator, a filtered Lie splitting method, and a
+filtered version of the resonance based scheme, and proved the convergence of order γ for the                                                                                               3
+three methods under the regularity condition u ∈C([0, T]; Hγ) with γ ∈(0, 3]. The conver-
+gence analysis in [24] is based on the combination of filters in the algorithms and the discrete
+Bourgain spaces in the analysis. Since the filters in these algorithms truncate the numerical
+solutions to frequencies below τ                          −13 , and such frequency-truncated functions approximate the
+                                                               γ
+original functions in Hγ with an error bound of O(τ 3 ), it follows that the convergence of such
+filtered algorithms is limited to order γ for the KdV equation under the regularity condition                                           3
+u ∈C([0, T]; Hγ).
+  This article is concerned with the construction and analysis of new time discretizations for
+the KdV equation on a torus,
+                         1
+                   ∂tu(t, x) + ∂3xu(t, x) = 2∂x(u(t, x)2),  x ∈T = [0, 2π] and t ∈(0, T],       (1.1)
+     u(0, x) = u0(x),                 x ∈T,
+
+for low-regularity solutions below H1, i.e., the initial value u0 is in Hγ with γ ∈(0, 1] and
+therefore the solution u is in C([0, T]; Hγ) with γ ∈(0, 1]. One of the main difficulties in the
+construction and analysis of low-regularity integrators for nonlinear dispersive equations is the
+approximation of exponential functions with imaginary powers, say eisϕ, based on a certain
+decomposition of the phase function ϕ = ϕ1 + ϕ2. The approximation of such exponential
+functions with imaginary powers were typically based on the following techniques:
+
+       eisϕ = eisϕ1 + O(s|ϕ2|)  or   eisϕ = eisϕ1 + eisϕ2 −1 + O(min{s|ϕ1|, s|ϕ2|}),      (1.2)
+
+see [6,13,14,23,29,31] and the references therein. The remainders in these types of approxi-
+mations are still too large to obtain error estimates for rough solutions u ∈C([0, T]; Hγ) with
+γ ∈(0, 1]. In this article we introduce a new averaging approximation technique:
+
+                                                  ϕ1   ϕ2
+    Mτ eis(ϕ1+ϕ2) = Mτ  eisϕ1 Mτ  eisϕ2 + O  min           ,        , s|ϕ1|, s|ϕ2|      ,      (1.3)
+                                                  ϕ2   ϕ1
+
+where Mτ(f) denotes the average of a function f in the interval [0, τ]; see Lemma 3.2. The
+remainder in this approximation is smaller than the remainders in (1.2). In particular, the
+additional upper bounds |ϕ1/ϕ2| and |ϕ2/ϕ1| for the remainder are important for us to obtain
+error estimates in the rough case by using harmonic analysis techniques.
+  Moreover, it is known that the combination of filters and discrete Bourgain spaces in [24]
+has played an important role in establishing the stability of numerical approximations to
+rough solutions. In this article, we develop new techniques which can be used to establish
+
+=== PDF PAGE 4 ===
+4
+
+stability estimates under such low-regularity conditions when the energy techniques fail and
+filters are not used. More specifically, instead of using energy techniques locally in time, we
+define a temporally continuous function V (t) which equals the numerical solution vn at the
+discrete time levels tn, n = 0, 1, . . . , L, and satisfies an integral formulation of the continuous
+KdV equation globally in time up to a perturbation term, i.e.,
+
+                       1 Z  t                      2
+          V (t) = v0 +       es∂3x∂x  e−s∂3xV (s)   ds + R(t)   for t ∈(0, T],
+                       2  0
+
+where the perturbation term R(t) can be defined piecewisely on each subinterval (tn, tn+1]
+according to the definition of the time discretization on this subinterval. The specific form of
+the perturbation term for the low-regularity integrator constructed in this article is given in
+(5.7). In the absence of the perturbation term R(t), the solution of the integral equation above
+coincides with the solution to the KdV equation. The continuous formulation of the numerical
+scheme allows us to apply many harmonic analysis techniques at the continuous level, such as
+low- and high-frequency decomposition in estimating the stability of solutions with respect to
+perturbation. These techniques can significantly weaken the regularity conditions compared
+with the energy approach of stability estimates used in numerical analysis.
+  In addition, we establish some new harmonic analysis tools, including new frequency decom-
+position techniques (Lemma 3.3) and new trilinear estimates of the KdV operator (Propo-
+sition 3.4), which can be used to construct and analyze low-regularity integrators without
+using filters (that cut numerical solutions to frequencies below τ                                                      −13 ) and therefore improves
+the convergence order from γ to γ (up to a logarithmic factor) under the regularity condition                                3
+u ∈C([0, T]; Hγ) for γ ∈(0, 1].
+  For the convenience of readers, we present the numerical scheme and the main theoretical
+result below. Let tn = nτ, n = 0, 1, . . . , L = T/τ, be a partition of the time interval [0, T]
+with stepsize τ = T/L. The low-regularity integrator constructed in this article for the KdV
+equation (11.1) reads: For given un ∈Hγ, find un+1 ∈Hγ by
+
+               un+1 =e−τ∂3xun + F[un] + H[un]   for n = 0, 1 . . . , L −1,              (1.4)
+
+where
+
+                   1                  2                        2            F[un] =     e−τ∂3x∂−1x un  −1               6P                  6e−τ∂3xP  ∂−1x un     ,
+                   1
+                                 x un ∂−1x F[un]i           H[un] = 3P h e−τ∂3x∂−1
+                        τ
+            +                                 x un) P0[(un)2]                      9e−τ∂3x(∂−1
+          −1      x∂−1x  (e−s∂3x∂−1x un)3  s=τ                        54e(s−τ)∂3                    s=0
+                      1                                                 s=τ                                    h                               i            −     e(s−τ)∂3x∂−2x   (e−(s−τ)∂3x∂−2x F[un]) (e−s∂3x∂−1x un)                      27τ                                                 s=0,
+in which P0 and P are projection operators defined by P0f = 2π1 R T f dx and Pf := f −
+ 1 R T f dx, respectively; see Section 2.3 for more details. The convergence of the numerical2π
+solution to the solution of the KdV equation is guaranteed by the following theorem.
+
+=== PDF PAGE 5 ===
+                                                                                                       5
+
+Theorem 1.1. Let γ ∈(0, 1] and u ∈C([0, T]; Hγ) with initial value satisfying R T u0 dx = 0.
+Then there exist positive constants τ0 ∈(0, 12] and C such that for τ ∈(0, τ0] the numerical
+solution given by (1.4) has the following error bound:
+                    max ∥u(tn, ·) −un∥L2 ≤Cτ γ ln(1/τ),                        (1.5)
+                       1≤n≤L
+where the constants τ0 and C depend only on ∥u0∥Hγ, γ and T.
+Remark 1.1. Without loss of generality, we can assume that R T u0 dx = 0, i.e., P0u0 = 0
+and Pu0 = u0, where
+                             1 Z
+                     P0u0 =      u0dx  and  Pu0 = u0 −P0u0
+                          2π  T
+are the zero-mode and nonzero-mode projections of u0, respectively. Otherwise we can con-
+sider the function
+                                         ˜u(t, x) := u(t, x −t P0u0) −P0u0,
+which satisfies the KdV equation in (11.1) with initial value  ˜u0 = Pu0, which satisfies
+R T ˜u0dx = 0.
+
+  The rest of this article is organized as follows. Some basic notations and preliminary results
+are presented in Section 2. Several new tools for the construction and analysis of low-regularity
+integrators are presented in Section 3, including a logarithmically growing trilinear estimate
+on L2, the averaging approximation of exponential functions with imaginary powers, and new
+trilinear estimates associated to the KdV operator. The construction of the low-regularity
+integrator is presented in Section 4, and the reduction of the proposed numerical scheme to a
+continuously formulated perturbed KdV equation is presented in Section 5. The consistency
+estimates for the local and global errors are presented in Sections 6 and 7, respectively. The
+stability estimates using low- and high-frequency decompositions are presented in Section 8.
+The error estimates (i.e., proof of Theorem 1.1), which combine the consistency and stability
+estimates, are presented in Section 9. Numerical experiments and conclusions are presented
+in Sections 10 and 11, respectively.
+
+
+                     2. Notations and preliminary results
+
+  In this section we present the basic notations to be used in this article, as well as some
+preliminary results which were known in the literature and are frequently used in this article.
+
+
+2.1. Baisc notations
+
+  For convenience, we adopt the following notations which are widely used in harmonic
+analysis and partial differential equations:
+
+     (i) For a function f(t, x) which depends on t and x, we simply denote f(t) = f(t, ·).
+                                             1
+     (ii) We denote ⟨k⟩= (1 + |k|2) 2 for k ∈Z.
+    (iii) We denote by C a generic positive constant which may be different at different occur-
+        rences, possibly depending on ∥u∥C([0,T];Hγ) and T, but is independent of the stepsize
+        τ and time level n.
+
+=== PDF PAGE 6 ===
+6
+
+   (iv) We denote by A ≲B or B ≳A the statement “A ≤CB for some constant C > 0”.
+    (v) We denote by A ∼B the statement “C−1B ≤A ≤CB for some constant C > 0”.
+       Namely, A ∼B is equivalently to A ≲B ≲A.
+   (vi) We denote by A ≪B or B ≫A the statement A ≤C−1B for some sufficiently large
+       constant C (which is independent of τ and n).
+   (vii) The notation a+ stands for a + ϵ with an arbitrary small ϵ > 0, and a−stands for
+      a −ϵ with an arbitrary small ϵ > 0.
+  With the notations above, we often decompose a subset E ⊂Z2 = {(k1, k2) : k1, k2 ∈Z}
+into two parts, i.e., E = E1 ∪E2, with
+
+        E1 = {(k1, k2) ∈E : |k1| ≪|k2|}  and  E2 = {(k1, k2) ∈E : |k1| ≳|k2|}.
+
+This means that we consider the decomposition with
+
+       E1 = {(k1, k2) ∈Z2 : |k1| < c|k2|}  and  E2 = {(k1, k2) ∈Z2 : |k1| ≥c|k2|},
+
+where c is some sufficiently small constant (independent of τ and n) which can satisfy the
+requirement in our analysis.
+
+
+2.2. Fourier transform
+  The inner product and norm of L2(T) is defined by
+
+                       Z
+                      ⟨f, g⟩=   f(x)g(x) dx  and  ∥f∥L2(T) := p ⟨f, f⟩.
+                           T
+The Fourier transform of a function f ∈L2(T) is defined by
+
+                                    1 Z
+                              Fk[f] =       e−ikxf(x) dx.
+                                 2π  T
+For the simplicity of notation, we also denote ˆfk = Fk[f] and f = F−1k   [ˆfk]. The following
+standard properties of the Fourier transform are well known:
+
+          f(x) = X ˆfkeikx               (Fourier series expansion)
+                  k∈Z
+          √                  12
+       ∥f∥L2(T) =  2π X |ˆfk|2           (Parseval’s identity)
+                       k∈Z
+            ⟨f, g⟩= 2π X ˆfkˆgk              (Plancherel’s identity)
+                    k∈Z
+         Fk[fg] = X   ˆfk1ˆgk2          (Conversion of products to convolutions)
+                  k1+k2=k
+  The Sobolev space Hs(T), with s ∈R, consists of generalized functions f = P ˆfkeikx such
+                                                                       k∈Z
+that ∥f∥Hs < ∞, where
+                   √                                21
+                       ∥f∥Hs :=  2π X (1 + |k|2)s|ˆfk|2     .
+                                        k∈Z
+
+=== PDF PAGE 7 ===
+                                                                                                       7
+
+
+                                      s
+                                    2  : Hs0(T) →Hs0−s(T), with s0, s ∈R, is defined asThe operator Js = (1 −∂2x)
+                     Jsf = X (1 + |k|2) 2s ˆfkeikx  ∀f ∈Hs0(T),
+                             k∈Z
+which satisfies that ∥f∥Hs(T) = ∥Jsf∥L2(T).
+
+
+2.3. Projection operators
+  For any real number N ≥0, we define the Littlewood–Paley projections P≤N  : L2(T) →
+L2(T) and P>N : L2(T) →L2(T) as
+                  P≤Nf := F−1k   1|k|≤NFk[f] = X ˆfkeikx,
+                                                          |k|≤N
+                  P>Nf := F−1k   1|k|>NFk[f] = X ˆfkeikx.
+                                                          |k|>N
+We denote P0 = P≤0 and P = P>0, which are called zero-mode and nonzero-mode projections,
+respectively, satisfying the following identities:
+                        1 Z                             f dx  and  Pf(x) = f(x) −1 Z f dx.                 P0f =
+                      2π  T                        2π  T
+The operator ∂−1x   : L2(T) →H1(T) is defined by
+                      ((ik)−1 ˆfk  for  k̸ = 0,
+                         Fk[∂−1x f] =
+                                      0          for k = 0.
+This operator has a natural extension ∂−1x    : Hs(T) →Hs+1(T) for all s ∈R. Moreover, the
+following relation holds:
+                            ∂−1x ∂xf = ∂x∂−1x f = Pf.
+
+  For functions restricted to low frequency or high frequency, the following Bernstein’s in-
+equalities hold for any real numbers s ≥s0:
+                  ∥P≤Nf∥Hs ≲Ns−s0∥P≤Nf∥Hs0  ∀f ∈Hs0(T),
+                                                                                             (2.1)
+                  ∥P>Nf∥Hs0 ≲Ns0−s∥P>Nf∥Hs  ∀f ∈Hs(T).
+
+
+2.4. The Kato–Ponce inequality
+
+  The Kato–Ponce inequality will be frequently used in this paper. The result was originally
+proved in [11] and then extended to the endpoint case in [3,15] recently.
+
+Lemma 2.1 (Kato–Ponce inequality). For s > 0, 1 < p ≤∞, 1 < p1, p3 < ∞and 1 <
+p2, p4 ≤∞satisfying p1 = p11 + p21 and p1 = p31 + p41 , the following inequality holds:
+                   Js(fg)                ≤C ∥Jsf∥Lp1∥g∥Lp2 + ∥Jsg∥Lp3∥f∥Lp4  ,                             Lp
+where the constant C > 0 depends on s, p, p1, p2, p3, p4. If s > p1 then the following inequality
+holds:
+
+                           Js(fg)                                       Lp ≤C∥Jsf∥Lp∥Jsg∥Lp,
+
+=== PDF PAGE 8 ===
+8
+
+where the constant C > 0 depends on s and p.
+
+Remark 2.1. The Kato–Ponce inequality was originally established in whole space R, but it
+also holds for periodic functions on T. This can be proved by using Stein’s extension operator
+E : L1(T) →L1(R), which is bounded from W s,p(T) to W s,p(R) for all s ≥0 and 1 < p < ∞.
+Therefore,
+
+    Js(fg)    ∼  fg     ≲ Ef Eg             Lp(T)     W s,p(T)       W s,p(R)
+                ≲C ∥Ef∥W s,p1(R)∥Eg∥Lp2(R) + ∥Eg∥W s,p3(R)∥Ef∥Lp4(R)
+                ≲C ∥f∥W s,p1(T)∥g∥Lp2(T) + ∥g∥W s,p3(T)∥f∥Lp4(T)
+                ≲C ∥Jsf∥Lp1(T)∥g∥Lp2(T) + ∥Jsg∥Lp3(T)∥f∥Lp4(T)  .
+
+  In addition to the Kato–Ponce inequality, we will also use the following basic inequality
+(as a result of the H¨older and Sobolev embedding inequalities):
+          ∥fg∥L2 ≲∥f∥Hγ∥g∥Ha(γ)   for f ∈Hγ and g ∈Ha(γ), with γ ∈[0, 1],       (2.2)
+
+where
+                   12+   when γ = 0,                                                       1                      1                                                            −γ  when γ ∈(0, 2),                   2                  
+                            a(γ) =                  1                               (2.3)
+                           0+    when γ =                                                      2,                                                                                          0     when γ ∈(12, 1].
+
+
+2.5. Integration by parts
+
+  The following integration-by-parts formula is closely related to the nonlinearity of the KdV
+equation, and therefore will be frequently used in this paper, for example, in the construction
+of the numerical scheme in (4.4)–(4.6) and (4.12), and the analysis of consistency errors in
+(7.1) and (7.18). A proof of this formula can be found in [31].
+
+Lemma 2.2 (Integration by parts). Let s ≥s0 ≥0 and consider the space-time functions
+f(t, x) and g(t, x) satisfying P0f(t) = P0g(t) = 0 for t ∈[s0, s]. Then the following formula
+
+
+        sholds:Z
+            x         et∂3              e−t∂3xf(t) · e−t∂3xg(t)  dt
+       s0
+   =1  x∂−1x   e−t∂3x∂−1x  f(t) · e−t∂3x∂−1x  g(t)   t=s + 1 Z sZ  f(t) g(t) dxdt      3et∂3                                       t=s0   2π   s0 T
+    −1 Z s et∂3x∂−1x   e−t∂3x∂−1x  ∂tf(t) · e−t∂3x∂−1x  g(t) + e−t∂3x∂−1x  f(t) · e−t∂3x∂−1x  ∂tg(t)  dt.
+        3  s0
+
+
+       3. New tools for the construction of low-regularity integrators
+
+  In this section, we establish several new technical tools which can be used to construct and
+analyze low-regularity integrators with improved convergence orders. These technical tools
+
+=== PDF PAGE 9 ===
+                                                                                                       9
+
+are used in the following sections in estimating the local truncation errors and establishing
+the stability estimates.
+
+
+3.1. A logarithmically growing trilinear estimate on L2
+
+  The following trilinear estimate will be used in the analysis of the local truncation error
+Rn2 in Proposition 6.1; see (6.5) and (6.9) for the details.
+
+Lemma 3.1. For any f, g, h ∈L2 we define M(f, g, h) to be a function determined by its
+Fourier coefficients
+                Fk[M(f, g, h)] = X   m(k, k1, k2, k3)ˆfk1 ˆgk2 ˆhk3,
+                                   k1+k2+k3=k
+where m is a multiplier satisfying the following estimate (for some constants θ0 > 0 and
+A ≥2):
+
+
+                                            2                                                                       2      |m(k, k1, k2, k3)| ≤Aθ ⟨k⟩−1                                −θ⟨k3⟩−1                                                       2 −θ + ⟨k2⟩−1                                                   −θ⟨k3⟩−1                                                                                  2 −θ   ∀θ ∈[0, θ0].       (3.1)
+
+Then the multilinear operator M : L2×L2×L2 →L2 is well defined and satisfies the following
+estimate:
+                    ∥M(f, g, h)∥L2 ≲(ln A) ∥f∥L2∥g∥L2∥h∥L2.
+
+Proof. By the duality between L2 and itself, it suffices to prove |⟨M(f, g, h), φ⟩| ≲ln A for
+any functions f, g, h, φ ∈L2 such that ∥f∥L2 = ∥g∥L2 = ∥h∥L2 = ∥φ∥L2 = 1. By the Parseval
+identity and (3.1), the following result holds:
+
+|⟨M(f, g, h), φ⟩| = 2π X Fk[M(f, g, h)]Fk[φ]
+                    k∈Z
+
+
+                                                                                 2         ≲ X X   Aθ ⟨k⟩−12 −θ⟨k3⟩−1                                                                  2 −θ + ⟨k2⟩−1                                                          −θ⟨k3⟩−1                                                                                             2 −θ  |ˆfk1||ˆgk2||ˆhk3||ˆφk|.
+                 k∈Z k1+k2+k3=k
+                                                                                             (3.2)
+
+Let ˜f,  ˜g, ˜h and ˜φ be the functions with the nonnegative Fourier coefficients |ˆfk|, |ˆgk|, |ˆhk|
+and |ˆφk|, respectively. These functions satisfy that
+           ∥˜f∥L2 = ∥˜g∥L2 = ∥˜h∥L2 = ∥˜φ∥L2 = ∥f∥L2 = ∥g∥L2 = ∥h∥L2 = ∥φ∥L2 = 1.
+
+                                                                                                                 θ
+If we define ˜m(D, θ) to be the linear operator associated to the multiplier ˜m(k, θ) = A 2 ⟨k⟩−12 −θ.
+Namely,
+                                                                   θ
+                                                                        2                            Fk[˜m(D, θ)v] = A 2 ⟨k⟩−1                                                                 −θˆvk.
+Then (3.2) can be written as
+         |⟨M(f, g, h), φ⟩| ≲ X X    ˜m(k, θ)˜m(k3, θ)|ˆfk1||ˆgk2||ˆhk3||ˆφk|
+                          k∈Z k1+k2+k3=k
+                + X X    ˜m(k2, θ)˜m(k3, θ)|ˆfk1||ˆgk2||ˆhk3||ˆφk|
+                            k∈Z k1+k2+k3=k
+               = (˜f ˜g ˜m(D, θ)˜h, ˜m(D, θ)˜φ) + (˜f [˜m(D, θ)˜g][˜m(D, θ)˜h], ˜φ)
+                        ≲∥˜f∥L2∥˜g∥L2∥˜m(D, θ)˜h∥L∞∥˜m(D, θ)˜φ∥L∞
+
+=== PDF PAGE 10 ===
+10
+
+                + ∥˜f∥L2∥˜m(D, θ)˜g∥L∞∥˜m(D, θ)˜h∥L∞∥˜φ∥L2.                 (3.3)
+
+It remains to prove the following result:
+                                    √
+               ∥˜m(D, θ)˜g∥L∞+ ∥˜m(D, θ)˜h∥L∞+ ∥˜m(D, θ)˜φ∥L∞≲   ln A.             (3.4)
+
+This can be proved as follows:
+                   ∥˜m(D, θ)˜g∥L∞= X A θ                                                            2 ⟨k⟩−12 −θ|ˆgk|eikx
+                                               L∞
+                                     k∈Z
+
+                                                                           1               1
+                  ≲A θ2 X ⟨k⟩−1−2θ  2 X |ˆgk|2  2
+                                        k∈Z            k∈Z
+
+                                                        θ
+                 ≲A√ 2 ∥g∥L2.                                         (3.5)
+                                      θ
+                                                                          θ         √    1                                             √1                                       =   ln A. In this case,If    ln   A ≤θ0 then we can choose θ = 1/ ln A so that A 2 ≲1 and                                                                                  θ
+inequality (3.5) reduces to
+                           √
+                               ∥˜m(D, θ)˜g∥L∞≲   ln A.
+                                       √
+    1If    ln   A ≥θ0 then 2 ≤A ≤e1/θ0 and therefore A ∼2, which implies that   ln A ∼1. In this
+case, we can choose θ = θ0 so that inequality (3.5) implies that
+                            √
+                             ∥˜m(D, θ)˜g∥L∞≲1 ≲   ln A.
+This proves (3.4) and therefore completes the proof of Lemma 3.1.             □
+
+
+3.2. Averaging approximation of exponential functions
+
+  In this subsection, we establish some average estimates which play important roles in the
+analysis of the local truncation errors. We define the average and oscillation of a function f
+in the interval [0, τ] by
+                                       1 Z τ
+                           Mτ(f) =       f(t) dt,
+                                             τ  0
+and
+                                ∥f∥osc([0,τ]) :=  max    f(t1) −f(t2) ,
+                                                     {t1,t2}⊂[0,τ]
+respectively. Then the following basic inequality holds and will be frequently used:
+
+                 Mτ(fg) −Mτ(f)Mτ(g)  ≤∥f∥osc([0,τ])∥g∥osc([0,τ]).                  (3.6)
+
+Indeed,
+                                      1 Z τ
+            Mτ(fg) −Mτ(f)Mτ(g) =                                        fg ds −1 Z τ Mτ(f)g ds
+                                           τ  0          τ  0
+                                      1 Z τ
+                       =       f −Mτ(f) g ds
+                                           τ  0
+                                      1 Z τ
+                       =       f −Mτ(f)  g −Mτ(g) ds
+                                           τ  0
+                                              ≤∥f∥osc([0,τ])∥g∥osc([0,τ]).                         (3.7)
+
+=== PDF PAGE 11 ===
+                                                                                                      11
+
+  In the following lemma we prove that, if f and g are exponential functions with imaginary
+powers, then much better estimates can be obtained.
+
+Lemma 3.2. Let α, β ∈R. If α, β̸ = 0 and s ∈[0, τ], then
+
+                                        α   β
+         Mτ eis(α+β) −Mτ  eisα Mτ  eisβ  ≲min         ,       , τ|α|, τ|β|   .         (3.8)
+                                             β  α
+
+If α + β̸ = 0, then
+              Mτ eis(α+β) −Mτ  eisα Mτ  eisβ  ≲τ −1|α + β|−1.                (3.9)
+
+Proof. Since ∥eisα∥osc([0,τ]) ≲min{1, τ|α|}, (3.6) implies that
+             Mτ eis(α+β) −Mτ  eisα Mτ  eisβ  ≲min {τ|α|, τ|β|} .             (3.10)
+
+Furthermore, similar as (3.7), we have
+          Mτ eis(α+β) −Mτ  eisα Mτ  eisβ
+          =1 Z τ  eisα −Mτ  eisα   eisβ ds
+                 τ  0
+          =1 Z τ  eisα −Mτ  eisα    eisβ −1 ds
+                 τ  0
+          =1 Z τ eisα eisβ −1 ds −1 Z τ Mτ  eisα   eisβ −1 ds
+                 τ  0                     τ  0
+          =1 Z τ 1    eisα   eisβ −1 ds −1 Z τ Mτ  eisα   eisβ −1 ds.                 τ  0  iα∂s                     τ  0
+Then, using integration by parts, we obtain
+     Mτ eis(α+β) −Mτ  eisα Mτ  eisβ
+
+          1
+    =                     eiτβ −1 −1 Z τ β       ds −Mτ  eisα 1 Z τ  eisβ −1 ds        (3.11)         iταeiτα             τ  0  αeisα+isβ               τ  0
+   ≤1   eiτβ −1 + |β| + Mτ  eisα  1 Z τ  eisβ −1 ds.                           (3.12)
+         τ|α|              |α|              τ  0
+By substituting the following estimates into (3.12):
+                                                 1              1
+                   eisβ −1 ≤τ|β|  and  Mτ  eisα =       eiτα −1 ≲                                               iτα              τ|α|,
+
+we obtain
+                                             ≲|β|                 Mτ eis(α+β) −Mτ  eisα Mτ  eisβ                                                                      |α|.
+Based on the symmetry between α and β, the following result also holds:
+                                             ≲|α|                 Mτ eis(α+β) −Mτ  eisα Mτ  eisβ                                                                       |β|.
+
+The two estimates above, together with (3.10), imply the desired estimate in (3.8).
+  In the case |α| ≥|β| we can obtain the following result directly from the expression in
+(3.11):
+    Mτ eis(α+β) −Mτ  eisα Mτ  eisβ
+
+=== PDF PAGE 12 ===
+12
+
+         1                    1    β                       1 Z τ
+    = iταeiτα eiτβ −1 − iτ(α + β) α eiτ(α+β) −1 −Mτ  eisα τ  0   eisβ −1 ds,
+which implies that
+
+     Mτ eis(α+β) −Mτ  eisα Mτ  eisβ  ≲τ −1 |α|−1 + |α + β|−1 ≲τ −1|α + β|−1.
+
+Since the expression of Mτ eis(α+β) −Mτ  eisα Mτ  eisβ   is symmetric about α and β, in the
+case |β| ≥|α| we can obtain the same result by switching the roles of α and β in the argument
+above. This proves the desired estimate in (3.9).                        □
+
+
+3.3. Trilinear estimates associated to the KdV operator
+
+  In this subsection, we establish new estimates for the phase function
+
+                          ϕ := k3 −k31 −k32 −k33
+
+and use the results to prove two technical estimates for the following trilinear KdV operator:
+                  Z s
+        C(v1, v2, v3) =     et∂3xP P e−t∂3xv1(t) · e−t∂3xv2(t)   · e−t∂3x∂−1x  v3(t)  dt,        (3.13)
+                              s0
+where s ≥s0 ≥0 are any two numbers such that |s −s0| ≲1. The trilinear estimates for the
+KdV operator established in this subsection will play a key role in the stability estimates for
+nonsmooth solutions in C([0, T]; Hγ) with γ ∈(0, 1] possibly approaching zero.
+  For the simplicity of notation, we decompose the set {(k1, k2, k3) ∈Z3 : k1 + k2 + k3 = k}
+into the following two subsets:
+
+  Γ0(k) :={(k1, k2, k3) ∈Z3 : k1 + k2 + k3 = k, k1 + k2 = 0 or k1 + k3 = 0 or k2 + k3 = 0},
+   Γ(k) :={(k1, k2, k3) ∈Z3 : k1 + k2 + k3 = k, k1 + k2̸ = 0, k1 + k3̸ = 0, k2 + k3̸ = 0},
+
+and denote
+                              |km| = max{|k|, |k1|, |k2|, |k3|}.
+
+We further decompose Γ(k) into two subsets, i.e., Γ(k) = Γ1(k) ∪Γ2(k), where
+                                                   1                       n                       Γ1(k) :=  (k1, k2, k3) ∈Γ : |ϕ| <              ,                                                   4|km|2o
+                       n                       Γ2(k) :=  (k1, k2, k3) ∈Γ : |ϕ| ≥1           .                                                   4|km|2o
+  In the following lemma, we show that a good estimate exists for the phase function when
+(k1, k2, k3) ∈Γ(k). Moreover, better estimates can be obtained for (k1, k2, k3) ∈Γ1(k) and
+(k1, k2, k3) ∈Γ2(k), respectively. These new estimates of the phase function can be used to
+analyze the trilinear KdV operator defined in (3.13).
+
+Lemma 3.3. Let k ∈Z. Then the following results hold.
+
+   (1)  If (k1, k2, k3) ∈Γ(k) then
+                                               |ϕ| ≳|km|.
+
+   (2)  If (k1, k2, k3) ∈Γ1(k) then
+
+                                         |k| ∼|k1| ∼|k2| ∼|k3|.
+
+=== PDF PAGE 13 ===
+                                                                                                      13
+
+   (3)  Γ2(k) can be further decomposed into Γ2(k) = Γ21(k) ∪Γ22(k), with
+                                          1                         15
+                                                                                          7 },                   Γ21(k) := {(k1, k2, k3) ∈Γ : 4|km|2 ≤|ϕ| ≪|km|
+                                                                            15
+                                                                            7 }.                   Γ22(k) := {(k1, k2, k3) ∈Γ : |ϕ| ≳|km|
+
+       Moreover, for (k1, k2, k3) ∈Γ21(k) there exist j, h ∈{1, 2, 3} such that |kj + kh| ≪
+                5
+       |km| 7 .
+
+Proof. For (k1, k2, k3) ∈Γ(k), we denote k0 = −k so that k0 + k1 + k2 + k3 = 0 and
+
+                   kj + kh̸ = 0,   for any j, h ∈{0, 1, 2, 3} such that  j̸ = h.             (3.14)
+
+By the symmetry among the indices k0, k1, k2, k3, we may further assume the following rela-
+tion:
+
+                                        |k0| ≥|k1| ≥|k2| ≥|k3|.                             (3.15)
+
+In this case, the following results must hold:
+
+        |km| = |k0| ∼|k1| (in particular, |k1| ≤|k0| ≤3|k1|)  and  k0 · k1 < 0.        (3.16)
+
+In fact, if k0 ·k1 ≥0 then the relation k0 +k1 +k2 +k3 = 0 implies that k0 = k1 = −k2 = −k3,
+which contradicts (3.14). If |k0| > 3|k1| then |k0 + k1| > 2|k1| ≥|k2 + k3|, which contradicts
+the relation k0 + k1 + k2 + k3 = 0. Therefore, |k0| ∼|k1|. This proves the results in (3.16).
+  Since k0 · k1 < 0 as shown in (3.16), without loss of generality, we may assume that k0 > 0
+and k1 < 0.
+    (1) If k2 ≤0 then |ϕ| = |3(k1 + k0)(k1 + k2)(k1 + k3)| ≥3|k1 + k2| ≥3|k1| ∼|km|.
+          If k2 > 0 then by the symmetry in the expression of ϕ = −k30 −k31 −k32 −k33, we have
+         |ϕ| = |3(k0 + k1)(k0 + k2)(k0 + k3)| ≥3|k0 + k2| ≥3|k0| ∼|km|.
+    (2) In view of (3.15), we only need to prove |k0| ∼|k3| for (k1, k2, k3) ∈Γ1(k). In fact, if
+         |k0| ≥6|k3| then (3.16) implies that |k1| ≥13|k0| ≥2|k3|, and therefore
+           |k0 + k3| ≥1  = 1      and   |k0 + k2| = |k1 + k3| ≥1  ≥1                      2|k0|   2|km|,                                  2|k1|   6|km|.
+       This implies that
+                                                1      1       1
+               |ϕ| = |3(k0 + k1)(k0 + k2)(k0 + k3)| ≥3 × 2|km| × 6|km| = 4|km|2
+       which contradicts that (k1, k2, k3) ∈Γ1(k). This proves |k0| ∼|k3| for (k1, k2, k3) ∈
+       Γ1(k).
+                          15                                     15
+    (3) If |ϕ| ≳|km|                           7  is not true, then |ϕ| ≪|k0| 7 . In this case, the following result must
+        hold:
+
+                                                                             5
+                                   |k0 + k1| = |k2 + k3| ≪|k0| 7 .                           (3.17)
+
+                                            5
+                                            7 , which together with (3.15) implies that       Otherwise |k0 + k1| ≳|k0|
+
+                                                               5
+                                                               7   for all j ∈{1, 2, 3}.                        |k0 + kj| ≥|k0 + k1| ≳|k0|
+
+                                             15                                       15
+       This means that |ϕ| ≳|k0|                                             7 , which contradicts |ϕ| ≪|k0| 7 . This proves (3.17) and
+       completes the proof of Lemma 3.3 (3).
+
+=== PDF PAGE 14 ===
+14
+
+                                                   □
+
+  The main result of this subsection is the following proposition, which contains new estimates
+of the trilinear KdV operator defined in (3.13) for low-regularity functions in L∞(s0, s; Hα)×
+L∞(s0, s; Hα) × L∞(s0, s; Hα), with α ∈[0, 1] possibly approaching zero. The results are
+proved by utilizing the new estimates for the phase function in Lemma 3.3.
+Proposition 3.4. Let α ∈[0, 1] and s ≥s0 ≥0 with |s −s0| ≲1.  Suppose that vj ∈
+                                                   14 ) for j = 1, 2, 3. Then the trilinear operator definedL∞(s0, s; Hα) and ∂tvj ∈L∞(s0, s; H−23
+in (3.13) has the following properties:
+
+   (1)
+          C(v1, v2, v3) L2
+                       3
+       ≲|s −s0| Y ∥vj∥X0([s0,s]) + ∥v1∥L∞(s0,s;H−2314 )∥v2∥L∞(s0,s;L2)∥v3∥L∞(s0,s;L2),
+                   j=1
+
+       where
+
+                        ∥v∥X0([s0,s]) := ∥v∥L∞(s0,s;L2) +  ∂tv                                                            L∞(s0,s;H−2314 ).
+       Moreover, the inequality still holds when v1, v2, v3 are permuted on the right-hand side.
+   (2)  If vj, j = 1, 2, 3 are time-independent, then
+
+                                                               3
+                            C(v1, v2, v3) L2 ≲|s −s0|α Y ∥vj∥Hα.
+                                                     j=1
+
+Proof. Clearly, the trilinear operator defined in (3.13) does not have zero mode, i.e.,
+
+                                   F0[C(v1, v2, v3)] = 0.
+
+For k̸ = 0, the Fourier transform of (3.13) can be written as
+                        Z s
+         Fk C(v1, v2, v3) =   X     e−itϕ(ik3)−1ˆv1,k1(t)ˆv2,k2(t)ˆv3,k3(t) dt
+                                        s0                                 k1+k2+k3=k
+                                        k1+k2̸=0,k3̸=0
+For the simplicity of notation, we assume that ˆvj,kj ≥0 for kj ∈Z and j = 1, 2, 3 (otherwise
+one can replace ˆvj,kj by |ˆvj,kj| in the following argument and consider the functions  ˜vj :=
+F−1  k   [ |ˆvj,k| ] as in the proof of Lemma 3.1).
+  Since Γ(k) = Γ1(k) ∪Γ2(k), we can further decompose Fk C(v1, v2, v3)  into the following
+several parts:
+                     Z s
+      Fk C(v1, v2, v3) =   X       e−itϕ(ik3)−1ˆv1,k1(t)ˆv2,k2(t)ˆv3,k3(t) dt
+                                    s0                                 k1+k2+k3=k,k3̸=0
+                                 k1+k2̸=0,k1+k3=0
+                       Z s
+               +   X       e−itϕ(ik3)−1ˆv1,k1(t)ˆv2,k2(t)ˆv3,k3(t) dt
+                                       s0                                   k1+k2+k3=k,k3̸=0
+                                    k1+k2̸=0,k2+k3=0
+                       Z s
+               −   X       e−itϕ(ik3)−1ˆv1,k1(t)ˆv2,k2(t)ˆv3,k3(t) dt
+                                       s0                                   k1+k2+k3=k,k3̸=0
+                                         k1+k2̸=0
+                                k1+k3=k2+k3=0
+
+=== PDF PAGE 15 ===
+                                                                                                      15
+
+                       Z s
+               +   X      e−itϕ(ik3)−1ˆv1,k1(t)ˆv2,k2(t)ˆv3,k3(t) dt
+                                       s0                                        (k1,k2,k3)∈Γ1(k)
+                                               k3̸=0
+                       Z s
+               +   X      e−itϕ(ik3)−1ˆv1,k1(t)ˆv2,k2(t)ˆv3,k3(t) dt
+                                       s0                                        (k1,k2,k3)∈Γ2(k)
+                                               k3̸=0
+
+                                 5
+                   =: X Fk C∗j (v1, v2, v3) .
+                            j=1
+We present estimates for C∗j (v1, v2, v3), j = 1, 2, 3, 4, 5, respectively.
+   (i) Estimates for C∗1(v1, v2, v3), C∗2(v1, v2, v3) and C∗3(v1, v2, v3): Since k3 = −k1̸ = 0 and
+k2 = k in the expression of C∗1(v1, v2, v3), it follows that (by the Cauchy–Schwarz inequality)
+                             Z s
+             Fk C∗1(v1, v2, v3) ≲ X |k1|−1ˆv1,k1(t) ˆv2,k(t) ˆv3,−k1(t) dt
+                                                 s0                                                   k1̸=0
+                             Z s
+                    ≲    ˆv2,k(t)∥v1(t)∥L2∥v3(t)∥L2 dt.
+                                                 s0
+This implies that
+           C∗1(v1, v2, v3) L2 ≲|s −s0|∥v1∥L∞(s0,s;L2)∥v2∥L∞(s0,s;L2)∥v3∥L∞(s0,s;L2).
+Since C∗2(v1, v2, v3) is similar as C∗1(v1, v2, v3), and the expression of C∗3(v1, v2, v3) consists of
+terms which are contained in C∗1(v1, v2, v3), the same estimates hold for C∗2(v1, v2, v3) and
+C∗3(v1, v2, v3), i.e.,
+                 C∗1(v1, v2, v3) L2 +  C∗2(v1, v2, v3) L2 +  C∗3(v1, v2, v3) L2
+             ≲|s −s0|∥v1∥L∞(s0,s;L2)∥v2∥L∞(s0,s;L2)∥v3∥L∞(s0,s;L2).                (3.18)
+   (ii) Estimates for C∗4(v1, v2, v3): Since |k1| ∼|k2| ∼|k3| ∼|k| for (k1, k2, k3) ∈Γ1(k), it
+follows that
+                  Z s
+  Fk C∗4(v1, v2, v3) ≲ X |k3|−1ˆv1,k1(t)ˆv2,k2(t)ˆv3,k3(t) dt
+                              s0                              Γ1(k)
+                                k3̸=0
+                  Z s
+           ≲    |k|−1  X        ˆv1,k1(t)ˆv2,k2(t)ˆv3,k3(t) dt
+                              s0                                k1+k2+k3=k
+                                       |k1|∼|k2|∼|k3|∼|k|
+                  Z s                     12                                                          21
+           ≲    |k|−1 X  1  X   |ˆv1,k1(t)|2|ˆv2,k2(t)|2 |ˆv3,k−k1−k2(t)|2   dt
+                              s0                                           |k1|∼|k|        |k1|∼|k|
+                                           |k2|∼|k|        |k2|∼|k|
+                  Z s                                                        12
+           ≲  X  |ˆv1,k1(t)|2|ˆv2,k2(t)|2 |ˆv3,k−k1−k2(t)|2    dt.
+                              s0                                   k1,k2
+
+Therefore,
+
+                                                                       1
+        C∗4(v1, v2, v3) L2 ≲ X Fk C∗4(v1, v2, v3)  2  2
+                           k∈Z
+
+=== PDF PAGE 16 ===
+16
+
+                      Z s                                                            12
+              ≲  X X |ˆv1,k1(t)|2|ˆv2,k2(t)|2 |ˆv3,k−k1−k2(t)|2   dt
+                                     s0    k  k1,k2
+                   ≲|s −s0|∥v1∥L∞(s0,s;L2)∥v2∥L∞(s0,s;L2)∥v3∥L∞(s0,s;L2).        (3.19)
+  We see that C∗j (v1, v2, v3), j = 1, 2, 3, 4 satisfy the estimates in both (1) and (2). It remains
+to show that C∗5(v1, v2, v3) also satisfies the estimates in (1) and (2).
+
+  Proof of (1). Via integration by parts, we can write Fk C∗5(v1, v2, v3)  as
+                                      1                            s
+          Fk C∗5(v1, v2, v3) = X e−itϕ k3ϕˆv1,k1(t)ˆv2,k2(t)ˆv3,k3(t) s0
+                                     Γ2(k)
+                                        k3̸=0
+                               Z s      1
+                  − X                                              e−itϕ k3ϕ∂t ˆv1,k1(t)ˆv2,k2(t)ˆv3,k3(t) ds.       (3.20)                                                   s0                                        Γ2(k)
+                                           k3̸=0
+We further decompose Γ2(k) into two parts, i.e., Γ2(k) = Γ21(k) ∪Γ22(k), where
+
+                                                                                        15
+                                                                                         7 },                    Γ21(k) := {(k1, k2, k3) ∈Γ : |km|2 ≲|ϕ| ≪|km|
+
+                                                                             15
+                                                                             7 }.                    Γ22(k) := {(k1, k2, k3) ∈Γ : |ϕ| ≳|km|
+
+Then (3.20) can be written as
+                                       1                            s
+          Fk C∗5(v1, v2, v3) = X e−itϕ k3ϕˆv1,k1(t)ˆv2,k2(t)ˆv3,k3(t) s0
+                                       Γ21(k)
+                                         k3̸=0
+                                         1                            s
+                  − X e−itϕ k3ϕˆv1,k1(t)ˆv2,k2(t)ˆv3,k3(t) s0
+                                         Γ22(k)
+                                            k3̸=0
+                                Z s     1
+                  − X                                                     eitϕ k3ϕ∂t ˆv1,k1(t)ˆv2,k2(t)ˆv3,k3(t) ds                                                     s0                                         Γ21(k)
+                                            k3̸=0
+                                Z s     1
+                  − X                                                     eitϕ k3ϕ∂t ˆv1,k1(t)ˆv2,k2(t)ˆv3,k3(t) ds                                                     s0                                         Γ22(k)
+                                            k3̸=0
+
+                                        4
+                       =: X Fk C∗5j(v1, v2, v3) .
+                                 j=1
+  Estimates for C∗51(v1, v2, v3):  In the expression of C∗51(v1, v2, v3), we have (k1, k2, k3) ∈
+Γ21(k). According to Lemma 3.3, for (k1, k2, k3) ∈Γ21(k) there exist j, h ∈{1, 2, 3}, such
+that
+                                                                      5
+                                            |kj + kh| ≪|km| 7 .
+                                                                                     5
+Without loss of generality, we may assume that |k2 + k3| ≪|km| 7 , as the other cases can be
+treated similarly. Since |ϕ| ≳|km|2 on Γ21(k), by using a change of variables ˜k2 = k2 + k3
+and the Cauchy–Schwarz inequality, we obtain
+ Fk C∗51(v1, v2, v3)
+
+=== PDF PAGE 17 ===
+                                                                                                      17
+
+≲max   X         |km|−2|k3|−1ˆv1,k1(t)ˆv2,k2(t)ˆv3,k3(t)
+    t∈{s0,s}
+             k1+k2+k3=k
+                            5
+           |k2+k3|≪|km| 7 ,|k3|̸=0
+≲ X X   |km|−2|k3|−1Fk−˜k2[v1(t)] F˜k2−k3[v2(t)]Fk3[v3(t)]
+    |k3|̸=0 |˜k2|≪|km| 57
+
+                                           1                                                                          1
+
+                                7                                                             7≲  X     |km|−5                           |k3|−2  2 X |km|−23                                                      |Fk−˜k2[v1(t)]|2|F˜k2−k3[v2(t)]|2|Fk3[v3(t)]|2  2
+     |˜k2|≪|km| 57 ,k3̸=0                           ˜k2,k3
+
+                                                                              1
+
+                            7≲  X    |km|−23                         |Fk1[v1(t)]|2|Fk2[v2(t)]|2|Fk3[v3(t)]|2  2 ,
+    k1+k2+k3=k
+
+where we have changed the subscripts back to k1, k2 and k3 in the last inequality. For k̸ = 0
+and k1 + k2 + k3 = k, it is easy to verify that |km| = max(|k1|, |k2|, |k3|) ≥⟨kj⟩for j = 1, 2, 3.
+By taking square of the inequality above and summing up the results for k ∈Z such that
+k̸ = 0, using the property that F0[C∗51(v1, v2, v3)] = 0, we obtain
+
+
+                                                                   7                                                          |Fk1[v1(t)]|2|Fk2[v2(t)]|2|Fk3[v3(t)]|2     C∗51(v1, v2, v3) 2Hσ ≲ X |k|2σ X    |km|−23
+                                k̸=0     k1+k2+k3=k
+             ≲ X   ⟨k1⟩σ1Fk1[v1(t)] 2 ⟨k2⟩σ2Fk2[v2(t)] 2 ⟨k3⟩σ3Fk3[v3(t)] 2
+                                 k1,k2,k3
+                    ≲∥v1∥2L∞(s0,s;Hσ1)∥v2∥2L∞(s0,s;Hσ2)∥v3∥2L∞(s0,s;Hσ3),              (3.21)
+
+where 0 ≤σ ≤23               and −23                 14                           14 ≤σj ≤0, j = 1, 2, 3, are any numbers satisfying σ−σ1−σ2−σ3 =
+2314.
+                                                              15
+                                                               7  for (k1, k2, k3) ∈Γ22(k), it follows that, by  Estimates for C∗52(v1, v2, v3): Since |ϕ| ≳|km|
+the Cauchy–Schwarz inequality,
+
+Fk C∗52(v1, v2, v3)
+
+
+                                  7≲max  X    |km|−15                             |k3|−1Fk1[v1(t)]Fk2[v2(t)]Fk3[v3(t)]
+   t∈{s0,s}
+         k1+k2+k3=k
+                |k3|̸=0
+
+                                       1                                                                                      1
+                                                                              2                                                                                            2                                                                                                          2  2≲  X     |km|−1|k3|−2  2  X     |km|−23                                                                   7 Fk−k2−k3[v1(t)]                                                                           Fk2[v2(t)]                                                                                        Fk3[v1(t)]
+    |k2|≤|km|,k3̸=0                     |k2|≤|km|,k3̸=0
+
+                                                                              1
+                                     2                                                   2                                                                2  2
+                                                                                                ,≲  X    |km|−23                           7  Fk1[v1(t)]                                     Fk2[v2(t)]                                                 Fk3[v1(t)]
+   k1+k2+k3=k
+
+where we have changed the subscripts back to k1, k2 and k3 in the last inequality. By taking
+square of the inequality above and summing up the results for k ∈Z such that k̸ = 0, using
+the property that F0[C∗52(v1, v2, v3)] = 0, we obtain
+            C∗52(v1, v2, v3) Hσ ≲∥v1∥L∞(s0,s;Hσ1)∥v2∥L∞(s0,s;Hσ2)∥v3∥L∞(s0,s;Hσ3),      (3.22)
+
+               and −23where 0 ≤σ ≤23                 14                           14 ≤σj ≤0, j = 1, 2, 3, are any numbers satisfying σ−σ1−σ2−σ3 =
+2314.
+
+=== PDF PAGE 18 ===
+18
+
+  In particular, by choosing σ = σ2 = σ3 = 0 and σ1 = −2314 in (3.21) and (3.22), we obtain
+the following result:
+                    C∗51(v1, v2, v3) L2 +  C∗52(v1, v2, v3) L2
+                    ≲∥v1∥L∞(s0,s;H−2314 )∥v2∥L∞(s0,s;L2)∥v3∥L∞(s0,s;L2).                (3.23)
+  Since the constraint σ −σ1 −σ2 −σ3 = 2314 is symmetric about σ1, σ2 and σ3, it follows that
+the supscripts σ1, σ2 and σ3 can be permuted in the right-hand sides of (3.21) and (3.22).
+Therefore, the estimate in (3.23) still holds when v1, v2 and v3 are permuted.
+  Estimates for C∗53(v1, v2, v3) and C∗54(v1, v2, v3): Similar as C∗51(v1, v2, v3) and C∗52(v1, v2, v3),
+the following result holds:
+            ∥C∗53(v1, v2, v3)∥Hσ + ∥C∗54(v1, v2, v3)∥Hσ
+          ≲|s −s0| ∥∂tv1∥L∞(s0,s;Hσ1)∥v2∥L∞(s0,s;Hσ2)∥v3∥L∞(s0,s;Hσ3)
+
+               + ∥v1∥L∞(s0,s;Hσ2)∥∂tv2∥L∞(s0,s;Hσ1)∥v3∥L∞(s0,s;Hσ3)
+
+               + ∥v1∥L∞(s0,s;Hσ3)∥v2∥L∞(s0,s;Hσ2)∥∂tv3∥L∞(s0,s;Hσ1)  ,
+
+where 0 ≤σ ≤23               and −23                 14                           14 ≤σj ≤0, j = 1, 2, 3, are any numbers satisfying σ−σ1−σ2−σ3 =
+2314. In particular, by choosing σ1 = −2314 and σ = σ2 = σ3 = 0, we obtain
+            ∥C∗53(v1, v2, v3)∥L2 + ∥C∗54(v1, v2, v3)∥L2
+           ≲|s −s0| ∥∂tv1∥L∞(s0,s;H−2314 )∥v2∥L∞(s0,s;L2)∥v3∥L∞(s0,s;L2)
+               + ∥v1∥L∞(s0,s;L2)∥∂tv2∥L∞(s0,s;H−2314 )∥v3∥L∞(s0,s;L2)
+               + ∥v1∥L∞(s0,s;L2)∥v2∥L∞(s0,s;L2)∥∂tv3∥L∞(s0,s;H−2314 )  .        (3.24)
+   Overall, the estimates of C∗j (v1, v2, v3), j = 1, 2, 3, 4, in (3.18) and (3.19), and the estimates
+of C∗5j(v1, v2, v3), j = 1, 2, 3, 4, in (3.23) and (3.24), imply the first result of Proposition 3.4.
+  Proof of (2). We further decompose C∗5(v1, v2, v3) into the low-frequency and high-frequency
+parts as follows:
+             C∗5(v1, v2, v3) = P≤|s−s0|−αC∗5(v1, v2, v3) + P>|s−s0|−αC∗5(v1, v2, v3),         (3.25)
+where we have used the projections P≤N and P>N defined in Section 2.3 with N = |s−s0|−α.
+  The first part in (3.25) can be estimated by using Bernstein’s inequality in (2.1), which
+converts the L2 norm to the H−b(α) norm, i.e.,
+               P≤|s−s0|−αC∗5(v1, v2, v3) L2 ≲|s −s0|−b(α)α C∗5(v1, v2, v3) H−b(α),
+
+where b(α) is chosen in the following way:
+                   1                                   when α = 0                                     2+                                                                         1                  1 i                           b(α) =   −α  when α ∈  0,
+                                  2                  2
+                                                                                       1                                                                           i                                                                       1                                                                                                   .                  0     when α ∈                                                                           2,
+
+=== PDF PAGE 19 ===
+                                                                                                      19
+
+For time-independent functions vj, j = 1, 2, 3, it is straightforward to verify (by the Cauchy–
+Schwartz inequality and Sobolev embedding inequalities) that this choice of b(α) guarantees
+the following inequality:
+                             Z s
+            C∗5(v1, v2, v3) H−b(α) =  X e−itϕ(ik3)−1ˆv1,k1ˆv2,k2ˆv3,k3 dt
+                                                 s0                                    H−b(α)                                               Γ2(k)
+                                                   k3̸=0
+                          ≲|s −s0|∥v1∥Hα∥v2∥Hα∥v3∥Hα.
+
+Combining the two inequalities above, we obtain
+              P≤|s−s0|−αC∗5(v1, v2, v3) L2 ≲|s −s0|1−b(α)α∥v1∥Hα∥v2∥Hα∥v3∥Hα.
+Since 1 −b(α)α ≥α, it follows that
+                 P≤|s−s0|−αC∗5(v1, v2, v3) L2 ≲|s −s0|α∥v1∥Hα∥v2∥Hα∥v3∥Hα.          (3.26)
+  For time-independent functions v1, v2 and v3, we have C∗53(v1, v2, v3) = C∗54(v1, v2, v3) = 0
+(as they contain the time derivatives of the functions v1, v2 and v3). Therefore, the second
+part in (3.25) can be estimated by using the decomposition
+                 C∗5(v1, v2, v3) = C∗51(v1, v2, v3) + C∗52(v1, v2, v3).
+
+According to Bernstein’s inequality, as shown in (2.1), we have
+
+
+                                                                                         23         ∥P>|s−s0|−αC∗5j(v1, v2, v3)∥L2 ≲|s −s0| 23                                                              14 α∥C∗5j(v1, v2, v3)∥H 14
+                              ≲|s −s0|α∥v1∥L2∥v2∥L2∥v3∥L2   for j = 1, 2,
+where the last inequality follows from (3.21) and (3.22) with σ = 23                                                         and σ1 = σ2 = σ3 = 0.                                                                           14
+This implies that
+                ∥P>|s−s0|−αC∗5(v1, v2, v3)∥L2 ≲|s −s0|α∥v1∥L2∥v2∥L2∥v3∥L2.           (3.27)
+  Combining (3.26) and (3.27), we obtain the second result of Proposition 3.4.      □
+
+
+
+
+
+               4. Construction of the low-regularity integrator
+
+
+  For the simplicity of notation, we decompose the phase function ϕ = k3 −k31 −k32 −k33 into
+the following two parts:
+                             ϕ = ϕ1 + ϕ2,
+
+where
+                     ϕ1 := (k1 + k2)3 −k31 −k32 = 3k1k2(k1 + k2),                     (4.1)
+                     ϕ2 := k3 −k33 −(k1 + k2)3 = 3kk3(k1 + k2).                      (4.2)
+  Since P0u0 = 0 (as assumed in Theorem 1.1 and explained in Remark 1.1), the conservation
+law R T u(t, x)dx = R T u0(x)dx of the KdV equation implies that P0u(t, ·) = 0 for all t ≥0. As
+
+=== PDF PAGE 20 ===
+20
+
+a result, the twisted function v(t, ·) := et∂3xu(t, ·) also satisfies P0v(t, ·) = 0 for all t ≥0, and
+the KdV equation in (11.1) can be written as
+
+                           1
+                                x∂x e−t∂3xv(t, x) 2,   t ≥0 and x ∈T.                (4.3)                     ∂tv(t, x) =                                2et∂3
+We denote v(t) = v(t, ·) for abbreviation.
+  Let tn = nτ, n = 0, 1, . . . , N = T/τ be a partition of the time interval [0, T] with stepsize
+τ. Then the solution of (4.3) can be expressed in terms of the Newton–Leibniz formula, i.e.,
+                             1 Z s                     2
+                  v(s) = v(tn) +       et∂3x∂x  e−t∂3xv(t)   dt
+                             2  tn
+             = v(tn) + F n[s; v(tn)] + rn(s)     for s ∈[tn, tn+1],               (4.4)
+
+where
+                    1 Z s
+     F n[s; v(tn)] :=       et∂3x∂x e−t∂3xv(tn) 2dt                                         (4.5)
+                    2  tn
+                    1
+           =                     xP h e−s∂3x∂−1x  v(tn) 2i −1                                              xP h e−tn∂3x∂−1x  v(tn) 2i ,       (4.6)                      6es∂3                         6etn∂3
+                    1 Z s      h     x                      x             i             rn(s) :=       et∂3x∂x  e−t∂3 v(t) −v(tn)  · e−t∂3 v(t) + v(tn)   dt,          (4.7)
+                    2  tn
+
+where the expression in (4.6) is given by Lemma 2.2. By using the Newton–Leibniz formula
+again, i.e.,
+                                   1 Z tn+1                      2
+                     v(tn+1) = v(tn) +          es∂3x∂x  e−s∂3xv(s)   ds,                  (4.8)
+                                   2  tn
+
+and substituting expression (4.4) into (4.8), we obtain
+
+                        1 Z tn+1                                                  2
+                                                       x v(tn) + F n[s; v(tn)] + rn(s)   ds         v(tn+1) = v(tn) +          es∂3x∂x  e−s∂3
+                        2  tn
+          = v(tn) + F n tn+1; v(tn) + An[v(tn)] + Rn1[v],                          (4.9)
+where An[v(tn)] and the remainder Rn1[v] are defined by
+           Z tn+1
+  An[v(tn)] :=        es∂3x∂x  e−s∂3xv(tn) e−s∂3xF n[s; v(tn)]  ds,                          (4.10)
+                    tn
+             1 Z tn+1                              2
+    Rn1[v] :=          es∂3x∂x  e−s∂3xF n[s; v(tn)]  ds
+             2  tn
+               1 Z tn+1
+        +          es∂3x∂x  e−s∂3xrn(s) e−s∂3x 2v(tn) + 2F n[s; v(tn)] + rn(s)   ds.  (4.11)
+               2  tn
+
+  The third term on the right-hand side of (4.9) can be calculated by using the integration-
+by-parts formula in Lemma 2.2, i.e.,
+
+                    1
+          An[v(tn)] =                       3etn+1∂3xP  e−tn+1∂3x∂−1x  v(tn) e−tn+1∂3x∂−1x F n tn+1; v(tn)
+
+                                                               n s; v(tn)  ds            −1 Z tn+1 es∂3xP e−s∂3x∂−1x  v(tn) e−s∂3x∂−1x ∂sF
+                      3  tn
+
+=== PDF PAGE 21 ===
+                                                                                                      21
+
+                    1
+           =                       3etn+1∂3xP  e−tn+1∂3x∂−1x  v(tn) e−tn+1∂3x∂−1x F n tn+1; v(tn)
+                                       P  e−s∂3xv(tn)    ds            −1 Z tn+1 es∂3xP e−s∂3x∂−1x  v(tn)                 2
+                      6  tn
+                    1
+           =                       3etn+1∂3xP  e−tn+1∂3x∂−1x  v(tn) e−tn+1∂3x∂−1x F n tn+1; v(tn)
+                      1
+                             x  v(tn) P0 v(tn)2 + Bn[v(tn)],                           (4.12)             + 6τ∂−1
+where
+                      Z tn+1 1
+                                            x           Bn[v(tn)] := −P                                               x  v(tn) e−s∂3xv(tn) e−s∂3xv(tn)  ds.                                    tn    6es∂3  e−s∂3x∂−1
+We approximate Bn[v(tn)] by considering its Fourier coefficient, i.e., F0 Bn[v(tn)] = 0 and
+for k̸ = 0
+
+      Fk Bn[v(tn)]
+                     1 Z tn+1      1
+    = − X             e−isϕ    ˆvk1(tn) ˆvk2(tn) ˆvk3(tn) ds
+                     6  tn         ik1            k1+k2+k3=k
+                 k1,k2,k3̸=0
+                      1 Z tn+1       1    1    1
+    = − X               e−isϕ   +  +      ˆvk1(tn) ˆvk2(tn) ˆvk3(tn) ds
+                       18i  tn          k1   k2   k3            k1+k2+k3=k
+                 k1,k2,k3̸=0
+                      1 Z tn+1       1    1    1    = − X               e−isϕ   +  +  −1  ˆvk1(tn) ˆvk2(tn) ˆvk3(tn) ds
+                       18i  tn          k1   k2   k3   k            k1+k2+k3=k
+                 k1,k2,k3̸=0
+                      1  Z tn+1
+      − X                 e−isϕˆvk1(tn) ˆvk2(tn) ˆvk3(tn) ds
+                      18ik  tn            k1+k2+k3=k
+                 k1,k2,k3̸=0
+                      1 Z tn+1       ϕ
+    = − X               e−isϕ           ˆvk1(tn) ˆvk2(tn) ˆvk3(tn) ds
+                       18i  tn        3kk1k2k3            k1+k2+k3=k
+                 k1,k2,k3̸=0
+                      1  Z tn+1
+      − X                 e−isϕˆvk1(tn) ˆvk2(tn) ˆvk3(tn) ds,
+                      18ik  tn            k1+k2+k3=k
+                 k1,k2,k3̸=0
+
+where we have used the following relation (which was discovered in [31]):
+
+                                1                           1
+                   +                      +                                     1 −1 =   ϕ      .
+                              k1   k2   k3   k   3kk1k2k3
+Therefore, by applying the inverse Fourier transform, we have
+                                    h e−s∂3x∂−1x  v(tn) 3i s=tn+1 + Sn[v(tn)],        (4.13)              Bn[v(tn)] = −1   x∂−1x                            54es∂3                          s=tn
+with
+                                   1                       Z τ
+         Sn[v(tn)] = −F−1k  X    18ike−itnϕˆvk1(tn) ˆvk2(tn) ˆvk3(tn)  0  e−isϕds.                           k1+k2+k3=k
+
+=== PDF PAGE 22 ===
+22
+
+In view of the expressions of ϕ1 and ϕ2 in (4.1)–(4.2), if k1 +k2 = 0 then ϕ = 0. Therefore, we
+can decompose the expression of Sn[v(tn)] into the following two parts (according to whether
+k1 + k2 is zero or not):
+                                    τ
+        Sn[v(tn)] = −F−1k X        ˆvk1(tn) ˆvk2(tn) ˆvk(tn)                                18ik
+                          k1+k2=0
+                                     1                       Z τ
+              −F−1                            k          X    18ike−itnϕˆvk1(tn) ˆvk2(tn) ˆvk3(tn)  0  e−isϕds.                            k1+k2+k3=k
+                                  k1+k2̸=0
+
+Now we use the following formula:
+   Z τ
+       e−isϕ ds = τMτ(e−isϕ1e−isϕ2) = τMτ e−isϕ1 Mτ e−isϕ2 + τη(τ, k, k1, k2, k3),   (4.14)
+     0
+
+                                                  f(t)dt defined in Section 3.2, withwhere we have used the notation Mτ(f) = τ −1 R 0τ
+               η(τ, k, k1, k2, k3) := Mτ(e−isϕ1e−isϕ2) −Mτ e−isϕ1 Mτ e−isϕ2  .         (4.15)
+
+Substituting (4.14) into the expression of Sn[v(tn)], we obtain
+Sn[v(tn)] = −1   x  v(tn) P0 v(tn)2           18τ∂−1
+                                τ
+        −F−1                  k       X   18ikMτ e−isϕ1 Mτ e−isϕ2 e−itnϕ1e−itnϕ2ˆvk1(tn) ˆvk2(tn) ˆvk3(tn)
+                  k1+k2+k3=k
+                       k1+k2̸=0
+       + Rn2[v(tn)],                                                                (4.16)
+
+where the remainder Rn2[v(tn)] is given by
+                                   τ
+  Rn2[v(tn)] = −F−1k  X    18ike−itnϕη(τ, k, k1, k2, k3)ˆvk1(tn)ˆvk2(tn)ˆvk3(tn)ds,    (4.17)
+                     k1+k2+k3=k
+                          k1+k2̸=0
+
+which will be dropped in the numerical scheme. The other terms on the right-hand side of
+(4.16) will be kept in the numerical scheme.
+  By applying Fourier transform to (4.6) we can obtain F0 ∂−1x F n[tn+1; v(tn)] = 0 and the
+following expression for  ˜k̸ = 0:
+
+                          1          e−iτ(˜k3−k31−k32) −1
+     F˜k ∂−1x F n[tn+1; v(tn)] = X                        e−itn(˜k3−k31−k32)ˆvk1(tn)ˆvk2(tn)                          6               ik1ik2i˜k                                   k1+k2=˜k
+                          1         e−iτ3k1k2(k1+k2) −1
+                = X                         e−itn3k1k2(k1+k2)ˆvk1(tn)ˆvk2(tn)
+                          2         −i3k1k2(k1 + k2)
+                                   k1+k2=˜k
+                          1         e−iτϕ1 −1
+                = X               e−itnϕ1ˆvk1(tn)ˆvk2(tn)
+                          2         −iϕ1
+                                   k1+k2=˜k
+                              τ
+                = X  Mτ e−isϕ1 e−itnϕ1ˆvk1(tn)ˆvk2(tn),               (4.18)
+                          2
+                                   k1+k2=˜k
+
+=== PDF PAGE 23 ===
+                                                                                                      23
+
+where we have used the notation ϕ1 = 3k1k2(k1 + k2) and the following relation in the last
+equality:
+                                   −1 Z τ             e−iτϕ1 −1                Mτ e−isϕ1 = τ       e−isϕ1ds =                 .
+                                                 0            −iτϕ1
+Then, substituting (4.18) into the right-hand side of (4.16) and using the notation ϕ2 =
+k3 −k33 −(k1 + k2)3 = 3kk3(k1 + k2), we obtain
+Sn[v(tn)] = −1   x  v(tn) P0 v(tn)2           18τ∂−1
+                 1         τ                                          e−iτϕ2 −1
+        −F−1       X  X  Mτ e−isϕ1 e−itnϕ1ˆvk1(tn)ˆvk2(tn)            e−itnϕ2ˆvk3(tn)                 k                  9ik       2                                   −iτϕ2
+                         ˜k+k3=k   k1+k2=˜k
+                                      ˜k̸=0
+       + Rn2[v(tn)]
+     = −1   x  v(tn) P0 v(tn)2           18τ∂−1
+                 1                                               e−iτ(k3−˜k3−k33) −1
+        −F−1                             F n[tn+1; v(tn)] e−itnk3                      eitnk33ˆvk3(tn)                 k       X   eitn˜k3F˜k ∂−1x                  9ik                                            −iτ3k˜kk3                         ˜k+k3=k
+       + Rn2[v(tn)]
+     = −1   x  v(tn) P0 v(tn)2           18τ∂−1
+              1                                                    s=tn+1                        h                                   i       −     es∂3x∂−2x   e−s∂3x∂−2x F n[tn+1; v(tn)] e−s∂3x∂−1x  v(tn)     + Rn2[v(tn)].             27τ                                                   s=tn
+                                                                                         (4.19)
+
+  Combining the expressions of An[v(tn)], Bn[v(tn)] and Sn[v(tn)] in (4.12), (4.13) and (4.19),
+respectively, we obtain
+
+                             An[v(tn)] = Hn[v(tn)] + Rn2[v(tn)],                        (4.20)
+
+with
+                   1
+        Hn[v(tn)] =                      3etn+1∂3xP  e−tn+1∂3x∂−1x  v(tn) e−tn+1∂3x∂−1x F n tn+1; v(tn)
+                     1
+                            x  v(tn) P0 v(tn)2            + 9τ∂−1
+          −1   x∂−1x                                h e−s∂3x∂−1x  v(tn) 3i s=tn+1                       54es∂3                          s=tn
+                      1                                 h          n                         i s=tn+1            −     es∂3x∂−2x   e−s∂3x∂−2x F  tn+1; v(tn) e−s∂3x∂−1x  v(tn)            .                      27τ                                                    s=tn
+
+Then, substituting (4.20) into (4.9), we obtain
+
+             v(tn+1) = v(tn) + F n[tn+1; v(tn)] + Hn[v(tn)] + Rn1[v] + Rn2[v(tn)].        (4.21)
+By dropping the remainders Rn1[v] and Rn2[v(tn)] in (4.21), we obtain the following time-
+stepping method:
+
+                         vn+1 = vn + F n[tn+1; vn] + Hn[vn],                       (4.22)
+
+=== PDF PAGE 24 ===
+24
+
+where vn denotes the numerical approximation to v(tn). After substituting vn = etn∂3xun into
+(4.22), we obtain
+
+           un+1 = e−τ∂3xun + e−tn+1∂3xF n tn+1; etn∂3xun + e−tn+1∂3xHn[etn∂3xun],       (4.23)
+
+which is equivalent to the numerical scheme in (1.4), where
+
+         F[un] = e−tn+1∂3xF n tn+1; etn∂3xun   and  H[un] = e−tn+1∂3xHn[etn∂3xun].
+
+  The rest of this article is devoted to the proof of Theorem 1.1 on the convergence with order
+γ (up to a logarithmic factor) of the proposed method for Hγ initial data with γ ∈(0, 1].
+
+Remark 4.1. Dropping the remainder term rn(s) in (4.4) leads to the low-regularity inte-
+grator in [6], with the following estimate:
+           1 Z s      h     x                      x             i            2∥rn(s)∥L2 =         et∂3x∂x  e−t∂3 v(t) −v(tn)  · e−t∂3 v(t) + v(tn)  dt  ≲τ  sup   ∥v(t)∥3H2.
+           2    tn                                                     L2     t∈[tn,tn+1]
+
+This implies that the low-regular integrator in [6] requires u ∈C([0, T]; H2) to have first-
+order convergence in time. It is therefore conceivable that this low-regularity scheme cannot
+achieve γ order convergence when the initial value is in Hγ for γ ∈(0, 1]. Indeed, by using
+integration by parts, we know that the regularity of the time-integral terms like (4.7) can
+be significantly improved at the expense of an order τ factor. Therefore, in this paper, an
+iterative strategy is adopted in (4.9) with the aim of requiring less differentiability rather
+than higher convergence rates. In this way, the remainder Rn1[v] in (4.9) can be estimated
+with less regularity requirement than rn(s).  This approach was used in [31, Lemma 3.6],
+where it has been proved that ∥Rn1[v]∥Hγ ≤Cτ 2, with a constant C depending only on
+supt∈[tn,tn+1] ∥v∥Hγ+1 for γ > 12. However, this regularity requirement is still too strong for
+approximating solutions below H1.
+  In order to achieve optimal-order convergence in L2 (up to a logarithmic factor) for ap-
+proximating solutions below H1, a new averaging approximation of the exponential phase
+function in (4.14) is proposed to ensure that the remainder term Rn2[v] arising from the nu-
+merical approximation of An[v(tn)] in (4.9) has an optimal-order error estimate. Meanwhile,
+in order to establish the stability estimate under the very rough functional space, a new con-
+vergence analysis framework is proposed in this paper, which is based on the reduction of
+the proposed numerical scheme to the perturbed KdV equation. For this reason, we do not
+explicitly give an error estimate for the remainder term Rn1[v] in (4.9), but rather convert this
+part of discussion to an estimate of R∗1(t) in Subsection 7.1.
+
+
+                  5. Reduction to a perturbed KdV equation
+
+  By using the twisted function v(t) = et∂3xu(t), the KdV equation can be equivalently
+formulated into the following integral form:
+
+                           1 Z  t                     2
+                    v(t) = v0 +       es∂3x∂x  e−s∂3xv(s)  ds   for t ∈[0, T].               (5.1)
+                           2  0
+
+=== PDF PAGE 25 ===
+                                                                                                      25
+
+In order to establish stability estimates for the numerical scheme under low-regularity condi-
+                                               1
+tions below H1 (especially below H 2 ), we shall rewrite the numerical scheme in (4.22) as a
+perturbation of the integral equation in (5.1).
+  By using the relation Hn[vn] = An[vn] −Rn2[vn], as shown in (4.20), we first rewrite the
+numerical scheme in (4.22) as
+                     vn+1 = vn + F n[tn+1; vn] + An[vn] −Rn2[vn].                     (5.2)
+In view of the definitions of F n[tn+1; vn] and An[vn] in (4.5) and (4.10), respectively, the
+following relation holds:
+            n                   1 Z tn+1                    2        F  tn+1; vn + An[vn] =          es∂3x∂x  e−s∂3xvn   ds
+                                2  tn
+                              Z tn+1
+                    +        es∂3x∂x  e−s∂3xvn · e−s∂3xF n[s; vn]  ds
+                                                  tn
+                                1 Z tn+1                                    2
+                   =          es∂3x∂x  e−s∂3x vn + F n[s; vn]    ds
+                                2  tn
+                    −1 Z tn+1 es∂3x∂x  e−s∂3xF n[s; vn]  2 ds.
+                                  2  tn
+
+Substituting this expression into (5.2), we obtain
+                          1 Z tn+1                                    2
+                                                         x               vn+1 = vn +          es∂3x∂x  e−s∂3 vn + F n[s; vn]    ds
+                          2  tn
+               −1 Z tn+1 es∂3x∂x  e−s∂3xF n[s; vn]  2 ds −Rn2[vn].             (5.3)
+                          2  tn
+  We define a continuous function V (t), t ∈[0, T], which has the following expression for
+t ∈[tn, tn+1]:
+                      1 Z  t                                    2
+                                                 x                                        vn + F n[s; vn]    ds         V (t) = vn +       es∂3x∂x  e−s∂3
+                      2  tn
+              −t −tn  1 Z tn+1 es∂3x∂x  e−s∂3xF n[s; vn]  2 ds + Rn2[vn]  .        (5.4)
+                            τ    2  tn
+In particular, V (tn) = vn for n = 0, 1, · · · , N. For t ∈[tn, tn+1] we further rewrite (5.4) as
+            1 Z  t                       2
+ V (t) = vn +       es∂3x∂x  e−s∂3xV (s)   ds
+            2  tn
+
+                                    x V (s) −vn −F n[s; vn]  · e−s∂3                                                                       x V (s) + vn + F n[s; vn]   ds      −1 Z  t es∂3x∂x  e−s∂3
+            2  tn
+       −t −tn  1 Z tn+1 es∂3x∂x  e−s∂3xF n[s; vn]  2 ds + Rn2[vn]  ,                    (5.5)
+                τ    2  tn
+and then iterate this expression for n = 0, 1, . . . . This yields the following integral equation
+in the continuous form:
+                      1 Z  t                      2
+        V (t) = v0 +       es∂3x∂x  e−s∂3xV (s)   ds + R(t)   for t ∈(tn, tn+1],        (5.6)
+                      2  0
+
+=== PDF PAGE 26 ===
+26
+
+with a remainder
+         Z  t                               x V (s) −vn −F n[s; vn]  · e−s∂3                                                                  x V (s) + vn + F n[s; vn]   dsR(t) = −1     es∂3x∂x  e−s∂3
+         2  tn
+    −t −tn  1 Z tn+1 es∂3x∂x  e−s∂3xF n[s; vn]  2 ds + Rn2[vn]
+            τ    2  tn
+           n−1   tj+1
+                                       x V (s) −vj −F j s; vj    · e−s∂3                                                                         x V (s) + vj + F j[s; vj]   ds    −1 X Z     es∂3x∂x  e−s∂3
+         2            j=0   tj
+         n−1 "             1 Z tj+1                          2         #
+    − X           es∂3x∂x  e−s∂3xF j[s; vj]   ds + Rj2[vj]
+             2   tj          j=0
+    =: R∗1(t) + R∗2(t) + R∗3(t) + R∗4(t)   for t ∈(tn, tn+1].                               (5.7)
+
+The integral equation in (5.6) can be viewed as a perturbation of (5.1) by the remainder
+R(t). This continuous integral formulation of the numerical scheme allows us to apply low-
+frequency and high-frequency decomposition in estimating the stability with respect to the
+perturbation, which can significantly weaken the regularity conditions compared with the
+energy approach of stability estimates used in the literature for the numerical analysis of the
+KdV equation.
+  In order to analyze the error of the numerical approximations, we consider the following
+continuous and discrete error functions:
+
+                   e(t) := v(t) −V (t) for t ∈[0, T],  and  en := v(tn) −vn,
+which satisfy that e(tn) = en. Then, by comparing (5.1) and (5.6), we obtain the following
+error equation:
+            Z  t    e(t) = e0 +    es∂3x∂x  e−s∂3xe(s) e−s∂3x v(s) −1       ds −R(t)   for t ∈[0, T].    (5.8)                   0                               2e(s)
+To simplify the notation, we rewrite (5.8) as
+
+                                     e(t) = e0 + F(t) −R(t),                               (5.9)
+
+with
+                      Z  t                 F(t) :=    es∂3x∂x e−s∂3xe(s) e−s∂3x  v(s) −1       ds.              (5.10)                                0                              2e(s)
+  In the next two sections, we present estimates for the local error Rn2[vn] and the global
+remainder R(t).
+
+
+                     6. Estimates for the local error Rn2[vn]
+
+  As an extended notation of the local error Rn2[vn] defined in (4.17), we introduce the
+following trilinear form:
+                                         τ
+     Rn2[v1, v2, v3] = −F−1k  X    18ike−itnϕη(τ, k, k1, k2, k3)ˆv1,k1 ˆv2,k2 ˆv3,k3,       (6.1)
+                           k1+k2+k3=k
+                                 k1+k2̸=0
+
+=== PDF PAGE 27 ===
+                                                                                                      27
+
+where the symbol η(τ, k, k1, k2, k3) is defined in (4.15). Thus Rn2[vn] = Rn2[vn, vn, vn]. The
+main result of this section is the following proposition, where the estimate in (2) is not sharp
+(in fact only one of the three functions v1, v2 and v3 need to be in Hγ) but is sufficient for
+the purpose of this article.
+
+Proposition 6.1. For the function Rn2[v1, v2, v3] defined in (6.1), the following estimates
+hold:
+   (1) If v1, v2, v3 ∈Hγ with γ ∈[0, 1], then
+              Rn2[v1, v2, v3] L2 ≲τ 1+γ ln(1/τ)∥v1∥Hγ∥v2∥Hγ∥v3∥Hγ.
+   (2) If v1 ∈L2, v2 ∈Hγ, v3 ∈Hγ for some γ > 0, then
+                  Rn2[v1, v2, v3] L2 ≲τ∥v1∥L2∥v2∥Hγ∥v3∥Hγ.
+
+       Moreover, the same result holds when v1, v2, v3 are permuted on the right-hand side.
+
+Proof. For the simplicity of notation, we simply write Rn2 = Rn2[v1, v2, v3] throughout the
+proof of Proposition 6.1. According to the definition in (6.1), the Fourier coefficients of Rn2
+have the following expressions: F0[Rn2] = 0 and
+                                 τ
+       Fk[Rn2] = − X    18ike−itnϕη(τ, k, k1, k2, k3)ˆv1,k1 ˆv2,k2 ˆv3,k3   for  k̸ = 0.
+                   k1+k2+k3=k
+                        k1+k2̸=0
+
+Similarly as the proof of Proposition 3.4, we may assume that ˆvj,k ≥0 for j = {1, 2, 3} and
+k ∈Z. Otherwise we can replace ˆvj,k by |ˆvj,k| in the following argument and consider the
+functions ˜vj := F−1k   [ |ˆvj,k| ], as in the proof of Lemma 3.1.
+  The proof of Proposition 6.1 relies on the following technical estimate for η(k, k1, k2, k3).
+
+Lemma 6.2. Let (k, k1, k2, k3) ∈Z4 with k1 + k2 + k3 = k, and denote by k∗1, k∗2, k∗3 a
+permutation of k1, k2, k3 satisfying
+
+                                        |k∗1| ≥|k∗2| ≥|k∗3|.
+
+Then the following estimate holds for ˜γ ∈[0, 1]:
+
+                                                                                                  2   if kk1k2k3̸ = 0,              (τ ˜γ|k|−12 |k∗1|˜γ|k∗2|˜γ|k∗3|˜γ−1                                                                   2 + τ ˜γ|k∗1|˜γ|k∗2|˜γ−1                                                                                         2 |k∗3|˜γ−1
+⟨k⟩−1 η(τ, k, k1, k2, k3) ≲
+                        0                                                                       if kk1k2k3 = 0.
+
+Proof. In the case kk1k2k3 = 0 either ϕ1 = 0 or ϕ2 = 0, which together with Lemma 3.2
+imply that η(τ, k, k1, k2, k3) = 0. Therefore, we focus on the case kk1k2k3̸ = 0 in the proof.
+  According to Lemma 3.2, for any γj ∈[0, ˜γ] such that γ1 + γ2 = ˜γ, the following result
+holds:
+                                                         |ϕ2|1−˜γ
+           η(τ, k, k1, k2, k3) ≲  τ|ϕ1|)γ1 τ|ϕ2|)γ2     = τ ˜γ|ϕ1|γ1+˜γ−1|ϕ2|γ2+1−˜γ.
+                                                         |ϕ1|1−˜γ
+
+In particular, setting γ1 = 0 and γ2 = ˜γ yields
+
+                               η(τ, k, k1, k2, k3) ≲τ ˜γ|ϕ1|˜γ−1|ϕ2|.
+
+=== PDF PAGE 28 ===
+28
+
+Since the estimate in Lemma 3.2 is symmetric about α = ϕ1 and β = ϕ2, it follows that we
+can switch ϕ1 and ϕ2 in the inequality above, i.e.,
+                               η(τ, k, k1, k2, k3) ≲τ ˜γ|ϕ1||ϕ2|˜γ−1.
+
+By considering the geometric average of the two inequalities above, we obtain
+
+         η(τ, k, k1, k2, k3) ≲τ ˜γ|ϕ1|a|ϕ2|b   for all a, b ∈[˜γ −1, 1] such that a + b = ˜γ.
+
+By the definitions of ϕ1 and ϕ2 in (4.1)–(4.2), this implies that
+                  |k|−1 η(τ, k, k1, k2, k3) ≲τ ˜γ|k|−1+b|k1|a|k2|a|k3|b|k1 + k2|˜γ.             (6.2)
+
+Since the right-hand side of (6.2) is symmetric about k1 and k2, without loss of generality,
+we may assume that |k1| ≥|k2| (the case |k2| ≥|k1| can be considered similarly by switching
+k1 and k2 in the estimates below).
+  We consider the following several cases regarding whether |k3| is larger or smaller than |k1|.
+     (i) |k3| ≫|k1|: In this case, since we have already assumed that |k1| ≥|k2|, there must
+      be |k| ∼|k3| ≳|k1| ≥|k2|. This is classified as Case 1 below.
+    (ii) |k3| ∼|k1|: In this case, |k| = |k1 + k2 + k3| ≲|k1|. There are two subcases:
+      Case 1: |k| ∼|k3| ≳|k1| ≥|k2|.
+      Case 2: |k3| ∼|k1| ≫|k|.
+    (iii) |k3| ≪|k1|: In this case, |k| = |k1 + k2 + k3| ≲|k1|, and there are two subcases:
+      Case 3: |k| ∼|k1| ≫|k3|.
+      Case 4: |k1| ≫|k|, |k3|. In this case, |k2| = |k1 + k3 −k| ∼|k1|.
+In the following, we estimate |k|−1 η(τ, k, k1, k2, k3) for the four different cases respectively.
+  Case 1: |k| ∼|k3| ≳|k1| ≥|k2|. In this case, |k∗1| ∼|k| ∼|k3| and |k∗2| ∼|k1|, |k∗3| ∼|k2|.
+By choosing a = 1 and b = ˜γ −1 in (6.2) and using the relation |k1 + k2| ≲|k1|, we obtain
+         |k|−1 η(τ, k, k1, k2, k3) ≲τ ˜γ|k|−2+˜γ|k1|1+˜γ|k2||k3|˜γ−1
+
+                                                                                                         2 −˜γ                  = τ ˜γ|k|−12 |k3|˜γ|k1|˜γ|k2|˜γ−1                                                                          2 · |k|−32 +˜γ|k3|−1|k1||k2| 3
+
+
+                                                                          2                    ≲τ ˜γ|k|−12 |k3|˜γ|k1|˜γ|k2|˜γ−1
+
+                                                                          2 .                    ∼τ ˜γ|k|−12 |k∗1|˜γ|k∗2|˜γ|k∗3|˜γ−1
+  Case 2: |k3| ∼|k1| ≫|k|. In this case, |k∗1| ∼|k∗2| ∼|k1| ∼|k3| and |k∗3| ∼|k2|. By choosing
+a = ˜γ −1         and b =                      1 in (6.2) and using the relation |k1 + k2| ≲|k1|, we obtain          2                      2
+
+
+                                                      2                                                                                                          2 .                                                    |k1|2˜γ|k2|˜γ−1          |k|−1 η(τ, k, k1, k2, k3) ≲τ ˜γ|k|−1                                                                       2 ∼τ ˜γ|k|−12 |k∗1|˜γ|k∗2|˜γ|k∗3|˜γ−1
+  Case 3: |k| ∼|k1| ≫|k3|. In this case, |k∗1| ∼|k| ∼|k1| and k∗2 = k2 or k3. We may assume
+that k∗2 = k2 and k∗3 = k3 as the other case can be treated in the same way. By choosing
+a = ˜γ −12, b = 12 in (6.2) and using the relation |k1 + k2| ≲|k1|, we obtain
+
+
+                                                       2                                                                2           |k|−1 η(τ, k, k1, k2, k3) ≲τ ˜γ|k|−1                        1                                                  |k1|˜γ−1                                                           |k2|˜γ−1                                                                          2 |k3| 2 |k1|˜γ
+                     ≲τ ˜γ|k1|−1+2˜γ|k2|˜γ−1     1                                                                     2 |k3| 2
+
+
+                                                               2                                                                                                         2 .                     ≲τ ˜γ|k1|˜γ|k2|˜γ−1                                                          |k3|˜γ−1                                                                         2 ∼τ ˜γ|k∗1|˜γ|k∗2|˜γ−1                                                                                               2 |k∗3|˜γ−1
+
+=== PDF PAGE 29 ===
+                                                                                                      29
+
+  Case 4: |k1| ∼|k2| ≫|k|, |k3|. In this case, |k∗1| ∼|k∗2| ∼|k1| ∼|k2| and |k∗3| ∼|k3|. By
+choosing a = ˜γ −1 and b = 1 in (6.2), we obtain
+
+                                                                                                            3
+                                                                                2                                                                                                            2 −˜γ                                                                         |k3|˜γ−1                                                                                          2 · |k1|˜γ−3                                                                                                     2 |k3|       |k|−1 η(τ, k, k1, k2, k3) ≲τ ˜γ|k1|3˜γ−2|k3| ≲τ ˜γ|k1|˜γ|k2|˜γ−1
+
+
+                                                           2                                                                                                    2 .                   ≲τ ˜γ|k1|˜γ|k2|˜γ−1                                                      |k3|˜γ−1                                                                    2 ∼τ ˜γ|k∗1|˜γ|k∗2|˜γ−1                                                                                           2 |k∗3|˜γ−1
+   Finally, by collecting the estimates in the four cases above, we obtain the desired result. □
+
+  We continue with the proof of Proposition 6.1. Without loss of generality, we may assume
+that |k1| ≥|k2| ≥|k3| in applying Lemma 6.2, which implies the following result for ˜γ ∈[0, 1]:
+
+
+                                                                                       2       τ 1+˜γ X    |k|−12 |k1|˜γ|k2|˜γ|k3|˜γ−1                                                                    2 + |k1|˜γ|k2|˜γ−1                                                                               |k3|˜γ−1                                                                                                2  ˆv1,k1ˆv2,k2ˆv3,k3
+                         k1+k2+k3=k
+   Fk[Rn2] ≲                                                                                  if kk1k2k3̸ = 0,
+                            0                                                                               if kk1k2k3 = 0.
+                                                                                             (6.3)
+In view of (6.3), we only need to consider the case kk1k2k3̸ = 0 when estimating |Fk[Rn2]|.
+
+Proof of (1): In the case γ ∈(0, 1], we choose ˜γ = γ −θ in (6.3) with θ ∈[0, γ2], i.e.,
+
+
+                                                      2                                                                                 2                                            |k1|γ−θ|k2|γ−θ|k3|γ−1                                                                                   −θˆv1,k1ˆv2,k2ˆv3,k3       Fk[Rn2] ≲τ 1+γτ −θ X    |k|−1
+                         k1+k2+k3=k
+
+
+                                                                     2                                                                                  2                                                     −θ|k3|γ−1           + τ 1+γτ −θ X    |k1|γ−θ|k2|γ−1                                                                                   −θˆv1,k1ˆv2,k2ˆv3,k3
+                            k1+k2+k3=k
+           ≲τ 1+γτ −θ X    |k|−12 −θ|k3|−1                                                                 2 −θ |k1|γˆv1,k1|k2|γˆv2,k2|k3|γˆv3,k3
+                         k1+k2+k3=k
+
+
+                                                           2                                             −θ|k3|−1           + τ 1+γτ −θ X    |k2|−1                                                                      2 −θ |k1|γˆv1,k1|k2|γˆv2,k2|k3|γˆv3,k3.
+                            k1+k2+k3=k
+Then, by applying Lemma 3.1 with A = τ −1 and θ0 = γ2, we obtain
+              Rn2[v1, v2, v3] L2 ≲τ 1+γ ln(1/τ)∥v1∥Hγ∥v2∥Hγ∥v3∥Hγ.               (6.4)
+  In the case γ = 0, we decompose Fk[Rn2] into two parts according to whether (k1, k2, k3) /∈
+Γ(k) or (k1, k2, k3) ∈Γ(k), where Γ(k) is defined in Section 3.3. Namely,
+                                              iτ
+          Fk[Rn2] =  X       18ke−itnϕη(τ, k, k1, k2, k3)ˆv1,k1 ˆv2,k2 ˆv3,k3       (6.5a)
+                        k1+k2+k3=k
+                              k1+k2̸=0
+                     k1+k3=0 or k2+k3=0
+                                             iτ
+              +  X     18ke−itnϕη(τ, k, k1, k2, k3)ˆv1,k1 ˆv2,k2 ˆv3,k3.      (6.5b)
+                                (k1,k2,k3)∈Γ(k)
+
+The summation in (6.5a) can be estimated as follows, where we focus on the case k2 + k3 = 0
+(the case k1 + k3 = 0 can be treated in the same way):  If k2 + k3 = 0 then k1 = k and
+therefore
+    |(6.5a)| ≲τ X  |k|−1|η(τ, k, k, k2, k3)|ˆv1,k ˆv2,k2 ˆv3,k3
+               k2+k3=0
+
+=== PDF PAGE 30 ===
+30
+
+         ≲τF0[v2v3] ˆv1,k                                    (since |η| ≲1 and |k|−1 ≲1)
+         ≲τ∥v2v3∥L1 ˆv1,k,
+
+which implies that
+
+                    F−1                               k  [(6.5a)] L2 ≲τ∥v1∥L2∥v2∥L2∥v3∥L2.                      (6.6)
+  According to Lemma 3.3 (2), Γ(k) can be decomposed into two parts, i.e., Γ(k) = Γ1(k) ∪
+Γ2(k), with
+                           |k| ∼|k1| ∼|k2| ∼|k3|  for (k1, k2, k3) ∈Γ1(k),
+                          |ϕ| ≥|km|2 = |k1|2      for (k1, k2, k3) ∈Γ2(k).
+In view of (6.5) we can decompose Rn2 into
+                      Rn2 = F−1k  [(6.5a)] + w1 + w2,                             (6.7)
+
+with
+                                           iτ
+            wj = F−1k  X     18ke−itnϕη(τ, k, k1, k2, k3)ˆv1,k1 ˆv2,k2 ˆv3,k3.
+                             (k1,k2,k3)∈Γj(k)
+By choosing ˜γ = 0 in Lemma 6.2, we have
+
+
+                                                     2                                                                        2                                          |k3|−1                                                             2 + |k2|−1                                                          |k3|−1           |Fk[w1]| ≲τ X     |k|−1                                                                                 2  ˆv1,k1ˆv2,k2ˆv3,k3
+                           (k1,k2,k3)∈Γ1(k)
+
+
+                                                 3                                                         3                                       |k2|−1                                              |k3|−1           ≲τ X   |k1|−1                                                                 3 ˆv1,k1ˆv2,k2ˆv3,k3    if kk1k2k3̸ = 0,
+                     k1+k2+k3=k
+where the last inequality uses the equivalence relation |k| ∼|k1| ∼|k2| ∼|k3| for (k1, k2, k3) ∈
+Γ1(k). By applying the Fourier inversion formula and using the Sobolev embedding L2(T) ,→
+W  −13 ,6(T), we have
+
+
+                                3                                                3                        v1∥L6∥|∂x|−1                                     v2∥L6∥|∂x|−1                                                                 3 v3∥L6 ≲τ∥v1∥L2∥v2∥L2∥v3∥L2.       (6.8)      ∥w1∥L2 ≲τ∥|∂x|−1
+
+  For (k1, k2, k3) ∈Γ2(k) ⊂Γ(k) we have |ϕ| = |3(k1 + k2)(k1 + k3)(k2 + k3)|̸ = 0 and
+|ϕ| ≥|km|2 = |k1|2. In this case, by choosing α = ϕ1, β = ϕ2 and α + β = ϕ in (3.9), we
+obtain
+                     τ|k|−1|η(τ, k, k1, k2, k3)| ≲τ|k|−1τ −1|ϕ|−1 ≲|k1|−2.
+
+By choosing ˜γ = 0 in Lemma 6.2 we also have
+
+
+                                                                  2                                                                                      2                                                                                              2 ).                  τ|k|−1|η(τ, k, k1, k2, k3)| ≲τ(|k|−1                                                     |k3|−1                                                                          2 + |k2|−1                                                                     |k3|−1
+
+The geometric average of the two inequalities above yields that
+                                                                                                    2 + θ2 )     τ|k|−1|η(τ, k, k1, k2, k3)| ≲ττ −θ|k1|−2θ(|k|−1                                                              2 + θ2 |k3|−1                                                                          2 + θ2 + |k2|−1                                                                                         2 + θ2 |k3|−1
+                                                                                            2 −θ2 )  ∀θ ∈[0, 1].                  ≲ττ −θ(|k|−12 −θ2 |k3|−1                                                                 2 −θ2 + |k2|−1                                                                                2 −θ2 |k3|−1
+Then we can apply Lemma 3.1 with A = τ −2 and θ0 = 12, which implies that
+                       ∥w2∥L2 ≲τ ln(1/τ)∥v1∥L2∥v2∥L2∥v3∥L2.                       (6.9)
+
+Finally, substituting estimates (6.6), (6.8) and (6.9) into (6.7), we obtain
+                    ∥Rn2∥L2 ≲τ ln(1/τ)∥v1∥L2∥v2∥L2∥v3∥L2.
+
+=== PDF PAGE 31 ===
+                                                                                                      31
+
+This, together with (6.4) for the case γ ∈(0, 1], gives the desired estimate in (1).
+
+
+Proof of (2): We may assume that |k1| ≥|k2| ≥|k3|, since the other cases can be reduced to
+this case). By choosing ˜γ = 0 in (6.3), we have
+
+
+
+                                                       2                                                                           2                                             |k3|−1                                                               2 + |k2|−1                                                            |k3|−1                                                                                   2  ˆv1,k1ˆv2,k2ˆv3,k3            |Fk[Rn2]| ≲τ X     |k|−1
+                         k1+k2+k3=k
+                                              2 v1 v2 |∂x|−1                                                              2 v3 + v1 |∂x|−1                                                                                  2 v2 |∂x|−1                                                                                             2 v3  .            = τFk  |∂x|−1
+
+Therefore, by the Plancherel identity and the Sobolev inequality, we obtain that
+
+                                2 v1 v2 |∂x|−1                                                                            2 v2 |∂x|−1     ∥Rn2∥L2 ≲τ  |∂x|−1                                                2 v3  L2 + τ  v1 |∂x|−1                                                                                       2 v3 L2
+                                                                  2 v2 |∂x|−1           ≲τ  v1 v2 |∂x|−1                                       2 v3 L1+ + τ  v1 |∂x|−1                                                                              2 v3 L2
+           ≲τ  v1 L2 v2 L2+ |∂x|−1                                                   2 v3 L∞+ τ  v1 L2 |∂x|−1                                                                                    2 v2 L∞ |∂x|−1                                                                                                      2 v3 L∞
+           ≲τ  v1 L2 v2 Hγ  v3 Hγ.
+
+This proves the desired result in (2).                              □
+
+  By choosing v1 = v2 = v3 = vn in Proposition 6.1, we obtain the following estimate for the
+local error Rn2[vn].
+
+Corollary 6.3. Under the assumptions of Theorem 1.1, the following estimate holds:
+
+             ∥Rn2[vn]∥L2 ≲τ 1+γ ln(1/τ) + τ ∥en∥L2 + | ln(1/τ)|2∥en∥3L2  .
+
+Proof. The assumptions of Theorem 1.1 guarantees that ∥v(tn)∥Hγ ≲1. By substituting the
+expression vn = v(tn) −en into the trilinear form Rn2[vn], we obtain
+
+ Rn2[vn] = Rn2[v(tn)] + Rn2[en, v(tn), v(tn)] + Rn2[v(tn), en, v(tn)] + Rn2[v(tn), v(tn), en]
+           + Rn2[en, en, v(tn)] + Rn2[en, v(tn), en] + Rn2[v(tn), en, en] −Rn2[en, en, en].
+
+We apply Proposition 6.1 (1) to the first term and last four terms on the right-hand side.
+This yields
+
+         ∥Rn2[v(tn)]∥L2 ≲τ 1+γ ln(1/τ)∥v(tn)∥3Hγ,
+    ∥Rn2[en, en, v(tn)]∥L2 ≲τ ln(1/τ)∥en∥2L2∥v(tn)∥L2 ≲τ∥en∥L2 + τ| ln(1/τ)|2∥en∥3L2,
+    ∥Rn2[en, v(tn), en]∥L2 ≲τ ln(1/τ)∥en∥2L2∥v(tn)∥L2 ≲τ∥en∥L2 + τ| ln(1/τ)|2∥en∥3L2,
+    ∥Rn2[v(tn), en, en]∥L2 ≲τ ln(1/τ)∥en∥2L2∥v(tn)∥L2 ≲τ∥en∥L2 + τ| ln(1/τ)|2∥en∥3L2,
+       ∥Rn2[en, en, en]∥L2 ≲τ ln(1/τ)∥en∥3L2.
+
+Furthermore, we apply Proposition 6.1 (2) to the rest terms in the above expression of Rn2[vn].
+Then we obtain the desired result in Corollary 6.3.                      □
+
+=== PDF PAGE 32 ===
+32
+
+                  7. Estimates for the global remainder R(t)
+
+  The main result of this section is the following proposition, where R(t) is defined in (5.7).
+
+Proposition 7.1. Under the assumptions of Theorem 1.1, the following estimate holds:
+
+   ∥R(t)∥L2 ≲tn+1τ γ ln(1/τ) + tn+1 max  ∥ej∥L2 + | ln(1/τ)|7∥ej∥8L2    for t ∈(tn, tn+1].                                 0≤j≤n
+
+Proof. For t ∈(tn, tn+1], we consider the expression of R(t) in (5.7) and estimate R∗1(t),
+R∗2(t), R∗3(t) and R∗4(t) separately in the following subsections.
+
+7.1. Estimation of R∗1(t)
+  In view of the definition in (5.7), we can decompose R∗1(t) into the following two parts:
+              Z  t
+                                                                         x                                      x V (s) −vn −F n[s; vn]  · e−s∂3                                                          vn + F n[s; vn]   ds     R∗1(t) = −    es∂3x∂x  e−s∂3
+                        tn
+
+                                        x V (s) −vn −F n[s; vn]    ds.        −1 Z  t es∂3x∂x  e−s∂3                            2
+                2  tn
+Then we can apply the integration-by-parts formula in Lemma 2.2 with V(tn) = vn and
+F n[tn; vn] = 0. This yields the following expression of R∗1(t):
+ R∗1(t) = −1             3et∂3xP  e−t∂3x∂−1x  V (t) −vn −F n[t; vn]  · e−t∂3x∂−1x  vn + F n[t; vn]
+           1 Z  t
+      +       es∂3xP  e−s∂3x∂−1x ∂s V (s) −vn −F n[s; vn]  · e−s∂3x∂−1x  vn + F n[s; vn]   ds
+           3  tn
+           1 Z  t
+      +       es∂3xP  e−s∂3x∂−1x  V (s) −vn −F n[s; vn]  · e−s∂3x∂−1x ∂sF n[s; vn]  ds
+           3  tn
+
+                                  x V (s) −vn −F n[s; vn]    ds      −1 Z  t es∂3x∂x  e−s∂3                            2
+           2  tn
+      =: R∗11(t) + R∗12(t) + R∗13(t) + R∗14(t).                                            (7.1)
+
+  As an extended notation of the function F n[s; v] defined in (4.6), we consider the following
+bilinear form (for time-independent functions v1, v2 such that P0v1 = P0v2 = 0):
+                        1 Z s
+        F n[s; v1, v2] :=       et∂3x∂x e−t∂3xv1 e−t∂3xv2 dt                                (7.2)
+                        2  tn
+                        1                               t=s
+              =      x                                                                      for s ∈[tn, tn+1],       (7.3)                                        x  v1 e−t∂3x∂−1x  v2                            6et∂3  e−t∂3x∂−1                                                                t=tn
+
+where the last equality is obtained by using the integration-by-parts formula in Lemma 2.2.
+This extended notation satisfies that F n[s; v, v] = F n[s; v]. The following bilinear estimate
+for F n[s; v1, v2] will be used.
+
+Lemma 7.2. For v1, v2 ∈Hγ with γ ∈(0, 1], and s ∈[tn, tn+1], the following result holds:
+
+                                    1+γ−β
+                                       1+γ−β0(γ) ∥v1∥Hγ∥v2∥Hγ   for β ∈[β0(γ), 1 + γ],         F n s; v1, v2  Hβ ≲τ
+
+=== PDF PAGE 33 ===
+                                                                                                      33
+
+where
+                                      1                                 2γ −3  when γ ∈  0,                                         2              2                                                                                         1                          β0(γ) =  −1    when γ =                          2−            2
+                                                                                        1                                                                            i                                                                        1                                                                                                    .                  γ −1   when γ ∈                                                                            2,
+Proof. On one hand, we consider the Hβ0(γ) norm of the expression in (7.2) and prove the
+following result:
+                   F n t; v1, v2   Hβ0(γ) ≲τ∥v1∥Hγ∥v2∥Hγ.                       (7.4)
+Indeed, the expression in (7.2) gives us the following inequality:
+                                 Z s
+               ∥F n[s; v1, v2]∥Hβ0(γ) ≲      e−t∂3xv1 e−t∂3xv2 Hβ0(γ)+1dt.
+                                                      tn
+If γ ∈(0, 4]1  then 2γ −12 ≤0. In this case, we apply the Sobolev embedding Hγ ,→Lp and
+  p
+  2 ,→H−12 +2γ with p = 2/(1 −2γ), i.e.,L
+                                 Z s
+                                                                                p                                                               dt
+                                                                                     2               ∥F n[s; v1, v2]∥Hβ0(γ) ≲      e−t∂3xv1 e−t∂3xv2 L
+                                                      tn
+                                 Z s
+                      ≲      e−t∂3xv1 Lp  e−t∂3xv2 Lpdt
+                                                      tn
+                                 Z s
+                      ≲      e−t∂3xv1 Hγ  e−t∂3xv2 Hγdt
+                                                      tn
+                                 ≲τ∥v1∥Hγ∥v2∥Hγ.
+If γ ∈(14, 12) then 0 < −12 + 2γ ≤γ. In this case, we apply the Kato–Ponce inequality in
+Lemma 2.1 and the Sobolev embeddings Hγ ,→W −12 +2γ,p1, Hγ ,→Lp2 with 1 −γ = 1 −1                                                                                       2         2    p1
+and      1 +           1 = 12, i.e.,      p1            p2
+                             Z s
+                                                                e−t∂3xv2∥Lp2dt                                               −12 +2γ,p1           ∥F n[s; v1, v2]∥Hβ0(γ) ≲      e−t∂3xv1 W
+                                                tn
+                               Z s
+                                                             −12 +2γ,p1dt                     +      e−t∂3xv1 Lp2  e−t∂3xv2∥W
+                                                   tn
+                             Z s
+                   ≲      e−t∂3xv1 Hγ  e−t∂3xv2∥Hγdt
+                                                tn
+                             ≲τ∥v1∥Hγ∥v2∥Hγ.
+If γ = 2,1  then β0(γ) + 1 = 12−and therefore, by the Kato–Ponce inequality in Lemma 2.1
+                                        1
+and the Sobolev embedding H 2 ,→Lp for all p ∈[1, ∞), we have
+                                 Z s
+                                                                                     1                                                                                     2 −dt               ∥F n[s; v1, v2]∥Hβ0(γ) ≲      e−t∂3xv1 e−t∂3xv2 H
+                                                      tn
+                                 Z s
+                      ≲      e−t∂3xv1    1  e−t∂3xv2    1 dt
+                                      H 2       H 2
+                                                      tn
+                              ≲τ∥v1∥H 12 ∥v2∥H 12 .
+
+=== PDF PAGE 34 ===
+34
+
+If γ ∈(12, 1], then β0(γ) + 1 = γ and therefore, by the Kato–Ponce inequality in Lemma 2.1
+and the Sobolev embedding Hγ ,→L∞, we have
+                                 Z s
+               ∥F n[s; v1, v2]∥Hβ0(γ) ≲      e−t∂3xv1 e−t∂3xv2 Hγdt
+                                                      tn
+                                 Z s
+                      ≲      e−t∂3xv1 Hγ  e−t∂3xv2 Hγdt
+                                                      tn
+                                 ≲τ∥v1∥Hγ∥v2∥Hγ.
+
+  On the other hand, we consider the H1+γ norm of the expression in (7.3), which gives us
+the following inequality:
+
+                     ∥F n[s; v1, v2]∥H1+γ ≲∥v1∥Hγ∥v2∥Hγ.
+  By considering the complex interpolation between the estimates for ∥F n[s; v1, v2]∥Hβ0(γ)
+and ∥F n[s; v1, v2]∥H1+γ, we obtain the result of Lemma 7.2.                  □
+
+  By using the result of Lemma 7.2, we manage to obtain the following several useful estimates
+for V (t) −vn −F n[t; vn].
+
+Lemma 7.3. Under the assumptions of Theorem 1.1, the following estimates hold for t ∈
+[tn, tn+1]:
+   (1)  ∂−1x  V (t) −vn −F n[t; vn]  L2 ≲τ 1+γ ln(1/τ) + τ ∥en∥L2 + | ln(1/τ)|3∥en∥4L2  .
+   (2)  ∂−1x  ∂t V (t) −vn −F n[t; vn]  L2 ≲τ γ ln(1/τ) + ∥en∥L2 + | ln(1/τ)|3∥en∥4L2  .
+   (3)  V (t) −vn −F n[t; vn]                    ≲τ γ + ∥en∥L2 + ∥en∥4L2.                                L2
+
+Proof. By comparing the expressions of V (t) and F n[t; vn] in (5.4) and (4.5), respectively, we
+can derive the following expression:
+                     Z  t
+  V (t) −vn −F n[t; vn] =     es∂3x∂x  e−s∂3xvn · e−s∂3xF n[s; vn]   ds                    (7.5a)
+                                   tn
+                          1 Z  t                            2
+               +       es∂3x∂x  e−s∂3xF n[s; vn]    ds                       (7.5b)
+                          2  tn
+                −t −tn  1 Z tn+1 es∂3x∂x  e−s∂3xF n[s; vn]  2 ds + Rn2[vn]  .   (7.5c)
+                                τ    2  tn
+
+  Proof of (1): Although the three terms in (7.5a), (7.5b) and (7.5c) should be estimated
+separately, we focus on the estimation of (7.5a) as the other terms can be treated similarly.
+  By applying ∂−1x  to (7.5a) and substituting vn = v(tn) −en into the result, we obtain
+                         Z  t
+                ∂−1x  (7.5a) =    es∂3xP  e−s∂3xv(tn) · e−s∂3xF n[s; vn]   ds             (7.6a)
+                                         tn
+                           Z  t                  −    es∂3xP  e−s∂3xen · e−s∂3xF n[s; vn]  ds.              (7.6b)
+                                            tn
+
+The expression in (7.6a) can be estimated by applying inequality (2.2), i.e.,
+
+                     ∥(7.6a)∥L2 ≲τ∥v(tn)∥Hγ   sup  ∥F n[s; vn]∥Ha(γ),                 (7.7)
+                                                         s∈[tn,tn+1]
+
+=== PDF PAGE 35 ===
+                                                                                                      35
+
+where ∥F n[s; vn]∥Ha(γ) can be decomposed into the following two parts using the triangle
+inequality:
+        ∥F n[s; vn]∥Ha(γ) ≤∥F n[s; v(tn)]∥Ha(γ) + ∥F n[s; vn] −F n[s; v(tn)]∥Ha(γ).       (7.8)
+
+  The first term on the right-hand side of (7.8) can be estimated by choosing β = a(γ) in
+Lemma 7.2, which implies that
+
+                                               1+γ−a(γ)
+                                              1+γ−β0(γ)                                                ∥v(tn)∥2Hγ ≲τ γ∥v(tn)∥2Hγ,              (7.9)             ∥F n[s; v(tn)]∥Ha(γ) ≲τ
+
+                                                       1+γ−a(γ)
+where the last inequality follows from the fact that      ≥γ for γ ∈(0, 1] for the                                                       1+γ−β0(γ)
+expression of a(γ) in (2.3).
+  The second term on the right-hand side of (7.8) can be estimated as follows:
+        ∥F[s; vn] −F[s; v(tn)]∥Ha(γ) = ∥F[s; en, 2v(tn) −en]∥Ha(γ)
+                             ≲∥F[s; en, 2v(tn) −en]∥H1     (since a(γ) ≤1)
+                                ≲∥en∥L2(∥v(tn)∥L2 + ∥en∥L2),                    (7.10)
+
+where the last inequality can be obtained from expression (7.3) directly. Hence, by substitut-
+ing (7.9)–(7.10) into (7.8), we obtain that
+             ∥F n[s; vn]∥Ha(γ) ≲τ γ + ∥en∥L2 + ∥en∥2L2   for s ∈[tn, tn+1],           (7.11)
+where we have omitted the dependence on ∥v(tn)∥2Hγ.
+  Substituting (7.11) into (7.7) yields
+                         ∥(7.6a)∥L2 ≲τ 1+γ + τ ∥en∥L2 + ∥en∥2L2  .                    (7.12)
+
+  The expression in (7.6b) can be estimated by
+                       ∥(7.6b)∥L2 ≲τ∥en∥L2   sup  ∥F n[s; vn]∥H1.                  (7.13)
+                                                        s∈[tn,tn+1]
+
+From expression (4.6) we see that
+              ∥F n[s; vn]∥H1 ≲∥vn∥2L2 = ∥v(tn) −en∥2L2 ≲1 + ∥en∥2L2.             (7.14)
+
+Inserting (7.14) into (7.13), gives that
+                             ∥(7.6b)∥L2 ≲τ ∥en∥L2 + ∥en∥3L2  .                        (7.15)
+
+  Then, substituting (7.12) and (7.15) into (7.6), we obtain
+                    ∥∂−1x  (7.5a)∥L2 ≲τ 1+γ + τ ∥en∥L2 + ∥en∥3L2  .
+  The estimation of ∥∂−1x (7.5b)∥L2 and ∥∂−1x  (7.5c)∥L2 are easier than ∥∂−1x  (7.5a)∥L2. In fact,
+employing (7.11), we have that
+    ∥F n[s; vn]∥L2 ≤∥F n[s; vn]∥Ha(γ) ≲τ γ + ∥en∥L2 + ∥en∥2L2   for s ∈[tn, tn+1],      (7.16)
+Hence, by applying ∂−1x  to (7.5b) and considering the L2 norm of the result, and then by
+(7.16) and (7.14), we have
+                              Z  t
+                  ∥∂−1x (7.5b)∥L2 ≲   ∥F n[s; vn]∥L2∥F n[s; vn]∥H1ds
+                                                  tn
+                     ≲τ 1+γ + τ ∥en∥L2 + ∥en∥4L2  .
+
+=== PDF PAGE 36 ===
+36
+
+  Since ∂−1x  (7.5c) consists of Rn2[vn] and a term similar as ∂−1x  (7.5b), it follows that we can
+directly use the result in Corollary 6.3 and the above estimate for ∥∂−1x  (7.5b)∥L2. Then we
+obtain the following result:
+∥∂−1x  (7.5c)∥L2 ≲τ 1+γ ln(1/τ) + τ ∥en∥L2 + | ln(1/τ)|2∥en∥3L2 + τ 1+γ + τ ∥en∥L2 + ∥en∥4L2
+         ≲τ 1+γ ln(1/τ) + τ ∥en∥L2 + | ln(1/τ)|3∥en∥4L2  .
+where the last inequality is obtained by considering the two cases | ln(1/τ)|∥en∥L2 ≤1 and
+| ln(1/τ)|∥en∥L2 ≥1 separately. This proves the first result of Lemma 7.3.
+Proof of (2): By applying ∂−1x  ∂t to the expression in (7.5), we have
+  ∂−1x  ∂t V (t) −vn −F n[t; vn] = et∂3xP  e−t∂3xvn · e−t∂3xF n[t; vn]
+
+                                1                          2
+                                      xF n[t; vn]                             (7.17)                   +                                      2et∂3xP  e−t∂3
+                  −1  1 Z tn+1 es∂3xP  e−s∂3xF n[s; vn]  2 ds + ∂−1x Rn2[vn]  ,
+                                     τ  2  tn
+which can be treated in the same way as (7.6). This proves the second result of Lemma 7.3.
+
+Proof of (3): By using the integration-by-parts formula in Lemma 2.2 and the expression of
+F[s; vn] in (4.5), we find that
+                      (7.5a) = et∂3xP e−t∂3x∂−1x vn · e−t∂3x∂−1x F n[t; vn]                   (7.18a)
+                          Z  t                      2
+                 −    es∂3xP P  e−s∂3xvn   e−s∂3x∂−1x vn  .              (7.18b)
+                                           tn
+The first term on the right-hand side of (7.18) can be estimated by using the H¨older and
+Sobolev inequalities as follows:
+                   ∥(7.18a)∥L2 ≲∥e−t∂3x∂−1x vn∥L2∥e−t∂3x∂−1x F n[t; vn]∥L∞
+                        ≲∥vn∥L2∥F n[t; vn]∥L2.
+
+Then, by substituting (7.16) into the inequality above, we further obtain that
+                ∥(7.18a)∥L2 ≲(∥v(tn)∥L2 + ∥en∥L2) τ γ + ∥en∥L2 + ∥en∥2L2
+                 ≲τ γ + ∥en∥L2 + ∥en∥2L2 + ∥en∥3L2
+                 ≲τ γ + ∥en∥L2 + ∥en∥3L2.
+
+  We rewrite (7.18b) as
+           Z  t                         2
+  (7.18b) = −    es∂3xP P  e−s∂3xv(tn)      · e−s∂3x∂−1x  v(tn) ds
+                   tn
+           Z  t                         2                                   2
+       +    es∂3xP P  e−s∂3xv(tn)      · e−s∂3x∂−1x  v(tn) −P  e−s∂3xvn      · e−s∂3x∂−1x vn  ds.
+                   tn
+and apply Proposition 3.4 (2) with α = γ and α = 0 for the first and second term, respectively.
+This yields the following result:
+                    + ∥en∥L2∥v(tn)∥2L2 + ∥en∥2L2∥v(tn)∥L2 + ∥en∥3L2  .       ∥(7.18b)∥L2 ≲τ γ v(tn) 3Hγ
+
+=== PDF PAGE 37 ===
+                                                                                                      37
+
+Substituting the estimates of ∥(7.18a)∥L2 and ∥(7.18b)∥L2 into (7.18), we obtain
+                           ∥(7.5a)∥L2 ≲τ γ + ∥en∥L2 + ∥en∥3L2  .
+
+The following result can be obtained similarly by using integration by parts as in (7.18):
+
+                    ∥(7.5b)∥L2 + ∥(7.5c)∥L2 ≲τ γ + ∥en∥L2 + ∥en∥4L2  .
+
+Finally, substituting the above estimates of ∥(7.5a)∥L2, ∥(7.5b)∥L2 and ∥(7.5c)∥L2 into (7.5)
+yields the third result of Lemma 7.3.                              □
+
+  By applying Lemma 7.3 (1) to the expression of R∗11(t) in (7.1) and using (7.16), we obtain
+   R∗11(t) L2 ≲  ∂−1x  V (t) −vn −F n[t; vn]  L2 vn + F n[t; vn] L2
+        ≲  ∂−1x  V (t) −vn −F n[t; vn]  L2 en + F n[t; vn] + v(tn) L2
+        ≲  τ 1+γ ln(1/τ) + τ ∥en∥L2 + | ln(1/τ)|3∥en∥4L2  (τ γ + ∥en∥L2 + ∥en∥2L2 + 1)
+        ≲τ 1+γ ln(1/τ) + τ ∥en∥L2 + | ln(1/τ)|5∥en∥6L2      for t ∈(tn, tn+1].
+Similarly, by applying Lemma 7.3 (2) to the expression of R∗12(t) in (7.1), we obtain
+     R∗12(t) L2 ≲τ ∂−1x  ∂t V (t) −vn −F n[t; vn]  L∞t L2x vn + F n[t; vn] L∞t L2x
+           ≲τ 1+γ ln(1/τ) + τ ∥en∥L2 + | ln(1/τ)|5∥en∥6L2      for t ∈(tn, tn+1].
+  We substitute expression (4.5) into the expression of R∗13(t) in (7.1), i.e.,
+                1 Z  t                      2
+      R∗13(t) =      es∂3xP P e−s∂3xvn     · e−s∂3x∂−1x  V (s) −vn −F n[s; vn]    ds.
+                3  tn
+
+Then we apply Proposition 3.4 (1) to the expression above. This yields the following result:
+          R∗13(t) L2 ≲τ∥vn∥2L2 V (t) −vn −F n[t; vn] L∞t L2x
+               + τ∥vn∥2L2  ∂t V (t) −vn −F n[t; vn]       −2314                                               L∞t Hx
+                                      2
+               +  vn                                  L2                          V (t) −vn −F n[t; vn]      −2314                                            L∞t Hx
+              ≲ τ 1+γ ln(1/τ) + τ ∥en∥L2 + | ln(1/τ)|3∥en∥4L2  ∥vn∥2L2,
+
+where the last inequality follows from Lemma 7.3.  Since ∥vn∥2                                                 ≲∥en∥2                                                                 L2                                                                            L2                                           + ∥v(tn)∥2L2, it
+follows that
+      R∗13(t) L2 ≲τ 1+γ ln(1/τ) + τ ∥en∥L2 + | ln(1/τ)|3∥en∥4L2 + | ln(1/τ)|3∥en∥6L2
+           ≲τ 1+γ ln(1/τ) + τ ∥en∥L2 + | ln(1/τ)|5∥en∥6L2  .
+  The expression of R∗14(t) can be rewritten as follows, by using the integration-by-parts
+formula in Lemma 2.2, i.e.,
+
+                                                            2
+R∗14(t) = −1             6et∂3xP  e−t∂3x∂−1x (V (t) −vn −F n[t; vn]
+           1 Z  t
+     +       es∂3xP  e−s∂3x∂−1x  V (s) −vn −F n[s; vn]  · e−s∂3x∂−1x ∂s V (s) −vn −F n[s; vn]   ds.
+           6  tn
+
+=== PDF PAGE 38 ===
+38
+
+Then, by the H¨older and Sobolev inequalities, we have that
+
+    sup   R∗14(t) L2
+  t∈(tn,tn+1]
+  ≲ V (t) −vn −F n[t; vn]                                L∞(tn,tn+1;L2)                                   ∂−1x  V (t) −vn −F n[t; vn]   L∞(tn,tn+1;L2)
+   + τ V (t) −vn −F n[t; vn]                                       ∂−1x  ∂t V (t) −vn −F n[t; vn]   L∞(tn,tn+1;L2)                                    L∞(tn,tn+1;L2)
+  ≲ τ γ + ∥en∥L2 + ∥en∥4L2  τ 1+γ ln(1/τ) + τ ∥en∥L2 + | ln(1/τ)|3∥en∥4L2
+  ≲τ 1+γ + τ ∥en∥L2 + | ln(1/τ)|7∥en∥8L2  .
+
+  Combining with the estimates of R∗1j(t) L2, j = 1, 2, 3, 4,
+             R∗1(t) L2 ≤τ 1+γ ln(1/τ) + τ ∥en∥L2 + | ln(1/τ)|7∥en∥8L2  .           (7.19)
+
+
+7.2. Estimation of R∗2(t), R∗3(t) and R∗4(t)
+  For the remainder R∗2(t) defined in (5.7), i.e.,
+                   −tn h1 Z tn+1                          2           i          R∗2(t) = −t                es∂3x∂x e−s∂3xF n[s; vn]  ds + Rn2[vn]  ,
+                           τ    2  tn
+
+we rewrite R              tn+1 es∂3x∂x e−s∂3xF n[s; vn] 2 ds as               tn
+
+  Z tn+1                           2
+          es∂3x∂x  e−s∂3xF n[s; vn]   ds
+     tn
+    Z tn+1                              2
+  =        es∂3x∂x  e−s∂3xF n[s; v(tn)]   ds
+         tn
+      Z tn+1
+                                                                   x F n[s; vn] + F n[s; v(tn)]   ds.                              x F n[s; vn] −F n[s; v(tn)]  · e−s∂3   +        es∂3x∂x  e−s∂3
+            tn
+
+and use inequality (2.2). Then we obtain
+
+ R∗2(t) L2 ≲τ ∂xF n[s; v(tn)] L∞(tn,tn+1;Hγ) F n[s; v(tn)] L∞(tn,tn+1;Ha(γ))
+        + τ F n[s; vn] −F n[s; v(tn)]           F n[s; vn] + F n[s; v(tn)]                                              L∞(tn,tn+1;H1)                           L∞(tn,tn+1;H1)
+        + Rn2[vn] L2.
+
+                                                          1+γ−a(γ)
+By using Lemma 7.2 with β = 1 + γ and β = a(γ), with      ≥γ for γ ∈(0, 1] for the                                                          1+γ−β0(γ)
+expression of a(γ) in (2.3), as well as inequalities (6.3) and (7.10), we obtain
+
+             R∗2(t) L2 ≲τ 1+γ ln(1/τ) + τ ∥en∥L2 + | ln(1/τ)|3∥en∥4L2  .           (7.20)
+  According to the definitions in (5.7), R∗3(t) and R∗4(t) can be expressed in terms of R∗1(tj+1)
+and R∗2(tj+1) as follows:
+
+                  n−1                       n−1
+        R∗3(t) = X R∗1(tj+1)  and  R∗4(t) = X R∗2(tj+1)   for t ∈(tn, tn+1].
+                    j=0                          j=0
+
+=== PDF PAGE 39 ===
+                                                                                                      39
+
+By substituting estimates (7.19) and (7.20) into relations above, we obtain the following
+result:
+
+                                                                                  L2  .  (7.21)  R∗3(t) L2 + R∗4(t) L2 ≲tn+1τ γ ln(1/τ) + tn+1 0≤j≤nmax  ∥ej∥L2 + | ln(1/τ)|7∥ej∥8
+
+  Then, by combining the estimates in (7.19) and (7.20) and (7.21), we obtain the result of
+Proposition 7.1.                                          □
+
+
+       8. Stability estimates using low-high frequency decompositions
+
+  The main result of this section is the following proposition, which concerns the estimation
+of the function F(t) defined in (5.10).
+
+Proposition 8.1. Under the assumptions of Theorem 1.1, there exists a positive constant C,
+which may depend on ∥v∥L∞(0,T;Hγ) but is independent of τ, such that
+
+    F(t)         ≤Ctτ γ + CN2t∥e∥L∞(0,t;L2) 1 + ∥e∥L∞(0,t;L2)          L2
+            + C t + N−2314 ∥e∥L∞(0,t;L2) 1 + | ln(1/τ)|96∥e∥96L∞(0,t;L2)  ∀N ≥1.
+
+  In the proof of Proposition 8.1 we need to use the two estimates in the following lemma.
+
+Lemma 8.2. Under the assumptions of Theorem 1.1, there exists a positive constant C,
+which may depend on ∥v∥L∞(0,T;Hγ) but is independent of τ, such that
+    (1) ∥∂tR∥L∞(0,T;H−32 −) ≤Cτ γ ln(1/τ) + C ∥en∥L2 + | ln(1/τ)|7∥en∥8L2  .
+    (2) ∥∂te∥L∞(0,T;H−32 −) ≤Cτ γ ln(1/τ) + C ∥en∥L2 + | ln(1/τ)|7∥en∥8L2  .
+
+Proof. By differentiating (5.7) with respect to t ∈(tn, tn+1], we can find the following expres-
+sion:
+                                    x V (t) −vn −F n[t; vn]  · e−t∂3     ∂tR(t) = −1   x∂x  e−t∂3                   2et∂3                                            x V (t) + vn + F n[t; vn]
+        −1  1 Z tn+1 et∂3x∂x  e−t∂3xF n[t; vn]  2 dt + Rn2[vn]
+                  τ  2  tn
+                                    x V (t) −vn −F n[t; vn]  · e−t∂3       = −1   x∂x  e−t∂3                   2et∂3                                            x V (t) −vn −F n[t; vn]
+
+                                                                    x                                  x V (t) −vn −F n[t; vn]  · e−t∂3                                                      vn + F n[t; vn]             −et∂3x∂x  e−t∂3
+         −τ −1R∗2(tn+1).                                                            (8.1)
+Then, by applying the Sobolev embedding inequality L1 ,→H−12 −and the H¨older inequality
+∥fg∥L1 ≤∥f∥L2∥g∥L2, we have
+ ∂tR          ≲ V (t) −vn −F n[t; vn] 2       L∞(tn,tn+1;H−32 −)                             L∞(tn,tn+1;L2)
+              + V (t) −vn −F n[t; vn]             vn + F n[t; vn]                                                         L∞(tn,tn+1;L2)                  L∞(tn,tn+1;L2)
+              + τ −1 R∗2(tn+1) L2
+                              γ                       2             ≤ τ + ∥en∥L2 + ∥en∥4L2
+
+=== PDF PAGE 40 ===
+40
+
+              +  τ γ + ∥en∥L2 + ∥en∥4L2 (1 + ∥en∥2L2)
+              + τ γ ln(1/τ) + ∥en∥L2 + | ln(1/τ)|3∥en∥4L2
+               ≤τ γ ln(1/τ) + ∥en∥L2 + | ln(1/τ)|7∥en∥8L2,
+
+where the second to last inequality follows from Lemma 7.3 and (7.20), together with the
+following estimate of ∥vn + F n[t; vn]∥L∞(tn,tn+1;L2) by using the expression in (4.6):
+   ∥vn + F n[t; vn]∥L∞(tn,tn+1;L2) ≲∥vn∥L2 + ∥vn∥2L2 ≲1 + ∥en∥L2 + ∥en∥2L2 ≲1 + ∥en∥2L2.
+                                                                                             (8.2)
+
+This proves the first result of Lemma 8.2.
+  By differentiating (5.8) with respect to t ∈(tn, tn+1], we can find the following expression:
+
+                             h               x              i                      ∂te(t) = ∂x e−t∂3xe(t) e−t∂3  v(t) −1    + ∂tR(t).                                                      2e(t)
+Then, by applying the Sobolev embedding L1 ,→H−12 −and the H¨older inequality ∥fg∥L1 ≤
+∥f∥L2∥g∥L2, we have
+
+              ∂te(t)                    −≲∥e(t)∥L2 ∥v(t)∥L2 + ∥e(t)∥L2 +  ∂tR(t)                H−32                                                       H−32 −
+                ≤τ γ ln(1/τ) +  ∥e∥L∞(0,t;L2) + | ln(1/τ)|3∥e∥6L∞(0,t;L2)  .
+This proves the second result of Lemma 8.2.                          □
+
+Proof of Proposition 8.1. We first consider the low-frequency part of F(t), i.e.,
+                       Z  t                                                                     i                                                                  x  v(s) −1                                                                 ds                                    es∂3xP≤N∂x h e−s∂3xe(s) e−s∂3          P≤NF(t) L2 ≲                                  0                                  2e(s)       L2
+                      Z  t                                                                 i              ≲                                                              x  v(s) −1                                                                ds                     N2 ∂−1x h e−s∂3xe(s) e−s∂3                                 0                                2e(s)    L2
+                        ≲N2t∥e∥L∞(0,t;L2) ∥v∥L∞(0,t;L2) + ∥e∥L∞(0,t;L2)
+                 ≲N2t ∥e∥L∞(0,t;L2) + ∥e∥2L∞(0,t;L2)  .                            (8.3)
+
+  We then consider the high-frequency part of F(t) by using the integration-by-parts formula
+in Lemma 2.2, which implies that
+                   1                                                             i                                                                                         (8.4a)             F(t) =    xP h e−t∂3x∂−1x  e(t) e−t∂3x∂−1x   v(t) −1                       3et∂3                                2e(t)
+            −1 Z  t es∂3xP                                 h e−s∂3x∂−1x ∂se(s) e−s∂3x∂−1x   v(s) −e(s) i ds         (8.4b)
+                      3  0
+            −1 Z  t es∂3xP                                 h e−s∂3x∂−1x  e(s) e−s∂3x∂−1x ∂sv(s)i ds.                   (8.4c)
+                      3  0
+The first term on the right-hand side of (8.4) can be estimated by using the Sobolev and
+Bernstein inequalities, i.e.,
+                                                   e(t) e−t∂3x∂−1x   v(t) −1             P≥N(8.4a) L2 ≲N−1 e−t∂3x∂−1x                                                                   2e(t)  H1
+                      ≲N−1∥e∥L2 ∥v∥L2 + ∥e∥L2
+                  ≲N−1 ∥e∥L2 + ∥e∥2L2  .
+
+=== PDF PAGE 41 ===
+                                                                                                      41
+
+In view of the relation e(t) = e0 + F(t) + R(t), as shown in (5.9), the second term on the
+right-hand side of (8.4) can be decomposed into the following two parts:
+                     Z  t             (8.4b) = −1    es∂3xP  e−s∂3x∂−1x ∂sF(s) e−s∂3x∂−1x   v(s) −e(s)  ds        (8.5a)
+                     3  0
+            −1 Z  t es∂3xP  e−s∂3x∂−1x ∂sR(s) e−s∂3x∂−1x   v(s) −e(s)   ds.       (8.5b)
+                     3  0
+where (8.5a) can be furthermore expressed as follows by using relation (5.10):
+     (8.5a) = −1 Z  t es∂3xP P                           h e−s∂3xe(s) e−s∂3                                                  x  v(s) −1                                                        i e−s∂3x∂−1x   v(s) −e(s)  ds.              3  0                                2e(s)
+By considering P≥N(8.5a), the frequency of at least one of the three terms e(s), v(s) −12e(s)
+and v(s) −e(s), should be greater than or equal to N/3. Then, by applying Proposition 3.4
+(1) to the high-frequency part of the expression above and using Bernstein’s inequality for
+high-frequency functions, i.e., the second inequality of (2.1) with s0 = −2314 and s = 0, we
+obtain
+          P≥N(8.5a) L2 ≲t∥e∥X0([0,t])∥v −12e∥X0([0,t])∥v −e∥X0([0,t])
+                + N−2314 ∥e∥L∞(0,t;L2)∥v −12e∥L∞(0,t;L2)∥v −e∥L∞(0,t;L2)
+                           ≲t∥e∥X0([0,t]) ∥v∥2X0([0,t]) + ∥e∥2X0([0,t])
+                + N−2314 ∥e∥L∞(0,t;L2) ∥v∥2L∞(0,t;L2) + ∥e∥2L∞(0,t;L2)  .
+From (4.3) it is straightforward to derive that ∥v∥X0([0,t]) ≲1, and from Lemma 8.2 (2) we
+know that
+               ∥e∥X0([0,t]) ≲τ γ ln(1/τ) +  ∥e∥L∞(0,t;L2) + | ln(1/τ)|7∥e∥8L∞(0,t;L2)  .         (8.6)
+
+Therefore, we have that
+                                                          14 ) ∥e∥L∞(0,t;L2) + | ln(1/τ)|23∥e∥24L∞(0,t;L2)  .     P≥N(8.5a) L2 ≲tτ γ ln(1/τ) + (t + N−23
+
+  We substitute expression (8.1) into (8.5b). This yields
+
+                                   n−1
+                      (8.5b) = R∗5(t) + X R∗5(tj+1)   for t ∈(tn, tn+1],                  (8.7)
+                                      j=0
+
+where
+          1 Z  t
+                                  x V (s) −vn −F n[s; vn]  R∗5(t) =       et∂3xP P e−s∂3
+          6  tn
+                                              · e−s∂3                                        x V (s) + vn + F n[s; vn]     · e−s∂3x∂−1x   v(s) −e(s)  ds
+
+      +            1 −1 Z  t P e−s∂3x∂−1x R∗2(tn+1) · e−s∂3x∂−1x   v(s) −e(s)  ds   for t ∈(tn, tn+1].           3τ     tn
+which can be estimated by using Proposition 3.4 (1), i.e.,
+    R∗5(t) L2 ≲τ∥V (s) −vn −F n[s; vn]∥X0([tn,tn+1])
+                                · ∥V (s) + vn + F n[s; vn]∥X0([tn,tn+1]) ∥v∥X0([0,t]) + ∥e∥X0([0,t])
+
+=== PDF PAGE 42 ===
+42
+
+          + ∥V (s) −vn −F n[s; vn]∥L∞(tn,tn+1;H−2314 )
+                                · ∥V (s) + vn + F j[s; vn]∥L∞(tn,tn+1;L2) ∥v∥L∞(0,t;L2) + ∥e∥L∞(0,t;L2)
+          + ∥R∗2(tn+1)∥L2 ∥v∥L∞(0,t;L2) + ∥e∥L∞(0,t;L2)  .
+
+Lemma 7.3 says that
+
+      V (s) −vn −F n[s; vn]                         ≲τ γ ln(1/τ) + ∥en∥L2 + | ln(1/τ)|3∥en∥4L2  ,                                      X0([tn,tn+1])
+  V (s) −vn −F n[s; vn]                         ≲τ 1+γ ln(1/τ) + τ ∥en∥L2 + | ln(1/τ)|3∥en∥4L2  .                           L∞(tn,tn+1;H−2314 )
+
+The above result and (8.2), together with the triangle inequality, imply that
+
+         V (s) + vn + F n[s; vn]                                            X0([tn,tn+1])
+       ≲ V (s) −vn −F n[s; vn]∥X0([tn,tn+1]) + 2 vn + F n[s; vn]  X0([tn,tn+1])
+       ≲τ γ ln(1/τ) + ∥en∥L2 + | ln(1/τ)|3∥en∥4L2 + 1 + ∥en∥2L2
+       ≲1 + | ln(1/τ)|4∥en∥4L2.
+
+From (8.6) we also know that
+
+                          ∥v∥X0([0,t]) + ∥e∥X0([0,t]) ≲1 + | ln(1/τ)|8∥en∥8L2.
+
+These estimates, together with (8.6) and Proposition 7.20, give the the following result:
+
+        R∗5(t) L2 ≤ τ 1+γ ln(1/τ) + τ∥en∥L2 1 + | ln(1/τ)|3∥en∥3L2
+                                       · (1 + | ln(1/τ)|4∥e∥4L∞(0,t;L2))(1 + | ln(1/τ)|8∥e∥8L∞(0,t;L2)).
+
+Substituting this into (8.7) yields that
+
+            (8.5b)                ≲tτ γ ln(1/τ) + t∥e∥L∞(0,t;L2) 1 + | ln(1/τ)|96∥e∥96L∞(0,t;L2)  .                    L2
+  By substituting the estimates of  P≥N(8.5a) L2 and  (8.5b) L2 into (8.5), we obtain
+                                                         14 ∥e∥L∞(0,t;L2) 1 + | ln(1/τ)|96∥e∥96L∞(0,t;L2)  .    P≥N(8.4b) L2 ≲tτ γ ln(1/τ) +  t + N−23
+
+   Finally, by using the expression of ∂tv(s) in (4.3), the last term on the right-hand side of
+(8.4) can be rewritten as follows:
+
+                        Z  t                        2                   (8.4c) = −1    es∂3xP P  e−s∂3xv(s)   e−s∂3x∂−1x  e(s)  ds.
+                         6  0
+Again, by considering P≥N(8.4c), the frequency of at least one of the three terms v(s), v(s)
+and e(s), should be greater than or equal to N/3. Then, by applying Proposition 3.4 (1) to
+the high-frequency part of the expression above together with (8.6), and using Bernstein’s
+inequality for high-frequency functions, i.e., the second inequality of (2.1) with s0 = −2314 and
+s = 0, we obtain
+
+
+                                                                  14                                                     ∥e∥L∞(0,t;L2)∥v∥2L∞(0,t;L2)     P≥N(8.4c) L2 ≲t∥e∥X0([0,t])∥v∥2X0([0,t]) + N−23
+               ≤tτ γ ln(1/τ) + (t + N−2314 )∥e∥L∞(0,t;L2) 1 + | ln(1/τ)|7∥e∥7L∞(0,t;L2)  .
+
+=== PDF PAGE 43 ===
+                                                                                                      43
+
+  Combining the estimates of P≥N(8.4a), (8.4b) and P≥N(8.4c), yields a desired estimate of
+ P≥NF(t) L2, which together with the estimate of  P≤NF(t) L2 in (8.3) implies the result
+of Proposition 8.1.                                         □
+
+
+                  9. Error estimates (Proof of Theorem 1.1)
+
+  By using the relation e(t) = e0 + F(t) −R(t) in (5.9), and the estimates of R(t) and F(t)
+in Propositions 7.1 and 8.1, respectively, we obtain
+
+∥e(t)∥L2 ≤∥e0∥L2 + C(t + τ)τ γ ln(1/τ) + CtN2∥e∥L∞(0,t;L2) 1 + ∥e∥L∞(0,t;L2)
+          + C t + τ + N−2314 ∥e∥L∞(0,t;L2) 1 + | ln(1/τ)|96∥e∥96L∞(0,t;L2)   ∀t ∈[0, T].
+
+Choosing N = (t + τ)−14 in the inequality above, we have
+  ∥e(t)∥L2 ≤∥e0∥L2 + C1τ γ ln(1/τ) + C2(t + τ) 1                                                              4 ∥e∥L∞(0,t;L2) 1 + | ln(1/τ)|96∥e∥96L∞(0,t;L2)  .
+                                                                                             (9.1)
+
+Since e0 = 0 and ∥e∥L∞(0,t;L2) is a continuous function of t ∈[0, T], we may assume that
+t∗∈(0, T] is the maximal time such that
+
+                                                                  γ
+                                       ∥e∥L∞(0,t∗;L2) ≤τ 2 .
+
+   If t∗= T then we set δ = 0.
+                                                                                                                γ
+   If t∗< T then there exists a positive constant δ > 0 such that ∥e∥L∞(0,t∗+δ;L2) ≤2τ 2
+according to the continuity of ∥e∥L∞(0,t;L2) with respect to t ∈[0, T].
+  In either case, we can rewrite (9.1) as follows (regarding s as the initial time):
+
+                                                                        1
+                                                                        4∥e∥L∞(s,t;L2) ≤∥e(s)∥L2 + C1τ γ ln(1/τ) + C3(t −s + τ)                                                             ∥e∥L∞(s,t;L2)
+
+                                                                             4 ∥e∥L∞(s,t;L2),  0 ≤s ≤t ≤t∗+ δ,            ≤∥e∥L∞(0,s;L2) + C1τ γ ln(1/τ) + C3(t −s + τ) 1
+
+which implies that
+∥e∥L∞(0,t;L2) ≤∥e∥L∞(0,s;L2) + C1τ γ ln(1/τ) + C3(t −s + τ) 1                                                                              4 ∥e∥L∞(0,t;L2),  0 ≤s ≤t ≤t∗+ δ.
+  Let T0 = 2(2C3)−4,1          τ ∈(0, T0], and consider a sequence of intervals [kT0, (k + 1)T0],
+k = 0, . . . , m, such that mT0 < T ≤(m + 1)T0. The maximal number of such intervals
+is bounded, i.e., m ≤T/T0, which is independent of the stepsize τ. On every subinterval
+[kT0, (k + 1)T0] such that [kT0, (k + 1)T0] ∩[0, t∗+ δ]̸ = ∅, we have
+                                        γ         1
+∥e∥L∞(0,t;L2) ≤∥e∥L∞(0,kT0;L2) + C1τ  ln(1/τ) + 2∥e∥L∞(0,t;L2)  ∀t ∈[kT0, (k + 1)T0] ∩[0, t∗+ δ],
+which implies that
+
+     ∥e∥L∞(0,t;L2) ≤2∥e∥L∞(0,kT0;L2) + 2C1τ γ ln(1/τ)  ∀t ∈[kT0, (k + 1)T0] ∩[0, t∗+ δ].
+
+Iterating this inequality for k = 0, 1, . . . , yields that
+
+           ∥e∥L∞(0,t∗+δ;L2) ≤2m+1∥e0∥L2 + 2m+2C1τ γ ln(1/τ) = 2m+2C1τ γ ln(1/τ).
+
+=== PDF PAGE 44 ===
+44
+
+Since m and C1 are independent of τ, it follows that there exists a positive constant τ0 such
+that for τ ≤τ0 we have
+
+                                                                    γ
+                                     ∥e∥L∞(0,t∗+δ;L2) ≤τ 2 .
+
+This contradicts the maximality of t∗∈(0, T] unless t∗= T. Therefore, t∗= T, δ = 0, and
+                             ∥e∥L∞(0,T;L2) ≤2m+2C1τ γ ln(1/τ).
+This proves the error estimate in Theorem 1.1.                         □
+
+
+                        10. Numerical experiments
+
+  In this section, we present numerical experiments on the convergence of the proposed low-
+regularity integrator for the KdV equation with Hγ initial data, for γ = 0.2, 0.4, 0.6 and 0.8,
+respectively. The computations are performed by Matlab with double precision.
+  We consider the KdV equation
+
+                            1
+        ∂tu(t, x) + ∂3xu(t, x) = 2∂x(u(t, x)2)   for x ∈T and t > 0,           (10.1)
+        u(0, x) = u0(x)   for x ∈T,
+
+with the following initial value:
+
+                                   1
+                            u0(x) = X  |k|−0.51−γeikx.                         (10.2)
+                                  10
+                                              0̸=k∈Z
+which is in Hγ(T) but not in Hγ+0.01(T). We compare the numerical solution given by the
+proposed method with several pre-existing methods, including the Crank–Nicolson method,
+i.e.,
+               un+1 −un   1                  1
+                +   ∂3xun+1 + ∂3xun =      (un+1)2 + (un)2  ,                      τ       2                 4∂x
+the resonance based scheme in [6] (referred to as hs16), i.e.,
+
+                                1                 2                     2
+                                                                        x               un+1 = e−τ∂3xun +    e−τ∂3x∂−1x un  −1      ∂−1x un    ,                                6                 6e−τ∂3
+and the following filtered time discretization methods (with filtering operator Πτ := χ −
+      1
+i∂xτ 3  using cut-off function χ = 1[−1,1], see [24]):
+     • The filtered resonance based scheme (referred to as Filtered-hs16)
+
+                           1                       2                           2
+                                                                           x           un+1 = e−τ∂3xun +      e−τ∂3x∂−1x Πτun  −1        ∂−1x Πτun    ,                        6Πτ                   6Πτe−τ∂3
+     • The filtered exponential integrator (referred to as Filtered-EI)
+
+                                    τ                                     eδ −1
+             un+1 = e−τ∂3                                                                                             ,  φ(δ) =                                                                                                                        ,                                x h un + 2φ(τ∂3x)Πτ∂x(Πτun)2i                                                                       δ
+     • The filtered Lie splitting (referred to as Filtered-Lie)
+
+                                       τ                             eδ −1
+                un+1 = e−τ∂3                                                                                       ,  φ(δ) =                                                                                                                  .                                    x h un + 2Πτ∂x(Πτun)2i                                                                    δ
+
+=== PDF PAGE 45 ===
+                                                                                                      45
+
+  We present the errors of the numerical solutions at T = 1 in Figure 10.1 for several Hγ
+initial values with γ = 0.2, 0.4, 0.6 and 0.8, respectively, with sufficiently large degrees
+of freedom (i.e., dof=214) in the spatial discretization by a Fourier spectral method. The
+reference solution is obtained by using the proposed low-regularity integrator with a much
+smaller time step size. The numerical results in Figure 10.1 show that the proposed method
+has convergence order γ in approximating the rough solutions with the Hγ initial values.
+
+
+
+
+
+      Figure 10.1. L2 errors of several methods for Hγ initial data with γ ∈(0, 1).
+
+=== PDF PAGE 46 ===
+ 46
+
+
+
+
+
+      0         π/2        π        3π/2       2π    1.0
+
+                                              10
+    0.8
+                                              5
+    0.6
+                                              0Time
+    0.4
+                                               5
+    0.2
+                                               10
+    0.0
+                    x
+
+          Figure 10.2. An example of rough solutions to the KdV equation.
+
+
+
+
+
+       Figure 10.3. Comparison of several methods for computing the rough solu-
+          tion.
+
+
+    Next, we compare several numerical methods for the KdV equation in (10.1) with the
+ following piecewise smooth discontinuous initial state:
+                                3π 5π                                         10,    for x ∈       ,       ,                                                   8   8                                                      
+                          u0(x) =               11π 13π                         (10.3)                                  −10,  for x ∈         ,         ,
+                                  8    8                                                                                           0,      else where.
+
+ The evolution of the solution is presented in Figure 10.2 (given by a reference solution with
+ sufficiently small step size), which shows that the solution is highly rough and possibly discon-
+ tinuous. The graph of the numerical solutions at time T = π/32 ≈0.0981747704 produced
+ by the Crank–Nicolson method and several other low-regularity integrators with step size
+
+=== PDF PAGE 47 ===
+                                                                                                      47
+
+τ = 2−4T are presented in Figure 10.3 (right). Figure 10.3 (left) shows that the proposed
+method is sufficiently accurate with τ = 2−4T, while Figure 10.3 (right) shows that the other
+methods with the same step size have observable errors in approximating the discontinuous
+solution in this example.
+
+
+
+
+                   11. Conclusions and extended studies
+
+  We have presented several new tools for the construction and analysis of low-regularity
+integrators for the KdV equations, including the averaging approximation technique for ex-
+ponential functions with imaginary powers (Lemma 3.2), the new estimates for the symbol
+ϕ = k3 −k31 −k32 −k33 (Lemma 3.3), and new trilinear estimates associated to the KdV op-
+erator (Proposition 3.4). These new techniques have played essential roles in analyzing the
+local error, global remainder, and the stability estimates. We have also introduced a new
+technique, which reformulates the numerical scheme into a perturbed integral formulation of
+the continuous KdV equation globally posed on the time interval [0, T], instead of locally
+posed on [tn, tn+1], for analyzing the stability of numerical approximations to solutions below
+H1. By combining the several new techniques, we have constructed a new time discretiza-
+tion which is convergent with order γ in L2 (up to a logarithmic factor) under the regularity
+condition u ∈C([0, T]; Hγ), with γ ∈(0, 1] possibly approaching zero.
+  This paper focuses on the development of low-regularity integrators that could improve
+the convergence rates of time discretization without the necessity of using filters. Typically,
+filters necessitates a stepsize that correlates with the degrees of freedom in space discretization,
+similar to a CFL condition. Our approach increases the flexibility in choosing the degrees of
+freedom for space discretization, which enables the design of a fully discrete numerical scheme
+that operates independently of any CFL condition. We believe that rigorous analysis of the
+full discretization, when coupled with the Fourier spectral method in space, can be conducted
+within the theoretical framework proposed in this paper, which provides a foundation for such
+future research.
+  The algorithm constructed in this paper improves the error from O(τ γ/3) to O(τ γ ln(1/τ)),
+with a logarithmic factor ln(1/τ) arising from technical estimates detailed within our paper.
+The optimality of the logarithmic factor ln(1/τ) is uncertain since the numerical tests cannot
+reveal the logarithmic influence on convergence rates.  Typically,  if the theoretical error is
+expressed as O(τ γ−ϵ) for any ϵ in the range (0, γ), numerical tests would generally reflect a
+convergence order of γ. Hence, further study is required to determine if the logarithmic term
+can be refined in future analyses.
+  The methodologies and theoretical framework introduced in this article can be extended
+to develop low-regularity integrators for a variety of nonlinear dispersive equations. These in-
+clude the modified KdV equation, the generalized KdV equation, and the nonlinear Schr¨odinger
+(NLS) equation. For instance, consider the NLS equation given by
+
+                                    i∂tu + ∂xxu = |u|2u                               (11.1)
+
+=== PDF PAGE 48 ===
+48
+
+This equation can be decomposed into low- and high-frequency components as follows:
+
+           (i∂tu≤N = ∂xxu≤N + λ|u≤N|2u≤N + N1(u≤N, u>N),
+                                                                                         (11.2)
+                   i∂tu>N = ∂xxu>N + 4πλM0u>N + N2(u≤N, u>N),
+
+where u≤N = Π≤Nu and u>N = Π>Nu. The remainder terms Nj(u≤N, u>N) for j = 1, 2 can
+be addressed by adopting the trilinear estimate strategies developed in Section 3.3 (refer to
+the definition of T(v1, v2, v3) and subsequent discussions). Furthermore, the low-frequency
+component can be approximated using the averaging approximation techniques described in
+this paper. Thus, we can design a low-regularity integrator for the NLS equation that sep-
+arately computes the high- and low-frequency parts of the solution, as elaborated in [28].
+Employing the framework proposed in Section 5, the numerical scheme can be reduced to
+a perturbed integral formulation of the continuous NLS equation. This adaptation enables
+the proof of convergence rates using the Strichartz estimates for the continuous NLS equa-
+                                                                                            4γ
+tion, leading to a low-regularity integrator whose L2-norm error is O(τ                                                                               4+γ ) for solutions in
+C([0, T]; Hγ).  For small values of γ, this convergence rate surpasses those of pre-existing
+algorithms; see [28] for more details.
+  The construction and analysis of more rapidly convergent algorithms based on the pro-
+posed framework and techniques, for nonlinear dispersive equations in both one- and higher-
+dimensional spaces, will be studied in our future work.
+
+
+
+                        Acknowledgements
+
+  The authors thank Dr. Jiachuan Cao for implementing the numerical scheme and providing
+the numerical results. The work of B. Li is partially supported by the Hong Kong Research
+Grants Council (General Research Fund, project no. PolyU15306123) and the internal grant
+at The Hong Kong Polytechnic University (PolyU Project ID: P0045404). The work of Y.
+Wu is partially supported by NSFC 12494544 and 12171356.
+
+
+
+                              References
+
+ [1] A. Babin, A. Ilyin, and E. Titi, On the regularization mechanism for the spatially periodic Korteweg-de
+     Vries equation, Comm. Pure Applied Math. 64 (2011), pp. 591–648.
+ [2] A. Bouard and A. Debussche, Soliton dynamics for the Korteweg–de Vries equation with multiplicative
+    homogeneous noise, Elect. J. Prob. 14 (2009), pp. 1727–1744.
+ [3] J. Bourgain and D. Li, On an endpoint Kato-Ponce inequality, Differential Integral Equations 27 (2014),
+    pp. 1037–1072.
+ [4] C. Court`es, F. Lagouti`ere, and F. Rousset, Error estimates of finite difference schemes for the
+    Korteweg-de Vries equation, IMA J. Numer. Anal. 4 (2020), pp. 628–685.
+ [5] M. Gubinelli, Rough solutions for the periodic Korteweg–de Vries equation, Commun. Pure Appl. Anal.
+    11 (2012), pp. 709–733.
+ [6] M. Hofmanov´a and K. Schratz, An exponential-type integrator for the KdV equation, Numer. Math.
+    136 (2017), pp. 1117–1137.
+ [7] H. Holden, C. Lubich, and N. H. Risebro, Operator splitting for partial differential equations with
+    Burgers nonlinearity, Math. Comp. 82 (2012), pp. 173–185.
+
+=== PDF PAGE 49 ===
+                                                                                                      49
+
+ [8] H. Holden, K. H. Karlsen, N. H. Risebro, and T. Tao, Operator splitting for the KdV equation,
+    Math. Comp. 80 (2011), pp. 821–846.
+ [9] H. Holden, K. H. Karlsen, and N. H. Risebro, Operator splitting methods for generalized Korteweg-
+    de Vries equations, J. Comput. Phys. 153 (1999), pp. 203–222.
+[10] T. Kappeler and P. Topalov, Global wellposedness of KdV in H−1(T, R), Duke Math. J. 135 (2006),
+    pp. 327–360.
+[11] T. Kato and G. Ponce, Commutator estimates and the Euler and Navier-Stokes equations, Commun.
+    Pure Appl. Math. 41 (1988), pp. 891–907.
+[12] R. Killip and M. Visan, KdV is well-posed in H−1, Ann. Math. (2) 190 (2019), pp. 249–305
+[13] M. Kn¨oller, A. Ostermann, and K. Schratz, A Fourier integrator for the cubic nonlinear Schr¨odinger
+    equation with rough initial data, SIAM J. Numer. Anal. 57 (2019), pp. 1967–1986.
+[14] B. Li and Y. Wu, A fully discrete low-regularity integrator for the 1D periodic cubic nonlinear
+     Schr¨odinger equation, Numer. Math. 149 (2021), pp. 151–183.
+[15] D. Li, On Kato-Ponce and fractional Leibniz, Rev. Mat. Iberoam. 35 (2019), pp. 23–100.
+[16] H. Ma and W. Sun, Optimal error estimates of the Legendre–Petrov–Galerkin method for the Korteweg–
+    de Vries equation, SIAM J. Numer. Anal. 39 (2001), pp. 1380-1394.
+[17] Y. Maday and A. Quarteroni, Error analysis for spectral approximation of the Korteweg-de Vries
+     equation, RAIRO-Mod´elisation math´ematique et analyse num´erique 22 (1988), pp. 821–846.
+[18] A. Ostermann, F. Rousset, and K. Schratz, Error estimates of a Fourier integrator for the cubic
+     Schr¨odinger equation at low regularity, Found. Comput. Math. 21 (2021), pp. 725–765.
+[19] A. Ostermann, F. Rousset, and K. Schratz, Fourier integrator for periodic NLS: low regularity
+     estimates via discrete Bourgain spaces, To appear in J. Eur. Math. Soc., https://arxiv.org/abs/2006.12785
+[20] A. Ostermann and K. Schratz, Low regularity exponential-type integrators for semilinear Schr¨odinger
+     equations, Found. Comput. Math. 18 (2018), pp. 731–755.
+[21] A. Ostermann and C. Su, A Lawson-type exponential integrator for the Korteweg-de Vries equation,
+   IMA J. Numer. Anal. 40 (2020), pp. 2399–2414.
+[22] A. Ostermann, Y. Wu, and F. Yao, A second-order low-regularity integrator for the nonlinear
+     Schr¨odinger equation, Adv. Contin. Discrete Models, 23 (2022), 14 pp.
+[23] A. Ostermann and F. Yao, A fully discrete low-regularity integrator for the nonlinear Schr¨odinger
+     equation, J. Sci. Comput. 91 (2022), article 9.
+[24] F. Rousset and K. Schratz, Convergence error estimates at low regularity for time discretizations of
+   KdV, Pure Appl. Math. 4 (2022), pp. 127–152.
+[25] J. Shen, A new dual-Petrov-Galerkin method for third and higher odd-order differential equations: ap-
+     plication to the KdV equation, SIAM J. Numer. Anal. 41 (2003), pp. 1595–1619.
+[26] J. Shatah, Normal forms and quadratic nonlinear Klein-Gordon equations. Comm. Pure Appl. Math. 38
+     (1985), 685–696.
+[27] F. Tappert, Numerical solutions of the Korteweg-de Vries equation and its generalizations by the split-
+     step Fourier method. In: (A.C. Newell, editor) Nonlinear Wave Motion, Amer. Math. Soc. 1974, pp.
+     215-216.
+[28] Y. Wu, A modified splitting method for the cubic nonlinear Schr¨odinger equation. arXiv:2212.09301
+[29] Y. Wu and F. Yao, A first-order Fourier integrator for the nonlinear Schr¨odinger equation on T without
+     loss of regularity, Math. Comp. (2020), DOI: 10.1090/mcom/3705.
+[30] Y. Wu and X. Zhao, Optimal convergence of a first order low-regularity integrator for the KdV equation,
+   IMA J. Numer. Anal. (2021). https://doi.org/10.1093/imanum/drab054
+[31] Y. Wu and X. Zhao, Embedded exponential-type low-regularity integrators for KdV equation under
+    rough data. BIT (2021), DOI:10.1007/s10543-021-00895-8.
+[32] J. Yan and C. W. Shu, A local discontinuous Galerkin method for KdV type equations, SIAM J. Numer.
+    Anal. 40 (2002), pp. 769–791.
+[33] Y. Zhou, Uniqueness of weak solution of the KdV equation, Int. Math. Res. Not. 1997, pp. 271–283.
+
+=== PDF PAGE 50 ===
+50
+
+Buyang Li: Department of Applied Mathematics, The Hong Kong Polytechnic University, Hung
+Hom, Hong Kong. Email address: buyang.li@polyu.edu.hk
+
+Yifei Wu (corresponding author): School of Mathematical Sciences, Nanjing Normal Univer-
+sity, Nanjing 210046, China. Email address: yifei@tju.edu.cn

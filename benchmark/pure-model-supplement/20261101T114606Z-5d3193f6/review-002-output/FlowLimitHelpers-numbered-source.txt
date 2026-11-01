@@ -1,0 +1,104 @@
+1: import PaddingHelpers
+2: noncomputable section
+3: open scoped ENNReal
+4: open MeasureTheory KdV
+5: namespace BareModelCompletion
+6: 
+7: /-- The genuine source weaker-norm estimate turns L2 convergence of data into
+8: coefficient convergence of their continuous source flows. -/
+9: theorem source_flow_coefficient_limit (hL : BITWeakerLipschitz)
+10:     {T M : ℝ} (hT : 0 < T) (hM : 0 ≤ M)
+11:     {data : ℕ → Fourier} {f : Fourier} {flows : ℕ → ℝ → Fourier} {v : ℝ → Fourier}
+12:     (hdataR : ∀ n, RealValued (data n)) (hfR : RealValued f)
+13:     (hdata : ∀ n, InHomSobolev 0 (data n)) (hf : InHomSobolev 0 f)
+14:     (hbound : ∀ n, homogeneousNorm 0 (data n) + homogeneousNorm 0 f ≤ M)
+15:     (hflows : ∀ n, SourceWeakSolution T (data n) (flows n))
+16:     (hflowsC : ∀ n, HomSobolevContinuousOn 0 T (flows n))
+17:     (hv : SourceWeakSolution T f v) (hvC : HomSobolevContinuousOn 0 T v)
+18:     (hd : Filter.Tendsto (fun n => homogeneousNorm 0 (data n - f)) Filter.atTop (nhds 0)) :
+19:     ∀ t ∈ Set.Icc 0 T, ∀ k : ℤ,
+20:       Filter.Tendsto (fun n => flows n t k) Filter.atTop (nhds (v t k)) := by
+21:   obtain ⟨C, hC, A, hA, hb⟩ := source_flow_lipschitz hL hM
+22:     (by norm_num : (-1 : ℝ) < 0) (le_refl (0 : ℝ))
+23:   intro t ht k
+24:   have hcoeff (n : ℕ) : ‖flows n t k - v t k‖ ≤
+25:       (C * A ^ T) * homogeneousNorm 0 (data n - f) := by
+26:     have hdiff : InSobolev 0 (flows n t - v t) :=
+27:       (((hflowsC n).1 t ht).sub (hvC.1 t ht)).to_inhomogeneous (le_refl 0)
+28:     have hc : ‖flows n t k - v t k‖ ≤ homogeneousNorm 0 (flows n t - v t) := by
+29:       simpa only [homogeneousNorm_zero, weighted_zero, Pi.sub_apply] using weighted_coeff_bound hdiff k
+30:     exact hc.trans (hb T hT (data n) f (hdataR n) hfR (hdata n) hf (hbound n)
+31:       (flows n) v (hflows n) hv (hflowsC n) hvC t ht)
+32:   rw [tendsto_iff_norm_sub_tendsto_zero]
+33:   apply squeeze_zero (fun n => norm_nonneg _) hcoeff
+34:   simpa using hd.const_mul (C * A ^ T)
+35: 
+36: 
+37: /-- Project-specific consequence: estimates with constants only on exact norm
+38: spheres imply the historical neighborhood estimate. All flow and estimate
+39: hypotheses are explicit here; none is asserted as a literature theorem. -/
+40: theorem local_lipschitz_from_spheres (hL : BITWeakerLipschitz)
+41:     {s T : ℝ} (hs : 0 < s) (hT : 0 < T)
+42:     (hexists : ∀ f : Fourier, RealValued f → InHomSobolev s f →
+43:       ∃ v : ℝ → Fourier, SourceWeakSolution T f v ∧ HomSobolevContinuousOn s T v)
+44:     (hsphere : ∀ S : ℝ, 0 < S → ∃ K : ℝ, 0 < K ∧
+45:       ∀ f g : Fourier, RealValued f → RealValued g → InHomSobolev s f → InHomSobolev s g →
+46:       homogeneousNorm s f = S → homogeneousNorm s g = S →
+47:       ∀ v w : ℝ → Fourier, SourceWeakSolution T f v → SourceWeakSolution T g w →
+48:       HomSobolevContinuousOn s T v → HomSobolevContinuousOn s T w →
+49:       ∀ t ∈ Set.Icc 0 T, homogeneousNorm s (v t - w t) ≤ K * homogeneousNorm s (f - g))
+50:     {f : Fourier} (hfr : RealValued f) (hf : InHomSobolev s f)
+51:     {v : ℝ → Fourier} (hv : SourceWeakSolution T f v) (hvC : HomSobolevContinuousOn s T v) :
+52:     SourceLocalLipschitz s T f v := by
+53:   let R := homogeneousNorm s f + 1
+54:   have hR : 0 < R := by dsimp [R]; have := homogeneousNorm_nonneg s f; linarith
+55:   have hfR : homogeneousNorm s f ≤ R := by dsimp [R]; linarith
+56:   obtain ⟨K, hK, hb⟩ := hsphere (2 * R) (by positivity)
+57:   apply (source_local_lipschitz_iff hT hvC).mp
+58:   refine ⟨1, by norm_num, 3 * K, by positivity, ?_⟩
+59:   intro g hgr hg hgf w hw hwC
+60:   have hgR : homogeneousNorm s g ≤ R := by
+61:     have hh := (abs_le.mp (abs_homogeneousNorm_sub_le hg hf)).2
+62:     dsimp [R]
+63:     linarith
+64:   let F := fun n => sourceSphereData s R n f hf
+65:   let G := fun n => sourceSphereData s R n g hg
+66:   have hFP (n : ℕ) := sourceSphereData_properties hR n f hf hfr hfR
+67:   have hGP (n : ℕ) := sourceSphereData_properties hR n g hg hgr hgR
+68:   choose vf hvf hvfC using (fun n : ℕ => hexists (F n) (hFP n).1 (hFP n).2.1)
+69:   choose wg hwg hwgC using (fun n : ℕ => hexists (G n) (hGP n).1 (hGP n).2.1)
+70:   have hf0 : InHomSobolev 0 f := hf.of_le hs.le
+71:   have hg0 : InHomSobolev 0 g := hg.of_le hs.le
+72:   have hF0 (n : ℕ) : InHomSobolev 0 (F n) := (hFP n).2.1.of_le hs.le
+73:   have hG0 (n : ℕ) : InHomSobolev 0 (G n) := (hGP n).2.1.of_le hs.le
+74:   have hbf (n : ℕ) : homogeneousNorm 0 (F n) + homogeneousNorm 0 f ≤ 4 * R := by
+75:     have h1 := homogeneousNorm_mono (hFP n).2.1 hs.le
+76:     have h2 := homogeneousNorm_mono hf hs.le
+77:     rw [(hFP n).2.2.1] at h1
+78:     linarith
+79:   have hbg (n : ℕ) : homogeneousNorm 0 (G n) + homogeneousNorm 0 g ≤ 4 * R := by
+80:     have h1 := homogeneousNorm_mono (hGP n).2.1 hs.le
+81:     have h2 := homogeneousNorm_mono hg hs.le
+82:     rw [(hGP n).2.2.1] at h1
+83:     linarith
+84:   have hcv := source_flow_coefficient_limit hL hT (show 0 ≤ 4 * R by positivity)
+85:     (fun n => (hFP n).1) hfr hF0 hf0 hbf hvf (fun n => (hvfC n).of_le hs.le)
+86:     hv (hvC.of_le hs.le) (sourceSphereData_L2_converges hs hR f hf hfr hfR)
+87:   have hcw := source_flow_coefficient_limit hL hT (show 0 ≤ 4 * R by positivity)
+88:     (fun n => (hGP n).1) hgr hG0 hg0 hbg hwg (fun n => (hwgC n).of_le hs.le)
+89:     hw (hwC.of_le hs.le) (sourceSphereData_L2_converges hs hR g hg hgr hgR)
+90:   intro t ht
+91:   have hbound (n : ℕ) : homogeneousNorm s (vf n t - wg n t) ≤
+92:       (3 * K) * homogeneousNorm s (f - g) := by
+93:     have hh := hb (F n) (G n) (hFP n).1 (hGP n).1 (hFP n).2.1 (hGP n).2.1
+94:       (hFP n).2.2.1 (hGP n).2.2.1 (vf n) (wg n) (hvf n) (hwg n) (hvfC n) (hwgC n) t ht
+95:     have hp := sourceSphereData_difference hR n f g hf hg hfR hgR
+96:     have hh2 := mul_le_mul_of_nonneg_left hp hK.le
+97:     exact hh.trans (by nlinarith only [hh2])
+98:   have hA : 0 ≤ (3 * K) * homogeneousNorm s (f - g) :=
+99:     mul_nonneg (by positivity) (homogeneousNorm_nonneg _ _)
+100:   exact (homogeneous_norm_limit hA
+101:     (fun n => ((hvfC n).1 t ht).sub ((hwgC n).1 t ht)) hbound
+102:     (fun k => (hcv t ht k).sub (hcw t ht k))).2
+103: 
+104: end BareModelCompletion

@@ -1,0 +1,422 @@
+1: import OriginalProof
+2: 
+3: /-! Concrete original-literature proposition types. These are definitions, not
+4: axiom declarations. Their full source correspondence and all project consequences
+5: are recorded in source-and-bridge-ledger.md. -/
+6: noncomputable section
+7: open scoped ComplexConjugate ENNReal
+8: open MeasureTheory KdV
+9: namespace BareModelCompletion
+10: 
+11: /-- Li–Wu (2.2)–(2.3), including all four endpoint cases of (2.3).
+12: The source norm and coefficient convention are defined in OriginalProof. -/
+13: abbrev LiWuProduct22 : Prop := KdV.LiWuProductEstimate
+14: 
+15: /-- Internal historical endpoint port using the published operator (7.3).
+16: The checked two-way correspondence with (7.2) is in ExternalBridges. -/
+17: abbrev HistoricalEndpointStageEstimate : Prop := KdV.LiWuStageEstimate
+18: 
+19: /-- The integral definition (7.2), rather than an endpoint surrogate. -/
+20: def liWuStage72 (a t : ℝ) (f g : Fourier) : Fourier := fun k =>
+21:   (1 / 2 : ℂ) * ∫ r : ℝ in a..t, B r f g k
+22: 
+23: /-- Source (4.10): the cross integral with its original integral stage. -/
+24: def liWuCross410 (a t : ℝ) (f : Fourier) : Fourier := fun k =>
+25:   ∫ r : ℝ in a..t, B r f (liWuStage72 a r f f) k
+26: 
+27: /-- Internal historical arbitrary-step port, written with the integral (7.2).
+28: The standing zero-mean condition is in the paragraph defining (7.2). -/
+29: def HistoricalIntegralStageEstimate : Prop :=
+30:   ∀ T : ℝ, 0 < T → ∀ γ : ℝ, 0 < γ → γ ≤ 1 → ∀ ε : ℝ, 0 < ε →
+31:     ∀ β : ℝ, sourceStageLower γ ε ≤ β → β ≤ 1 + γ →
+32:       ∃ C : ℝ, 0 < C ∧ ∀ τ : ℝ, ∀ n : ℕ, ∀ t : ℝ, 0 < τ → ((n + 1 : ℕ) : ℝ) * τ ≤ T →
+33:         t ∈ Set.Icc ((n : ℝ) * τ) (((n + 1 : ℕ) : ℝ) * τ) → ∀ f g : Fourier,
+34:           InSobolev γ f → InSobolev γ g → MeanZero f → MeanZero g →
+35:             InSobolev β (liWuStage72 ((n : ℝ) * τ) t f g) ∧
+36:             sourceNorm β (liWuStage72 ((n : ℝ) * τ) t f g) ≤
+37:               C * τ ^ (sourceStagePower γ ε β) * sourceNorm γ f * sourceNorm γ g
+38: 
+39: /-- Lemma 7.2 with its original complete time grid tau=T/L. -/
+40: def LiWuLemma72Grid : Prop :=
+41:   ∀ T : ℝ, 0 < T → ∀ γ : ℝ, 0 < γ → γ ≤ 1 → ∀ ε : ℝ, 0 < ε →
+42:     ∀ β : ℝ, sourceStageLower γ ε ≤ β → β ≤ 1 + γ →
+43:     ∃ C : ℝ, 0 < C ∧ ∀ L : ℕ, 0 < L →
+44:       let τ := T / (L : ℝ)
+45:       ∀ n : ℕ, n < L → ∀ t : ℝ,
+46:       t ∈ Set.Icc ((n : ℝ) * τ) (((n + 1 : ℕ) : ℝ) * τ) → ∀ f g : Fourier,
+47:       InSobolev γ f → InSobolev γ g → MeanZero f → MeanZero g →
+48:       InSobolev β (sourceBilinearStage ((n : ℝ) * τ) t f g) ∧
+49:       sourceNorm β (sourceBilinearStage ((n : ℝ) * τ) t f g) ≤
+50:         C * τ ^ (sourceStagePower γ ε β) * sourceNorm γ f * sourceNorm γ g
+51: 
+52: /-- Actual complete-space-valued weak derivative in H^(-23/14). -/
+53: def BochnerWeakTimeDerivative {α : ℝ} (hα : 0 ≤ α) (a b : ℝ)
+54:     (f : ℝ → Sobolev α) (df : ℝ → Sobolev (-pStar)) : Prop :=
+55:   ∀ φ : ℝ → ℝ, ContDiff ℝ (⊤ : WithTop ℕ∞) φ → HasCompactSupport φ →
+56:     Function.support φ ⊆ Set.Ioo a b →
+57:     (∫ t : ℝ in a..b, ((deriv φ t : ℝ) : ℂ) •
+58:       inclusionMap (-pStar) α (by dsimp [pStar]; linarith) (f t)) =
+59:       -(∫ t : ℝ in a..b, ((φ t : ℝ) : ℂ) • df t)
+60: 
+61: /-- Both conclusions of Proposition 3.4, with an arbitrary fixed bound on the
+62: interval length. Its bound is a parameter of the implicit estimate constant. -/
+63: structure LiWuProposition34 : Prop where
+64:   dynamic : ∀ H : ℝ, 0 < H → ∀ α : ℝ, ∀ hα : 0 ≤ α, α ≤ 1 →
+65:     ∃ C : ℝ, 0 < C ∧ ∀ a b : ℝ, 0 ≤ a → a ≤ b → b - a ≤ H →
+66:       ∀ f : Fin 3 → ℝ → Sobolev α, ∀ df : Fin 3 → ℝ → Sobolev (-pStar),
+67:         (∀ j, MemLp (f j) ∞ (volume.restrict (Set.Icc a b))) →
+68:         (∀ j, MemLp (df j) ∞ (volume.restrict (Set.Icc a b))) →
+69:         (∀ j, BochnerWeakTimeDerivative hα a b (f j) (df j)) →
+70:           InSobolev 0 (CIntegral a b (fun t => (f 0 t).val)
+71:             (fun t => (f 1 t).val) (fun t => (f 2 t).val)) ∧
+72:           ∀ i : Fin 3,
+73:             sourceNorm 0 (CIntegral a b (fun t => (f 0 t).val)
+74:               (fun t => (f 1 t).val) (fun t => (f 2 t).val)) ≤
+75:               C * (b - a) * (∏ j : Fin 3, sourceXNorm hα a b (f j) (df j)) +
+76:               C * sourceLInfinityNegative hα a b (f i) *
+77:                 (∏ j : Fin 3, if j = i then 1 else sourceLInfinityZero hα a b (f j))
+78:   timeIndependent : ∀ H : ℝ, 0 < H → ∀ α : ℝ, 0 ≤ α → α ≤ 1 →
+79:     ∃ C : ℝ, 0 < C ∧ ∀ a b : ℝ, 0 ≤ a → a ≤ b → b - a ≤ H →
+80:       ∀ f g h : Fourier, InSobolev α f → InSobolev α g → InSobolev α h →
+81:         InSobolev 0 (CIntegral a b (fun _ => f) (fun _ => g) (fun _ => h)) ∧
+82:         sourceNorm 0 (CIntegral a b (fun _ => f) (fun _ => g) (fun _ => h)) ≤
+83:           C * (b - a) ^ α * sourceNorm α f * sourceNorm α g * sourceNorm α h
+84: 
+85: /-- The full weaker-norm result (6.22), including -1 < theta <= 0. -/
+86: abbrev BITTheorem65 : Prop := KdV.BITWeakerLipschitz
+87: 
+88: 
+89: /-- Source (3.16), with zero-denominator terms omitted by division by zero = 0.
+90: All arguments in the source applications are mean-zero. -/
+91: def bitB2 (t : ℝ) (f g : Fourier) : Fourier := fun k =>
+92:   if k = 0 then 0 else ∑' a : ℤ, Complex.exp (Complex.I * (3 * (k : ℂ) * (a : ℂ) * ((k-a : ℤ) : ℂ)) * (t : ℂ)) *
+93:     f a * g (k-a) / ((a : ℂ) * ((k-a : ℤ) : ℂ))
+94: 
+95: /-- Source nonresonant operator (3.25). -/
+96: def bitB3 (t : ℝ) (f g h : Fourier) : Fourier := fun k =>
+97:   if k = 0 then 0 else ∑' ab : ℤ × ℤ,
+98:     let a := ab.1
+99:     let b := ab.2
+100:     let c := k-a-b
+101:     Complex.exp (Complex.I * (3 * ((a+b : ℤ) : ℂ) * ((b+c : ℤ) : ℂ) * ((c+a : ℤ) : ℂ)) * (t : ℂ)) *
+102:       f a * g b * h c /
+103:       ((a : ℂ) * ((a+b : ℤ) : ℂ) * ((b+c : ℤ) : ℂ) * ((c+a : ℤ) : ℂ))
+104: 
+105: /-- Source (3.28). -/
+106: def bitB14 (t : ℝ) (f g h q : Fourier) : Fourier := fun k =>
+107:   if k = 0 then 0 else ∑' abc : ℤ × ℤ × ℤ,
+108:     let a := abc.1
+109:     let b := abc.2.1
+110:     let c := abc.2.2
+111:     let d := k-a-b-c
+112:     if c + d = 0 then 0 else
+113:     Complex.exp (Complex.I * ((k : ℂ)^3-(a : ℂ)^3-(b : ℂ)^3-(c : ℂ)^3-(d : ℂ)^3) * (t : ℂ)) *
+114:       f a * g b * h c * q d /
+115:       (((a+b : ℤ) : ℂ) * ((a+c+d : ℤ) : ℂ) * ((b+c+d : ℤ) : ℂ))
+116: 
+117: /-- Source (3.29). -/
+118: def bitB24 (t : ℝ) (f g h q : Fourier) : Fourier := fun k =>
+119:   if k = 0 then 0 else ∑' abc : ℤ × ℤ × ℤ,
+120:     let a := abc.1
+121:     let b := abc.2.1
+122:     let c := abc.2.2
+123:     let d := k-a-b-c
+124:     if c + d = 0 then 0 else
+125:     Complex.exp (Complex.I * ((k : ℂ)^3-(a : ℂ)^3-(b : ℂ)^3-(c : ℂ)^3-(d : ℂ)^3) * (t : ℂ)) *
+126:       ((c+d : ℤ) : ℂ) * f a * g b * h c * q d /
+127:       ((a : ℂ) * ((a+b : ℤ) : ℂ) * ((a+c+d : ℤ) : ℂ) * ((b+c+d : ℤ) : ℂ))
+128: 
+129: /-- Source (3.27) has coefficient one half on B4^1. -/
+130: def bitB4 (t : ℝ) (f g h q : Fourier) : Fourier :=
+131:   (1 / 2 : ℂ) • bitB14 t f g h q + bitB24 t f g h q
+132: 
+133: /-- The real-valued resonant expression (3.21). -/
+134: def bitAres (f : Fourier) : Fourier := fun k =>
+135:   f k / (k : ℂ) * ((homogeneousNorm 0 f ^ 2 - ‖f k‖ ^ 2 : ℝ) : ℂ)
+136: 
+137: /-- The full omitted conclusion (4.10), using the input/output truncations (4.8),
+138: (4.11). Derivatives are within the closed solution interval, including its endpoints. -/
+139: def bitAresM412 (m : ℕ) (f v : Fourier) : Fourier := fun k =>
+140:   if |k| < (m : ℤ) then
+141:     v k / (k : ℂ) * ((homogeneousNorm 0 f ^ 2 - ‖v k‖ ^ 2 : ℝ) : ℂ)
+142:   else 0
+143: 
+144: def BITNormalForm410 (m : ℕ) (T : ℝ) (f : Fourier) (v : ℝ → Fourier) : Prop :=
+145:   ∀ t ∈ Set.Icc 0 T, ∀ k : ℤ, k ≠ 0 →
+146:     HasDerivWithinAt (fun r : ℝ => v r k -
+147:       (1 / 6 : ℂ) * cutoff m (bitB2 r (cutoff m (v r)) (cutoff m (v r))) k -
+148:       (1 / 18 : ℂ) * cutoff m (bitB3 r (cutoff m (v r)) (cutoff m (v r)) (cutoff m (v r))) k)
+149:       ((Complex.I / 6) * bitAresM412 m f (cutoff m (v t)) k +
+150:         (Complex.I / 18) * cutoff m (bitB4 t (cutoff m (v t)) (cutoff m (v t))
+151:           (cutoff m (v t)) (cutoff m (v t))) k) (Set.Icc 0 T) t
+152: 
+153: /-- Full Theorem 4.2, including both its normal-form and estimate conclusions. -/
+154: def BITTheorem42 : Prop :=
+155:   ∀ s : ℝ, 0 ≤ s → ∀ M₀ : ℝ, 0 ≤ M₀ → ∀ T : ℝ, 0 < T → ∀ r : ℝ, 0 ≤ r →
+156:     ∃ A : ℝ, 0 ≤ A ∧ ∀ m : ℕ, 0 < m → ∀ f : Fourier, ∀ v : ℝ → Fourier,
+157:       RealValued f → InHomSobolev s f → homogeneousNorm s f = r → homogeneousNorm 0 f ≤ M₀ →
+158:       HomSobolevContinuousOn s T v → (∀ t ∈ Set.Icc 0 T, RealValued (v t)) →
+159:       SourceGalerkinODE m T f v →
+160:         BITNormalForm410 m T f v ∧ ∀ t ∈ Set.Icc 0 T, homogeneousNorm s (v t) ≤ A
+161: 
+162: 
+163: /-- The limit certificate with the previously chosen (4.13) bound visible.
+164: Source H^sigma is defined by (3.4), hence on the zero-mean class its norm is
+165: exactly the homogeneous norm, not the target (1+k^2) norm. -/
+166: def BITLimit43 (A s T : ℝ) (f : Fourier) (σ : ℝ) (v : ℝ → Fourier) : Prop :=
+167:   SourceWeakSolution T f v ∧ HomogeneousEssentiallyBounded s T v ∧
+168:         (∀ᵐ t ∂volume.restrict (Set.Icc 0 T), homogeneousNorm s (v t) ≤ A) ∧
+169:         (∀ᵐ t ∂volume.restrict (Set.Icc 0 T), homogeneousNorm 0 (v t) = homogeneousNorm 0 f) ∧
+170:       ∃ G : ℕ → ℝ → Fourier, ∃ idx : ℕ → ℕ, StrictMono idx ∧
+171:         (∀ m, HomSobolevContinuousOn s T (G m) ∧
+172:           (∀ t ∈ Set.Icc 0 T, RealValued (G m t)) ∧ SourceGalerkinODE (m + 1) T f (G m) ∧
+173:           ∀ t ∈ Set.Icc 0 T, homogeneousNorm s (G m t) ≤ A) ∧
+174:         (∀ p : ℝ, 1 < p → SourceLpConvergence σ T p (fun n => G (idx n)) v) ∧
+175:         SourceWeakStarConvergence s T (fun n => G (idx n)) v
+176: 
+177: /-- The complete global existence and energy statement of BIT Proposition 4.1,
+178: for the source's full-tail Galerkin equation. The printed energy uses squares. -/
+179: def BITProposition41 : Prop :=
+180:   ∀ f : Fourier, RealValued f → InHomSobolev 0 f → ∀ m : ℕ, 0 < m →
+181:     ∃ v : ℝ → Fourier,
+182:       (∀ T : ℝ, 0 < T → HomSobolevContinuousOn 0 T v ∧
+183:         (∀ t ∈ Set.Icc 0 T, RealValued (v t)) ∧ SourceGalerkinODE m T f v) ∧
+184:       ∀ t : ℝ, 0 ≤ t → homogeneousNorm 0 (v t) ^ 2 = homogeneousNorm 0 f ^ 2
+185: 
+186: /-- The given source Galerkin family is global and energy conserving, as in
+187: Proposition 4.1. These time ranges are not restricted to the limit horizon T. -/
+188: def BITGalerkinFamily (s : ℝ) (f : Fourier) (G : ℕ → ℝ → Fourier) : Prop :=
+189:   ∀ m : ℕ,
+190:     (∀ U : ℝ, 0 < U → HomSobolevContinuousOn s U (G m) ∧
+191:       (∀ t ∈ Set.Icc 0 U, RealValued (G m t)) ∧ SourceGalerkinODE (m + 1) U f (G m)) ∧
+192:     ∀ t : ℝ, 0 ≤ t → homogeneousNorm 0 (G m t) ^ 2 = homogeneousNorm 0 f ^ 2
+193: 
+194: /-- Literal strong L^p convergence in the source complete homogeneous Hilbert
+195: space, for every finite p>1, with actual vector-valued representatives. -/
+196: def BITStrongLp43 (σ T : ℝ) (G : ℕ → ℝ → Fourier) (v : ℝ → Fourier) : Prop :=
+197:   ∃ W : ℕ → ℝ → L2Seq, ∃ w : ℝ → L2Seq,
+198:     (∀ n, ∀ᵐ t ∂volume.restrict (Set.Icc 0 T), (W n t).val = homogeneousWeighted σ (G n t)) ∧
+199:     (∀ᵐ t ∂volume.restrict (Set.Icc 0 T), (w t).val = homogeneousWeighted σ (v t)) ∧
+200:     ∀ p : ℝ, 1 < p →
+201:       (∀ n, MemLp (W n) (ENNReal.ofReal p) (volume.restrict (Set.Icc 0 T))) ∧
+202:       MemLp w (ENNReal.ofReal p) (volume.restrict (Set.Icc 0 T)) ∧
+203:       Filter.Tendsto (fun n => eLpNorm (fun t => W n t - w t) (ENNReal.ofReal p)
+204:         (volume.restrict (Set.Icc 0 T))) Filter.atTop (nhds 0)
+205: 
+206: /-- All Galerkin family data precede the subsequence in Theorem 4.3. -/
+207: def BITLimit43For (A s T : ℝ) (f : Fourier) (σ : ℝ)
+208:     (G : ℕ → ℝ → Fourier) (v : ℝ → Fourier) : Prop :=
+209:   SourceWeakSolution T f v ∧ HomogeneousEssentiallyBounded s T v ∧
+210:     (∀ᵐ t ∂volume.restrict (Set.Icc 0 T), homogeneousNorm s (v t) ≤ A) ∧
+211:     (∀ᵐ t ∂volume.restrict (Set.Icc 0 T), homogeneousNorm 0 (v t) = homogeneousNorm 0 f) ∧
+212:     ∃ idx : ℕ → ℕ, StrictMono idx ∧
+213:       BITStrongLp43 σ T (fun n => G (idx n)) v ∧
+214:       SourceWeakStarConvergence s T (fun n => G (idx n)) v
+215: 
+216: /-- Joint full Theorems 4.2 and 4.3: a common bound with exactly their stated
+217: parameter dependence. This joins source statements, not project consequences. -/
+218: def BITTheorems42And43 : Prop :=
+219:   ∀ s : ℝ, 0 ≤ s → ∀ M₀ : ℝ, 0 ≤ M₀ → ∀ T : ℝ, 0 < T → ∀ r : ℝ, 0 ≤ r →
+220:     ∃ A : ℝ, 0 ≤ A ∧
+221:       (∀ m : ℕ, 0 < m → ∀ f : Fourier, ∀ v : ℝ → Fourier,
+222:         RealValued f → InHomSobolev s f → homogeneousNorm s f = r → homogeneousNorm 0 f ≤ M₀ →
+223:         HomSobolevContinuousOn s T v → (∀ t ∈ Set.Icc 0 T, RealValued (v t)) →
+224:         SourceGalerkinODE m T f v →
+225:           BITNormalForm410 m T f v ∧ ∀ t ∈ Set.Icc 0 T, homogeneousNorm s (v t) ≤ A) ∧
+226:       (0 < s → ∀ f : Fourier, RealValued f → InHomSobolev s f →
+227:         homogeneousNorm s f = r → homogeneousNorm 0 f ≤ M₀ →
+228:         ∀ G : ℕ → ℝ → Fourier,
+229:           BITGalerkinFamily s f G →
+230:         ∀ σ : ℝ, 0 < σ → σ < s → ∃ v : ℝ → Fourier, BITLimit43For A s T f σ G v)
+231: 
+232: 
+233: /-- Literal averaging covariance (4.15), before combining the exponentials. -/
+234: def liWuEta415 (τ α β : ℝ) : ℂ :=
+235:   (τ : ℂ)⁻¹ * (∫ r : ℝ in (0 : ℝ)..τ,
+236:     Complex.exp (-Complex.I * (r : ℂ) * (α : ℂ)) * Complex.exp (-Complex.I * (r : ℂ) * (β : ℂ))) -
+237:     phaseAverage τ α * phaseAverage τ β
+238: 
+239: /-- Source remainder (6.1), with exactly the covariance (4.15). -/
+240: def liWuRemainder61 (τ t : ℝ) (f₁ f₂ f₃ : Fourier) : Fourier := fun k =>
+241:   if k = 0 then 0 else
+242:     (-(τ : ℂ) / (18 * Complex.I * (k : ℂ))) *
+243:       ∑' ab : ℤ × ℤ,
+244:         let a := ab.1
+245:         let b := ab.2
+246:         let c := k - a - b
+247:         let p := a + b
+248:         let α : ℝ := 3 * (a : ℝ) * (b : ℝ) * (p : ℝ)
+249:         let β : ℝ := 3 * (k : ℝ) * (c : ℝ) * (p : ℝ)
+250:         let Φ : ℤ := k ^ 3 - a ^ 3 - b ^ 3 - c ^ 3
+251:         if p = 0 then 0 else
+252:           Complex.exp (-Complex.I * (t : ℂ) * (Φ : ℂ)) * liWuEta415 τ α β *
+253:             f₁ a * f₂ b * f₃ c
+254: 
+255: /-- The algebraic step relation (5.2), (4.20)--(4.23), throughout the source's
+256: positive regularity range. Its stage, cross integral and averaging covariance
+257: are represented by the original defining formulas. -/
+258: def LiWuStep52 : Prop :=
+259:   ∀ γ : ℝ, 0 < γ → γ ≤ 1 → ∀ τ : ℝ, 0 < τ → ∀ n : ℕ, ∀ f : Fourier,
+260:     InSobolev γ f → MeanZero f →
+261:       airy (-(((n + 1 : ℕ) : ℝ) * τ)) (step τ (airy ((n : ℝ) * τ) f)) =
+262:         f + liWuStage72 ((n : ℝ) * τ) (((n + 1 : ℕ) : ℝ) * τ) f f +
+263:           liWuCross410 ((n : ℝ) * τ) (((n + 1 : ℕ) : ℝ) * τ) f -
+264:           liWuRemainder61 τ ((n : ℝ) * τ) f f f
+265: 
+266: 
+267: /-- The published identity on the original complete grid tau=T/L. -/
+268: def LiWuStep52Grid : Prop :=
+269:   ∀ γ : ℝ, 0 < γ → γ ≤ 1 → ∀ T : ℝ, 0 < T → ∀ L : ℕ, 0 < L →
+270:     let τ := T / (L : ℝ)
+271:     ∀ n : ℕ, n < L → ∀ f : Fourier,
+272:     InSobolev γ f → MeanZero f →
+273:       airy (-(((n + 1 : ℕ) : ℝ) * τ)) (step τ (airy ((n : ℝ) * τ) f)) =
+274:         f + liWuStage72 ((n : ℝ) * τ) (((n + 1 : ℕ) : ℝ) * τ) f f +
+275:           liWuCross410 ((n : ℝ) * τ) (((n + 1 : ℕ) : ℝ) * τ) f -
+276:           liWuRemainder61 τ ((n : ℝ) * τ) f f f
+277: 
+278: 
+279: /-- The local solution-map condition with continuous-time supremum conventions.
+280: This is a concrete comparison predicate, not a new literature input; full
+281: quantitative source inputs are defined separately below. -/
+282: def SourceLocalLipschitzAllTimes (s T : ℝ) (f : Fourier) (v : ℝ → Fourier) : Prop :=
+283:   ∃ r : ℝ, 0 < r ∧ ∃ C : ℝ, 0 < C ∧ ∀ g : Fourier,
+284:     RealValued g → InHomSobolev s g → homogeneousNorm s (g - f) < r →
+285:       ∀ w : ℝ → Fourier, SourceWeakSolution T g w → HomSobolevContinuousOn s T w →
+286:         ∀ t ∈ Set.Icc 0 T,
+287:           homogeneousNorm s (v t - w t) ≤ C * homogeneousNorm s (f - g)
+288: 
+289: 
+290: /-- The actual constructed-limit class of the original Theorem 4.3, with
+291: vector-valued strong convergence, rather than the historical scalar certificate. -/
+292: def BITConstructedLimit43 (s T : ℝ) (f : Fourier) (v : ℝ → Fourier) : Prop :=
+293:   ∃ σ : ℝ, 0 < σ ∧ σ < s ∧ ∃ A : ℝ, 0 ≤ A ∧ ∃ G : ℕ → ℝ → Fourier,
+294:     BITGalerkinFamily s f G ∧
+295:     (∀ m, ∀ t ∈ Set.Icc 0 T, homogeneousNorm s (G m t) ≤ A) ∧ BITLimit43For A s T f σ G v
+296: 
+297: /-- Uniqueness in Definition 3.1, before restricting to the historical continuous
+298: comparison class. -/
+299: def BITUniqueWeak (T : ℝ) (f : Fourier) (v : ℝ → Fourier) : Prop :=
+300:   ∀ w : ℝ → Fourier, SourceWeakSolution T f w → ∀ t ∈ Set.Icc 0 T, w t = v t
+301: 
+302: /-- Full quantitative (5.18), keeping the printed dependence of T* on
+303: ||w0||_s+||w0||_s (p.21) and C' on ||v0||_s+||w0||_s separately. No local
+304: boundedness of either parameter function is imported. -/
+305: def BITDependence518 : Prop :=
+306:   ∀ s : ℝ, 1 / 2 < s → ∀ T : ℝ, 0 < T →
+307:     ∃ δ : ℝ → ℝ, (∀ r : ℝ, 0 ≤ r → 0 < δ r ∧ δ r ≤ T) ∧
+308:     ∃ C' : ℝ → ℝ, (∀ r : ℝ, 0 ≤ r → 0 < C' r) ∧
+309:       ∀ f g : Fourier, RealValued f → RealValued g → InHomSobolev s f → InHomSobolev s g →
+310:       ∀ v w : ℝ → Fourier, SourceWeakSolution T f v → SourceWeakSolution T g w →
+311:       HomSobolevContinuousOn s T v → HomSobolevContinuousOn s T w →
+312:       ∀ t ∈ Set.Icc 0 T,
+313:         homogeneousNorm s (w t - v t) ≤
+314:           (C' (homogeneousNorm s f + homogeneousNorm s g) + 1) ^
+315:             (⌊T / δ (2 * homogeneousNorm s g)⌋₊ + 1) * homogeneousNorm s (g - f)
+316: 
+317: /-- Full Theorem 5.1, including the quantitative (5.18). -/
+318: structure BITTheorem51 : Prop where
+319:   regularity : ∀ s : ℝ, 1 / 2 < s → ∀ T : ℝ, 0 < T → ∀ f : Fourier,
+320:     RealValued f → InHomSobolev s f → ∀ v : ℝ → Fourier, BITConstructedLimit43 s T f v →
+321:       HomSobolevContinuousOn s T v ∧ BITUniqueWeak T f v ∧
+322:       ∀ t ∈ Set.Icc 0 T, homogeneousNorm 0 (v t) = homogeneousNorm 0 f
+323:   dependence : BITDependence518
+324: 
+325: /-- Literal L-infinity homogeneous Sobolev norm, with source spatial measure. -/
+326: def bitHomSup (s T : ℝ) (v : ℝ → Fourier) : ℝ :=
+327:   (eLpNorm (fun t => homogeneousNorm s (v t)) ∞ (volume.restrict (Set.Icc 0 T))).toReal
+328: 
+329: /-- The theta=s application of (6.7) specified in Theorem 6.3. C0 is the
+330: explicit upper bound from (6.3), and the constant/step choices precede flows.
+331: Its parameter dependence follows (6.2)--(6.5). -/
+332: def BITDependence67 : Prop :=
+333:   ∀ s : ℝ, 0 < s → s ≤ 1 / 2 → ∀ T : ℝ, 0 < T → ∀ C₀ : ℝ, 0 ≤ C₀ →
+334:     ∃ τ : ℝ, 0 < τ ∧ ∃ C : ℝ, 0 < C ∧ ∃ C' : ℝ, 0 < C' ∧
+335:       ∀ f g : Fourier, RealValued f → RealValued g → InHomSobolev s f → InHomSobolev s g →
+336:       ∀ v w : ℝ → Fourier, SourceWeakSolution T f v → SourceWeakSolution T g w →
+337:       HomogeneousEssentiallyBounded s T v → HomogeneousEssentiallyBounded s T w →
+338:       bitHomSup s T v + bitHomSup s T w ≤ C₀ →
+339:       ∀ᵐ t ∂volume.restrict (Set.Icc 0 T), homogeneousNorm s (v t - w t) ≤
+340:         C' * (2 * C + 1) ^ (⌊T / τ⌋₊ + 1) * homogeneousNorm s (f - g)
+341: 
+342: /-- Literal norm formulation of (6.7); the equivalence with the a.e.
+343: formulation is proved in RegularityBridges. -/
+344: def BITDependence67Norm : Prop :=
+345:   ∀ s : ℝ, 0 < s → s ≤ 1 / 2 → ∀ T : ℝ, 0 < T → ∀ C₀ : ℝ, 0 ≤ C₀ →
+346:     ∃ τ : ℝ, 0 < τ ∧ ∃ C : ℝ, 0 < C ∧ ∃ C' : ℝ, 0 < C' ∧
+347:       ∀ f g : Fourier, RealValued f → RealValued g → InHomSobolev s f → InHomSobolev s g →
+348:       ∀ v w : ℝ → Fourier, SourceWeakSolution T f v → SourceWeakSolution T g w →
+349:       HomogeneousEssentiallyBounded s T v → HomogeneousEssentiallyBounded s T w →
+350:       bitHomSup s T v + bitHomSup s T w ≤ C₀ →
+351:       bitHomSup s T (fun t => v t - w t) ≤
+352:         C' * (2 * C + 1) ^ (⌊T / τ⌋₊ + 1) * homogeneousNorm s (f - g)
+353: 
+354: /-- The governing index in Theorem 6.1 (p.26), used in (6.2)--(6.7):
+355: zero below the endpoint, and every positive index at the endpoint. -/
+356: def BITComparisonIndex (s θ₀ : ℝ) : Prop :=
+357:   (s < 1 / 2 ∧ θ₀ = 0) ∨ (s = 1 / 2 ∧ 0 < θ₀)
+358: 
+359: /-- Full original quantitative comparison (6.7), including (6.3)/(6.5).
+360: The choices depend on s, θ₀ and the lower-norm bound C₀. With that bound
+361: fixed they precede the final time, data and flows. The H^s bound is NOT
+362: an argument of these choices. In particular θ₀=0 is retained below 1/2. -/
+363: def BITDependence67OriginalNorm : Prop :=
+364:   ∀ s : ℝ, 0 < s → s ≤ 1 / 2 → ∀ θ₀ : ℝ, BITComparisonIndex s θ₀ →
+365:     ∀ C₀ : ℝ, 0 ≤ C₀ →
+366:     ∃ τ : ℝ, 0 < τ ∧ ∃ C : ℝ, 0 < C ∧ ∃ C' : ℝ, 0 < C' ∧
+367:       ∀ T : ℝ, 0 < T →
+368:       ∀ f g : Fourier, RealValued f → RealValued g → InHomSobolev s f → InHomSobolev s g →
+369:       ∀ v w : ℝ → Fourier, SourceWeakSolution T f v → SourceWeakSolution T g w →
+370:       HomogeneousEssentiallyBounded s T v → HomogeneousEssentiallyBounded s T w →
+371:       HomogeneousEssentiallyBounded θ₀ T v → HomogeneousEssentiallyBounded θ₀ T w →
+372:       bitHomSup θ₀ T v + bitHomSup θ₀ T w ≤ C₀ →
+373:       bitHomSup s T (fun t => v t - w t) ≤
+374:         C' * (2 * C + 1) ^ (⌊T / τ⌋₊ + 1) * homogeneousNorm s (f - g)
+375: 
+376: /-- Full Theorem 6.3, including its quantitative (6.7) dependence. -/
+377: structure BITTheorem63 : Prop where
+378:   regularity : ∀ s : ℝ, 0 < s → s ≤ 1 / 2 → ∀ T : ℝ, 0 < T → ∀ f : Fourier,
+379:     RealValued f → InHomSobolev s f → ∀ v : ℝ → Fourier, BITConstructedLimit43 s T f v →
+380:       HomSobolevContinuousOn s T v ∧ BITUniqueWeak T f v
+381:   dependence : BITDependence67OriginalNorm
+382: 
+383: /-- Literal L-infinity norm form of Theorem 6.5 (6.22). -/
+384: def BITTheorem65Norm : Prop :=
+385:   ∀ M : ℝ, 0 ≤ M → ∀ θ : ℝ, -1 < θ → θ ≤ 0 →
+386:     ∃ C' : ℝ, 0 < C' ∧ ∃ CM : ℝ, 0 < CM ∧ ∀ T : ℝ, 0 < T →
+387:       ∀ f g : Fourier, RealValued f → RealValued g → InHomSobolev 0 f → InHomSobolev 0 g →
+388:         homogeneousNorm 0 f + homogeneousNorm 0 g ≤ M →
+389:         ∀ v w : ℝ → Fourier, SourceWeakSolution T f v → SourceWeakSolution T g w →
+390:           HomSobolevContinuousOn 0 T v → HomSobolevContinuousOn 0 T w →
+391:             bitHomSup θ T (fun t => v t - w t) ≤ C' * CM ^ T * homogeneousNorm θ (f - g)
+392: 
+393: 
+394: /-- Unrestricted real bound parameters, including the vacuous negative cases. -/
+395: def BITTheorems42And43AllBounds : Prop :=
+396:   ∀ s : ℝ, 0 ≤ s → ∀ M₀ : ℝ, ∀ T : ℝ, 0 < T → ∀ r : ℝ,
+397:     ∃ A : ℝ, 0 ≤ A ∧
+398:       (∀ m : ℕ, 0 < m → ∀ f : Fourier, ∀ v : ℝ → Fourier,
+399:         RealValued f → InHomSobolev s f → homogeneousNorm s f = r → homogeneousNorm 0 f ≤ M₀ →
+400:         HomSobolevContinuousOn s T v → (∀ t ∈ Set.Icc 0 T, RealValued (v t)) →
+401:         SourceGalerkinODE m T f v →
+402:           BITNormalForm410 m T f v ∧ ∀ t ∈ Set.Icc 0 T, homogeneousNorm s (v t) ≤ A) ∧
+403:       (0 < s → ∀ f : Fourier, RealValued f → InHomSobolev s f →
+404:         homogeneousNorm s f = r → homogeneousNorm 0 f ≤ M₀ →
+405:         ∀ G : ℕ → ℝ → Fourier,
+406:           BITGalerkinFamily s f G →
+407:         ∀ σ : ℝ, 0 < σ → σ < s → ∃ v : ℝ → Fourier, BITLimit43For A s T f σ G v)
+408: 
+409: 
+410: 
+411: def BITTheorem65AllBounds : Prop :=
+412:   ∀ M : ℝ, ∀ θ : ℝ, -1 < θ → θ ≤ 0 →
+413:     ∃ C' : ℝ, 0 < C' ∧ ∃ CM : ℝ, 0 < CM ∧ ∀ T : ℝ, 0 < T →
+414:       ∀ f g : Fourier, RealValued f → RealValued g → InHomSobolev 0 f → InHomSobolev 0 g →
+415:         homogeneousNorm 0 f + homogeneousNorm 0 g ≤ M →
+416:         ∀ v w : ℝ → Fourier, SourceWeakSolution T f v → SourceWeakSolution T g w →
+417:           HomSobolevContinuousOn 0 T v → HomSobolevContinuousOn 0 T w →
+418:             bitHomSup θ T (fun t => v t - w t) ≤ C' * CM ^ T * homogeneousNorm θ (f - g)
+419: 
+420: 
+421: 
+422: end BareModelCompletion

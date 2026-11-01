@@ -1,0 +1,355 @@
+1: import GalerkinBridges
+2: noncomputable section
+3: open scoped ComplexConjugate ENNReal
+4: open MeasureTheory KdV
+5: namespace BareModelCompletion
+6: 
+7: /-- Representation correspondence (7.2) = (7.3), proved using the unchanged
+8: historical fixed-input normal form. This is valid for all real endpoints. -/
+9: theorem liWuStage72_eq_endpoint {f g : Fourier}
+10:     (hf : InSobolev 0 f) (hg : InSobolev 0 g)
+11:     (hfm : MeanZero f) (hgm : MeanZero g) (a t : ℝ) :
+12:     liWuStage72 a t f g = sourceBilinearStage a t f g := by
+13:   rw [← bilinearStage_eq_source]
+14:   funext k
+15:   change (1 / 2 : ℂ) * (∫ r : ℝ in a..t, B r f g k) =
+16:     (1 / 6 : ℂ) * (J t f g k - J a f g k)
+17:   rw [fixed_normal_form hf hg hfm hgm]
+18:   ring
+19: 
+20: /-- Original integral stage estimate implies the historical endpoint port. -/
+21: theorem stage_to_historical (h : HistoricalIntegralStageEstimate) : LiWuStageEstimate := by
+22:   intro T hT γ hγ hγ1 ε hε β hb hb1
+23:   obtain ⟨C, hC, hc⟩ := h T hT γ hγ hγ1 ε hε β hb hb1
+24:   refine ⟨C, hC, ?_⟩
+25:   intro τ n t hτ hn ht f g hf hg hfm hgm
+26:   have he := hc τ n t hτ hn ht f g hf hg hfm hgm
+27:   rw [liWuStage72_eq_endpoint (hf.of_le hγ.le) (hg.of_le hγ.le) hfm hgm] at he
+28:   exact he
+29: 
+30: /-- Reverse direction: this reformulation has lost no source-stage conclusion. -/
+31: theorem historical_to_stage (h : LiWuStageEstimate) : HistoricalIntegralStageEstimate := by
+32:   intro T hT γ hγ hγ1 ε hε β hb hb1
+33:   obtain ⟨C, hC, hc⟩ := h T hT γ hγ hγ1 ε hε β hb hb1
+34:   refine ⟨C, hC, ?_⟩
+35:   intro τ n t hτ hn ht f g hf hg hfm hgm
+36:   rw [liWuStage72_eq_endpoint (hf.of_le hγ.le) (hg.of_le hγ.le) hfm hgm]
+37:   exact hc τ n t hτ hn ht f g hf hg hfm hgm
+38: 
+39: theorem stage_iff_historical : HistoricalIntegralStageEstimate ↔ LiWuStageEstimate :=
+40:   ⟨stage_to_historical, historical_to_stage⟩
+41: 
+42: /-- Essential boundedness supplies the Bochner integrals in the weak derivative
+43: identity. No continuity of the input trajectory is assumed. -/
+44: theorem smul_interval_coefficient {s a b : ℝ} (hab : a ≤ b)
+45:     {f : ℝ → Sobolev s} (hf : MemLp f ∞ (volume.restrict (Set.Icc a b)))
+46:     {ψ : ℝ → ℂ} (hψ : Continuous ψ) (k : ℤ) :
+47:     (∫ t : ℝ in a..b, ψ t • f t).val k = (∫ t : ℝ in a..b, ψ t * (f t).val k) := by
+48:   have hψm := continuousOn_memLp_top_Icc (a := a) (b := b) hψ.continuousOn
+49:   have hm : MemLp (fun t => ψ t • f t) ∞ (volume.restrict (Set.Icc a b)) := hf.smul hψm
+50:   have hi : IntervalIntegrable (fun t => ψ t • f t) volume a b :=
+51:     (intervalIntegrable_iff_integrableOn_Icc_of_le hab).mpr (hm.integrable (by simp))
+52:   have hh := congrFun (sobolev_integral_val hi) k
+53:   simpa only [sobolev_val_smul, Pi.smul_apply, smul_eq_mul] using hh
+54: 
+55: /-- Both directions of coefficientwise and complete-space distributional time
+56: derivatives, under exactly the published essential-bound hypotheses. -/
+57: theorem weakTimeDerivative_iff_bochner {α a b : ℝ} (hα : 0 ≤ α) (hab : a ≤ b)
+58:     {f : ℝ → Sobolev α} {df : ℝ → Sobolev (-pStar)}
+59:     (hf : MemLp f ∞ (volume.restrict (Set.Icc a b)))
+60:     (hd : MemLp df ∞ (volume.restrict (Set.Icc a b))) :
+61:     WeakTimeDerivative a b (fun t => (f t).val) (fun t => (df t).val) ↔
+62:       BochnerWeakTimeDerivative hα a b f df := by
+63:   let F : ℝ → Sobolev (-pStar) := fun t => inclusionMap (-pStar) α (by dsimp [pStar]; linarith) (f t)
+64:   have hF : MemLp F ∞ (volume.restrict (Set.Icc a b)) :=
+65:     (inclusionMap (-pStar) α (by dsimp [pStar]; linarith)).comp_memLp' hf
+66:   constructor
+67:   · intro h φ hφ hcomp hsupp
+68:     have hD : Continuous (fun t : ℝ => ((deriv φ t : ℝ) : ℂ)) :=
+69:       Complex.continuous_ofReal.comp (hφ.continuous_deriv (by simp))
+70:     have hV : Continuous (fun t : ℝ => ((φ t : ℝ) : ℂ)) := Complex.continuous_ofReal.comp hφ.continuous
+71:     apply Sobolev.ext
+72:     funext k
+73:     change (∫ t : ℝ in a..b, ((deriv φ t : ℝ) : ℂ) • F t).val k =
+74:       -(∫ t : ℝ in a..b, ((φ t : ℝ) : ℂ) • df t).val k
+75:     rw [smul_interval_coefficient hab hF hD k, smul_interval_coefficient hab hd hV k]
+76:     change (∫ t : ℝ in a..b, ((deriv φ t : ℝ) : ℂ) * (f t).val k) =
+77:       -(∫ t : ℝ in a..b, ((φ t : ℝ) : ℂ) * (df t).val k)
+78:     exact h k φ hφ hcomp hsupp
+79:   · intro h k φ hφ hcomp hsupp
+80:     have hD : Continuous (fun t : ℝ => ((deriv φ t : ℝ) : ℂ)) :=
+81:       Complex.continuous_ofReal.comp (hφ.continuous_deriv (by simp))
+82:     have hV : Continuous (fun t : ℝ => ((φ t : ℝ) : ℂ)) := Complex.continuous_ofReal.comp hφ.continuous
+83:     have hh := congrArg (fun z : Sobolev (-pStar) => z.val k) (h φ hφ hcomp hsupp)
+84:     change (∫ t : ℝ in a..b, ((deriv φ t : ℝ) : ℂ) • F t).val k =
+85:       -(∫ t : ℝ in a..b, ((φ t : ℝ) : ℂ) • df t).val k at hh
+86:     rw [smul_interval_coefficient hab hF hD k, smul_interval_coefficient hab hd hV k] at hh
+87:     exact hh
+88: 
+89: /-- Restrict only the original bounded-length parameter and prove the needed
+90: weak-derivative representation conversion. -/
+91: theorem trilinear_to_historical (h : LiWuProposition34) : LiWuTrilinearEstimate where
+92:   dynamic := by
+93:     intro H hH _ α hα hα1
+94:     obtain ⟨C, hC, hb⟩ := h.dynamic H hH α hα hα1
+95:     refine ⟨C, hC, ?_⟩
+96:     intro a b ha hab hlen f df hf hd hweak
+97:     exact hb a b ha hab hlen f df hf hd
+98:       (fun j => (weakTimeDerivative_iff_bochner hα hab (hf j) (hd j)).mp (hweak j))
+99:   timeIndependent := fun H hH _ => h.timeIndependent H hH
+100: 
+101: theorem galerkin_to_historical (h : BITTheorem42) : BITGalerkinEstimate := by
+102:   intro s hs M hM T hT r hr
+103:   obtain ⟨A, hA, hb⟩ := h s hs M hM T hT r hr
+104:   refine ⟨A, hA, ?_⟩
+105:   intro m hm f v hfr hf hfn hfM hc hreal hode
+106:   exact (hb m hm f v hfr hf hfn hfM hc hreal hode).2
+107: 
+108: 
+109: theorem bit42_from_joint (h : BITTheorems42And43) : BITTheorem42 := by
+110:   intro s hs M hM T hT r hr
+111:   obtain ⟨A, hA, hb, _⟩ := h s hs M hM T hT r hr
+112:   exact ⟨A, hA, hb⟩
+113: 
+114: /-- Taking norms gives the exact weaker convergence port used historically. -/
+115: theorem strongLp43_to_scalar {σ T : ℝ} {G : ℕ → ℝ → Fourier} {v : ℝ → Fourier}
+116:     (hG : ∀ n, ∀ t ∈ Set.Icc 0 T, MeanZero (G n t))
+117:     (hv : ∀ t ∈ Set.Icc 0 T, MeanZero (v t)) (h : BITStrongLp43 σ T G v) :
+118:     ∀ p : ℝ, 1 < p → SourceLpConvergence σ T p G v := by
+119:   obtain ⟨W, w, hW, hw, hp⟩ := h
+120:   have he (n : ℕ) : (fun t => homogeneousNorm σ (G n t - v t)) =ᵐ[volume.restrict (Set.Icc 0 T)]
+121:       (fun t => ‖W n t - w t‖) := by
+122:     filter_upwards [hW n, hw, ae_restrict_mem measurableSet_Icc] with t hnt hvt ht
+123:     have hz : MeanZero (G n t - v t) := by
+124:       change G n t 0 - v t 0 = 0
+125:       rw [hG n t ht, hv t ht, sub_self]
+126:     have hd : (W n t - w t).val = homogeneousWeighted σ (G n t - v t) := by
+127:       change (W n t).val - (w t).val = _
+128:       rw [hnt, hvt, homogeneousWeighted_sub]
+129:       rfl
+130:     have hi : InHomSobolev σ (G n t - v t) := ⟨hz, by rw [← hd]; exact (W n t - w t).property⟩
+131:     have hrep : homogeneousLp σ (G n t - v t) hi = W n t - w t := Subtype.ext hd.symm
+132:     rw [← homogeneousLp_norm σ (G n t - v t) hi, hrep]
+133:   intro p hpp
+134:   obtain ⟨hWp, hwp, hlim⟩ := hp p hpp
+135:   refine ⟨fun n => (memLp_congr_ae (he n)).mpr ((hWp n).sub hwp).norm, ?_⟩
+136:   have hnorm (n : ℕ) : eLpNorm (fun t => homogeneousNorm σ (G n t - v t)) (ENNReal.ofReal p)
+137:       (volume.restrict (Set.Icc 0 T)) = eLpNorm (fun t => W n t - w t) (ENNReal.ofReal p)
+138:       (volume.restrict (Set.Icc 0 T)) := by
+139:     rw [eLpNorm_congr_ae (he n), eLpNorm_norm]
+140:   simpa only [hnorm] using hlim
+141: 
+142: theorem limit43For_to_certificate {A s T σ : ℝ} {f : Fourier}
+143:     {G : ℕ → ℝ → Fourier} {v : ℝ → Fourier} (hA : 0 ≤ A)
+144:     (hG : ∀ m, HomSobolevContinuousOn s T (G m) ∧
+145:       (∀ t ∈ Set.Icc 0 T, RealValued (G m t)) ∧ SourceGalerkinODE (m + 1) T f (G m))
+146:     (hGB : ∀ m, ∀ t ∈ Set.Icc 0 T, homogeneousNorm s (G m t) ≤ A)
+147:     (hv : BITLimit43For A s T f σ G v) : SourceLimitCertificate s T f σ v := by
+148:   obtain ⟨hw, he, hb, henergy, idx, hidx, hlp, hstar⟩ := hv
+149:   have hscalar := strongLp43_to_scalar
+150:     (fun n t ht => ((hG (idx n)).1.1 t ht).1) (fun t ht => (hw.2.1 t ht).2) hlp
+151:   exact ⟨hw, he, A, hA, hb, henergy, G, idx, hidx,
+152:     (fun m => ⟨(hG m).1, (hG m).2.1, (hG m).2.2, hGB m⟩), hscalar, hstar⟩
+153: 
+154: theorem limit_to_historical (h41 : BITProposition41) (h : BITTheorems42And43) : BITExistenceLimit := by
+155:   intro T hT s hs f hfr hf σ hσ hσs
+156:   obtain ⟨A, hA, hgal, hl⟩ := h s hs.le (homogeneousNorm 0 f)
+157:     (homogeneousNorm_nonneg 0 f) T hT (homogeneousNorm s f) (homogeneousNorm_nonneg s f)
+158:   obtain ⟨G, hGG⟩ := source_global_galerkin_family h41 hs.le f hfr hf
+159:   have hG (m : ℕ) := (hGG m).1 T hT
+160:   obtain ⟨v, hv⟩ := hl hs f hfr hf rfl le_rfl G hGG σ hσ hσs
+161:   have hGB (m : ℕ) : ∀ t ∈ Set.Icc 0 T, homogeneousNorm s (G m t) ≤ A :=
+162:     (hgal (m + 1) (by omega) f (G m) hfr hf rfl le_rfl
+163:       (hG m).1 (hG m).2.1 (hG m).2.2).2
+164:   exact ⟨v, limit43For_to_certificate hA hG hGB hv⟩
+165: 
+166: theorem original_limit_exists (h41 : BITProposition41) (h : BITTheorems42And43)
+167:     {s T : ℝ} (hs : 0 < s) (hT : 0 < T) (f : Fourier)
+168:     (hfr : RealValued f) (hf : InHomSobolev s f) :
+169:     ∃ v : ℝ → Fourier, BITConstructedLimit43 s T f v := by
+170:   obtain ⟨A, hA, hgal, hl⟩ := h s hs.le (homogeneousNorm 0 f)
+171:     (homogeneousNorm_nonneg 0 f) T hT (homogeneousNorm s f) (homogeneousNorm_nonneg s f)
+172:   obtain ⟨G, hGG⟩ := source_global_galerkin_family h41 hs.le f hfr hf
+173:   have hG (m : ℕ) := (hGG m).1 T hT
+174:   obtain ⟨v, hv⟩ := hl hs f hfr hf rfl le_rfl G hGG (s / 2) (by linarith) (by linarith)
+175:   refine ⟨v, s / 2, by linarith, by linarith, A, hA, G, hGG, ?_, hv⟩
+176:   intro m
+177:   exact (hgal (m + 1) (by omega) f (G m) hfr hf rfl le_rfl
+178:       (hG m).1 (hG m).2.1 (hG m).2.2).2
+179: 
+180: theorem original_constructed_weak {s T : ℝ} {f : Fourier} {v : ℝ → Fourier}
+181:     (hv : BITConstructedLimit43 s T f v) : SourceWeakSolution T f v := by
+182:   obtain ⟨σ, _, _, A, _, G, _, _, hv⟩ := hv
+183:   exact hv.1
+184: 
+185: theorem liWuStage72_eq_bilinear {f g : Fourier}
+186:     (hf : InSobolev 0 f) (hg : InSobolev 0 g) (hfm : MeanZero f) (hgm : MeanZero g) (a t : ℝ) :
+187:     liWuStage72 a t f g = bilinearStage a t f g := by
+188:   rw [liWuStage72_eq_endpoint hf hg hfm hgm, ← bilinearStage_eq_source]
+189: 
+190: theorem liWuCross410_eq_frozenCross {f : Fourier} (hf : InSobolev 0 f)
+191:     (hfm : MeanZero f) (a t : ℝ) : liWuCross410 a t f = frozenCross a t f := by
+192:   funext k
+193:   unfold liWuCross410 frozenCross
+194:   congr 1
+195:   funext r
+196:   rw [liWuStage72_eq_bilinear hf hf hfm hfm]
+197: 
+198: theorem liWuEta415_eq_covariance (τ α β : ℝ) : liWuEta415 τ α β = covariance τ α β := by
+199:   unfold liWuEta415 covariance phaseAverage
+200:   congr 2
+201:   apply intervalIntegral.integral_congr
+202:   intro r _
+203:   dsimp only
+204:   rw [← Complex.exp_add]
+205:   congr 1
+206:   push_cast
+207:   ring
+208: 
+209: theorem liWuRemainder61_eq_remainder (τ t : ℝ) (f g h : Fourier) :
+210:     liWuRemainder61 τ t f g h = remainder τ t f g h := by
+211:   unfold liWuRemainder61 remainder
+212:   simp_rw [liWuEta415_eq_covariance]
+213: 
+214: theorem step_to_historical (h : LiWuStep52) : LiWuStepIdentity := by
+215:   intro τ hτ n f hf _ hfm
+216:   have he := h 1 (by norm_num) le_rfl τ hτ n f hf hfm
+217:   have hf0 := hf.of_le (by norm_num : (0 : ℝ) ≤ 1)
+218:   rw [liWuStage72_eq_bilinear hf0 hf0 hfm hfm, liWuCross410_eq_frozenCross hf0 hfm, liWuRemainder61_eq_remainder] at he
+219:   exact he
+220: 
+221: /-- The continuous-representative formulation is equivalent, with the same
+222: neighborhood and constant, to the historical essential-time formulation. -/
+223: theorem source_local_lipschitz_iff {s T : ℝ} (hT : 0 < T)
+224:     {f : Fourier} {v : ℝ → Fourier} (hv : HomSobolevContinuousOn s T v) :
+225:     SourceLocalLipschitzAllTimes s T f v ↔ SourceLocalLipschitz s T f v := by
+226:   constructor
+227:   · rintro ⟨r, hr, C, hC, hb⟩
+228:     refine ⟨r, hr, C, hC, ?_⟩
+229:     intro g hgr hg hgf w hw hwC
+230:     filter_upwards [ae_restrict_mem measurableSet_Icc] with t ht
+231:     exact hb g hgr hg hgf w hw hwC t ht
+232:   · rintro ⟨r, hr, C, hC, hb⟩
+233:     refine ⟨r, hr, C, hC, ?_⟩
+234:     intro g hgr hg hgf w hw hwC
+235:     exact homogeneous_bound_of_ae hT (hv.sub hwC) (hb g hgr hg hgf w hw hwC)
+236: 
+237: 
+238: /-- Open and closed time intervals give exactly the same essential norms and
+239: representative classes for Lebesgue time measure. -/
+240: theorem source_time_measure_eq (a b : ℝ) :
+241:     volume.restrict (Set.Ioo a b) = volume.restrict (Set.Icc a b) :=
+242:   restrict_Ioo_eq_restrict_Icc
+243: 
+244: theorem CIntegral_congr_ae {a b : ℝ} (hab : a ≤ b)
+245:     {f f' g g' h h' : ℝ → Fourier}
+246:     (hf : f =ᵐ[volume.restrict (Set.Icc a b)] f')
+247:     (hg : g =ᵐ[volume.restrict (Set.Icc a b)] g')
+248:     (hh : h =ᵐ[volume.restrict (Set.Icc a b)] h') :
+249:     CIntegral a b f g h = CIntegral a b f' g' h' := by
+250:   funext k
+251:   unfold CIntegral
+252:   apply intervalIntegral.integral_congr_ae_restrict
+253:   rw [Set.uIoc_of_le hab, restrict_Ioc_eq_restrict_Icc]
+254:   filter_upwards [hf, hg, hh] with t ht ht' ht''
+255:   rw [ht, ht', ht'']
+256: 
+257: theorem weakTimeDerivative_congr_ae {a b : ℝ} (hab : a ≤ b)
+258:     {f g df dg : ℝ → Fourier}
+259:     (hf : f =ᵐ[volume.restrict (Set.Icc a b)] g)
+260:     (hd : df =ᵐ[volume.restrict (Set.Icc a b)] dg) :
+261:     WeakTimeDerivative a b f df ↔ WeakTimeDerivative a b g dg := by
+262:   have hint {F G : ℝ → Fourier} (he : F =ᵐ[volume.restrict (Set.Icc a b)] G)
+263:       (ψ : ℝ → ℂ) (k : ℤ) :
+264:       (∫ t : ℝ in a..b, ψ t * F t k) = (∫ t : ℝ in a..b, ψ t * G t k) := by
+265:     apply intervalIntegral.integral_congr_ae_restrict
+266:     rw [Set.uIoc_of_le hab, restrict_Ioc_eq_restrict_Icc]
+267:     filter_upwards [he] with t ht
+268:     rw [ht]
+269:   constructor
+270:   · intro h k φ hφ hcomp hsupp
+271:     rw [← hint hf (fun t => ((deriv φ t : ℝ) : ℂ)) k,
+272:       ← hint hd (fun t => ((φ t : ℝ) : ℂ)) k]
+273:     exact h k φ hφ hcomp hsupp
+274:   · intro h k φ hφ hcomp hsupp
+275:     rw [hint hf (fun t => ((deriv φ t : ℝ) : ℂ)) k,
+276:       hint hd (fun t => ((φ t : ℝ) : ℂ)) k]
+277:     exact h k φ hφ hcomp hsupp
+278: 
+279: 
+280: /-- The unnormalized source Hilbert norm is an actual rescaling of the complete
+281: weighted coefficient space, not a change to the target norm. -/
+282: theorem source_rescaled_norm {s : ℝ} (f : Sobolev s) :
+283:     ‖(sourceNormalization : ℂ) • f‖ = sourceNorm s f.val := by
+284:   rw [norm_smul, sobolev_norm]
+285:   simp only [Complex.norm_real, Real.norm_of_nonneg sourceNormalization_pos.le, sourceNorm]
+286: 
+287: theorem source_rescaled_memLp_iff {s : ℝ} (a b : ℝ) (f : ℝ → Sobolev s) :
+288:     MemLp ((sourceNormalization : ℂ) • f) ∞ (volume.restrict (Set.Icc a b)) ↔
+289:       MemLp f ∞ (volume.restrict (Set.Icc a b)) := by
+290:   have hκ : (sourceNormalization : ℂ) ≠ 0 := Complex.ofReal_ne_zero.mpr sourceNormalization_pos.ne'
+291:   constructor
+292:   · intro h
+293:     have hi := h.const_smul ((sourceNormalization : ℂ)⁻¹)
+294:     simpa only [smul_smul, inv_mul_cancel₀ hκ, one_smul] using hi
+295:   · intro h
+296:     exact h.const_smul (sourceNormalization : ℂ)
+297: 
+298: theorem source_rescaled_time_norm {s : ℝ} (a b : ℝ) (f : ℝ → Sobolev s) :
+299:     (eLpNorm ((sourceNormalization : ℂ) • f) ∞ (volume.restrict (Set.Icc a b))).toReal =
+300:       sourceLInfinity a b f := by
+301:   rw [eLpNorm_const_smul, ENNReal.toReal_mul]
+302:   simp only [toReal_enorm, Complex.norm_real, Real.norm_of_nonneg sourceNormalization_pos.le, sourceLInfinity]
+303: 
+304: 
+305: theorem step_grid_to_universal (h : LiWuStep52Grid) : LiWuStep52 := by
+306:   intro γ hγ hγ1 τ hτ n f hf hfm
+307:   let L := n + 1
+308:   have hL : 0 < L := by dsimp [L]; omega
+309:   have hLr : 0 < (L : ℝ) := by exact_mod_cast hL
+310:   have hT : 0 < (L : ℝ) * τ := mul_pos hLr hτ
+311:   have heq : ((L : ℝ) * τ) / (L : ℝ) = τ := by field_simp
+312:   have hh := h γ hγ hγ1 ((L : ℝ) * τ) hT L hL n (by dsimp [L]; omega) f hf hfm
+313:   simpa only [heq] using hh
+314: 
+315: theorem step_universal_to_grid (h : LiWuStep52) : LiWuStep52Grid := by
+316:   intro γ hγ hγ1 T hT L hL
+317:   dsimp only
+318:   intro n _ f hf hfm
+319:   exact h γ hγ hγ1 (T / (L : ℝ)) (div_pos hT (by exact_mod_cast hL)) n f hf hfm
+320: 
+321: theorem step_grid_iff_universal : LiWuStep52Grid ↔ LiWuStep52 :=
+322:   ⟨step_grid_to_universal, step_universal_to_grid⟩
+323: 
+324: theorem step_grid_to_historical (h : LiWuStep52Grid) : LiWuStepIdentity :=
+325:   step_to_historical (step_grid_to_universal h)
+326: 
+327: 
+328: /-- Restricting an upper norm bound to nonnegative values loses no original
+329: case: all data hypotheses in a negative-bound case are contradictory. -/
+330: theorem bit42_43_all_bounds_iff : BITTheorems42And43AllBounds ↔ BITTheorems42And43 := by
+331:   constructor
+332:   · intro h s hs M _ T hT r _
+333:     exact h s hs M T hT r
+334:   · intro h s hs M T hT r
+335:     by_cases hM : 0 ≤ M
+336:     · by_cases hr : 0 ≤ r
+337:       · exact h s hs M hM T hT r hr
+338:       · have impossible (f : Fourier) (he : homogeneousNorm s f = r) : False := by
+339:           have := homogeneousNorm_nonneg s f
+340:           linarith
+341:         refine ⟨0, le_rfl, ?_, ?_⟩
+342:         · intro m hm f v hfr hf he
+343:           exact False.elim (impossible f he)
+344:         · intro hs' f hfr hf he
+345:           exact False.elim (impossible f he)
+346:     · have impossible (f : Fourier) (he : homogeneousNorm 0 f ≤ M) : False := by
+347:         have := homogeneousNorm_nonneg 0 f
+348:         linarith
+349:       refine ⟨0, le_rfl, ?_, ?_⟩
+350:       · intro m hm f v hfr hf he hfm
+351:         exact False.elim (impossible f hfm)
+352:       · intro hs' f hfr hf he hfm
+353:         exact False.elim (impossible f hfm)
+354: 
+355: end BareModelCompletion
