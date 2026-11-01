@@ -74,9 +74,12 @@ Do not replace the numerical method or omit a hypothesis or conclusion.
 The PDF is the only initial mathematical input. Do not import an old draft,
 NL0, theorem list, source cache, proof, review, or result from another run.
 
-Produce NL0, complete independent Audit A, typed interfaces with independent
-semantic review, Lean proofs, standalone assembly/native trust inspection,
-and independent Audit B. Both phase profiles are gpt-6.1-sol / high / Standard,
+Produce NL0, complete independent Audit A, typed interfaces with
+pre-freeze independent semantic review, Lean proofs, standalone assembly/native trust inspection,
+and machine Audit B inheriting the reviewed frozen-interface authority.
+Use exceptional B-final semantic review only where the existing workflow requires it,
+retaining its actual warnings and qualifications.
+Both phase profiles are gpt-6.1-sol / high / Standard,
 without fallback. The explicitly selected per-case worker count is {workers},
 for local R reviews and later local Lean proofs in separate phases. NL0 author,
 global A, preparation/interfaces, assembly and B keep their serial lanes.
@@ -113,7 +116,8 @@ continuation separately; report unsupported blockers with their retained state.
 At termination validate existing bound result/A/B artifacts with the selected
 skill's validators, without launching an additional model or proof run. Keep
 structural acceptance, conditional local proofs, standalone assembly, native
-trust inspection and independent semantic B distinct. Report the complete
+trust inspection, pre-freeze semantic review, machine Audit B and any exceptional
+B-final review distinct. Report the complete
 target and every external-theorem correspondence, warnings, actual phase,
 wall time, phase times, known/partial tokens and missing coverage. Sum distinct
 responses only; cached/reasoning counts are subsets. Record requested and

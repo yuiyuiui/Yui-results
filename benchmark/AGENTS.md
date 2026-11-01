@@ -37,9 +37,12 @@ settings.json; use exactly that file's `skill_name` and `benchmark_name`.
 8. At termination inspect real gates, validate bound artifacts without a new
    model/proof run, confirm exact owned process/group exits, preserve
    FINAL_OUTCOME.json and delete this run's completed heartbeat. Report assembly,
-   native trust, complete independent A/B, target/external correspondence, source
+   native trust, independent Audit A, pre-freeze semantic review, machine Audit B,
+   any exceptional B-final review, target/external correspondence, source
    warnings, health and usage completeness separately. No unqualified PASS for
-   missing primary-source verification; compilation is not independent B.
+   missing primary-source verification. Normal machine Audit B inherits the
+   independently reviewed frozen semantics; compilation alone is not semantic
+   source-fidelity approval. Preserve any exceptional B-final qualifications.
 9. Compare results only when the human requests it and the selected runs are
    terminal. Keep that evaluation outside construction sessions. Shared host
    and account resource contention prevents an isolated-speed causal claim.

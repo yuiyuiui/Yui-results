@@ -132,7 +132,9 @@ class StartupTests(unittest.TestCase):
         self.assertTrue(prompt.startswith('Use $'+self.name))
         for value in [str(paper), str(self.install / 'SKILL.md'), self.config['target'],
                       str(BENCHMARK / 'results'), 'gpt-6.1-sol / high / Standard',
-                      'count is 20', '180-second', 'independent Audit B', '--detach',
+                      'count is 20', '180-second', 'pre-freeze independent semantic review',
+                      'machine Audit B', 'reviewed frozen-interface authority',
+                      'exceptional B-final semantic review', '--detach',
                       'every 600 seconds', 'warn.json/warn.md', 'start authorization']:
             self.assertIn(value, prompt)
         self.assertNotIn('including the unfiltered method', prompt)

@@ -107,8 +107,11 @@ owner provenance, outside measured mathematical inputs. Never overwrite an old
 run or store results in the installed skill. Preserve earlier stopped attempts
 and include every authorized continuation's time and known tokens.
 
-Keep complete Audit A, conditional local checks, standalone assembly, native
-trust inspection and independent semantic Audit B separate. Every external
+Keep independent Audit A, conditional local checks, standalone assembly, native
+trust inspection, pre-freeze independent semantic review and final machine Audit B
+separate. Normal machine Audit B checks closure and correspondence with the
+reviewed frozen interfaces; it does not call a new semantic reviewer. Retain
+the actual warnings and qualifications of any exceptional B-final review. Every external
 theorem and the full target, including hypotheses, need actual correspondence.
 Inaccessible originals require visible warn.json/warn.md and conditional status;
 a compiler pass or author self-report is not independent semantic acceptance.

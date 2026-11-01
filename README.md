@@ -9,7 +9,7 @@ To run these locally, complete [local setup](#local-setup), then use the [benchm
 | Method | Elapsed time | Observed input + output tokens | Results |
 | --- | ---: | ---: | --- |
 | **Yui** | **04:09:26** | **282,760,473** | [Full workflow](benchmark/results/20261031T212422Z-533b379994/) |
-| **Pure model, including supplement** | **11:06:03** | **248,548,201** | [Completed result](benchmark/pure-model-supplement/20261101T114606Z-5d3193f6/FINAL_REPORT.md) |
+| **Pure model, including supplement** | **11:06:03** | **248,548,201** | [Completed result](benchmark/pure-model-supplement/20261101T114606Z-5d3193f6/README.md) |
 
 **In this recorded benchmark, Yui completed the task 2.67× as fast as the pure model, using 13.8% more observed tokens.** The pure-model total includes its original attempt, supplementary repair and acceptance review.
 
@@ -41,7 +41,7 @@ Save the exact prompt, configuration, elapsed time, native token records and pro
 
 The three test problems cover different fields, at roughly advanced undergraduate to graduate level. They test Yui's reliability across the complete natural-language proof, review, Lean translation and final acceptance workflow.
 
-Only the latest full run for each problem is retained in the current checkout. All three used the same harness runtime as Yui commit [`d657ecb9`](https://github.com/yuiyuiui/Yui/commit/d657ecb93d7586d42c17e05cebbaa6cf7d194232), with **10 local workers per case**, and finished with `WORKFLOW-PASSED` and `AUDIT-B-PASSED`.
+Only the latest full run for each problem is retained in the current checkout. All three used the same harness runtime as Yui commit [`8734facd`](https://github.com/yuiyuiui/Yui/commit/8734facd59ff264c67497ca3c4ded85674daeddb), with **10 local workers per case**, and finished with `WORKFLOW-PASSED` and `AUDIT-B-PASSED`.
 
 | Problem | Elapsed time | Observed tokens | Result directory |
 | --- | ---: | ---: | --- |
@@ -73,10 +73,14 @@ Start now, detached. Save each fresh run under its problem's rigorous-proof/<run
 
 ## Local setup
 
-Use macOS with an authenticated Codex CLI and the [Yui runtime prerequisites](https://github.com/yuiyuiui/Yui#runtime), including Python, ripgrep and the pinned Lean 4.32.2/Mathlib environment. Install the **complete Yui repository** as `$rigorous-proof`, not just `SKILL.md`. To install the updated documentation and logo with the same harness runtime as the recorded runs, ask local Codex once:
+Use macOS with an authenticated Codex CLI and follow [Yui's local setup guide](https://github.com/yuiyuiui/Yui/blob/main/docs/setup.md) for the matching Code Mode helper, Python, ripgrep and pinned Lean 4.32.2/Mathlib environment. Install the **complete Yui repository** as `$rigorous-proof`, not just `SKILL.md`. To install the updated documentation with the same harness runtime as the recorded runs, ask local Codex once:
 
 ```text
-Install https://github.com/yuiyuiui/Yui at commit d657ecb93d7586d42c17e05cebbaa6cf7d194232 as the rigorous-proof skill in ~/.agents/skills/rigorous-proof, keeping the entire repository together. Check its README prerequisites and run its doctor check; do not start any proof jobs yet. If this exact skill is already installed, use that installation without creating a duplicate.
+Install https://github.com/yuiyuiui/Yui at commit 8734facd59ff264c67497ca3c4ded85674daeddb as the rigorous-proof skill in ~/.agents/skills/rigorous-proof, keeping the entire repository together. Check its README prerequisites and run its doctor check; do not start any proof jobs yet. If this exact skill is already installed, use that installation without creating a duplicate.
 ```
 
 The installation location follows [Codex's local skill documentation](https://developers.openai.com/codex/skills/#where-to-save-skills). Confirm `$rigorous-proof` is available before running a prompt; restart Codex if it is not detected. Fresh runs can produce different proofs, repair steps, timings and token totals.
+
+## License
+
+Original contributor-owned code, Lean proofs, documentation and records are available under the [MIT license](LICENSE). External papers, images, quoted statements and other third-party material retain their own terms; see [third-party notices](THIRD_PARTY_NOTICES.md).
