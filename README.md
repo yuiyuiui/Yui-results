@@ -41,7 +41,7 @@ Save the exact prompt, configuration, elapsed time, native token records and pro
 
 The three test problems cover different fields, at roughly advanced undergraduate to graduate level. They test Yui's reliability across the complete natural-language proof, review, Lean translation and final acceptance workflow.
 
-Only the latest full run for each problem is retained in the current checkout. All three used the same harness runtime as Yui commit [`8734facd`](https://github.com/yuiyuiui/Yui/commit/8734facd59ff264c67497ca3c4ded85674daeddb), with **10 local workers per case**, and finished with `WORKFLOW-PASSED` and `AUDIT-B-PASSED`.
+Only the latest full run for each problem is retained in the current checkout. All three used the same harness runtime as Yui commit [`adf65d18`](https://github.com/yuiyuiui/Yui/commit/adf65d18c810ffa9105e03a4b89b2fb5ad441e26), with **10 local workers per case**, and finished with `WORKFLOW-PASSED` and `AUDIT-B-PASSED`.
 
 | Problem | Elapsed time | Observed tokens | Result directory |
 | --- | ---: | ---: | --- |
@@ -76,7 +76,7 @@ Start now, detached. Save each fresh run under its problem's rigorous-proof/<run
 Use macOS with an authenticated Codex CLI and follow [Yui's local setup guide](https://github.com/yuiyuiui/Yui/blob/main/docs/setup.md) for the matching Code Mode helper, Python, ripgrep and pinned Lean 4.32.2/Mathlib environment. Install the **complete Yui repository** as `$rigorous-proof`, not just `SKILL.md`. To install the updated documentation with the same harness runtime as the recorded runs, ask local Codex once:
 
 ```text
-Install https://github.com/yuiyuiui/Yui at commit 8734facd59ff264c67497ca3c4ded85674daeddb as the rigorous-proof skill in ~/.agents/skills/rigorous-proof, keeping the entire repository together. Check its README prerequisites and run its doctor check; do not start any proof jobs yet. If this exact skill is already installed, use that installation without creating a duplicate.
+Install https://github.com/yuiyuiui/Yui at commit adf65d18c810ffa9105e03a4b89b2fb5ad441e26 as the rigorous-proof skill in ~/.agents/skills/rigorous-proof, keeping the entire repository together. Check its README prerequisites and run its doctor check; do not start any proof jobs yet. If this exact skill is already installed, use that installation without creating a duplicate.
 ```
 
 The installation location follows [Codex's local skill documentation](https://developers.openai.com/codex/skills/#where-to-save-skills). Confirm `$rigorous-proof` is available before running a prompt; restart Codex if it is not detected. Fresh runs can produce different proofs, repair steps, timings and token totals.
