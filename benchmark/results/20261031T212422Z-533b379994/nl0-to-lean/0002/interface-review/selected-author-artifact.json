@@ -1,0 +1,342 @@
+{
+  "header": "import Mathlib\nnoncomputable section\nopen scoped BigOperators ENNReal NNReal\nopen Filter MeasureTheory Set\nnamespace KdVPlan\nabbrev Coeff := ℤ → ℂ\nabbrev Path := ℝ → Coeff\ndef weight (s : ℝ) (k : ℤ) : ℝ := (1 + (k : ℝ)^2) ^ s\ndef MemH (s : ℝ) (f : Coeff) : Prop := Summable (fun k => weight s k * ‖f k‖^2)\ndef hn (s : ℝ) (f : Coeff) : ℝ := Real.sqrt (∑' k, weight s k * ‖f k‖^2)\ndef HB (s : ℝ) (f : Coeff) (C : ℝ) : Prop := MemH s f ∧ hn s f ≤ C\ndef ZeroMean (f : Coeff) : Prop := f 0 = 0\ndef RealField (f : Coeff) : Prop := ∀ k, f (-k) = star (f k)\ndef Data (s : ℝ) (f : Coeff) : Prop := MemH s f ∧ ZeroMean f ∧ RealField f\ndef Smooth (f : Coeff) : Prop := ∀ m : ℕ, MemH (m : ℝ) f\ndef dn (s : ℝ) (f : Coeff) : ℝ :=\n  Real.sqrt (∑' k : ℤ, if k = 0 then 0 else |(k : ℝ)| ^ (2*s) * ‖f k‖^2)\ndef MemDot (s : ℝ) (f : Coeff) : Prop :=\n  ZeroMean f ∧ Summable (fun k : ℤ => if k = 0 then 0 else |(k : ℝ)| ^ (2*s) * ‖f k‖^2)\ndef scale (c : ℂ) (f : Coeff) : Coeff := fun k => c * f k\ndef P (f : Coeff) : Coeff := fun k => if k = 0 then 0 else f k\ndef cutoff (N : ℝ) (f : Coeff) : Coeff := fun k => if |(k : ℝ)| ≤ N then f k else 0\ndef high (N : ℝ) (f : Coeff) : Coeff := f - cutoff N f\ndef S (t : ℝ) (f : Coeff) : Coeff := fun k => Complex.exp (Complex.I * (t * (k : ℝ)^3 : ℝ)) * f k\ndef invD (f : Coeff) : Coeff := fun k => if k = 0 then 0 else (Complex.I * (k : ℂ))⁻¹ * f k\ndef invD2 (f : Coeff) : Coeff := invD (invD f)\ndef dx (f : Coeff) : Coeff := fun k => Complex.I * (k : ℂ) * f k\ndef mul (f g : Coeff) : Coeff := fun k => ∑' j : ℤ, f j * g (k-j)\ndef cube (f : Coeff) : Coeff := mul (mul f f) f\ndef timeInt (a b : ℝ) (f : Path) : Coeff := fun k => ∫ t in a..b, f t k\ndef B (t : ℝ) (f g : Coeff) : Coeff := S (-t) (dx (mul (S t f) (S t g)))\ndef J (t : ℝ) (f g : Coeff) : Coeff := S (-t) (P (mul (S t (invD f)) (S t (invD g))))\ndef tri (a b : ℝ) (f g h : Path) : Coeff :=\n  timeInt a b (fun t => S (-t) (P (mul (P (mul (S t (f t)) (S t (g t)))) (S t (invD (h t))))))\ndef stage (a b : ℝ) (f g : Coeff) : Coeff := scale (1/2) (timeInt a b (fun t => B t f g))\ndef avg (τ : ℝ) (f : ℝ → ℂ) : ℂ := (τ : ℂ)⁻¹ * ∫ t in (0 : ℝ)..τ, f t\ndef phase (α t : ℝ) : ℂ := Complex.exp (-Complex.I * (t*α : ℝ))\ndef eta (τ α β : ℝ) : ℂ := avg τ (phase (α+β)) - avg τ (phase α) * avg τ (phase β)\ndef remWith (χ : ℤ → ℤ → ℤ → ℂ) (a τ : ℝ) (f g h : Coeff) : Coeff :=\n  fun k => if k = 0 then 0 else\n    -(τ : ℂ) / (18 * Complex.I * (k : ℂ)) *\n      ∑' z : ℤ × ℤ, if z.1 + z.2 = 0 then 0 else\n        let c := k-z.1-z.2\n        let α : ℝ := 3*(z.1 : ℝ)*(z.2 : ℝ)*(z.1+z.2 : ℤ)\n        let β : ℝ := 3*(k : ℝ)*(c : ℝ)*(z.1+z.2 : ℤ)\n        χ z.1 z.2 c * phase (α+β) a * eta τ α β * f z.1 * g z.2 * h c\ndef rem (a τ : ℝ) (f g h : Coeff) : Coeff := remWith (fun _ _ _ => 1) a τ f g h\ndef Ftau (τ : ℝ) (f : Coeff) : Coeff :=\n  scale (1/6) (P (mul (S τ (invD f)) (S τ (invD f)))) -\n  scale (1/6) (S τ (P (mul (invD f) (invD f))))\ndef Htau (τ : ℝ) (f : Coeff) : Coeff :=\n  scale (1/3) (P (mul (S τ (invD f)) (invD (Ftau τ f)))) +\n  scale ((τ : ℂ)/9 * mul f f 0) (S τ (invD f)) -\n  scale (1/54) (S (τ-τ) (invD (cube (S τ (invD f)))) - S (τ-0) (invD (cube (S 0 (invD f))))) -\n  scale (1/(27*(τ : ℂ)))\n    (S (τ-τ) (invD2 (mul (S (τ-τ) (invD2 (Ftau τ f))) (S τ (invD f)))) -\n     S (τ-0) (invD2 (mul (S (0-τ) (invD2 (Ftau τ f))) (S 0 (invD f)))))\ndef psi (τ : ℝ) (f : Coeff) : Coeff := S τ f + Ftau τ f + Htau τ f\ndef numerical (τ : ℝ) (f : Coeff) (n : ℕ) : Coeff := (psi τ)^[n] f\ndef twistedNum (τ : ℝ) (f : Coeff) (n : ℕ) : Coeff := S (-(n : ℝ)*τ) (numerical τ f n)\ndef pstar : ℝ := 23/14\ndef ag (γ : ℝ) : ℝ := if γ < 1/2 then 1/2-γ else if γ = 1/2 then 1/8 else 0\ndef ContH (s a b : ℝ) (f : Path) : Prop :=\n  (∀ t ∈ Icc a b, MemH s (f t)) ∧\n  ∀ t ∈ Icc a b, ∀ ε > 0, ∃ δ > 0, ∀ r ∈ Icc a b, |r-t| < δ → hn s (f r-f t) < ε\ndef SupH (s a b : ℝ) (f : Path) : ℝ := sSup {x | ∃ t ∈ Icc a b, x = hn s (f t)}\ndef UB (s a b : ℝ) (f : Path) (C : ℝ) : Prop := ∀ t ∈ Icc a b, HB s (f t) C\ndef UniformConv (s a b : ℝ) (f : ℕ → Path) (g : Path) : Prop :=\n  ∀ ε > 0, ∃ m : ℕ, ∀ n ≥ m, ∀ t ∈ Icc a b, HB s (f n t-g t) ε\ndef dt (f : Path) : Path := fun t k => deriv (fun r => f r k) t\ndef Weak (a b : ℝ) (f d : Path) : Prop :=\n  (∀ k, IntegrableOn (fun t => f t k) (Icc a b) ∧ IntegrableOn (fun t => d t k) (Icc a b)) ∧\n  ∀ φ : ℝ → ℝ, ContDiff ℝ ((⊤ : ℕ∞) : WithTop ℕ∞) φ → HasCompactSupport φ → Function.support φ ⊆ Ioo a b →\n    ∀ k, (∫ t in a..b, f t k * ((deriv φ t : ℝ) : ℂ)) = -(∫ t in a..b, d t k * (φ t : ℂ))\ndef EssH (s a b : ℝ) (f : Path) : ℝ :=\n  (essSup (fun t => ENNReal.ofReal (hn s (f t))) (volume.restrict (Icc a b))).toReal\ndef EssBound (s a b : ℝ) (f : Path) : Prop :=\n  (∀ k, AEStronglyMeasurable (fun t => f t k) (volume.restrict (Icc a b))) ∧\n  (∀ᵐ t ∂(volume.restrict (Icc a b)), MemH s (f t)) ∧\n  essSup (fun t => ENNReal.ofReal (hn s (f t))) (volume.restrict (Icc a b)) < (⊤ : ℝ≥0∞)\ndef Xnorm (a b : ℝ) (f d : Path) : ℝ := EssH 0 a b f + EssH (-pstar) a b d\ndef XPath (s a b : ℝ) (f d : Path) : Prop := Weak a b f d ∧ EssBound s a b f ∧ EssBound (-pstar) a b d\ndef SmoothOn (a b : ℝ) (f : Path) : Prop :=\n  (∀ k, ContDiffOn ℝ ((⊤ : ℕ∞) : WithTop ℕ∞) (fun t => f t k) (Icc a b)) ∧\n  ∀ m j : ℕ, ContH (m : ℝ) a b (fun t k => iteratedDerivWithin j (fun r => f r k) (Icc a b) t)\ndef Piecewise (a b : ℝ) (f : Path) : Prop :=\n  (∀ m : ℕ, ContH (m : ℝ) a b f) ∧\n  ∃ p : Finset ℝ, ∀ l r, a ≤ l → l < r → r ≤ b →\n    (∀ x ∈ p, x ∉ Ioo l r) → SmoothOn l r f\ndef RealPath (a b : ℝ) (f : Path) : Prop := ∀ t ∈ Icc a b, ZeroMean (f t) ∧ RealField (f t)\ndef F (a : ℝ) (f : Coeff) : Path := fun t => stage a t f f\ndef z (a : ℝ) (f : Coeff) : Path := fun t => f + F a f t\ndef Cst (a : ℝ) (f : Coeff) : Path := fun t => timeInt a t (fun s => B s f (F a f s))\ndef Qst (a : ℝ) (f : Coeff) : Path := fun t => scale (1/2) (timeInt a t (fun s => B s (F a f s) (F a f s)))\ndef Wst (a τ : ℝ) (f : Coeff) : Coeff := Qst a f (a+τ) + rem a τ f f f\ndef Vst (a τ : ℝ) (f : Coeff) : Path :=\n  fun t => f + F a f t + Cst a f t + Qst a f t - scale (((t-a)/τ : ℝ) : ℂ) (Wst a τ f)\ndef Yst (a τ : ℝ) (f : Coeff) : Path := fun t => Vst a τ f t-z a f t\ndef rho (a τ : ℝ) (f : Coeff) : Path :=\n  fun t => -timeInt a t (fun s => B s (Yst a τ f s) (z a f s)) -\n    scale (1/2) (timeInt a t (fun s => B s (Yst a τ f s) (Yst a τ f s))) -\n    scale (((t-a)/τ : ℝ) : ℂ) (Wst a τ f)\ndef gridIndex (τ t : ℝ) : ℕ := ⌊t/τ⌋₊\ndef interp (τ : ℝ) (f : Coeff) : Path :=\n  fun t => let n := gridIndex τ t; Vst ((n : ℝ)*τ) τ (twistedNum τ f n) t\ndef residual (τ : ℝ) (f : Coeff) : Path :=\n  fun t => let n := gridIndex τ t\n           (∑ j ∈ Finset.range n, rho ((j : ℝ)*τ) τ (twistedNum τ f j) (((j : ℝ)+1)*τ)) +\n           rho ((n : ℝ)*τ) τ (twistedNum τ f n) t\ndef Twist (u : Path) : Path := fun t => S (-t) (u t)\ndef SourceTwist (u : Path) : Path := fun t => S t (u t)\ndef sourceB (t : ℝ) (f g : Coeff) : Coeff := S t (dx (mul (S (-t) f) (S (-t) g)))\ndef IntegralEq (op : ℝ → Coeff → Coeff → Coeff) (a b : ℝ) (f : Coeff) (v : Path) : Prop :=\n  v a = f ∧ ∀ t ∈ Icc a b, v t = f + scale (1/2) (timeInt a t (fun s => op s (v s) (v s)))\ndef SourceSol (s T : ℝ) (f : Coeff) (u : Path) : Prop :=\n  ContH s 0 T u ∧ RealPath 0 T u ∧ IntegralEq sourceB 0 T f (SourceTwist u)\ndef KSol (s T : ℝ) (f : Coeff) (u : Path) : Prop :=\n  ContH s 0 T u ∧ RealPath 0 T u ∧ IntegralEq B 0 T f (Twist u)\ndef SameOn (a b : ℝ) (u v : Path) : Prop := ∀ t ∈ Icc a b, u t = v t\ndef SmoothApprox (s T : ℝ) (f : Coeff) (u : Path) : Prop :=\n  ∃ v : ℕ → Path, (∀ n : ℕ, KSol s T (cutoff (n : ℝ) f) (v n) ∧ SmoothOn 0 T (v n)) ∧ UniformConv s 0 T v u\ndef Exact (s T : ℝ) (f : Coeff) (u : Path) : Prop :=\n  KSol s T f u ∧ SmoothApprox s T f u ∧\n  ∀ v, KSol s T f v → SameOn 0 T u v\ndef linfty (f : Coeff) : ℝ := sSup {x | ∃ t : ℝ, x = ‖∑' k : ℤ, f k * Complex.exp (Complex.I * ((k : ℝ)*t : ℝ))‖}\ndef LinftyBound (f : Coeff) (C : ℝ) : Prop :=\n  BddAbove {x | ∃ t : ℝ, x = ‖∑' k : ℤ, f k * Complex.exp (Complex.I * ((k : ℝ)*t : ℝ))‖} ∧ linfty f ≤ C\nend KdVPlan\n\nnamespace KdVPlan\ndef SourceClass (T : ℝ) (f : Coeff) (u : Path) : Prop :=\n  RealPath 0 T u ∧ EssBound 0 0 T u ∧ IntegralEq sourceB 0 T f (SourceTwist u)\ndef DotCont (s a b : ℝ) (u : Path) : Prop :=\n  (∀ t ∈ Icc a b, MemDot s (u t)) ∧\n  ∀ t ∈ Icc a b, ∀ ε > 0, ∃ δ > 0, ∀ r ∈ Icc a b, |r-t| < δ → dn s (u r-u t) < ε\ndef DotUB (s a b : ℝ) (u : Path) (C : ℝ) : Prop := ∀ t ∈ Icc a b, MemDot s (u t) ∧ dn s (u t) ≤ C\ndef SourceApprox (s T : ℝ) (f : Coeff) (u : Path) : Prop :=\n  ∃ v : ℕ → Path, (∀ n : ℕ, SourceSol s T (cutoff (n : ℝ) f) (v n) ∧ SmoothOn 0 T (v n)) ∧\n    ∀ ε > 0, ∃ m : ℕ, ∀ n ≥ m, DotUB s 0 T (fun t => v n t-u t) ε\ndef galOp (m : ℕ) (t : ℝ) (f g : Coeff) : Coeff :=\n  cutoff (m : ℝ) (sourceB t (cutoff (m : ℝ) f) (cutoff (m : ℝ) g))\ndef Galerkin (m : ℕ) (T : ℝ) (f : Coeff) (z : Path) : Prop :=\n  DotCont 0 0 T z ∧ RealPath 0 T z ∧ IntegralEq (galOp m) 0 T f z\ndef dotPair (s : ℝ) (f g : Coeff) : ℂ :=\n  ∑' k : ℤ, if k = 0 then 0 else (|(k : ℝ)| ^ (2*s) : ℝ) * f k * star (g k)\ndef StrongTime (s q T : ℝ) (v : ℕ → Path) (u : Path) : Prop :=\n  (∀ n : ℕ, IntegrableOn (fun t => dn s (v n t-u t)^q) (Icc 0 T)) ∧\n  Tendsto (fun n : ℕ => ∫ t in (0 : ℝ)..T, dn s (v n t-u t)^q) atTop (nhds 0)\ndef WeakStarDot (s T : ℝ) (v : ℕ → Path) (u : Path) : Prop :=\n  ∀ φ : Path, (∀ k, AEStronglyMeasurable (fun t => φ t k) (volume.restrict (Icc 0 T))) →\n    (∀ᵐ t ∂(volume.restrict (Icc 0 T)), MemDot s (φ t)) →\n    IntegrableOn (fun t => dn s (φ t)) (Icc 0 T) →\n    Tendsto (fun n : ℕ => ∫ t in (0 : ℝ)..T, dotPair s (v n t) (φ t))\n      atTop (nhds (∫ t in (0 : ℝ)..T, dotPair s (u t) (φ t)))\ndef EFlow : Prop :=\n  (∀ s T : ℝ, 0 ≤ s → 0 < T →\n    (∀ f : Coeff, MemDot s f → RealField f → ∃ u : Path,\n      SourceSol s T f u ∧ DotCont s 0 T u ∧\n      (∀ v, SourceClass T f v → SameOn 0 T u v) ∧\n      (∀ t ∈ Icc 0 T, dn 0 (u t) = dn 0 f) ∧ SourceApprox s T f u) ∧\n    (∀ B₀ Bₛ : ℝ, 0 ≤ B₀ → 0 ≤ Bₛ → ∃ A K : ℝ, 0 ≤ A ∧ 0 ≤ K ∧\n      (∀ f u, MemDot s f → RealField f → dn 0 f ≤ B₀ → dn s f ≤ Bₛ →\n        SourceSol s T f u → DotUB s 0 T u A) ∧\n      (∀ f g u v, MemDot s f → MemDot s g → RealField f → RealField g →\n        dn 0 f ≤ B₀ → dn 0 g ≤ B₀ → dn s f ≤ Bₛ → dn s g ≤ Bₛ →\n        SourceSol s T f u → SourceSol s T g v →\n        DotUB s 0 T (fun t => u t-v t) (K*dn s (f-g))) ∧\n      (∀ f : Coeff, MemDot s f → RealField f → dn 0 f ≤ B₀ → dn s f ≤ Bₛ →\n        (∀ m : ℕ, ∃ z : Path, Galerkin m T f z) ∧\n        (∀ m z, Galerkin m T f z → DotUB s 0 T z A)) )) ∧\n  (∀ s T : ℝ, 0 < s → 0 < T → ∀ f : Coeff, MemDot s f → RealField f →\n    ∀ v : ℕ → Path, (∀ m : ℕ, Galerkin m T f (v m)) →\n    ∃ l : ℕ → ℕ, StrictMono l ∧ ∃ u : Path, SourceSol s T f u ∧\n      WeakStarDot s T (fun n => v (l n)) (SourceTwist u) ∧\n      ∀ σ q : ℝ, 0 < σ → σ < s → 1 < q → StrongTime σ q T (fun n => v (l n)) (SourceTwist u))\ndef EDependence : Prop :=\n  ∀ B₀ θ : ℝ, 0 ≤ B₀ → -1 < θ → θ ≤ 0 → ∃ C D : ℝ, 0 < C ∧ 0 < D ∧\n    ∀ T : ℝ, 0 < T → ∀ f g u v, Data 0 f → Data 0 g →\n      dn 0 f + dn 0 g ≤ B₀ → SourceSol 0 T f u → SourceSol 0 T g v →\n      DotUB θ 0 T (fun t => SourceTwist u t-SourceTwist v t) (C * D^T * dn θ (f-g)) ∧\n      DotUB θ 0 T (fun t => u t-v t) (C * D^T * dn θ (f-g))\ndef csrc : ℝ := Real.sqrt (2*Real.pi)\ndef srcN (s : ℝ) (f : Coeff) : ℝ := csrc * hn s f\ndef srcX (a b : ℝ) (f d : Path) : ℝ := csrc * Xnorm a b f d\ndef TriBound (c a b : ℝ) (f g h df dg dh : Path) : Prop :=\n  HB 0 (tri a b f g h) (c*(b-a)*Xnorm a b f df*Xnorm a b g dg*Xnorm a b h dh +\n    c*EssH (-pstar) a b f*EssH 0 a b g*EssH 0 a b h) ∧\n  HB 0 (tri a b f g h) (c*(b-a)*Xnorm a b f df*Xnorm a b g dg*Xnorm a b h dh +\n    c*EssH (-pstar) a b g*EssH 0 a b f*EssH 0 a b h) ∧\n  HB 0 (tri a b f g h) (c*(b-a)*Xnorm a b f df*Xnorm a b g dg*Xnorm a b h dh +\n    c*EssH (-pstar) a b h*EssH 0 a b f*EssH 0 a b g)\ndef SrcTriBound (c a b : ℝ) (f g h df dg dh : Path) : Prop :=\n  MemH 0 (tri a b f g h) ∧\n  (∀ i : Fin 3, let fs : Fin 3 → Path := ![f,g,h]\n                srcN 0 (tri a b f g h) ≤\n                  c*(b-a)*srcX a b f df*srcX a b g dg*srcX a b h dh +\n                  c*(csrc*EssH (-pstar) a b (fs i)) *\n                    ∏ j ∈ Finset.univ.erase i, csrc*EssH 0 a b (fs j))\ndef ETri : Prop :=\n  ∃ c : ℝ, 0 < c ∧\n    (∀ α a b : ℝ, 0 ≤ α → α ≤ 1 → 0 ≤ a → a ≤ b → b-a ≤ 1 →\n      ∀ f g h df dg dh : Path, XPath α a b f df → XPath α a b g dg → XPath α a b h dh →\n      SrcTriBound c a b f g h df dg dh) ∧\n    (∀ σ : ℝ, 0 ≤ σ → σ ≤ 1 → ∃ C : ℝ, 0 < C ∧\n      ∀ a b : ℝ, 0 ≤ a → a ≤ b → b-a ≤ 1 →\n      ∀ f g h : Coeff, MemH σ f → MemH σ g → MemH σ h →\n      MemH 0 (tri a b (fun _ => f) (fun _ => g) (fun _ => h)) ∧\n      srcN 0 (tri a b (fun _ => f) (fun _ => g) (fun _ => h)) ≤\n        C*(b-a)^σ*srcN σ f*srcN σ g*srcN σ h)\ndef beta0 (σ ε : ℝ) : ℝ := if σ < 1/2 then 2*σ-3/2 else if σ = 1/2 then -1/2-ε else σ-1\ndef aprod (σ ε : ℝ) : ℝ := if σ = 0 then 1/2+ε else if σ < 1/2 then 1/2-σ else if σ = 1/2 then ε else 0\ndef EStage : Prop :=\n  ∀ σ : ℝ, 0 < σ → σ ≤ 1 → ∃ ε₀ : ℝ, 0 < ε₀ ∧\n    ∀ ε : ℝ, 0 < ε → ε < ε₀ → ∀ β : ℝ, beta0 σ ε ≤ β → β ≤ 1+σ →\n    ∃ C : ℝ, 0 < C ∧ ∀ τ : ℝ, 0 < τ → ∀ n : ℕ, ∀ t : ℝ,\n    (n : ℝ)*τ ≤ t → t ≤ (n : ℝ)*τ+τ →\n    ∀ f g : Coeff, MemH σ f → MemH σ g → ZeroMean f → ZeroMean g →\n    MemH β (stage ((n : ℝ)*τ) t f g) ∧\n    srcN β (stage ((n : ℝ)*τ) t f g) ≤ C*τ^((1+σ-β)/(1+σ-beta0 σ ε))*srcN σ f*srcN σ g\ndef EProduct : Prop :=\n  ∀ σ : ℝ, 0 ≤ σ → σ ≤ 1 → ∃ ε₀ : ℝ, 0 < ε₀ ∧\n    ∀ ε : ℝ, 0 < ε → ε < ε₀ → ∃ C : ℝ, 0 < C ∧\n    ∀ f g : Coeff, MemH σ f → MemH (aprod σ ε) g →\n    MemH 0 (mul f g) ∧ srcN 0 (mul f g) ≤ C*srcN σ f*srcN (aprod σ ε) g\ndef Endpoint : Prop :=\n  ∀ τ : ℝ, 0 < τ → ∀ n : ℕ, ∀ f : Coeff, Data 0 f → Smooth f →\n    S (-((n : ℝ)+1)*τ) (psi τ (S ((n : ℝ)*τ) f)) =\n      f + stage ((n : ℝ)*τ) (((n : ℝ)+1)*τ) f f +\n      Cst ((n : ℝ)*τ) f (((n : ℝ)+1)*τ) - rem ((n : ℝ)*τ) τ f f f\nend KdVPlan\n\nnamespace KdVPlan\ndef FromLP (s : ℝ) (x : lp (fun _ : ℤ => ℂ) 2) : Coeff := fun k => (weight (-s/2) k : ℂ)*x k\ndef SeqConv (s : ℝ) (f : ℕ → Coeff) (g : Coeff) : Prop :=\n  MemH s g ∧ ∀ ε > 0, ∃ m : ℕ, ∀ n ≥ m, HB s (f n-g) ε\ndef SobolevInfrastructure : Prop :=\n  (∀ s f, MemH s f ↔ ∃ x : lp (fun _ : ℤ => ℂ) 2, f = FromLP s x) ∧\n  (∀ s (x : lp (fun _ : ℤ => ℂ) 2), hn s (FromLP s x) = ‖x‖) ∧\n  (∀ s f, MemH s f → SeqConv s (fun n : ℕ => cutoff (n : ℝ) f) f) ∧\n  (∀ q r f, q ≤ r → MemH r f → HB q f (hn r f)) ∧\n  (∀ s (f : ℕ → Coeff), (∀ n, MemH s (f n)) →\n    (∀ ε > 0, ∃ m : ℕ, ∀ n ≥ m, ∀ j ≥ m, HB s (f n-f j) ε) →\n    ∃ g, SeqConv s f g)\ndef MOf (T γ : ℝ) (u : Path) : ℝ := 1+SupH γ 0 T (Twist u)\ndef FlowOutput (T γ R : ℝ) : Prop :=\n  (∃ A : ℝ, 0 ≤ A ∧ ∀ f : Coeff, Data γ f → hn γ f ≤ R →\n    ∃ u : Path, Exact γ T f u ∧ UB γ 0 T u A ∧ UB γ 0 T (Twist u) A ∧ MOf T γ u ≤ 1+A ∧\n      (Smooth f → SmoothOn 0 T u ∧ SmoothOn 0 T (Twist u) ∧\n        ∀ t ∈ Ioo 0 T, dt (Twist u) t = scale (1/2) (B t (Twist u t) (Twist u t)))) ∧\n  (∃ K : ℝ, 0 ≤ K ∧ ∀ f g : Coeff, Data 0 f → Data 0 g → hn 0 f+hn 0 g ≤ 2*R →\n    ∃ u v : Path, Exact 0 T f u ∧ Exact 0 T g v ∧\n      UB 0 0 T (fun t => u t-v t) (K*hn 0 (f-g)) ∧\n      UB 0 0 T (fun t => Twist u t-Twist v t) (K*hn 0 (f-g)))\ndef CovarianceBounds : Prop :=\n  ∀ τ α β : ℝ, 0 < τ →\n    (α*β = 0 → eta τ α β = 0) ∧\n    (α*β ≠ 0 → ‖eta τ α β‖ ≤ 2*min |α/β| |β/α| ∧\n      ‖eta τ α β‖ ≤ τ*min |α| |β|)\ndef n1 (a b c d : ℤ) : ℝ := max (max |(a : ℝ)| |(b : ℝ)|) (max |(c : ℝ)| |(d : ℝ)|)\ndef n2 (a b c d : ℤ) : ℝ :=\n  max (min |(a : ℝ)| |(b : ℝ)|)\n    (max (min |(a : ℝ)| |(c : ℝ)|)\n      (max (min |(a : ℝ)| |(d : ℝ)|)\n        (max (min |(b : ℝ)| |(c : ℝ)|) (max (min |(b : ℝ)| |(d : ℝ)|) (min |(c : ℝ)| |(d : ℝ)|)))))\ndef n3 (a b c d : ℤ) : ℝ :=\n  min (max |(a : ℝ)| |(b : ℝ)|)\n    (min (max |(a : ℝ)| |(c : ℝ)|)\n      (min (max |(a : ℝ)| |(d : ℝ)|)\n        (min (max |(b : ℝ)| |(c : ℝ)|) (min (max |(b : ℝ)| |(d : ℝ)|) (max |(c : ℝ)| |(d : ℝ)|)))))\ndef Interaction (a b c d : ℤ) : Prop := a+b+c+d = 0 ∧ a ≠ 0 ∧ b ≠ 0 ∧ c ≠ 0 ∧ d ≠ 0\ndef NonnegL2 (x : ℤ → ℝ) : Prop := x 0 = 0 ∧ (∀ k, 0 ≤ x k) ∧ Summable (fun k => x k ^ 2)\ndef seqN (x : ℤ → ℝ) : ℝ := Real.sqrt (∑' k, x k^2)\ndef quadTerm (A : Set (ℤ × ℤ × ℤ)) (x₁ x₂ x₃ x₄ : ℤ → ℝ) (z : ℤ × ℤ × ℤ) : ℝ :=\n  let a := z.1; let b := z.2.1; let c := z.2.2; let d := -a-b-c\n  @ite ℝ (z ∈ A ∧ Interaction a b c d) (Classical.propDecidable _) (x₁ a*x₂ b*x₃ c*x₄ d/n3 a b c d) 0\ndef FourFrequency : Prop :=\n  (∀ a b c d : ℤ, Interaction a b c d →\n    n1 a b c d ≤ 3*n2 a b c d ∧\n    (1/|(d : ℝ)|)*min (|(a : ℝ)*(b : ℝ)|/|(c : ℝ)*(d : ℝ)| : ℝ) (|(c : ℝ)*(d : ℝ)|/|(a : ℝ)*(b : ℝ)| : ℝ) ≤ 3/n3 a b c d ∧\n    |(a : ℝ)+(b : ℝ)| / max (|(a : ℝ)*(b : ℝ)| : ℝ) (|(c : ℝ)*(d : ℝ)| : ℝ) ≤ 6/n3 a b c d) ∧\n  ∃ C : ℝ, 0 < C ∧ ∀ x₁ x₂ x₃ x₄ : ℤ → ℝ,\n    NonnegL2 x₁ → NonnegL2 x₂ → NonnegL2 x₃ → NonnegL2 x₄ →\n    ∀ A : Set (ℤ × ℤ × ℤ), Summable (quadTerm A x₁ x₂ x₃ x₄) ∧\n      (∑' z, quadTerm A x₁ x₂ x₃ x₄ z) ≤ C*seqN x₁*seqN x₂*seqN x₃*seqN x₄ ∧\n      (∑' z, quadTerm A x₁ x₂ x₃ x₄ z) =\n        sSup {r | ∃ F : Finset (ℤ × ℤ × ℤ), r = ∑ z ∈ F, quadTerm A x₁ x₂ x₃ x₄ z}\ndef Poly (f : Coeff) : Prop := (Function.support f).Finite\ndef TriLinearOn (s : ℝ) (A : Coeff → Coeff → Coeff → Coeff) : Prop :=\n  ∀ f f' g g' h h' : Coeff,\n    MemH s f → MemH s f' → MemH s g → MemH s g' → MemH s h → MemH s h' →\n    ZeroMean f → ZeroMean f' → ZeroMean g → ZeroMean g' → ZeroMean h → ZeroMean h' →\n    A (f+f') g h = A f g h + A f' g h ∧\n    A f (g+g') h = A f g h + A f g' h ∧\n    A f g (h+h') = A f g h + A f g h' ∧\n    ∀ z : ℂ, A (scale z f) g h = scale z (A f g h) ∧\n      A f (scale z g) h = scale z (A f g h) ∧ A f g (scale z h) = scale z (A f g h)\ndef BoundedTri (s : ℝ) (A : Coeff → Coeff → Coeff → Coeff) : Prop :=\n  TriLinearOn s A ∧ ∃ C : ℝ, 0 ≤ C ∧ ∀ f g h,\n    MemH s f → MemH s g → MemH s h → ZeroMean f → ZeroMean g → ZeroMean h →\n    HB 0 (A f g h) (C*hn s f*hn s g*hn s h)\ndef RemainderBound : Prop :=\n  (∀ σ : ℝ, 0 ≤ σ → σ ≤ 1 → ∃ C : ℝ, 0 < C ∧\n    ∀ χ : ℤ → ℤ → ℤ → ℂ, (∀ a b c, ‖χ a b c‖ ≤ 1) →\n    ∀ a τ : ℝ, 0 ≤ a → 0 < τ →\n      BoundedTri σ (remWith χ a τ) ∧\n      (∀ f g h, MemH σ f → MemH σ g → MemH σ h → ZeroMean f → ZeroMean g → ZeroMean h →\n        HB 0 (remWith χ a τ f g h) (C*τ^(1+σ)*hn σ f*hn σ g*hn σ h)) ∧\n      (∀ A : Coeff → Coeff → Coeff → Coeff, BoundedTri σ A →\n        (∀ f g h, Poly f → Poly g → Poly h → ZeroMean f → ZeroMean g → ZeroMean h →\n          A f g h = remWith χ a τ f g h) →\n        ∀ f g h, MemH σ f → MemH σ g → MemH σ h → ZeroMean f → ZeroMean g → ZeroMean h →\n          A f g h = remWith χ a τ f g h))\ndef MultiplierBound : Prop :=\n  (∀ σ τ : ℝ, 0 ≤ σ → σ ≤ 1 → 0 < τ →\n    ∀ a b c : ℤ, let k := a+b+c\n    Interaction a b c (-k) → a+b ≠ 0 →\n      ‖eta τ (3*(a : ℝ)*(b : ℝ)*(a+b : ℤ)) (3*(k : ℝ)*(c : ℝ)*(a+b : ℤ))‖ /\n        (|(k : ℝ)| * |(a : ℝ)*(b : ℝ)*(c : ℝ)|^σ) ≤ 6^(1-σ)*18^σ*τ^σ/n3 a b c (-k))\ndef MixedRemainderBound : Prop :=\n  (∀ σ M : ℝ, 0 < σ → σ ≤ 1 → 0 ≤ M → ∃ C : ℝ, 0 < C ∧\n    ∀ a τ : ℝ, 0 ≤ a → 0 < τ → τ ≤ 1 → ∀ f w : Coeff,\n    MemH 0 f → ZeroMean f → MemH σ w → ZeroMean w → hn σ w ≤ M → hn 0 (f-w) ≤ 1 →\n    HB 0 (rem a τ f f f) (C*τ*(τ^σ+hn 0 (f-w))))\ndef RemOutput : Prop := RemainderBound ∧ MultiplierBound ∧ MixedRemainderBound\ndef ContinuousMapH (s r : ℝ) (A : Coeff → Coeff) (guard : Coeff → Prop) : Prop :=\n  ∀ f, MemH s f → guard f → MemH r (A f) ∧\n    ∀ ε > 0, ∃ δ > 0, ∀ g, MemH s g → guard g → hn s (g-f) < δ → hn r (A g-A f) < ε\ndef NormalForm : Prop :=\n  (∀ t f g, MemH 0 f → MemH 0 g → ZeroMean f → ZeroMean g → J t f g = J t g f) ∧\n  (∀ a b f g, a ≤ b → Piecewise a b f → Piecewise a b g →\n    (∀ t ∈ Icc a b, ZeroMean (f t)) → (∀ t ∈ Icc a b, ZeroMean (g t)) →\n    timeInt a b (fun t => B t (f t) (g t)) =\n      scale (1/3) (J b (f b) (g b)-J a (f a) (g a)) -\n      scale (1/3) (timeInt a b (fun t => J t (dt f t) (g t)+J t (f t) (dt g t)))) ∧\n  (∀ a b f g h, a ≤ b → Piecewise a b f → Piecewise a b g → Piecewise a b h →\n    (∀ t ∈ Icc a b, ZeroMean (f t) ∧ ZeroMean (g t) ∧ ZeroMean (h t)) →\n    timeInt a b (fun t => J t (B t (f t) (g t)) (h t)) = tri a b f g h) ∧\n  (∀ a t f g, a ≤ t → MemH 0 f → MemH 0 g → ZeroMean f → ZeroMean g →\n    stage a t f g = scale (1/6) (J t f g-J a f g))\ndef FourierApprox2 (s r q : ℝ) (A : Coeff → Coeff → Coeff) : Prop :=\n  ∀ f g, MemH s f → MemH r g →\n    SeqConv q (fun n : ℕ => A (cutoff (n : ℝ) f) (cutoff (n : ℝ) g)) (A f g)\ndef BilinearExtensions : Prop :=\n  (∀ f, MemH 0 f → SeqConv 1 (fun n : ℕ => invD (cutoff (n : ℝ) f)) (invD f)) ∧\n  FourierApprox2 1 1 1 mul ∧\n  (∀ t : ℝ, FourierApprox2 0 0 (-pstar) (B t) ∧ FourierApprox2 0 0 1 (J t)) ∧\n  FourierApprox2 0 0 0 (fun f g => invD (P (mul f g)))\ndef BasicBilinearBounds : Prop :=\n  (∃ C : ℝ, 0 < C ∧\n    (∀ f, MemH 0 f → ZeroMean f → HB 1 (invD f) (C*hn 0 f) ∧ LinftyBound (invD f) (C*hn 0 f)) ∧\n    (∀ f g, MemH 1 f → MemH 1 g → HB 1 (mul f g) (C*hn 1 f*hn 1 g)) ∧\n    (∀ t f g, MemH 0 f → MemH 0 g →\n      HB (-pstar) (B t f g) (C*hn 0 f*hn 0 g) ∧ HB 1 (J t f g) (C*hn 0 f*hn 0 g) ∧\n      HB 0 (invD (P (mul f g))) (C*hn 0 f*hn 0 g)) ∧\n    (∀ t A g, ZeroMean A → MemH 0 (invD A) → MemH 0 g →\n      HB (-pstar) A (hn 0 (invD A)) ∧ HB 0 (J t A g) (C*hn 0 (invD A)*hn 0 g))) ∧ BilinearExtensions\ndef BilinearOutput : Prop := BasicBilinearBounds ∧ NormalForm\ndef FourierApprox3 (s : ℝ) (A : Coeff → Coeff → Coeff → Coeff) : Prop :=\n  ∀ f g h, MemH s f → MemH s g → MemH s h → ZeroMean f → ZeroMean g → ZeroMean h →\n    SeqConv 0 (fun n : ℕ => A (cutoff (n : ℝ) f) (cutoff (n : ℝ) g) (cutoff (n : ℝ) h)) (A f g h)\ndef XConvergence (a b : ℝ) (v : ℕ → Path) (u du : Path) : Prop :=\n  XPath 0 a b u du ∧\n  (∀ n : ℕ, Piecewise a b (v n) ∧ XPath 0 a b (fun t => v n t-u t) (fun t => dt (v n) t-du t)) ∧\n  ∀ ε > 0, ∃ m : ℕ, ∀ n ≥ m,\n    Xnorm a b (fun t => v n t-u t) (fun t => dt (v n) t-du t) < ε\ndef TriExtensions : Prop :=\n  (∀ σ a b : ℝ, 0 ≤ σ → σ ≤ 1 → 0 ≤ a → a ≤ b → b-a ≤ 1 →\n    FourierApprox3 σ (fun f g h => tri a b (fun _ => f) (fun _ => g) (fun _ => h))) ∧\n  (∀ a b : ℝ, 0 ≤ a → a ≤ b → b-a ≤ 1 →\n    ∀ (fn gn hn : ℕ → Path) (f g h df dg dh : Path),\n    XConvergence a b fn f df → XConvergence a b gn g dg → XConvergence a b hn h dh →\n    (∀ n : ℕ, ∀ t ∈ Icc a b, ZeroMean (fn n t) ∧ ZeroMean (gn n t) ∧ ZeroMean (hn n t)) →\n    SeqConv 0 (fun n : ℕ => tri a b (fn n) (gn n) (hn n)) (tri a b f g h))\ndef StageExtensions (γ : ℝ) : Prop :=\n  ∀ a t : ℝ, 0 ≤ a → a ≤ t → t ≤ a+1 →\n    ∀ w, MemH γ w → ZeroMean w →\n      SeqConv (ag γ) (fun n : ℕ => stage a t (cutoff (n : ℝ) w) (cutoff (n : ℝ) w)) (stage a t w w) ∧\n      SeqConv (1+γ) (fun n : ℕ => stage a t (cutoff (n : ℝ) w) (cutoff (n : ℝ) w)) (stage a t w w)\ndef NormalizedTri : Prop :=\n  (∃ C : ℝ, 0 < C ∧ ∀ a b : ℝ, 0 ≤ a → a ≤ b → b-a ≤ 1 →\n    ∀ f g h : Path, Piecewise a b f → Piecewise a b g → Piecewise a b h →\n    (∀ t ∈ Icc a b, ZeroMean (f t) ∧ ZeroMean (g t) ∧ ZeroMean (h t)) →\n    TriBound C a b f g h (dt f) (dt g) (dt h)) ∧\n  (∀ σ : ℝ, 0 ≤ σ → σ ≤ 1 → ∃ C : ℝ, 0 < C ∧\n    ∀ a b : ℝ, 0 ≤ a → a ≤ b → b-a ≤ 1 → ∀ f g h,\n    MemH σ f → MemH σ g → MemH σ h → ZeroMean f → ZeroMean g → ZeroMean h →\n    HB 0 (tri a b (fun _ => f) (fun _ => g) (fun _ => h)) (C*(b-a)^σ*hn σ f*hn σ g*hn σ h)) ∧ TriExtensions\ndef ProductOutput (γ : ℝ) : Prop :=\n  (0 ≤ ag γ ∧ ag γ < 1) ∧\n  (∃ C : ℝ, 0 < C ∧ ∀ f g, MemH γ f → MemH (ag γ) g → HB 0 (mul f g) (C*hn γ f*hn (ag γ) g))\ndef StageEstimates (γ : ℝ) : Prop :=\n  (∀ M : ℝ, 0 ≤ M → ∃ C : ℝ, 0 < C ∧ ∀ a τ t : ℝ,\n    0 ≤ a → 0 < τ → τ ≤ 1 → a ≤ t → t ≤ a+τ →\n    ∀ w, MemH γ w → ZeroMean w → hn γ w ≤ M →\n    HB (ag γ) (stage a t w w) (C*τ^γ) ∧ HB (1+γ) (stage a t w w) C) ∧ StageExtensions γ\ndef ContinuousOutput (γ : ℝ) : Prop := NormalizedTri ∧ ProductOutput γ ∧ StageEstimates γ\ndef SchemeOutput : Prop :=\n  (∀ τ : ℝ, 0 < τ →\n    ContinuousMapH 0 0 (psi τ) (fun f => ZeroMean f ∧ RealField f) ∧\n    ContinuousMapH 0 1 (Ftau τ) ZeroMean ∧\n    (∀ f, Data 0 f → Data 0 (psi τ f) ∧ (Smooth f → Smooth (psi τ f))) ∧\n    (∀ n : ℕ, ContinuousMapH 0 0 (fun f => numerical τ f n) (fun f => ZeroMean f ∧ RealField f))) ∧\n  Endpoint ∧\n  (∀ (τ : ℝ) (f : Coeff) (n : ℕ), 0 < τ → Data 0 f → Smooth f →\n    Vst ((n : ℝ)*τ) τ (twistedNum τ f n) ((n : ℝ)*τ) = twistedNum τ f n ∧\n    Vst ((n : ℝ)*τ) τ (twistedNum τ f n) (((n : ℝ)+1)*τ) = twistedNum τ f (n+1)) ∧\n  (∀ (τ : ℝ) (f : Coeff) (L : ℕ), 0 < τ → Data 0 f → Smooth f →\n    Piecewise 0 ((L : ℝ)*τ) (interp τ f) ∧ RealPath 0 ((L : ℝ)*τ) (interp τ f) ∧\n    ∀ n : ℕ, n ≤ L → interp τ f ((n : ℝ)*τ) = twistedNum τ f n)\nend KdVPlan\n\nnamespace KdVPlan\ndef localQ (γ τ : ℝ) (f w : Coeff) : ℝ := τ^γ+hn 0 (f-w)\ndef StepData (γ M a τ : ℝ) (f w : Coeff) : Prop :=\n  1 ≤ M ∧ 0 ≤ a ∧ 0 < τ ∧ τ ≤ 1 ∧ Data 0 f ∧ Data γ w ∧ Smooth f ∧ Smooth w ∧\n  hn γ w ≤ M ∧ hn 0 (f-w) ≤ 1\ndef LocalBounds (C γ M a τ : ℝ) (f w : Coeff) : Prop :=\n  let q := localQ γ τ f w\n  hn 0 f ≤ M+1 ∧ q ≤ 2 ∧\n  UB 1 a (a+τ) (F a f) C ∧\n  UB 1 a (a+τ) (fun t => F a f t-stage a t w w) (C*hn 0 (f-w)) ∧\n  (∀ t ∈ Icc a (a+τ), hn (ag γ) (F a f t)+hn 0 (F a f t) ≤ C*q ∧ MemH (ag γ) (F a f t)) ∧\n  XPath 0 a (a+τ) (z a f) (dt (z a f)) ∧ Xnorm a (a+τ) (z a f) (dt (z a f)) ≤ C ∧\n  UB 0 a (a+τ) (fun t => B t (F a f t) (F a f t)) (C*q) ∧\n  (∀ t ∈ Icc a (a+τ), MemH 0 (Qst a f t) ∧ MemH 0 (Wst a τ f) ∧\n    hn 0 (Qst a f t)+hn 0 (Wst a τ f) ≤ C*τ*q) ∧\n  UB 0 a (a+τ) (fun t => invD (B t f (F a f t))) (C*q) ∧\n  (∀ t ∈ Ioo a (a+τ), dt (Yst a τ f) t = B t f (F a f t)+\n    scale (1/2) (B t (F a f t) (F a f t))-scale ((τ : ℂ)⁻¹) (Wst a τ f)) ∧\n  UB 0 a (a+τ) (fun t => invD (Yst a τ f t)) (C*τ*q) ∧\n  (∀ᵐ t ∂(volume.restrict (Icc a (a+τ))), HB 0 (invD (dt (Yst a τ f) t)) (C*q)) ∧\n  (∀ t ∈ Icc a (a+τ), Cst a f t = scale (1/3) (J t f (F a f t)) -\n    scale (1/6) (tri a t (fun _ => f) (fun _ => f) (fun _ => f))) ∧\n  UB 0 a (a+τ) (Yst a τ f) (C*q) ∧\n  XPath 0 a (a+τ) (Yst a τ f) (dt (Yst a τ f)) ∧\n  Xnorm a (a+τ) (Yst a τ f) (dt (Yst a τ f)) ≤ C*q ∧\n  UB (-pstar) a (a+τ) (Yst a τ f) (C*τ*q)\ndef StageOutput (γ : ℝ) : Prop :=\n  ∀ M : ℝ, 1 ≤ M → ∃ C : ℝ, 0 < C ∧ ∀ a τ f w, StepData γ M a τ f w → LocalBounds C γ M a τ f w\ndef TwistedExact (γ M H : ℝ) (v : Path) : Prop :=\n  SmoothOn 0 H v ∧ RealPath 0 H v ∧ UB γ 0 H v M ∧\n  ∀ t ∈ Ioo 0 H, dt v t = scale (1/2) (B t (v t) (v t))\ndef Traj (γ M τ : ℝ) (L : ℕ) (f : Coeff) (v : Path) : Prop :=\n  Data 0 f ∧ Smooth f ∧ TwistedExact γ M ((L : ℝ)*τ) v\ndef GridInterval (τ : ℝ) (L : ℕ) (a b : ℝ) : Prop :=\n  0 ≤ a ∧ a ≤ b ∧ b ≤ (L : ℝ)*τ ∧ ∃ n : ℕ, n ≤ L ∧ a = (n : ℝ)*τ\ndef err (τ : ℝ) (f : Coeff) (v : Path) : Path := fun t => v t-interp τ f t\ndef enorm (a b τ : ℝ) (f : Coeff) (v : Path) : ℝ := SupH 0 a b (err τ f v)\ndef StepResidual (C γ a τ : ℝ) (f w : Coeff) : Prop :=\n  let q := localQ γ τ f w\n  (∀ t ∈ Ioo a (a+τ),\n    dt (Vst a τ f) t = scale (1/2) (B t (Vst a τ f t) (Vst a τ f t))+dt (rho a τ f) t ∧\n    dt (rho a τ f) t = -B t (Yst a τ f t) (z a f t) -\n      scale (1/2) (B t (Yst a τ f t) (Yst a τ f t))-scale ((τ : ℂ)⁻¹) (Wst a τ f)) ∧\n  UB 0 a (a+τ) (rho a τ f) (C*τ*q) ∧\n  EssBound (-pstar) a (a+τ) (dt (rho a τ f)) ∧ EssH (-pstar) a (a+τ) (dt (rho a τ f)) ≤ C*q\ndef AccResidual (C γ τ : ℝ) (L : ℕ) (f : Coeff) (v : Path) : Prop :=\n  Piecewise 0 ((L : ℝ)*τ) (interp τ f) ∧ RealPath 0 ((L : ℝ)*τ) (interp τ f) ∧\n  Weak 0 ((L : ℝ)*τ) (interp τ f)\n    (fun t => scale (1/2) (B t (interp τ f t) (interp τ f t))+dt (residual τ f) t) ∧\n  residual τ f 0 = 0 ∧\n  (∀ n : ℕ, n ≤ L → interp τ f ((n : ℝ)*τ) = twistedNum τ f n) ∧\n  ∀ a b : ℝ, GridInterval τ L a b → b-a ≤ 1 → enorm a b τ f v ≤ 1 →\n    UB 0 a b (fun t => residual τ f t-residual τ f a)\n      (C*(b-a+τ)*(τ^γ+enorm a b τ f v)) ∧\n    EssBound (-pstar) a b (dt (residual τ f)) ∧\n    EssH (-pstar) a b (dt (residual τ f)) ≤ C*(τ^γ+enorm a b τ f v) ∧\n    XPath 0 a b (err τ f v) (dt (err τ f v)) ∧\n    Xnorm a b (err τ f v) (dt (err τ f v)) ≤ C*(τ^γ+enorm a b τ f v) ∧\n    XPath 0 a b v (dt v) ∧ XPath 0 a b (interp τ f) (dt (interp τ f)) ∧\n    Xnorm a b v (dt v)+Xnorm a b (interp τ f) (dt (interp τ f)) ≤ C\ndef ResidualOutput (γ : ℝ) : Prop :=\n  ∀ M : ℝ, 1 ≤ M → ∃ C : ℝ, 0 < C ∧\n    (∀ a τ f w, StepData γ M a τ f w → StepResidual C γ a τ f w) ∧\n    (∀ (τ : ℝ) (L : ℕ) (f : Coeff) (v : Path), 0 < τ → τ ≤ 1 →\n      Traj γ M τ L f v → AccResidual C γ τ L f v)\ndef errorF (a τ : ℝ) (f : Coeff) (v : Path) : Path :=\n  fun t => timeInt a t (fun s => B s (err τ f v s) (v s-scale (1/2) (err τ f v s)))\ndef StabilityEstimates (C γ τ a b : ℝ) (f : Coeff) (v : Path) : Prop :=\n  let e := err τ f v\n  let g : Path := fun t => v t-scale (1/2) (e t)\n  let E := enorm a b τ f v\n  let h := b-a\n  (∀ t ∈ Icc a b, e t = e a + errorF a τ f v t-(residual τ f t-residual τ f a)) ∧\n  (∀ N : ℝ, 2 ≤ N →\n    UB 0 a b (fun t => cutoff N (errorF a τ f v t)) (C*N^2*h*E) ∧\n    (∀ t ∈ Icc a b, errorF a τ f v t =\n      scale (1/3) (J t (e t) (g t)-J a (e a) (g a)) -\n      scale (1/3) (tri a t e g (interp τ f)) -\n      scale (1/6) (tri a t v v e) +\n      scale (1/3) (timeInt a t (fun s => J s (dt (residual τ f) s) (interp τ f s)))) ∧\n    UB 0 a b (fun t => high N (errorF a τ f v t))\n      (C*(h+τ)*τ^γ+C*(h+τ+N⁻¹+N^(-pstar))*E) ∧\n    E ≤ hn 0 (e a)+C*(h+τ)*τ^γ+C*(N^2*h+h+τ+N⁻¹+N^(-pstar))*E)\ndef StabilityOutput (γ : ℝ) : Prop :=\n  ∀ M : ℝ, 1 ≤ M →\n    (∃ C : ℝ, 0 < C ∧ ∀ (τ : ℝ) (L : ℕ) (f : Coeff) (v : Path) (a b : ℝ),\n      0 < τ → τ ≤ 1 → Traj γ M τ L f v → GridInterval τ L a b →\n      b-a ≤ 1 → enorm a b τ f v ≤ 1 → StabilityEstimates C γ τ a b f v) ∧\n    ∃ δ K : ℝ, 0 < δ ∧ δ ≤ 1 ∧ 0 < K ∧\n      ∀ (τ : ℝ) (L : ℕ) (f : Coeff) (v : Path) (a b : ℝ),\n      0 < τ → τ ≤ δ/2 → Traj γ M τ L f v → GridInterval τ L a b →\n      b-a ≤ δ → enorm a b τ f v ≤ 1 →\n      enorm a b τ f v ≤ 2*hn 0 (err τ f v a)+K*δ*τ^γ\ndef GridError (C γ τ : ℝ) (L : ℕ) (f : Coeff) (u : Path) : Prop :=\n  ∀ n : ℕ, n ≤ L →\n    Data 0 (numerical τ f n) ∧ HB 0 (u ((n : ℝ)*τ)-numerical τ f n) (C*τ^γ)\ndef SmoothOutput (T γ R : ℝ) : Prop :=\n  ∃ C τ₀ : ℝ, 0 < C ∧ 0 < τ₀ ∧ ∀ f : Coeff, Data γ f → Smooth f → hn γ f ≤ R →\n    ∀ L : ℕ, 0 < L → T/(L : ℝ) ≤ τ₀ → ∃ u : Path, Exact γ T f u ∧\n      UB 0 0 T (fun t => Twist u t-interp (T/(L : ℝ)) f t) (C*(T/(L : ℝ))^γ) ∧\n      GridError C γ (T/(L : ℝ)) L f u\ndef Target (T γ R : ℝ) : Prop :=\n  ∃ C τ₀ : ℝ, 0 < C ∧ 0 < τ₀ ∧ ∀ f : Coeff, Data γ f → hn γ f ≤ R →\n    ∀ L : ℕ, 0 < L → T/(L : ℝ) ≤ τ₀ → ∃ u : Path, Exact γ T f u ∧ GridError C γ (T/(L : ℝ)) L f u\nend KdVPlan\n",
+  "parameters": [
+    {
+      "name": "T",
+      "type": "ℝ"
+    },
+    {
+      "name": "gamma",
+      "type": "ℝ"
+    },
+    {
+      "name": "R",
+      "type": "ℝ"
+    }
+  ],
+  "premise_types": {
+    "H001": "0 < T",
+    "H002": "0 < gamma ∧ gamma ≤ 1",
+    "H003": "0 < R",
+    "E001": "KdVPlan.EFlow",
+    "E002": "KdVPlan.EDependence",
+    "E003": "KdVPlan.ETri",
+    "E004": "KdVPlan.EStage",
+    "E005": "KdVPlan.EProduct",
+    "E006": "KdVPlan.Endpoint"
+  },
+  "conclusion_type": "KdVPlan.Target T gamma R",
+  "representation": "Use one Fourier coefficient representation Coeff = ℤ → ℂ, with MemH s the summability of (1+k²)^s |f_k|², and hn its square-root sum. It is the specified completion of Fourier polynomials, not a strengthened solution space. HB includes MemH, so totalized real tsums never certify regularity by themselves. Source homogeneous norms delete frequency zero. RealField is f(-k)=conj(f(k)); ZeroMean is f(0)=0. Product is coefficient convolution. S has multiplier exp(i t k³); inverse derivatives kill zero. The four terms of Htau, including its finite 1/τ coefficient, are copied exactly; numerical uses ordinary finite function iteration without cutoff. Time integrals are coefficientwise complex Bochner interval integrals. ContH explicitly gives norm continuity on the closed interval. Weak is the coefficientwise distributional time derivative, tested against compactly supported smooth real scalar functions; EssBound includes measurability, Sobolev membership almost everywhere and finite essential supremum. XPath uses weak derivatives; Xnorm uses essential suprema, while UB and SupH use continuous representatives. Piecewise records a finite set of breakpoints with smooth pieces and globally continuous spatial Sobolev paths; derivatives at finitely many joins have no effect on Weak or Xnorm. KSol is the integrated twisted Fourier equation, equivalent for continuous L² paths to the distributional physical equation by Fourier testing; no second physical Lean representation is introduced. Exact adds uniqueness and uniform H^s approximation by solutions with Fourier-truncated data. T013 supplies a checked weighted lp₂ realization only as reusable Hilbert-space infrastructure for truncation, inclusions and completion; FromLP is an explicit invertible positive Fourier weight, not an assumed capability. The pinned lp parameter 2 is the ℝ≥0∞ summability exponent (not a regularity index); real Sobolev order s stays in the weight. iteratedDerivWithin uses a natural derivative order and the actual closed interval. n2 is the maximum of pairwise minima (second largest magnitude), n3 the minimum of pairwise maxima (third largest), including ties. N in cutoff/high is a real frequency threshold, not an integer index. Nat L,n are step counts/indices and their real casts are explicit. E003-E005 keep the factor sqrt(2π) in source norms; E004/E005 quantify an admissibility threshold for positive epsilon, with constants chosen after epsilon and before time/input data. Each constant existential is outside the data, time-grid and Fourier-support quantifiers it must be uniform over. Original T,gamma,R and H001-H003 are unchanged and universally closed by the interface parameters; all E ports retain their full source signatures. Background notes remain optional references, never premise ports. Estimates, completion, reflection, endpoint matching and all operator-extension properties remain proof obligations; the header proves none. The plan has twelve distinct source-output steps, one shared Sobolev implementation bridge, and four independently usable subarguments; source paragraph coverage is explicit in each step. BilinearExtensions, TriExtensions and StageExtensions state convergence of the actual polynomial/path approximations to the defined output, rather than presupposing a bounded extension. XConvergence requires genuine XPath membership of every difference and convergence in its finite controlling norm; the path extension is only for approximable paths. AccResidual explicitly retains the interpolant's continuous piecewise smooth, real mean-zero status for downstream normal forms. LinftyBound asserts boundedness of the Fourier representative's range as well as the supremum estimate. The repaired time regularity order is explicitly ((⊤ : ℕ∞) : WithTop ℕ∞) in both Weak and SmoothOn: the inner top denotes unbounded finite differentiability order, then is coerced into ContDiff's WithTop ℕ∞ order type. The outer top of that type denotes analyticity and is not used for either predicate. Inspected pinned FTaylorSeries.lean:112-120 and Defs.lean:549-550,1115-1116 identify this smooth order with every finite natural derivative order. Thus Weak tests against all compactly supported C∞ real scalar functions, including nonzero bumps in the open interval; its derivative argument is constrained by genuine distributional integration by parts. SmoothOn and Piecewise allow arbitrary C∞ time coefficients with the stated Sobolev derivative continuity, including smooth nonanalytic paths. EFlow/SourceApprox and Exact/SmoothApprox consequently require only the source smooth approximation. This is a repair of the time-order encoding after located semantic feedback, with no new root assumption, analytic premise or changed NL0 route.",
+  "objects": [],
+  "steps": [
+    {
+      "id": "T013",
+      "statement": "KdVPlan.SobolevInfrastructure",
+      "inputs": [],
+      "source_steps": [
+        "S013",
+        "S019",
+        "S020"
+      ],
+      "explanation": "Shared implementation of the existing weighted Fourier completion arguments: realize H^s by the explicit weight in lp₂, identify its norm, prove convergence of Fourier truncations, monotone Sobolev inclusions and completeness. Inspected pinned lp.norm_eq_tsum_rpow has premise 0 < p.toReal and exponent p : ℝ≥0∞; here p=2. This is a derived bridge using definitions and Mathlib, with no new H or background premise."
+    },
+    {
+      "id": "T001",
+      "statement": "KdVPlan.FlowOutput T gamma R",
+      "inputs": [
+        "H001",
+        "H002",
+        "H003",
+        "E001",
+        "E002",
+        "T013"
+      ],
+      "source_steps": [
+        "S001",
+        "S002",
+        "S003"
+      ],
+      "explanation": "Apply the source flows to U₀(k)=-f(-k), reflect back, and prove the equation, reality and norm identities coefficientwise. Keep the constants uniform on the ball. Use source uniqueness across regularities for smooth data, and theta=0 in E002 for all L² pairs with norm sum ≤2R. The reflected integrated Fourier equation is the physical KdV distributional equation on continuous L² paths; smooth approximation is in uniform H^gamma norm. Twisting is an isometry. No source proof body is an input. In SmoothOn the order is explicitly the coerced top of ℕ∞, so the higher-Sobolev equation argument must establish each finite time derivative and its Sobolev continuity. It need not establish time analyticity; this also gives precisely the SmoothApprox/SourceApprox regularity."
+    },
+    {
+      "id": "T002",
+      "statement": "KdVPlan.CovarianceBounds",
+      "inputs": [],
+      "source_steps": [
+        "S004",
+        "S005"
+      ],
+      "explanation": "Prove the covariance zero case, elementary small-phase estimate and integration by parts ratio estimate; interchange alpha,beta and retain both minima. This step is independent of the PDE and E roots."
+    },
+    {
+      "id": "T003",
+      "statement": "KdVPlan.FourFrequency",
+      "inputs": [],
+      "source_steps": [
+        "S006",
+        "S007",
+        "S008",
+        "S009",
+        "S010"
+      ],
+      "explanation": "Use zero-sum frequency orderings for the two pointwise majorants. Follow the existing dyadic proof: comparable top shells, Cauchy-Schwarz on the two large inputs, counting on smaller shells, then sum the geometric offset. Extend nonnegative finite restrictions by their supremum, proving summability. Encoding d=-a-b-c is a bijective indexing of the zero-sum hyperplane; A is an arbitrary interaction subset."
+    },
+    {
+      "id": "T017",
+      "statement": "KdVPlan.MultiplierBound",
+      "inputs": [
+        "T002",
+        "T003"
+      ],
+      "source_steps": [
+        "S011"
+      ],
+      "explanation": "Apply the covariance bounds and the two four-frequency majorants to alpha=3ab(a+b), beta=3kc(a+b), d=-k. Geometrically interpolate the two existing endpoints, treating sigma=0,1 explicitly; keep all nonzero-frequency and a+b guards."
+    },
+    {
+      "id": "T004",
+      "statement": "KdVPlan.RemOutput",
+      "inputs": [
+        "T002",
+        "T003",
+        "T017",
+        "T013"
+      ],
+      "source_steps": [
+        "S012",
+        "S013",
+        "S014"
+      ],
+      "explanation": "Dualize on finite Fourier supports and apply the positive four-linear bound, including every extra multiplier of modulus ≤1. Prove absolute coefficient convergence, bounded trilinearity, unique dense-core extension and the uniform bound. For the mixed endpoint, expand the difference at (f,f,f) and (w,w,w) into the three existing telescoping terms and use sigma=0 on them. No H^sigma hypothesis is placed on f."
+    },
+    {
+      "id": "T016",
+      "statement": "KdVPlan.BasicBilinearBounds",
+      "inputs": [
+        "T013"
+      ],
+      "source_steps": [
+        "S015",
+        "S016"
+      ],
+      "explanation": "Prove the supplied inverse-derivative, H¹ algebra, B, J and asymmetric J estimates from Fourier Cauchy-Schwarz and products. pstar=23/14 is strictly greater than 3/2. linfty is the supremum of the continuous Fourier representative, whose absolute/uniform convergence follows from the inverse-derivative bound. Establish density compatibility of these bounded products."
+    },
+    {
+      "id": "T005",
+      "statement": "KdVPlan.BilinearOutput",
+      "inputs": [
+        "T016",
+        "T013"
+      ],
+      "source_steps": [
+        "S017",
+        "S018"
+      ],
+      "explanation": "Retain the previously proved bounds and prove the normal-form identities by differentiating the explicit oscillatory J coefficient on smooth inputs. Justify termwise differentiation by rapid Fourier decay. Integrate with both endpoints; continuous finite pieces telescope. Derive the J(B,h)=Ctri identity and the constant-input first-stage identity, extending the latter by Fourier truncation. SmoothOn and Piecewise now use C∞ order ((⊤ : ℕ∞) : WithTop ℕ∞); all source smooth time paths, including nonanalytic ones, remain in the domain of the normal form. Termwise differentiation uses the existing smooth Sobolev/Fourier bounds."
+    },
+    {
+      "id": "T014",
+      "statement": "KdVPlan.NormalizedTri",
+      "inputs": [
+        "E003",
+        "T013"
+      ],
+      "source_steps": [
+        "S019"
+      ],
+      "explanation": "Show that continuous piecewise smooth paths have the specified weak derivatives, with cancellation at all joins. Apply E003 for every negative-norm slot at alpha=0, and to constant H^sigma inputs at alpha=sigma. Divide the source norms by sqrt(2π), changing only constants. Prove the stated density extensions in controlling norms; path density is only in the closure of the initial smooth domain, not the whole X space. Weak now tests against arbitrary compactly supported C∞ scalar functions using order ((⊤ : ℕ∞) : WithTop ℕ∞). Prove the actual integration-by-parts identity on each smooth piece and cancel matching endpoint terms; this supplies the genuine weak derivative required by E003. The pinned contDiff_infty/contDiffOn_infty equivalences and C∞ bump APIs were inspected, with explicit order/field/function/set arguments checked. No analytic path hypothesis is needed."
+    },
+    {
+      "id": "T015",
+      "statement": "KdVPlan.ProductOutput gamma",
+      "inputs": [
+        "H002",
+        "E005",
+        "T013"
+      ],
+      "source_steps": [
+        "S020"
+      ],
+      "explanation": "For gamma away from 1/2 use E005 with its exact source exponent. At gamma=1/2 choose a permitted positive epsilon ≤1/8 from the existential threshold, then use H^(1/8)→H^epsilon. Normalize the bilinear norms. Prove ag(gamma)∈[0,1) with exactly the three specified cases; no gamma=0 product clause is introduced."
+    },
+    {
+      "id": "T006",
+      "statement": "KdVPlan.ContinuousOutput gamma",
+      "inputs": [
+        "H002",
+        "E004",
+        "T014",
+        "T015",
+        "T013"
+      ],
+      "source_steps": [
+        "S021",
+        "S022"
+      ],
+      "explanation": "Retain normalized trilinear and product estimates. Choose the permitted E004 epsilon independently of stage data. Derive the time-shift covariance from the explicit S multipliers and apply E004 at n=0 to S_a w. Check all beta interval conditions and positive denominators. The three source powers at beta=ag are ≥gamma, while beta=1+gamma gives power zero. Extend both target Sobolev estimates by the same polynomial sequence, so their distributional values agree. Constants precede a,t,tau,w."
+    },
+    {
+      "id": "T007",
+      "statement": "KdVPlan.SchemeOutput",
+      "inputs": [
+        "E006",
+        "T005",
+        "T013"
+      ],
+      "source_steps": [
+        "S023",
+        "S024",
+        "S025"
+      ],
+      "explanation": "Use the H¹ algebra and inverse derivatives to prove continuity of every update term at a fixed positive timestep, reality/mean preservation, smoothness and finite-iterate continuity. Apply E006 with exactly the unfiltered psi. Calculate Vst at both endpoints and prove they match adjacent twisted states; consequently the explicit floor-index interpolation is continuous and piecewise smooth, including its final endpoint. No timestep-uniform Lipschitz property of psi is asserted."
+    },
+    {
+      "id": "T008",
+      "statement": "KdVPlan.StageOutput gamma",
+      "inputs": [
+        "H002",
+        "T004",
+        "T005",
+        "T006",
+        "T013"
+      ],
+      "source_steps": [
+        "S026",
+        "S027",
+        "S028",
+        "S029",
+        "S030",
+        "S031"
+      ],
+      "explanation": "Under StepData follow the seven existing Interp formulas. Compare F(f) with F(w) by bilinearity of J; use the two distinct stage Sobolev bounds for B(F,F). Bound W by the mixed remainder endpoint. For Dinv B(f,F), split f=w+(f-w). Use the normal form for Cst, then the three-term trilinear difference at w. Derive Y', inverse-derivative and X estimates. All constants are uniform in higher norms of f and Fourier support."
+    },
+    {
+      "id": "T009",
+      "statement": "KdVPlan.ResidualOutput gamma",
+      "inputs": [
+        "H002",
+        "T005",
+        "T006",
+        "T007",
+        "T008",
+        "T013"
+      ],
+      "source_steps": [
+        "S032",
+        "S033",
+        "S034",
+        "S035",
+        "S036"
+      ],
+      "explanation": "Differentiate the actual stage interpolation, obtain rho' and apply the two-endpoint normal form to B(Y,z) and B(Y,Y). Assign the negative Sobolev slot to Y in the remaining cubic term. Concatenate the explicit residual increments; weak derivatives ignore only finitely many grid joins. On any grid-started interval, including a partial last step, at most h/tau+1 increments occur and delta_n≤E_I. Prove accumulated residual and error X bounds with these exact constants. The AccResidual Weak field now quantifies all compactly supported C∞ scalar tests, so prove the concatenated weak equation by integration by parts with cancellation of the continuous interpolation's endpoint contributions. Values of the ordinary derivative at the finite grid join set do not affect the integrals or essential norms; a jump in the path itself cannot be discarded."
+    },
+    {
+      "id": "T010",
+      "statement": "KdVPlan.StabilityOutput gamma",
+      "inputs": [
+        "H002",
+        "T005",
+        "T006",
+        "T008",
+        "T009",
+        "T013"
+      ],
+      "source_steps": [
+        "S037",
+        "S038",
+        "S039",
+        "S040",
+        "S041",
+        "S042",
+        "S043"
+      ],
+      "explanation": "Follow the accepted low/high proof. Use the exact error identity and inverse-product low-frequency estimate. Keep both endpoints of the normal form. In cubic terms telescope three projections to put a high input in one slot and apply the negative-norm estimate there. For the forcing integral substitute the actual stepwise rho', rather than estimating an arbitrary forcing. Sum partial-step bounds. Choose a common N0,delta,K only after the uniform constants and absorb the E_I coefficient. Export every displayed pre-absorption estimate as well as the short-interval inequality."
+    },
+    {
+      "id": "T011",
+      "statement": "KdVPlan.SmoothOutput T gamma R",
+      "inputs": [
+        "H001",
+        "H002",
+        "H003",
+        "T001",
+        "T007",
+        "T010",
+        "T013"
+      ],
+      "source_steps": [
+        "S044",
+        "S045",
+        "S046",
+        "S047",
+        "S048"
+      ],
+      "explanation": "Choose the exact-flow ball bound and M0 before the initial datum, then choose the common stability constants. Divide the grid into blocks of m=floor(delta/tau) steps; include a possibly shorter final block. Iterate the restarted bound and close the first-exit bootstrap using continuity. Retain both the full interpolated-time bound and the grid error by unitarity, uniformly in the entire smooth-data ball."
+    },
+    {
+      "id": "T012",
+      "statement": "KdVPlan.Target T gamma R",
+      "inputs": [
+        "H001",
+        "H002",
+        "H003",
+        "T001",
+        "T007",
+        "T011",
+        "T013"
+      ],
+      "source_steps": [
+        "S049",
+        "S050",
+        "S051",
+        "S052"
+      ],
+      "explanation": "Choose the smooth-data constants first. Approximate arbitrary data by real mean-zero Fourier projections staying in the same H^gamma ball. The exact solutions converge uniformly in L² by T001, and numerical iterates converge at every grid point by fixed-timestep finite-iterate continuity in T007. Pass the inequality to the limit over the finite grid, preserving exactly C,tau0 and the full original quantifier order. Exact includes the unique continuous distributional solution obtained by smooth approximation; GridError includes that every iterate is real mean-zero L²."
+    }
+  ],
+  "terminal": "T012",
+  "source_outputs": {
+    "N001": "T001",
+    "N002": "T002",
+    "N003": "T003",
+    "N004": "T004",
+    "N005": "T005",
+    "N006": "T006",
+    "N007": "T007",
+    "N008": "T008",
+    "N009": "T009",
+    "N010": "T010",
+    "N011": "T011",
+    "P": "T012"
+  },
+  "endpoint_correspondence": {
+    "E001": {
+      "mode": "equivalent",
+      "explanation": "EFlow encodes the complete source suite on normalized Fourier coefficients: all nonnegative orders, uniform homogeneous flow and Galerkin bounds, bounded-set Lipschitz dependence, uniqueness in the source L∞L² coefficient class, conservation, compatibility by uniqueness, smooth approximation, and the positive-order subsequence's strong L^q_t dot H^sigma and weak-* L∞_t dot H^s convergence. sourceB has exp(+i3kabt), SourceTwist u=S_t u, so its physical equation is U_t=UU_x+U_xxx. MemDot/DotCont are exactly the source mean-zero homogeneous completions and topology. Galerkin projects both inputs/output and freezes high coefficients. WeakStarDot tests all L¹ paths in the homogeneous Hilbert space via its weighted inner product, exactly its predual; StrongTime uses the qth-power integral for every real finite q>1. Fourier testing and reconstruction identify this with the source physical formulation in both directions; no numerical error estimate is assumed. SourceApprox uses SmoothOn at the explicitly coerced inner-top order ((⊤ : ℕ∞) : WithTop ℕ∞), meaning C∞ (all finite derivative orders), with Sobolev continuity of those derivatives. It imposes precisely smooth approximation, including nonanalytic smooth flows, without adding time analyticity to the source suite."
+    },
+    "E002": {
+      "mode": "equivalent",
+      "explanation": "For each B0 and theta∈(-1,0], C,D are positive and chosen before Q and the two data/solutions. DotUB gives the source bound C D^Q times the initial dot H^theta distance at every time; on the continuous solution paths this equals the time supremum. SourceTwist is the source common multiplier exp(+itk³), and the physical and twisted distances coincide coefficientwise, so retaining both inequalities is equivalent to the stated single source estimate plus its unitary reformulation. Data 0 means precisely real mean-zero normalized L²."
+    },
+    "E003": {
+      "mode": "equivalent",
+      "explanation": "ETri is Proposition 3.4 for all alpha∈[0,1], 0≤a≤b, b-a≤1 and weakly differentiable L∞H^alpha paths. XPath states exactly coordinate measurability, Sobolev membership and finite essential bounds, plus the weak time derivative. Countable Fourier coordinates characterize the corresponding Hilbert-valued measurable classes. srcN/srcX multiply each normalized norm by sqrt(2π); SrcTriBound quantifies all three negative-norm slots without changing the trilinear operator or constants' uniformity. The second clause retains the constant-input H^sigma bound for all sigma∈[0,1]. Coefficientwise convolution/integration agrees on the smooth core and hence on the bounded extension; conversely the Fourier representation reconstructs those same Sobolev/distribution classes. Weak uses ContDiff ℝ ((⊤ : ℕ∞) : WithTop ℕ∞) for its compactly supported scalar tests. The pinned contDiff_infty theorem identifies this with all finite differentiability orders; these are the full C∞ test functions, including nonzero interval bumps. Hence the integration-by-parts identities are exactly the coordinate distributional derivative identities, not a restriction to analytic tests. In the separable weighted Fourier Hilbert spaces, testing each coordinate gives the Hilbert-valued weak derivative and conversely; the EssBound conditions supply integrability/measurability and the finite derivative norm. Thus XPath preserves the original source-X domain in both directions, and piecewise continuous paths have no jump masses because their boundary terms cancel against these tests."
+    },
+    "E004": {
+      "mode": "equivalent",
+      "explanation": "EStage retains 0<sigma≤1, any positive timestep, every natural grid index n, every t∈[nτ,nτ+τ], and all time-independent mean-zero H^sigma inputs. beta0 has exactly the three source cases and beta is restricted to [beta0,1+sigma]; the real power is (1+sigma-beta)/(1+sigma-beta0). The existence of epsilon0 followed by every epsilon∈(0,epsilon0) expresses 'any sufficiently small fixed positive epsilon'. C is chosen after sigma,epsilon,beta and before n,tau,t and inputs. srcN retains the unnormalized source norm, and stage includes the source factor 1/2. Fourier completion identifies the input/output spaces in both directions."
+    },
+    "E005": {
+      "mode": "equivalent",
+      "explanation": "EProduct retains the source range sigma∈[0,1], all four a(sigma) cases including both positive epsilon endpoints, the admissibility threshold, and the source factor sqrt(2π) in each norm. mul is the Fourier coefficient convolution of the product; on these Sobolev domains the asserted L² membership and bound identify exactly the source pointwise product by density. The same Fourier identification converts the inequality in both directions. Epsilon and the constant are chosen before f,g."
+    },
+    "E006": {
+      "mode": "direct",
+      "explanation": "Endpoint copies the exact twisted update for every tau>0, natural n and smooth real mean-zero f, with uold=S_(nτ)f. psi is the displayed four-term physical update, stage is the half B integral, Cst is the B(f,stage) integral, and rem is precisely -τ/(18ik) times the double frequency sum with alpha=3ab(a+b), beta=3kc(a+b), the covariance eta and exp(-it_n(alpha+beta)); output zero and a+b=0 are handled exactly as in D015. No cutoff, asymptotic error or convergence premise is introduced."
+    },
+    "P": {
+      "mode": "equivalent",
+      "explanation": "Universally closing the parameters T,gamma,R under H001-H003 gives exactly T>0,0<gamma≤1,R>0. Target chooses C>0,tau0>0 before every real mean-zero datum in the whole H^gamma ball and every positive integer L with tau=T/L≤tau0. Exact is the unique real mean-zero continuous H^gamma distributional KdV flow, encoded by its integrated twisted Fourier equation and uniform H^gamma smooth approximation. Fourier testing gives the physical PDE from this equation and conversely, since continuous L² paths give continuous convolution coefficients; smooth scalar Fourier-test approximation justifies the distributional reconstruction. GridError asserts each unfiltered recursive iterate is real mean-zero L² and gives the normalized L² error ≤C tau^gamma at every n≤L, equivalent to the maximum on the finite grid. Numerical uses exactly psi with no frequency filter. Weighted square-summable coefficients are the specified Sobolev completion, so the quantification covers all original rough data and conversely. Constants cannot depend on the datum, L, Fourier support or additional smoothness because all are quantified after C,tau0. SmoothApprox now uses SmoothOn with C∞ order ((⊤ : ℕ∞) : WithTop ℕ∞), explicitly distinct from analytic outer top. Its approximating solutions have exactly the smooth regularity supplied by the higher-Sobolev source argument. The complete target therefore retains the stipulated smooth-approximation meaning without requiring analytic time dependence."
+    }
+  }
+}

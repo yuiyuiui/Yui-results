@@ -1,0 +1,851 @@
+theorem_1 : KdV.LiWuStepIdentity →
+  KdV.LiWuStageEstimate →
+    KdV.LiWuProductEstimate →
+      KdV.LiWuTrilinearEstimate →
+        KdV.BITGalerkinEstimate →
+          KdV.BITExistenceLimit →
+            KdV.BITHigherRegularity → KdV.BITLowRegularity → KdV.BITWeakerLipschitz → KdV.TheoremOne
+'theorem_1' depends on axioms: [propext, Classical.choice.{u}, Quot.sound.{u}]
+def KdV.TheoremOne : Prop :=
+∀ (T : Real),
+  @LT.lt.{0} Real Real.instLT (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero)) T →
+    ∀ (γ : Real),
+      @LT.lt.{0} Real Real.instLT (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero)) γ →
+        @LE.le.{0} Real Real.instLE γ (@OfNat.ofNat.{0} Real (nat_lit 1) (@One.toOfNat1.{0} Real Real.instOne)) →
+          ∀ (R : Real),
+            @LT.lt.{0} Real Real.instLT (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero)) R →
+              ∃ C,
+                And
+                  (@LT.lt.{0} Real Real.instLT
+                    (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero)) C)
+                  (∃ τ₀,
+                    And
+                      (@LT.lt.{0} Real Real.instLT
+                        (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero)) τ₀)
+                      (∀ (u₀ : KdV.Fourier),
+                        KdV.InSobolev γ u₀ →
+                          KdV.RealValued u₀ →
+                            KdV.MeanZero u₀ →
+                              @LE.le.{0} Real Real.instLE (KdV.hNorm γ u₀) R →
+                                ∀ (u : Real → KdV.Fourier),
+                                  KdV.ExactSolution γ T u₀ u →
+                                    ∀ (L : Nat),
+                                      @LT.lt.{0} Nat instLTNat
+                                          (@OfNat.ofNat.{0} Nat (nat_lit 0) (instOfNatNat (nat_lit 0))) L →
+                                        @LE.le.{0} Real Real.instLE
+                                            (@HDiv.hDiv.{0, 0, 0} Real Real Real
+                                              (@instHDiv.{0} Real (@DivInvMonoid.toDiv.{0} Real Real.instDivInvMonoid))
+                                              T (@Nat.cast.{0} Real Real.instNatCast L))
+                                            τ₀ →
+                                          @LE.le.{0} Real Real.instLE (KdV.maximumError T L u₀ u)
+                                            (@HMul.hMul.{0, 0, 0} Real Real Real (@instHMul.{0} Real Real.instMul) C
+                                              (@HPow.hPow.{0, 0, 0} Real Real Real
+                                                (@instHPow.{0, 0} Real Real Real.instPow)
+                                                (@HDiv.hDiv.{0, 0, 0} Real Real Real
+                                                  (@instHDiv.{0} Real
+                                                    (@DivInvMonoid.toDiv.{0} Real Real.instDivInvMonoid))
+                                                  T (@Nat.cast.{0} Real Real.instNatCast L))
+                                                γ))))
+def KdV.ExactSolution : Real → Real → KdV.Fourier → (Real → KdV.Fourier) → Prop :=
+fun γ T u₀ u => And (KdV.KdVSolution γ T u₀ u) (KdV.ObtainedBySmoothApproximation γ T u₀ u)
+def KdV.LiWuStepIdentity : Prop :=
+∀ (τ : Real),
+  @LT.lt.{0} Real Real.instLT (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero)) τ →
+    ∀ (n : Nat) (f : KdV.Fourier),
+      KdV.InSobolev (@OfNat.ofNat.{0} Real (nat_lit 1) (@One.toOfNat1.{0} Real Real.instOne)) f →
+        KdV.RealValued f →
+          KdV.MeanZero f →
+            @Eq.{1} KdV.Fourier
+              (KdV.airy
+                (@Neg.neg.{0} Real Real.instNeg
+                  (@HMul.hMul.{0, 0, 0} Real Real Real (@instHMul.{0} Real Real.instMul)
+                    (@Nat.cast.{0} Real Real.instNatCast
+                      (@HAdd.hAdd.{0, 0, 0} Nat Nat Nat (@instHAdd.{0} Nat instAddNat) n
+                        (@OfNat.ofNat.{0} Nat (nat_lit 1) (instOfNatNat (nat_lit 1)))))
+                    τ))
+                (KdV.step τ
+                  (KdV.airy
+                    (@HMul.hMul.{0, 0, 0} Real Real Real (@instHMul.{0} Real Real.instMul)
+                      (@Nat.cast.{0} Real Real.instNatCast n) τ)
+                    f)))
+              (@HSub.hSub.{0, 0, 0} KdV.Fourier KdV.Fourier KdV.Fourier
+                (@instHSub.{0} KdV.Fourier (@Pi.instSub.{0, 0} Int (fun a => Complex) fun i => Complex.instSub))
+                (@HAdd.hAdd.{0, 0, 0} KdV.Fourier KdV.Fourier KdV.Fourier
+                  (@instHAdd.{0} KdV.Fourier (@Pi.instAdd.{0, 0} Int (fun a => Complex) fun i => Complex.instAdd))
+                  (@HAdd.hAdd.{0, 0, 0} KdV.Fourier KdV.Fourier KdV.Fourier
+                    (@instHAdd.{0} KdV.Fourier (@Pi.instAdd.{0, 0} Int (fun a => Complex) fun i => Complex.instAdd)) f
+                    (KdV.bilinearStage
+                      (@HMul.hMul.{0, 0, 0} Real Real Real (@instHMul.{0} Real Real.instMul)
+                        (@Nat.cast.{0} Real Real.instNatCast n) τ)
+                      (@HMul.hMul.{0, 0, 0} Real Real Real (@instHMul.{0} Real Real.instMul)
+                        (@Nat.cast.{0} Real Real.instNatCast
+                          (@HAdd.hAdd.{0, 0, 0} Nat Nat Nat (@instHAdd.{0} Nat instAddNat) n
+                            (@OfNat.ofNat.{0} Nat (nat_lit 1) (instOfNatNat (nat_lit 1)))))
+                        τ)
+                      f f))
+                  (KdV.frozenCross
+                    (@HMul.hMul.{0, 0, 0} Real Real Real (@instHMul.{0} Real Real.instMul)
+                      (@Nat.cast.{0} Real Real.instNatCast n) τ)
+                    (@HMul.hMul.{0, 0, 0} Real Real Real (@instHMul.{0} Real Real.instMul)
+                      (@Nat.cast.{0} Real Real.instNatCast
+                        (@HAdd.hAdd.{0, 0, 0} Nat Nat Nat (@instHAdd.{0} Nat instAddNat) n
+                          (@OfNat.ofNat.{0} Nat (nat_lit 1) (instOfNatNat (nat_lit 1)))))
+                      τ)
+                    f))
+                (KdV.remainder τ
+                  (@HMul.hMul.{0, 0, 0} Real Real Real (@instHMul.{0} Real Real.instMul)
+                    (@Nat.cast.{0} Real Real.instNatCast n) τ)
+                  f f f))
+def KdV.LiWuStageEstimate : Prop :=
+∀ (T : Real),
+  @LT.lt.{0} Real Real.instLT (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero)) T →
+    ∀ (γ : Real),
+      @LT.lt.{0} Real Real.instLT (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero)) γ →
+        @LE.le.{0} Real Real.instLE γ (@OfNat.ofNat.{0} Real (nat_lit 1) (@One.toOfNat1.{0} Real Real.instOne)) →
+          ∀ (ε : Real),
+            @LT.lt.{0} Real Real.instLT (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero)) ε →
+              ∀ (β : Real),
+                @LE.le.{0} Real Real.instLE (KdV.sourceStageLower γ ε) β →
+                  @LE.le.{0} Real Real.instLE β
+                      (@HAdd.hAdd.{0, 0, 0} Real Real Real (@instHAdd.{0} Real Real.instAdd)
+                        (@OfNat.ofNat.{0} Real (nat_lit 1) (@One.toOfNat1.{0} Real Real.instOne)) γ) →
+                    ∃ C,
+                      And
+                        (@LT.lt.{0} Real Real.instLT
+                          (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero)) C)
+                        (∀ (τ : Real) (n : Nat) (t : Real),
+                          @LT.lt.{0} Real Real.instLT
+                              (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero)) τ →
+                            @LE.le.{0} Real Real.instLE
+                                (@HMul.hMul.{0, 0, 0} Real Real Real (@instHMul.{0} Real Real.instMul)
+                                  (@Nat.cast.{0} Real Real.instNatCast
+                                    (@HAdd.hAdd.{0, 0, 0} Nat Nat Nat (@instHAdd.{0} Nat instAddNat) n
+                                      (@OfNat.ofNat.{0} Nat (nat_lit 1) (instOfNatNat (nat_lit 1)))))
+                                  τ)
+                                T →
+                              @Membership.mem.{0, 0} Real (Set.{0} Real) (@Set.instMembership.{0} Real)
+                                  (@Set.Icc.{0} Real Real.instPreorder
+                                    (@HMul.hMul.{0, 0, 0} Real Real Real (@instHMul.{0} Real Real.instMul)
+                                      (@Nat.cast.{0} Real Real.instNatCast n) τ)
+                                    (@HMul.hMul.{0, 0, 0} Real Real Real (@instHMul.{0} Real Real.instMul)
+                                      (@Nat.cast.{0} Real Real.instNatCast
+                                        (@HAdd.hAdd.{0, 0, 0} Nat Nat Nat (@instHAdd.{0} Nat instAddNat) n
+                                          (@OfNat.ofNat.{0} Nat (nat_lit 1) (instOfNatNat (nat_lit 1)))))
+                                      τ))
+                                  t →
+                                ∀ (f g : KdV.Fourier),
+                                  KdV.InSobolev γ f →
+                                    KdV.InSobolev γ g →
+                                      KdV.MeanZero f →
+                                        KdV.MeanZero g →
+                                          And
+                                            (KdV.InSobolev β
+                                              (KdV.sourceBilinearStage
+                                                (@HMul.hMul.{0, 0, 0} Real Real Real (@instHMul.{0} Real Real.instMul)
+                                                  (@Nat.cast.{0} Real Real.instNatCast n) τ)
+                                                t f g))
+                                            (@LE.le.{0} Real Real.instLE
+                                              (KdV.sourceNorm β
+                                                (KdV.sourceBilinearStage
+                                                  (@HMul.hMul.{0, 0, 0} Real Real Real (@instHMul.{0} Real Real.instMul)
+                                                    (@Nat.cast.{0} Real Real.instNatCast n) τ)
+                                                  t f g))
+                                              (@HMul.hMul.{0, 0, 0} Real Real Real (@instHMul.{0} Real Real.instMul)
+                                                (@HMul.hMul.{0, 0, 0} Real Real Real (@instHMul.{0} Real Real.instMul)
+                                                  (@HMul.hMul.{0, 0, 0} Real Real Real (@instHMul.{0} Real Real.instMul)
+                                                    C
+                                                    (@HPow.hPow.{0, 0, 0} Real Real Real
+                                                      (@instHPow.{0, 0} Real Real Real.instPow) τ
+                                                      (KdV.sourceStagePower γ ε β)))
+                                                  (KdV.sourceNorm γ f))
+                                                (KdV.sourceNorm γ g))))
+def KdV.LiWuProductEstimate : Prop :=
+∀ (γ : Real),
+  @LE.le.{0} Real Real.instLE (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero)) γ →
+    @LE.le.{0} Real Real.instLE γ (@OfNat.ofNat.{0} Real (nat_lit 1) (@One.toOfNat1.{0} Real Real.instOne)) →
+      ∀ (ε : Real),
+        @LT.lt.{0} Real Real.instLT (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero)) ε →
+          ∃ C,
+            And
+              (@LT.lt.{0} Real Real.instLT (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero))
+                C)
+              (∀ (f g : KdV.Fourier),
+                KdV.InSobolev γ f →
+                  KdV.InSobolev (KdV.sourceProductExponent γ ε) g →
+                    And
+                      (KdV.InSobolev (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero))
+                        (KdV.product f g))
+                      (@LE.le.{0} Real Real.instLE
+                        (KdV.sourceNorm (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero))
+                          (KdV.product f g))
+                        (@HMul.hMul.{0, 0, 0} Real Real Real (@instHMul.{0} Real Real.instMul)
+                          (@HMul.hMul.{0, 0, 0} Real Real Real (@instHMul.{0} Real Real.instMul) C (KdV.sourceNorm γ f))
+                          (KdV.sourceNorm (KdV.sourceProductExponent γ ε) g))))
+structure KdV.LiWuTrilinearEstimate : Prop
+number of parameters: 0
+fields:
+  KdV.LiWuTrilinearEstimate.dynamic : ∀ (H : Real),
+      @LT.lt.{0} Real Real.instLT (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero)) H →
+        @LE.le.{0} Real Real.instLE H (@OfNat.ofNat.{0} Real (nat_lit 1) (@One.toOfNat1.{0} Real Real.instOne)) →
+          ∀ (α : Real)
+            (hα :
+              @LE.le.{0} Real Real.instLE (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero))
+                α),
+            @LE.le.{0} Real Real.instLE α (@OfNat.ofNat.{0} Real (nat_lit 1) (@One.toOfNat1.{0} Real Real.instOne)) →
+              ∃ C,
+                And
+                  (@LT.lt.{0} Real Real.instLT
+                    (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero)) C)
+                  (∀ (a b : Real),
+                    @LE.le.{0} Real Real.instLE
+                        (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero)) a →
+                      @LE.le.{0} Real Real.instLE a b →
+                        @LE.le.{0} Real Real.instLE
+                            (@HSub.hSub.{0, 0, 0} Real Real Real (@instHSub.{0} Real Real.instSub) b a) H →
+                          ∀
+                            (f :
+                              Fin (@OfNat.ofNat.{0} Nat (nat_lit 3) (instOfNatNat (nat_lit 3))) → Real → KdV.Sobolev α)
+                            (df :
+                              Fin (@OfNat.ofNat.{0} Nat (nat_lit 3) (instOfNatNat (nat_lit 3))) →
+                                Real → KdV.Sobolev (@Neg.neg.{0} Real Real.instNeg KdV.pStar)),
+                            (∀ (j : Fin (@OfNat.ofNat.{0} Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))),
+                                @MeasureTheory.MemLp.{0, 0} Real (KdV.Sobolev α)
+                                  (@MeasureTheory.MeasureSpace.toMeasurableSpace.{0} Real Real.measureSpace)
+                                  (@ContinuousENorm.toENorm.{0} (KdV.Sobolev α)
+                                    (@UniformSpace.toTopologicalSpace.{0} (KdV.Sobolev α)
+                                      (@PseudoMetricSpace.toUniformSpace.{0} (KdV.Sobolev α)
+                                        (@SeminormedAddGroup.toPseudoMetricSpace.{0} (KdV.Sobolev α)
+                                          (@SeminormedAddCommGroup.toSeminormedAddGroup.{0} (KdV.Sobolev α)
+                                            (@NormedAddCommGroup.toSeminormedAddCommGroup.{0} (KdV.Sobolev α)
+                                              (KdV.sobolevNormedAddCommGroup α))))))
+                                    (@SeminormedAddGroup.toContinuousENorm.{0} (KdV.Sobolev α)
+                                      (@SeminormedAddCommGroup.toSeminormedAddGroup.{0} (KdV.Sobolev α)
+                                        (@NormedAddCommGroup.toSeminormedAddCommGroup.{0} (KdV.Sobolev α)
+                                          (KdV.sobolevNormedAddCommGroup α)))))
+                                  (@UniformSpace.toTopologicalSpace.{0} (KdV.Sobolev α)
+                                    (@PseudoMetricSpace.toUniformSpace.{0} (KdV.Sobolev α)
+                                      (@SeminormedAddCommGroup.toPseudoMetricSpace.{0} (KdV.Sobolev α)
+                                        (@NormedAddCommGroup.toSeminormedAddCommGroup.{0} (KdV.Sobolev α)
+                                          (KdV.sobolevNormedAddCommGroup α)))))
+                                  (f j) (@Top.top.{0} ENNReal ENNReal.instTop)
+                                  (@MeasureTheory.Measure.restrict.{0} Real
+                                    (@MeasureTheory.MeasureSpace.toMeasurableSpace.{0} Real Real.measureSpace)
+                                    (@MeasureTheory.volume.{0} Real Real.measureSpace)
+                                    (@Set.Icc.{0} Real Real.instPreorder a b))) →
+                              (∀ (j : Fin (@OfNat.ofNat.{0} Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))),
+                                  @MeasureTheory.MemLp.{0, 0} Real
+                                    (KdV.Sobolev (@Neg.neg.{0} Real Real.instNeg KdV.pStar))
+                                    (@MeasureTheory.MeasureSpace.toMeasurableSpace.{0} Real Real.measureSpace)
+                                    (@ContinuousENorm.toENorm.{0}
+                                      (KdV.Sobolev (@Neg.neg.{0} Real Real.instNeg KdV.pStar))
+                                      (@UniformSpace.toTopologicalSpace.{0}
+                                        (KdV.Sobolev (@Neg.neg.{0} Real Real.instNeg KdV.pStar))
+                                        (@PseudoMetricSpace.toUniformSpace.{0}
+                                          (KdV.Sobolev (@Neg.neg.{0} Real Real.instNeg KdV.pStar))
+                                          (@SeminormedAddGroup.toPseudoMetricSpace.{0}
+                                            (KdV.Sobolev (@Neg.neg.{0} Real Real.instNeg KdV.pStar))
+                                            (@SeminormedAddCommGroup.toSeminormedAddGroup.{0}
+                                              (KdV.Sobolev (@Neg.neg.{0} Real Real.instNeg KdV.pStar))
+                                              (@NormedAddCommGroup.toSeminormedAddCommGroup.{0}
+                                                (KdV.Sobolev (@Neg.neg.{0} Real Real.instNeg KdV.pStar))
+                                                (KdV.sobolevNormedAddCommGroup
+                                                  (@Neg.neg.{0} Real Real.instNeg KdV.pStar)))))))
+                                      (@SeminormedAddGroup.toContinuousENorm.{0}
+                                        (KdV.Sobolev (@Neg.neg.{0} Real Real.instNeg KdV.pStar))
+                                        (@SeminormedAddCommGroup.toSeminormedAddGroup.{0}
+                                          (KdV.Sobolev (@Neg.neg.{0} Real Real.instNeg KdV.pStar))
+                                          (@NormedAddCommGroup.toSeminormedAddCommGroup.{0}
+                                            (KdV.Sobolev (@Neg.neg.{0} Real Real.instNeg KdV.pStar))
+                                            (KdV.sobolevNormedAddCommGroup
+                                              (@Neg.neg.{0} Real Real.instNeg KdV.pStar))))))
+                                    (@UniformSpace.toTopologicalSpace.{0}
+                                      (KdV.Sobolev (@Neg.neg.{0} Real Real.instNeg KdV.pStar))
+                                      (@PseudoMetricSpace.toUniformSpace.{0}
+                                        (KdV.Sobolev (@Neg.neg.{0} Real Real.instNeg KdV.pStar))
+                                        (@SeminormedAddCommGroup.toPseudoMetricSpace.{0}
+                                          (KdV.Sobolev (@Neg.neg.{0} Real Real.instNeg KdV.pStar))
+                                          (@NormedAddCommGroup.toSeminormedAddCommGroup.{0}
+                                            (KdV.Sobolev (@Neg.neg.{0} Real Real.instNeg KdV.pStar))
+                                            (KdV.sobolevNormedAddCommGroup
+                                              (@Neg.neg.{0} Real Real.instNeg KdV.pStar))))))
+                                    (df j) (@Top.top.{0} ENNReal ENNReal.instTop)
+                                    (@MeasureTheory.Measure.restrict.{0} Real
+                                      (@MeasureTheory.MeasureSpace.toMeasurableSpace.{0} Real Real.measureSpace)
+                                      (@MeasureTheory.volume.{0} Real Real.measureSpace)
+                                      (@Set.Icc.{0} Real Real.instPreorder a b))) →
+                                (∀ (j : Fin (@OfNat.ofNat.{0} Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))),
+                                    KdV.WeakTimeDerivative a b (fun t => @KdV.Sobolev.val α (f j t)) fun t =>
+                                      @KdV.Sobolev.val (@Neg.neg.{0} Real Real.instNeg KdV.pStar) (df j t)) →
+                                  And
+                                    (KdV.InSobolev
+                                      (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero))
+                                      (KdV.CIntegral a b
+                                        (fun t =>
+                                          @KdV.Sobolev.val α
+                                            (f
+                                              (@OfNat.ofNat.{0}
+                                                (Fin (@OfNat.ofNat.{0} Nat (nat_lit 3) (instOfNatNat (nat_lit 3))))
+                                                (nat_lit 0)
+                                                ({
+                                                      len :=
+                                                        @OfNat.ofNat.{0} Nat (nat_lit 2)
+                                                          (instOfNatNat
+                                                            (nat_lit 2)) }.instOfNatToTypeOrderHomFinHAddNatLenOfNat
+                                                  (nat_lit 0)))
+                                              t))
+                                        (fun t =>
+                                          @KdV.Sobolev.val α
+                                            (f
+                                              (@OfNat.ofNat.{0}
+                                                (Fin (@OfNat.ofNat.{0} Nat (nat_lit 3) (instOfNatNat (nat_lit 3))))
+                                                (nat_lit 1)
+                                                ({
+                                                      len :=
+                                                        @OfNat.ofNat.{0} Nat (nat_lit 2)
+                                                          (instOfNatNat
+                                                            (nat_lit 2)) }.instOfNatToTypeOrderHomFinHAddNatLenOfNat
+                                                  (nat_lit 1)))
+                                              t))
+                                        fun t =>
+                                        @KdV.Sobolev.val α
+                                          (f
+                                            (@OfNat.ofNat.{0}
+                                              (Fin (@OfNat.ofNat.{0} Nat (nat_lit 3) (instOfNatNat (nat_lit 3))))
+                                              (nat_lit 2)
+                                              ({
+                                                    len :=
+                                                      @OfNat.ofNat.{0} Nat (nat_lit 2)
+                                                        (instOfNatNat
+                                                          (nat_lit 2)) }.instOfNatToTypeOrderHomFinHAddNatLenOfNat
+                                                (nat_lit 2)))
+                                            t)))
+                                    (∀ (i : Fin (@OfNat.ofNat.{0} Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))),
+                                      @LE.le.{0} Real Real.instLE
+                                        (KdV.sourceNorm
+                                          (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero))
+                                          (KdV.CIntegral a b
+                                            (fun t =>
+                                              @KdV.Sobolev.val α
+                                                (f
+                                                  (@OfNat.ofNat.{0}
+                                                    (Fin (@OfNat.ofNat.{0} Nat (nat_lit 3) (instOfNatNat (nat_lit 3))))
+                                                    (nat_lit 0)
+                                                    ({
+                                                          len :=
+                                                            @OfNat.ofNat.{0} Nat (nat_lit 2)
+                                                              (instOfNatNat
+                                                                (nat_lit 2)) }.instOfNatToTypeOrderHomFinHAddNatLenOfNat
+                                                      (nat_lit 0)))
+                                                  t))
+                                            (fun t =>
+                                              @KdV.Sobolev.val α
+                                                (f
+                                                  (@OfNat.ofNat.{0}
+                                                    (Fin (@OfNat.ofNat.{0} Nat (nat_lit 3) (instOfNatNat (nat_lit 3))))
+                                                    (nat_lit 1)
+                                                    ({
+                                                          len :=
+                                                            @OfNat.ofNat.{0} Nat (nat_lit 2)
+                                                              (instOfNatNat
+                                                                (nat_lit 2)) }.instOfNatToTypeOrderHomFinHAddNatLenOfNat
+                                                      (nat_lit 1)))
+                                                  t))
+                                            fun t =>
+                                            @KdV.Sobolev.val α
+                                              (f
+                                                (@OfNat.ofNat.{0}
+                                                  (Fin (@OfNat.ofNat.{0} Nat (nat_lit 3) (instOfNatNat (nat_lit 3))))
+                                                  (nat_lit 2)
+                                                  ({
+                                                        len :=
+                                                          @OfNat.ofNat.{0} Nat (nat_lit 2)
+                                                            (instOfNatNat
+                                                              (nat_lit 2)) }.instOfNatToTypeOrderHomFinHAddNatLenOfNat
+                                                    (nat_lit 2)))
+                                                t)))
+                                        (@HAdd.hAdd.{0, 0, 0} Real Real Real (@instHAdd.{0} Real Real.instAdd)
+                                          (@HMul.hMul.{0, 0, 0} Real Real Real (@instHMul.{0} Real Real.instMul)
+                                            (@HMul.hMul.{0, 0, 0} Real Real Real (@instHMul.{0} Real Real.instMul) C
+                                              (@HSub.hSub.{0, 0, 0} Real Real Real (@instHSub.{0} Real Real.instSub) b
+                                                a))
+                                            (∏ j, @KdV.sourceXNorm α hα a b (f j) (df j)))
+                                          (@HMul.hMul.{0, 0, 0} Real Real Real (@instHMul.{0} Real Real.instMul)
+                                            (@HMul.hMul.{0, 0, 0} Real Real Real (@instHMul.{0} Real Real.instMul) C
+                                              (@KdV.sourceLInfinityNegative α hα a b (f i)))
+                                            (∏ j,
+                                              @ite.{1} Real
+                                                (@Eq.{1}
+                                                  (Fin (@OfNat.ofNat.{0} Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))) j
+                                                  i)
+                                                (instDecidableEqFin
+                                                  (@OfNat.ofNat.{0} Nat (nat_lit 3) (instOfNatNat (nat_lit 3))) j i)
+                                                (@OfNat.ofNat.{0} Real (nat_lit 1)
+                                                  (@One.toOfNat1.{0} Real Real.instOne))
+                                                (@KdV.sourceLInfinityZero α hα a b (f j)))))))
+  KdV.LiWuTrilinearEstimate.timeIndependent : ∀ (H : Real),
+      @LT.lt.{0} Real Real.instLT (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero)) H →
+        @LE.le.{0} Real Real.instLE H (@OfNat.ofNat.{0} Real (nat_lit 1) (@One.toOfNat1.{0} Real Real.instOne)) →
+          ∀ (α : Real),
+            @LE.le.{0} Real Real.instLE (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero)) α →
+              @LE.le.{0} Real Real.instLE α (@OfNat.ofNat.{0} Real (nat_lit 1) (@One.toOfNat1.{0} Real Real.instOne)) →
+                ∃ C,
+                  And
+                    (@LT.lt.{0} Real Real.instLT
+                      (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero)) C)
+                    (∀ (a b : Real),
+                      @LE.le.{0} Real Real.instLE
+                          (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero)) a →
+                        @LE.le.{0} Real Real.instLE a b →
+                          @LE.le.{0} Real Real.instLE
+                              (@HSub.hSub.{0, 0, 0} Real Real Real (@instHSub.{0} Real Real.instSub) b a) H →
+                            ∀ (f g h : KdV.Fourier),
+                              KdV.InSobolev α f →
+                                KdV.InSobolev α g →
+                                  KdV.InSobolev α h →
+                                    And
+                                      (KdV.InSobolev
+                                        (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero))
+                                        (KdV.CIntegral a b (fun x => f) (fun x => g) fun x => h))
+                                      (@LE.le.{0} Real Real.instLE
+                                        (KdV.sourceNorm
+                                          (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero))
+                                          (KdV.CIntegral a b (fun x => f) (fun x => g) fun x => h))
+                                        (@HMul.hMul.{0, 0, 0} Real Real Real (@instHMul.{0} Real Real.instMul)
+                                          (@HMul.hMul.{0, 0, 0} Real Real Real (@instHMul.{0} Real Real.instMul)
+                                            (@HMul.hMul.{0, 0, 0} Real Real Real (@instHMul.{0} Real Real.instMul)
+                                              (@HMul.hMul.{0, 0, 0} Real Real Real (@instHMul.{0} Real Real.instMul) C
+                                                (@HPow.hPow.{0, 0, 0} Real Real Real
+                                                  (@instHPow.{0, 0} Real Real Real.instPow)
+                                                  (@HSub.hSub.{0, 0, 0} Real Real Real (@instHSub.{0} Real Real.instSub)
+                                                    b a)
+                                                  α))
+                                              (KdV.sourceNorm α f))
+                                            (KdV.sourceNorm α g))
+                                          (KdV.sourceNorm α h))))
+constructor:
+  KdV.LiWuTrilinearEstimate.mk
+    (dynamic :
+      ∀ (H : Real),
+        @LT.lt.{0} Real Real.instLT (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero)) H →
+          @LE.le.{0} Real Real.instLE H (@OfNat.ofNat.{0} Real (nat_lit 1) (@One.toOfNat1.{0} Real Real.instOne)) →
+            ∀ (α : Real)
+              (hα :
+                @LE.le.{0} Real Real.instLE (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero))
+                  α),
+              @LE.le.{0} Real Real.instLE α (@OfNat.ofNat.{0} Real (nat_lit 1) (@One.toOfNat1.{0} Real Real.instOne)) →
+                ∃ C,
+                  And
+                    (@LT.lt.{0} Real Real.instLT
+                      (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero)) C)
+                    (∀ (a b : Real),
+                      @LE.le.{0} Real Real.instLE
+                          (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero)) a →
+                        @LE.le.{0} Real Real.instLE a b →
+                          @LE.le.{0} Real Real.instLE
+                              (@HSub.hSub.{0, 0, 0} Real Real Real (@instHSub.{0} Real Real.instSub) b a) H →
+                            ∀
+                              (f :
+                                Fin (@OfNat.ofNat.{0} Nat (nat_lit 3) (instOfNatNat (nat_lit 3))) →
+                                  Real → KdV.Sobolev α)
+                              (df :
+                                Fin (@OfNat.ofNat.{0} Nat (nat_lit 3) (instOfNatNat (nat_lit 3))) →
+                                  Real → KdV.Sobolev (@Neg.neg.{0} Real Real.instNeg KdV.pStar)),
+                              (∀ (j : Fin (@OfNat.ofNat.{0} Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))),
+                                  @MeasureTheory.MemLp.{0, 0} Real (KdV.Sobolev α)
+                                    (@MeasureTheory.MeasureSpace.toMeasurableSpace.{0} Real Real.measureSpace)
+                                    (@ContinuousENorm.toENorm.{0} (KdV.Sobolev α)
+                                      (@UniformSpace.toTopologicalSpace.{0} (KdV.Sobolev α)
+                                        (@PseudoMetricSpace.toUniformSpace.{0} (KdV.Sobolev α)
+                                          (@SeminormedAddGroup.toPseudoMetricSpace.{0} (KdV.Sobolev α)
+                                            (@SeminormedAddCommGroup.toSeminormedAddGroup.{0} (KdV.Sobolev α)
+                                              (@NormedAddCommGroup.toSeminormedAddCommGroup.{0} (KdV.Sobolev α)
+                                                (KdV.sobolevNormedAddCommGroup α))))))
+                                      (@SeminormedAddGroup.toContinuousENorm.{0} (KdV.Sobolev α)
+                                        (@SeminormedAddCommGroup.toSeminormedAddGroup.{0} (KdV.Sobolev α)
+                                          (@NormedAddCommGroup.toSeminormedAddCommGroup.{0} (KdV.Sobolev α)
+                                            (KdV.sobolevNormedAddCommGroup α)))))
+                                    (@UniformSpace.toTopologicalSpace.{0} (KdV.Sobolev α)
+                                      (@PseudoMetricSpace.toUniformSpace.{0} (KdV.Sobolev α)
+                                        (@SeminormedAddCommGroup.toPseudoMetricSpace.{0} (KdV.Sobolev α)
+                                          (@NormedAddCommGroup.toSeminormedAddCommGroup.{0} (KdV.Sobolev α)
+                                            (KdV.sobolevNormedAddCommGroup α)))))
+                                    (f j) (@Top.top.{0} ENNReal ENNReal.instTop)
+                                    (@MeasureTheory.Measure.restrict.{0} Real
+                                      (@MeasureTheory.MeasureSpace.toMeasurableSpace.{0} Real Real.measureSpace)
+                                      (@MeasureTheory.volume.{0} Real Real.measureSpace)
+                                      (@Set.Icc.{0} Real Real.instPreorder a b))) →
+                                (∀ (j : Fin (@OfNat.ofNat.{0} Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))),
+                                    @MeasureTheory.MemLp.{0, 0} Real
+                                      (KdV.Sobolev (@Neg.neg.{0} Real Real.instNeg KdV.pStar))
+                                      (@MeasureTheory.MeasureSpace.toMeasurableSpace.{0} Real Real.measureSpace)
+                                      (@ContinuousENorm.toENorm.{0}
+                                        (KdV.Sobolev (@Neg.neg.{0} Real Real.instNeg KdV.pStar))
+                                        (@UniformSpace.toTopologicalSpace.{0}
+                                          (KdV.Sobolev (@Neg.neg.{0} Real Real.instNeg KdV.pStar))
+                                          (@PseudoMetricSpace.toUniformSpace.{0}
+                                            (KdV.Sobolev (@Neg.neg.{0} Real Real.instNeg KdV.pStar))
+                                            (@SeminormedAddGroup.toPseudoMetricSpace.{0}
+                                              (KdV.Sobolev (@Neg.neg.{0} Real Real.instNeg KdV.pStar))
+                                              (@SeminormedAddCommGroup.toSeminormedAddGroup.{0}
+                                                (KdV.Sobolev (@Neg.neg.{0} Real Real.instNeg KdV.pStar))
+                                                (@NormedAddCommGroup.toSeminormedAddCommGroup.{0}
+                                                  (KdV.Sobolev (@Neg.neg.{0} Real Real.instNeg KdV.pStar))
+                                                  (KdV.sobolevNormedAddCommGroup
+                                                    (@Neg.neg.{0} Real Real.instNeg KdV.pStar)))))))
+                                        (@SeminormedAddGroup.toContinuousENorm.{0}
+                                          (KdV.Sobolev (@Neg.neg.{0} Real Real.instNeg KdV.pStar))
+                                          (@SeminormedAddCommGroup.toSeminormedAddGroup.{0}
+                                            (KdV.Sobolev (@Neg.neg.{0} Real Real.instNeg KdV.pStar))
+                                            (@NormedAddCommGroup.toSeminormedAddCommGroup.{0}
+                                              (KdV.Sobolev (@Neg.neg.{0} Real Real.instNeg KdV.pStar))
+                                              (KdV.sobolevNormedAddCommGroup
+                                                (@Neg.neg.{0} Real Real.instNeg KdV.pStar))))))
+                                      (@UniformSpace.toTopologicalSpace.{0}
+                                        (KdV.Sobolev (@Neg.neg.{0} Real Real.instNeg KdV.pStar))
+                                        (@PseudoMetricSpace.toUniformSpace.{0}
+                                          (KdV.Sobolev (@Neg.neg.{0} Real Real.instNeg KdV.pStar))
+                                          (@SeminormedAddCommGroup.toPseudoMetricSpace.{0}
+                                            (KdV.Sobolev (@Neg.neg.{0} Real Real.instNeg KdV.pStar))
+                                            (@NormedAddCommGroup.toSeminormedAddCommGroup.{0}
+                                              (KdV.Sobolev (@Neg.neg.{0} Real Real.instNeg KdV.pStar))
+                                              (KdV.sobolevNormedAddCommGroup
+                                                (@Neg.neg.{0} Real Real.instNeg KdV.pStar))))))
+                                      (df j) (@Top.top.{0} ENNReal ENNReal.instTop)
+                                      (@MeasureTheory.Measure.restrict.{0} Real
+                                        (@MeasureTheory.MeasureSpace.toMeasurableSpace.{0} Real Real.measureSpace)
+                                        (@MeasureTheory.volume.{0} Real Real.measureSpace)
+                                        (@Set.Icc.{0} Real Real.instPreorder a b))) →
+                                  (∀ (j : Fin (@OfNat.ofNat.{0} Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))),
+                                      KdV.WeakTimeDerivative a b (fun t => @KdV.Sobolev.val α (f j t)) fun t =>
+                                        @KdV.Sobolev.val (@Neg.neg.{0} Real Real.instNeg KdV.pStar) (df j t)) →
+                                    And
+                                      (KdV.InSobolev
+                                        (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero))
+                                        (KdV.CIntegral a b
+                                          (fun t =>
+                                            @KdV.Sobolev.val α
+                                              (f
+                                                (@OfNat.ofNat.{0}
+                                                  (Fin (@OfNat.ofNat.{0} Nat (nat_lit 3) (instOfNatNat (nat_lit 3))))
+                                                  (nat_lit 0)
+                                                  ({
+                                                        len :=
+                                                          @OfNat.ofNat.{0} Nat (nat_lit 2)
+                                                            (instOfNatNat
+                                                              (nat_lit 2)) }.instOfNatToTypeOrderHomFinHAddNatLenOfNat
+                                                    (nat_lit 0)))
+                                                t))
+                                          (fun t =>
+                                            @KdV.Sobolev.val α
+                                              (f
+                                                (@OfNat.ofNat.{0}
+                                                  (Fin (@OfNat.ofNat.{0} Nat (nat_lit 3) (instOfNatNat (nat_lit 3))))
+                                                  (nat_lit 1)
+                                                  ({
+                                                        len :=
+                                                          @OfNat.ofNat.{0} Nat (nat_lit 2)
+                                                            (instOfNatNat
+                                                              (nat_lit 2)) }.instOfNatToTypeOrderHomFinHAddNatLenOfNat
+                                                    (nat_lit 1)))
+                                                t))
+                                          fun t =>
+                                          @KdV.Sobolev.val α
+                                            (f
+                                              (@OfNat.ofNat.{0}
+                                                (Fin (@OfNat.ofNat.{0} Nat (nat_lit 3) (instOfNatNat (nat_lit 3))))
+                                                (nat_lit 2)
+                                                ({
+                                                      len :=
+                                                        @OfNat.ofNat.{0} Nat (nat_lit 2)
+                                                          (instOfNatNat
+                                                            (nat_lit 2)) }.instOfNatToTypeOrderHomFinHAddNatLenOfNat
+                                                  (nat_lit 2)))
+                                              t)))
+                                      (∀ (i : Fin (@OfNat.ofNat.{0} Nat (nat_lit 3) (instOfNatNat (nat_lit 3)))),
+                                        @LE.le.{0} Real Real.instLE
+                                          (KdV.sourceNorm
+                                            (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero))
+                                            (KdV.CIntegral a b
+                                              (fun t =>
+                                                @KdV.Sobolev.val α
+                                                  (f
+                                                    (@OfNat.ofNat.{0}
+                                                      (Fin
+                                                        (@OfNat.ofNat.{0} Nat (nat_lit 3) (instOfNatNat (nat_lit 3))))
+                                                      (nat_lit 0)
+                                                      ({
+                                                            len :=
+                                                              @OfNat.ofNat.{0} Nat (nat_lit 2)
+                                                                (instOfNatNat
+                                                                  (nat_lit
+                                                                    2)) }.instOfNatToTypeOrderHomFinHAddNatLenOfNat
+                                                        (nat_lit 0)))
+                                                    t))
+                                              (fun t =>
+                                                @KdV.Sobolev.val α
+                                                  (f
+                                                    (@OfNat.ofNat.{0}
+                                                      (Fin
+                                                        (@OfNat.ofNat.{0} Nat (nat_lit 3) (instOfNatNat (nat_lit 3))))
+                                                      (nat_lit 1)
+                                                      ({
+                                                            len :=
+                                                              @OfNat.ofNat.{0} Nat (nat_lit 2)
+                                                                (instOfNatNat
+                                                                  (nat_lit
+                                                                    2)) }.instOfNatToTypeOrderHomFinHAddNatLenOfNat
+                                                        (nat_lit 1)))
+                                                    t))
+                                              fun t =>
+                                              @KdV.Sobolev.val α
+                                                (f
+                                                  (@OfNat.ofNat.{0}
+                                                    (Fin (@OfNat.ofNat.{0} Nat (nat_lit 3) (instOfNatNat (nat_lit 3))))
+                                                    (nat_lit 2)
+                                                    ({
+                                                          len :=
+                                                            @OfNat.ofNat.{0} Nat (nat_lit 2)
+                                                              (instOfNatNat
+                                                                (nat_lit 2)) }.instOfNatToTypeOrderHomFinHAddNatLenOfNat
+                                                      (nat_lit 2)))
+                                                  t)))
+                                          (@HAdd.hAdd.{0, 0, 0} Real Real Real (@instHAdd.{0} Real Real.instAdd)
+                                            (@HMul.hMul.{0, 0, 0} Real Real Real (@instHMul.{0} Real Real.instMul)
+                                              (@HMul.hMul.{0, 0, 0} Real Real Real (@instHMul.{0} Real Real.instMul) C
+                                                (@HSub.hSub.{0, 0, 0} Real Real Real (@instHSub.{0} Real Real.instSub) b
+                                                  a))
+                                              (∏ j, @KdV.sourceXNorm α hα a b (f j) (df j)))
+                                            (@HMul.hMul.{0, 0, 0} Real Real Real (@instHMul.{0} Real Real.instMul)
+                                              (@HMul.hMul.{0, 0, 0} Real Real Real (@instHMul.{0} Real Real.instMul) C
+                                                (@KdV.sourceLInfinityNegative α hα a b (f i)))
+                                              (∏ j,
+                                                @ite.{1} Real
+                                                  (@Eq.{1}
+                                                    (Fin (@OfNat.ofNat.{0} Nat (nat_lit 3) (instOfNatNat (nat_lit 3))))
+                                                    j i)
+                                                  (instDecidableEqFin
+                                                    (@OfNat.ofNat.{0} Nat (nat_lit 3) (instOfNatNat (nat_lit 3))) j i)
+                                                  (@OfNat.ofNat.{0} Real (nat_lit 1)
+                                                    (@One.toOfNat1.{0} Real Real.instOne))
+                                                  (@KdV.sourceLInfinityZero α hα a b (f j))))))))
+    (timeIndependent :
+      ∀ (H : Real),
+        @LT.lt.{0} Real Real.instLT (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero)) H →
+          @LE.le.{0} Real Real.instLE H (@OfNat.ofNat.{0} Real (nat_lit 1) (@One.toOfNat1.{0} Real Real.instOne)) →
+            ∀ (α : Real),
+              @LE.le.{0} Real Real.instLE (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero))
+                  α →
+                @LE.le.{0} Real Real.instLE α
+                    (@OfNat.ofNat.{0} Real (nat_lit 1) (@One.toOfNat1.{0} Real Real.instOne)) →
+                  ∃ C,
+                    And
+                      (@LT.lt.{0} Real Real.instLT
+                        (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero)) C)
+                      (∀ (a b : Real),
+                        @LE.le.{0} Real Real.instLE
+                            (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero)) a →
+                          @LE.le.{0} Real Real.instLE a b →
+                            @LE.le.{0} Real Real.instLE
+                                (@HSub.hSub.{0, 0, 0} Real Real Real (@instHSub.{0} Real Real.instSub) b a) H →
+                              ∀ (f g h : KdV.Fourier),
+                                KdV.InSobolev α f →
+                                  KdV.InSobolev α g →
+                                    KdV.InSobolev α h →
+                                      And
+                                        (KdV.InSobolev
+                                          (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero))
+                                          (KdV.CIntegral a b (fun x => f) (fun x => g) fun x => h))
+                                        (@LE.le.{0} Real Real.instLE
+                                          (KdV.sourceNorm
+                                            (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero))
+                                            (KdV.CIntegral a b (fun x => f) (fun x => g) fun x => h))
+                                          (@HMul.hMul.{0, 0, 0} Real Real Real (@instHMul.{0} Real Real.instMul)
+                                            (@HMul.hMul.{0, 0, 0} Real Real Real (@instHMul.{0} Real Real.instMul)
+                                              (@HMul.hMul.{0, 0, 0} Real Real Real (@instHMul.{0} Real Real.instMul)
+                                                (@HMul.hMul.{0, 0, 0} Real Real Real (@instHMul.{0} Real Real.instMul) C
+                                                  (@HPow.hPow.{0, 0, 0} Real Real Real
+                                                    (@instHPow.{0, 0} Real Real Real.instPow)
+                                                    (@HSub.hSub.{0, 0, 0} Real Real Real
+                                                      (@instHSub.{0} Real Real.instSub) b a)
+                                                    α))
+                                                (KdV.sourceNorm α f))
+                                              (KdV.sourceNorm α g))
+                                            (KdV.sourceNorm α h))))) :
+    KdV.LiWuTrilinearEstimate
+def KdV.BITGalerkinEstimate : Prop :=
+∀ (s : Real),
+  @LE.le.{0} Real Real.instLE (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero)) s →
+    ∀ (M₀ : Real),
+      @LE.le.{0} Real Real.instLE (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero)) M₀ →
+        ∀ (T : Real),
+          @LT.lt.{0} Real Real.instLT (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero)) T →
+            ∀ (r : Real),
+              @LE.le.{0} Real Real.instLE (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero))
+                  r →
+                ∃ A,
+                  And
+                    (@LE.le.{0} Real Real.instLE
+                      (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero)) A)
+                    (∀ (m : Nat),
+                      @LT.lt.{0} Nat instLTNat (@OfNat.ofNat.{0} Nat (nat_lit 0) (instOfNatNat (nat_lit 0))) m →
+                        ∀ (f : KdV.Fourier) (v : Real → KdV.Fourier),
+                          KdV.RealValued f →
+                            KdV.InHomSobolev s f →
+                              @Eq.{1} Real (KdV.homogeneousNorm s f) r →
+                                @LE.le.{0} Real Real.instLE
+                                    (KdV.homogeneousNorm
+                                      (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero)) f)
+                                    M₀ →
+                                  KdV.HomSobolevContinuousOn s T v →
+                                    (∀ (t : Real),
+                                        @Membership.mem.{0, 0} Real (Set.{0} Real) (@Set.instMembership.{0} Real)
+                                            (@Set.Icc.{0} Real Real.instPreorder
+                                              (@OfNat.ofNat.{0} Real (nat_lit 0)
+                                                (@Zero.toOfNat0.{0} Real Real.instZero))
+                                              T)
+                                            t →
+                                          KdV.RealValued (v t)) →
+                                      KdV.SourceGalerkinODE m T f v →
+                                        ∀ (t : Real),
+                                          @Membership.mem.{0, 0} Real (Set.{0} Real) (@Set.instMembership.{0} Real)
+                                              (@Set.Icc.{0} Real Real.instPreorder
+                                                (@OfNat.ofNat.{0} Real (nat_lit 0)
+                                                  (@Zero.toOfNat0.{0} Real Real.instZero))
+                                                T)
+                                              t →
+                                            @LE.le.{0} Real Real.instLE (KdV.homogeneousNorm s (v t)) A)
+def KdV.BITExistenceLimit : Prop :=
+∀ (T : Real),
+  @LT.lt.{0} Real Real.instLT (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero)) T →
+    ∀ (s : Real),
+      @LT.lt.{0} Real Real.instLT (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero)) s →
+        ∀ (f : KdV.Fourier),
+          KdV.RealValued f →
+            KdV.InHomSobolev s f →
+              ∀ (σ : Real),
+                @LT.lt.{0} Real Real.instLT (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero))
+                    σ →
+                  @LT.lt.{0} Real Real.instLT σ s → ∃ v, KdV.SourceLimitCertificate s T f σ v
+def KdV.BITHigherRegularity : Prop :=
+∀ (s : Real),
+  @LT.lt.{0} Real Real.instLT
+      (@HDiv.hDiv.{0, 0, 0} Real Real Real (@instHDiv.{0} Real (@DivInvMonoid.toDiv.{0} Real Real.instDivInvMonoid))
+        (@OfNat.ofNat.{0} Real (nat_lit 1) (@One.toOfNat1.{0} Real Real.instOne))
+        (@OfNat.ofNat.{0} Real (nat_lit 2)
+          (@instOfNatAtLeastTwo.{0} Real (nat_lit 2) Real.instNatCast KdV.Torus._proof_1)))
+      s →
+    ∀ (T : Real),
+      @LT.lt.{0} Real Real.instLT (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero)) T →
+        ∀ (f : KdV.Fourier),
+          KdV.RealValued f →
+            KdV.InHomSobolev s f →
+              ∀ (v : Real → KdV.Fourier),
+                KdV.SourceConstructedLimit s T f v →
+                  And (KdV.HomSobolevContinuousOn s T v)
+                    (And (KdV.SourceUniqueContinuous s T f v)
+                      (And (KdV.SourceLocalLipschitz s T f v)
+                        (∀ (t : Real),
+                          @Membership.mem.{0, 0} Real (Set.{0} Real) (@Set.instMembership.{0} Real)
+                              (@Set.Icc.{0} Real Real.instPreorder
+                                (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero)) T)
+                              t →
+                            @Eq.{1} Real
+                              (KdV.homogeneousNorm
+                                (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero)) (v t))
+                              (KdV.homogeneousNorm
+                                (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero)) f))))
+def KdV.BITLowRegularity : Prop :=
+∀ (s : Real),
+  @LT.lt.{0} Real Real.instLT (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero)) s →
+    @LE.le.{0} Real Real.instLE s
+        (@HDiv.hDiv.{0, 0, 0} Real Real Real (@instHDiv.{0} Real (@DivInvMonoid.toDiv.{0} Real Real.instDivInvMonoid))
+          (@OfNat.ofNat.{0} Real (nat_lit 1) (@One.toOfNat1.{0} Real Real.instOne))
+          (@OfNat.ofNat.{0} Real (nat_lit 2)
+            (@instOfNatAtLeastTwo.{0} Real (nat_lit 2) Real.instNatCast KdV.Torus._proof_1))) →
+      ∀ (T : Real),
+        @LT.lt.{0} Real Real.instLT (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero)) T →
+          ∀ (f : KdV.Fourier),
+            KdV.RealValued f →
+              KdV.InHomSobolev s f →
+                ∀ (v : Real → KdV.Fourier),
+                  KdV.SourceConstructedLimit s T f v →
+                    And (KdV.HomSobolevContinuousOn s T v)
+                      (And (KdV.SourceUniqueContinuous s T f v) (KdV.SourceLocalLipschitz s T f v))
+def KdV.BITWeakerLipschitz : Prop :=
+∀ (M : Real),
+  @LE.le.{0} Real Real.instLE (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero)) M →
+    ∀ (θ : Real),
+      @LT.lt.{0} Real Real.instLT
+          (@Neg.neg.{0} Real Real.instNeg (@OfNat.ofNat.{0} Real (nat_lit 1) (@One.toOfNat1.{0} Real Real.instOne))) θ →
+        @LE.le.{0} Real Real.instLE θ (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero)) →
+          ∃ C',
+            And
+              (@LT.lt.{0} Real Real.instLT (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero))
+                C')
+              (∃ CM,
+                And
+                  (@LT.lt.{0} Real Real.instLT
+                    (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero)) CM)
+                  (∀ (T : Real),
+                    @LT.lt.{0} Real Real.instLT
+                        (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero)) T →
+                      ∀ (f g : KdV.Fourier),
+                        KdV.RealValued f →
+                          KdV.RealValued g →
+                            KdV.InHomSobolev (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero))
+                                f →
+                              KdV.InHomSobolev
+                                  (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero)) g →
+                                @LE.le.{0} Real Real.instLE
+                                    (@HAdd.hAdd.{0, 0, 0} Real Real Real (@instHAdd.{0} Real Real.instAdd)
+                                      (KdV.homogeneousNorm
+                                        (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero)) f)
+                                      (KdV.homogeneousNorm
+                                        (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero)) g))
+                                    M →
+                                  ∀ (v w : Real → KdV.Fourier),
+                                    KdV.SourceWeakSolution T f v →
+                                      KdV.SourceWeakSolution T g w →
+                                        KdV.HomSobolevContinuousOn
+                                            (@OfNat.ofNat.{0} Real (nat_lit 0) (@Zero.toOfNat0.{0} Real Real.instZero))
+                                            T v →
+                                          KdV.HomSobolevContinuousOn
+                                              (@OfNat.ofNat.{0} Real (nat_lit 0)
+                                                (@Zero.toOfNat0.{0} Real Real.instZero))
+                                              T w →
+                                            @Filter.Eventually.{0} Real
+                                              (fun t =>
+                                                @LE.le.{0} Real Real.instLE
+                                                  (KdV.homogeneousNorm θ
+                                                    (@HSub.hSub.{0, 0, 0} KdV.Fourier KdV.Fourier KdV.Fourier
+                                                      (@instHSub.{0} KdV.Fourier
+                                                        (@Pi.instSub.{0, 0} Int (fun a => Complex) fun i =>
+                                                          Complex.instSub))
+                                                      (v t) (w t)))
+                                                  (@HMul.hMul.{0, 0, 0} Real Real Real (@instHMul.{0} Real Real.instMul)
+                                                    (@HMul.hMul.{0, 0, 0} Real Real Real
+                                                      (@instHMul.{0} Real Real.instMul) C'
+                                                      (@HPow.hPow.{0, 0, 0} Real Real Real
+                                                        (@instHPow.{0, 0} Real Real Real.instPow) CM T))
+                                                    (KdV.homogeneousNorm θ
+                                                      (@HSub.hSub.{0, 0, 0} KdV.Fourier KdV.Fourier KdV.Fourier
+                                                        (@instHSub.{0} KdV.Fourier
+                                                          (@Pi.instSub.{0, 0} Int (fun a => Complex) fun i =>
+                                                            Complex.instSub))
+                                                        f g))))
+                                              (@MeasureTheory.ae.{0, 0} Real
+                                                (@MeasureTheory.Measure.{0} Real
+                                                  (@MeasureTheory.MeasureSpace.toMeasurableSpace.{0} Real
+                                                    Real.measureSpace))
+                                                (@MeasureTheory.Measure.instFunLike.{0} Real
+                                                  (@MeasureTheory.MeasureSpace.toMeasurableSpace.{0} Real
+                                                    Real.measureSpace))
+                                                KdV.HomogeneousEssentiallyBounded._proof_1
+                                                (@MeasureTheory.Measure.restrict.{0} Real
+                                                  (@MeasureTheory.MeasureSpace.toMeasurableSpace.{0} Real
+                                                    Real.measureSpace)
+                                                  (@MeasureTheory.volume.{0} Real Real.measureSpace)
+                                                  (@Set.Icc.{0} Real Real.instPreorder
+                                                    (@OfNat.ofNat.{0} Real (nat_lit 0)
+                                                      (@Zero.toOfNat0.{0} Real Real.instZero))
+                                                    T)))))

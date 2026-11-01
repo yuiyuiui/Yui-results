@@ -1,0 +1,34 @@
+{
+  "statement": "∃ red : Reduction.loc p →+* ZMod p, ∀ (a d : ℤ), ¬ (p : ℤ) ∣ d → ∀ r : Reduction.loc p, (r : ℚ) = (a : ℚ) / (d : ℚ) → red r * (d : ZMod p) = (a : ZMod p)",
+  "proof": "classical\nletI : Fact p.Prime := ⟨h_H001⟩\nlet D : Submonoid ℤ :=\n  { carrier := {d | ¬ (p : ℤ) ∣ d}\n    one_mem' := by\n      change ¬ (p : ℤ) ∣ ((1 : ℕ) : ℤ)\n      simpa only [Int.natCast_dvd_natCast, Nat.dvd_one] using h_H001.ne_one\n    mul_mem' := by\n      intro a b ha hb hab\n      exact (Int.prime_iff_natAbs_prime.mpr (by simpa using h_H001)).dvd_mul.mp hab |>.elim ha hb }\nhave hs : Reduction.locSpec p := h_T004.1.1\nletI : IsLocalization D (Reduction.loc p) := (isLocalization_iff D _).mpr (by\n  refine ⟨?_, ?_, ?_⟩\n  · intro d\n    have hd : (d.val : ℚ) ≠ 0 := by\n      exact_mod_cast (show d.val ≠ 0 from fun hz => d.property (hz ▸ dvd_zero _))\n    let t : Reduction.loc p := ⟨(d.val : ℚ)⁻¹, Subring.subset_closure ⟨d.val, d.property, rfl⟩⟩\n    exact isUnit_iff_exists_inv.mpr ⟨t, Subtype.ext (by simpa [t] using mul_inv_cancel₀ hd)⟩\n  · intro r\n    obtain ⟨a,d,hd,he⟩ := (hs r.val).mp r.property\n    refine ⟨⟨a, ⟨d,hd⟩⟩, Subtype.ext ?_⟩\n    change (r : ℚ) * (d : ℚ) = (a : ℚ)\n    rw [he, div_mul_cancel₀]\n    exact_mod_cast (show d ≠ 0 from fun hz => hd (hz ▸ dvd_zero _))\n  · intro a b he\n    refine ⟨1, ?_⟩\n    simpa using (Int.cast_injective (congrArg (fun z : Reduction.loc p => (z : ℚ)) he)))\nhave hu : ∀ d : D, IsUnit ((Int.castRingHom (ZMod p)) d) := by\n  intro d\n  apply isUnit_iff_ne_zero.mpr\n  exact (ZMod.intCast_zmod_eq_zero_iff_dvd d.val p).not.mpr d.property\nlet red : Reduction.loc p →+* ZMod p := IsLocalization.lift (M := D) hu\nrefine ⟨red, ?_⟩\nintro a d hd r he\nhave hd0 : (d : ℚ) ≠ 0 := by\n  exact_mod_cast (show d ≠ 0 from fun hz => hd (hz ▸ dvd_zero _))\nhave hr : r * (d : Reduction.loc p) = (a : Reduction.loc p) := by\n  apply Subtype.ext\n  change (r : ℚ) * (d : ℚ) = (a : ℚ)\n  rw [he, div_mul_cancel₀ _ hd0]\nsimpa using congrArg red hr\n",
+  "check": {
+    "exit_code": 0,
+    "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-k78xeidi/output/Auxiliary.lean:131:18: warning: Variable name `hd` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-k78xeidi/output/Auxiliary.lean:152:22: warning: Variable name `p` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-k78xeidi/output/Auxiliary.lean:191:46: warning: Variable name `fieldK` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-k78xeidi/output/Auxiliary.lean:191:273: warning: Variable name `h_H002` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-k78xeidi/output/Auxiliary.lean:191:294: warning: Variable name `h_H003` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (p : ℕ) (l : ℤ) (K : Type u_2) [fieldK : Field K] (V : Type u_1) [addV : AddCommGroup V]\n  [modV : _root_.Module ℂ V] (act : ↥Reduction.SL →ₗ⁅ℂ⁆ End ℂ V) (x y h : ↥Reduction.SL) (v0 : V) (M : Submodule ℤ V),\n  Nat.Prime p →\n    CharP K p →\n      0 ≤ l ∧ l < ↑p →\n        Reduction.localizationFacts p l (act x) (act y) (act h) v0 M →\n          ∃ red, ∀ (a d : ℤ), ¬↑p ∣ d → ∀ (r : ↥(Reduction.loc p)), ↑r = ↑a / ↑d → red r * ↑d = ↑a\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+    "stderr": "",
+    "wall_seconds": 6.1857757908292115,
+    "native_limits": {
+      "timeout_seconds": 180,
+      "max_heartbeats": 20000000
+    },
+    "source_path": "/Users/syyui/projects/Yui-results/test/lie-module-irreducibility/rigorous-proof/20261101-fresh-full-18b3e2e0bf/native-checks/002b4cfc44784395b0c4a9e5a3f3e993.lean",
+    "source_sha256": "c03d70cfb42f4528d9e9bd41f3a01673e45b4b7022309a2da95b09e440596faf",
+    "auxiliary_valid": true,
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "lean_sha256": "c03d70cfb42f4528d9e9bd41f3a01673e45b4b7022309a2da95b09e440596faf",
+    "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+    "context_port": "T008",
+    "candidate": 2,
+    "helper": {
+      "name": "yui_aux_0001",
+      "statement": "∃ red : Reduction.loc p →+* ZMod p, ∀ (a d : ℤ), ¬ (p : ℤ) ∣ d → ∀ r : Reduction.loc p, (r : ℚ) = (a : ℚ) / (d : ℚ) → red r * (d : ZMod p) = (a : ZMod p)",
+      "application": "@yui_aux_0001 p l K fieldK V addV modV act x y h v0 M h_H001 h_H002 h_H003 h_T004",
+      "scope": "Checked same-node theorem; available in later checks and the final body."
+    },
+    "accepted": true,
+    "stage_complete": false
+  }
+}

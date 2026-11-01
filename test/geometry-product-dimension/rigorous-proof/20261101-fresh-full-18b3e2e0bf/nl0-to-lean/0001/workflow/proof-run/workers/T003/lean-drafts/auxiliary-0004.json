@@ -1,0 +1,34 @@
+{
+  "statement": "∀ (B : ℕ), (∀ x ∈ E, ∀ j : Fin n, |x j| ≤ B) → ∀ (k : ℕ), 0 < k → ∃ t : (Fin n → Fin ((2 * B + 2) * k)) → Set (GDVec n), E ⊆ ⋃ i, t i ∧ ∀ i, Metric.ediam (t i) ≤ (n : ℝ≥0∞) ^ (1 / 2 : ℝ) * (1 / (k : ℝ≥0∞))",
+  "proof": "intro B hB k hk\nhave kp : (0 : ℝ) < k := Nat.cast_pos.mpr hk\nlet t : (Fin n → Fin ((2 * B + 2) * k)) → Set (GDVec n) := fun f =>\n  {x | ∀ j, -(B : ℝ) + (f j : ℝ) / k ≤ x j ∧ x j ≤ -(B : ℝ) + (f j : ℝ) / k + 1 / k}\nrefine ⟨t, ?_, ?_⟩\n· intro x hx\n  have bounds : ∀ j, -(B : ℝ) ≤ x j ∧ x j ≤ B := fun j => abs_le.mp (hB x hx j)\n  have nonneg : ∀ j, 0 ≤ (x j + B) * k := fun j => mul_nonneg (by linarith [(bounds j).1]) kp.le\n  let f : Fin n → Fin ((2 * B + 2) * k) := fun j =>\n    ⟨⌊(x j + B) * k⌋₊, by\n      apply (@yui_aux_0002 n E h_H001 h_H002 h_T002) _ _ (nonneg j)\n      push_cast\n      nlinarith [(bounds j).2]⟩\n  apply Set.mem_iUnion.mpr\n  refine ⟨f, fun j => ⟨?_, ?_⟩⟩\n  · have hf := Nat.floor_le (nonneg j)\n    change -(B : ℝ) + (⌊(x j + B) * k⌋₊ : ℝ) / k ≤ x j\n    apply (le_sub_iff_add_le.mp ?_)\n    have hdiv : (⌊(x j + B) * k⌋₊ : ℝ) / k ≤ x j + B := (div_le_iff₀ kp).mpr hf\n    linarith\n  · have hf := (Nat.lt_floor_add_one ((x j + B) * k)).le\n    change x j ≤ -(B : ℝ) + (⌊(x j + B) * k⌋₊ : ℝ) / k + 1 / k\n    have hdiv : x j + B ≤ ((⌊(x j + B) * k⌋₊ : ℝ) + 1) / k := (le_div_iff₀ kp).mpr hf\n    rw [add_div] at hdiv\n    linarith\n· intro f\n  have hd := (@yui_aux_0001 n E h_H001 h_H002 h_T002) (fun j => -(B : ℝ) + (f j : ℝ) / k) (1 / (k : ℝ)) (by positivity)\n  simpa only [ENNReal.ofReal_div_of_pos kp, ENNReal.ofReal_one, ENNReal.ofReal_natCast] using hd",
+  "check": {
+    "exit_code": 0,
+    "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-4khi3v6c/output/Auxiliary.lean:44:50: warning: Variable name `h_H001` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-4khi3v6c/output/Auxiliary.lean:44:72: warning: Variable name `h_H002` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-4khi3v6c/output/Auxiliary.lean:44:95: warning: Variable name `h_T002` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-4khi3v6c/output/Auxiliary.lean:71:50: warning: Variable name `h_H001` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-4khi3v6c/output/Auxiliary.lean:71:72: warning: Variable name `h_H002` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-4khi3v6c/output/Auxiliary.lean:71:95: warning: Variable name `h_T002` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (n : ℕ) (E : Set (GDVec n)),\n  E.Nonempty →\n    IsCompact E →\n      (∀ (m : ℕ) (A : Set (GDVec m)),\n          0 ≤ dimH A ∧\n            ∀ (s : ℝ),\n              0 < s →\n                GDMeasure s A = (MeasureTheory.Measure.hausdorffMeasure s) A ∧\n                  (ENNReal.ofReal s < dimH A → GDMeasure s A = ∞) ∧\n                    (dimH A < ENNReal.ofReal s → GDMeasure s A = 0) ∧\n                      (GDMeasure s A < ∞ → dimH A ≤ ENNReal.ofReal s) ∧\n                        (GDMeasure s A = 0 → dimH A ≤ ENNReal.ofReal s) ∧\n                          (GDMeasure s A = ∞ → ENNReal.ofReal s ≤ dimH A)) →\n        ∀ (B : ℕ),\n          (∀ x ∈ E, ∀ (j : Fin n), |x.ofLp j| ≤ ↑B) →\n            ∀ (k : ℕ),\n              0 < k →\n                ∃ t, E ⊆ ⋃ i, t i ∧ ∀ (i : Fin n → Fin ((2 * B + 2) * k)), Metric.ediam (t i) ≤ ↑n ^ (1 / 2) * (1 / ↑k)\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+    "stderr": "",
+    "wall_seconds": 4.695385250262916,
+    "native_limits": {
+      "timeout_seconds": 180,
+      "max_heartbeats": 20000000
+    },
+    "source_path": "/Users/syyui/projects/Yui-results/test/geometry-product-dimension/rigorous-proof/20261101-fresh-full-18b3e2e0bf/native-checks/3dba7c960ba44106bc356cf6e1399543.lean",
+    "source_sha256": "8d623a447f969209fd563e840772094df3a60be0f05571b1ffdea658afbfbd46",
+    "auxiliary_valid": true,
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "lean_sha256": "8d623a447f969209fd563e840772094df3a60be0f05571b1ffdea658afbfbd46",
+    "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+    "context_port": "T003",
+    "candidate": 4,
+    "helper": {
+      "name": "yui_aux_0003",
+      "statement": "∀ (B : ℕ), (∀ x ∈ E, ∀ j : Fin n, |x j| ≤ B) → ∀ (k : ℕ), 0 < k → ∃ t : (Fin n → Fin ((2 * B + 2) * k)) → Set (GDVec n), E ⊆ ⋃ i, t i ∧ ∀ i, Metric.ediam (t i) ≤ (n : ℝ≥0∞) ^ (1 / 2 : ℝ) * (1 / (k : ℝ≥0∞))",
+      "application": "@yui_aux_0003 n E h_H001 h_H002 h_T002",
+      "scope": "Checked same-node theorem; available in later checks and the final body."
+    },
+    "accepted": true,
+    "stage_complete": false
+  }
+}

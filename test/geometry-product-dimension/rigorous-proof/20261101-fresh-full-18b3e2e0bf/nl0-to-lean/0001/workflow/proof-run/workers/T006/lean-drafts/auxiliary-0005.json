@@ -1,0 +1,29 @@
+{
+  "statement": "∀ U : ℕ → Set ℝ, GDInterval ⊆ ⋃ i, U i → (∀ i, Bornology.IsBounded (U i)) → (1 : ℝ≥0∞) ≤ ∑' i, Metric.ediam (U i)",
+  "proof": "classical\nintro U hcover hbdd\nlet K : Set ℕ := {i | (U i).Nonempty}\nhave hcoverK : GDInterval ⊆ ⋃ i : K, U i.val := by\n  intro x hx\n  obtain ⟨i, hi⟩ := Set.mem_iUnion.mp (hcover hx)\n  exact Set.mem_iUnion.mpr ⟨⟨i, ⟨x, hi⟩⟩, hi⟩\nhave hsum : (1 : ℝ≥0∞) ≤ ∑' i : K, Metric.ediam (U i.val) := by\n  apply ENNReal.le_of_forall_pos_le_add\n  intro ε hε hfinite\n  have hεreal : 0 < (ε : ℝ) := by exact_mod_cast hε\n  have hJ : ∀ i : K, ∃ J : Set ℝ, IsOpen J ∧ U i.val ⊆ J ∧\n      MeasureTheory.volume J = Metric.ediam (U i.val) +\n        ENNReal.ofReal (2 * ((ε : ℝ) / 4 / 2 ^ i.val)) := by\n    intro i\n    exact yui_aux_0001 n E (U i.val) (hbdd i.val) i.property\n      ((ε : ℝ) / 4 / 2 ^ i.val) (by positivity)\n  choose J hJopen hJU hJvol using hJ\n  have hcoverJ : GDInterval ⊆ ⋃ i : K, J i := by\n    exact hcoverK.trans (Set.iUnion_mono fun i => hJU i)\n  have herror : (∑' i : K, ENNReal.ofReal (2 * ((ε : ℝ) / 4 / 2 ^ i.val))) ≤\n      (ε : ℝ≥0∞) := by\n    calc\n      _ ≤ ∑' i : ℕ, ENNReal.ofReal (2 * ((ε : ℝ) / 4 / 2 ^ i)) :=\n        ENNReal.tsum_comp_le_tsum_of_injective Subtype.val_injective _\n      _ = _ := yui_aux_0002 n E ε\n  calc\n    (1 : ℝ≥0∞) = MeasureTheory.volume GDInterval := by simp [GDInterval]\n    _ ≤ MeasureTheory.volume (⋃ i : K, J i) := MeasureTheory.measure_mono hcoverJ\n    _ ≤ ∑' i : K, MeasureTheory.volume (J i) := MeasureTheory.measure_iUnion_le J\n    _ = (∑' i : K, Metric.ediam (U i.val)) +\n          ∑' i : K, ENNReal.ofReal (2 * ((ε : ℝ) / 4 / 2 ^ i.val)) := by\n      simp_rw [hJvol]\n      exact ENNReal.tsum_add\n    _ ≤ (∑' i : K, Metric.ediam (U i.val)) + (ε : ℝ≥0∞) :=\n      add_le_add_left herror _\nexact hsum.trans (ENNReal.tsum_comp_le_tsum_of_injective Subtype.val_injective\n  (fun i : ℕ => Metric.ediam (U i)))",
+  "check": {
+    "exit_code": 1,
+    "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-abdbzd_d/output/Auxiliary.lean:44:30: warning: Variable name `E` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-abdbzd_d/output/Auxiliary.lean:56:30: warning: Variable name `E` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-abdbzd_d/output/Auxiliary.lean:99:8: error: Type mismatch\n  add_le_add_left herror ?m.428\nhas type\n  ∑' (i : ↑K), ENNReal.ofReal (2 * (↑ε / 4 / 2 ^ ↑i)) + ?m.428 ≤ ↑ε + ?m.428\nbut is expected to have type\n  ∑' (i : ↑K), Metric.ediam (U ↑i) + ∑' (i : ↑K), ENNReal.ofReal (2 * (↑ε / 4 / 2 ^ ↑i)) ≤\n    ∑' (i : ↑K), Metric.ediam (U ↑i) + ↑ε\nchecked : ∀ (n : ℕ) (E : Set (GDVec n)) (U : ℕ → Set ℝ),\n  GDInterval ⊆ ⋃ i, U i → (∀ (i : ℕ), Bornology.IsBounded (U i)) → 1 ≤ ∑' (i : ℕ), Metric.ediam (U i)\n'YuiAuxiliary.checked' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]\n",
+    "stderr": "",
+    "wall_seconds": 3.2738083750009537,
+    "native_limits": {
+      "timeout_seconds": 180,
+      "max_heartbeats": 20000000
+    },
+    "source_path": "/Users/syyui/projects/Yui-results/test/geometry-product-dimension/rigorous-proof/20261101-fresh-full-18b3e2e0bf/native-checks/11a6d7b7013645739030c683055fd3ee.lean",
+    "source_sha256": "173bae7078e747cdab3e5d57e80e7ceb14da4b982685eb07fbf40452c612148a",
+    "auxiliary_valid": false,
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext",
+      "sorryAx"
+    ],
+    "lean_sha256": "173bae7078e747cdab3e5d57e80e7ceb14da4b982685eb07fbf40452c612148a",
+    "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+    "context_port": "T006",
+    "candidate": 5,
+    "accepted": false,
+    "stage_complete": false
+  }
+}

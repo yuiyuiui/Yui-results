@@ -1,0 +1,136 @@
+import Mathlib
+
+open MeasureTheory Set Filter
+open scoped BigOperators Topology
+
+namespace WaveMap
+
+abbrev X (n : ℕ) := Fin n → ℝ
+abbrev V (m : ℕ) := EuclideanSpace ℝ (Fin m)
+
+def domain (n : ℕ) : Set (X n × ℝ) := {p | 0 < p.2}
+def box (n : ℕ) (R : ℝ) : Set (X n) :=
+  Set.pi Set.univ (fun _ => Set.Icc (-R) R)
+def openBox (n : ℕ) (R : ℝ) : Set (X n) :=
+  Set.pi Set.univ (fun _ => Set.Ioo (-R) R)
+def slab (t : ℝ) : Set ℝ := Set.Icc (t / 2) (3 * t / 2)
+
+noncomputable def dt {n m : ℕ} (u : X n × ℝ → V m) : X n × ℝ → V m :=
+  fun p => deriv (fun r : ℝ => u (p.1, r)) p.2
+noncomputable def dx {n m : ℕ} (u : X n × ℝ → V m) (j : Fin n) :
+    X n × ℝ → V m :=
+  fun p => fderiv ℝ (fun x : X n => u (x, p.2)) p.1 (Pi.single j 1)
+noncomputable def lap {n m : ℕ} (u : X n × ℝ → V m) : X n × ℝ → V m :=
+  fun p => ∑ j : Fin n, dx (dx u j) j p
+noncomputable def density {n m : ℕ} (u : X n × ℝ → V m) :
+    X n × ℝ → ℝ :=
+  fun p => ‖dt u p‖ ^ 2 + ∑ j : Fin n, ‖dx u j p‖ ^ 2
+noncomputable def densityT {n m : ℕ} (u : X n × ℝ → V m) :
+    X n × ℝ → ℝ :=
+  fun p => deriv (fun r : ℝ => density u (p.1, r)) p.2
+noncomputable def energy {n m : ℕ} (u : X n × ℝ → V m) (t : ℝ) : ℝ :=
+  ∫ x : X n, density u (x, t)
+noncomputable def timeProduct {n m : ℕ} (u : X n × ℝ → V m) :
+    X n × ℝ → ℝ :=
+  fun p => inner ℝ (dt u p) (dt (dt u) p)
+noncomputable def mixedProduct {n m : ℕ} (u : X n × ℝ → V m) (j : Fin n) :
+    X n × ℝ → ℝ :=
+  fun p => inner ℝ (dx u j p) (dx (dt u) j p)
+noncomputable def lapProduct {n m : ℕ} (u : X n × ℝ → V m) (j : Fin n) :
+    X n × ℝ → ℝ :=
+  fun p => inner ℝ (dt u p) (dx (dx u j) j p)
+noncomputable def flux {n m : ℕ} (u : X n × ℝ → V m) (j : Fin n) :
+    X n × ℝ → ℝ :=
+  fun p => inner ℝ (dt u p) (dx u j p)
+noncomputable def fluxDx {n m : ℕ} (u : X n × ℝ → V m) (j : Fin n) :
+    X n × ℝ → ℝ :=
+  fun p => fderiv ℝ (fun x : X n => flux u j (x, p.2)) p.1 (Pi.single j 1)
+
+def sectionGood {n : ℕ} (C : Set (X n)) (R : ℝ) (f : X n → ℝ) : Prop :=
+  Continuous f ∧ (∀ x, x ∉ C → f x = 0) ∧
+  (∃ B : ℝ, 0 ≤ B ∧ ∀ x ∈ box n R, |f x| ≤ B) ∧ Integrable f
+
+def supportGeometry {n m : ℕ} (u : X n × ℝ → V m) (q : V m)
+    (t : ℝ) (C : Set (X n)) (R : ℝ) : Prop :=
+  IsCompact C ∧ 0 < R ∧ C ⊆ openBox n R ∧
+  (∀ x, x ∉ C → ∀ r ∈ slab t, u (x, r) = q) ∧
+  volume (box n R) = ENNReal.ofReal ((2 * R) ^ n) ∧
+  volume (box n R) < ⊤ ∧
+  (∀ k : ℕ, ∀ x, x ∉ C → ∀ r ∈ interior (slab t),
+    iteratedFDeriv ℝ (k + 1) u (x, r) = 0)
+
+def supportSections {n m : ℕ} (u : X n × ℝ → V m)
+    (t : ℝ) (C : Set (X n)) (R : ℝ) : Prop :=
+  ∀ r ∈ interior (slab t),
+    sectionGood C R (fun x => density u (x, r)) ∧
+    sectionGood C R (fun x => densityT u (x, r)) ∧
+    sectionGood C R (fun x => timeProduct u (x, r)) ∧
+    (∀ j : Fin n,
+      sectionGood C R (fun x => mixedProduct u j (x, r)) ∧
+      sectionGood C R (fun x => lapProduct u j (x, r)) ∧
+      sectionGood C R (fun x => fluxDx u j (x, r)))
+
+noncomputable def quotient {n m : ℕ} (u : X n × ℝ → V m)
+    (t h : ℝ) (x : X n) : ℝ :=
+  (density u (x, t + h) - density u (x, t)) / h
+
+abbrev Other {n : ℕ} (j : Fin n) := {i : Fin n // i ≠ j}
+def insertCoord {n : ℕ} (j : Fin n) (y : Other j → ℝ) (z : ℝ) : X n :=
+  fun i => if h : i = j then z else y ⟨i, h⟩
+def otherBox {n : ℕ} (j : Fin n) (R : ℝ) : Set (Other j → ℝ) :=
+  Set.pi Set.univ (fun _ => Set.Icc (-R) R)
+
+end WaveMap
+
+open Lean Elab Term
+elab "yui_aux_type% " text:str : term => do
+  let parsed ← ofExcept <| Parser.runParserCategory (← getEnv) `term text.getString
+  Term.elabTerm parsed none
+
+namespace YuiAuxiliary
+set_option autoImplicit false
+theorem yui_aux_0001 (n : ℕ) (m : ℕ) (u : WaveMap.X n × ℝ → WaveMap.V m) (q : WaveMap.V m) (h_H001 : 1 ≤ n ∧ 1 ≤ m) (h_H002 : ContDiffOn ℝ ((⊤ : ℕ∞) : WithTop ℕ∞) u (WaveMap.domain n)) (h_T004 : (∀ t : ℝ, 0 < t → ∃ C : Set (WaveMap.X n), ∃ R : ℝ,
+    WaveMap.supportGeometry u q t C R ∧ WaveMap.supportSections u t C R) ∧
+  (∀ t : ℝ, 0 < t → Integrable (fun x : WaveMap.X n => WaveMap.density u (x, t))) ∧
+  ContinuousOn (WaveMap.density u) (WaveMap.domain n) ∧
+  ContinuousOn (WaveMap.densityT u) (WaveMap.domain n)) (h_T008 : ∀ (j : Fin n) (R : ℝ), 0 < R → ∀ f : WaveMap.X n → ℝ,
+  IntegrableOn f (WaveMap.box n R) →
+  (∫ x in WaveMap.box n R, f x) =
+    ∫ y in WaveMap.otherBox j R, ∫ z in Set.Icc (-R) R, f (WaveMap.insertCoord j y z)) : yui_aux_type% "∀ t : ℝ, 0 < t → ContDiff ℝ (⊤ : ℕ∞) (fun x : WaveMap.X n => WaveMap.dt u (x,t)) ∧ ∀ j : Fin n, ContDiff ℝ (⊤ : ℕ∞) (fun x : WaveMap.X n => WaveMap.dx u j (x,t))" := by
+  intro t ht
+  have hopen : IsOpen (WaveMap.domain n) := isOpen_lt continuous_const continuous_snd
+  have hu (x : WaveMap.X n) : ContDiffAt ℝ (⊤ : ℕ∞) u (x,t) :=
+    h_H002.contDiffAt (hopen.mem_nhds ht)
+  constructor
+  · apply contDiff_iff_contDiffAt.mpr
+    intro x
+    have hf : ContDiffAt ℝ (⊤ : ℕ∞)
+        (fun x : WaveMap.X n => fderiv ℝ (fun r : ℝ => u (x,r)) t) x :=
+      (hu x).fderiv contDiffAt_const (by simp)
+    exact hf.clm_apply contDiffAt_const
+  · intro j
+    have hs : ContDiff ℝ (⊤ : ℕ∞) (fun x : WaveMap.X n => u (x,t)) :=
+      contDiff_iff_contDiffAt.mpr (fun x => (hu x).comp x (contDiffAt_id.prodMk contDiffAt_const))
+    exact (hs.fderiv_right (by simp)).clm_apply contDiff_const
+
+theorem checked (n : ℕ) (m : ℕ) (u : WaveMap.X n × ℝ → WaveMap.V m) (q : WaveMap.V m) (h_H001 : 1 ≤ n ∧ 1 ≤ m) (h_H002 : ContDiffOn ℝ ((⊤ : ℕ∞) : WithTop ℕ∞) u (WaveMap.domain n)) (h_T004 : (∀ t : ℝ, 0 < t → ∃ C : Set (WaveMap.X n), ∃ R : ℝ,
+    WaveMap.supportGeometry u q t C R ∧ WaveMap.supportSections u t C R) ∧
+  (∀ t : ℝ, 0 < t → Integrable (fun x : WaveMap.X n => WaveMap.density u (x, t))) ∧
+  ContinuousOn (WaveMap.density u) (WaveMap.domain n) ∧
+  ContinuousOn (WaveMap.densityT u) (WaveMap.domain n)) (h_T008 : ∀ (j : Fin n) (R : ℝ), 0 < R → ∀ f : WaveMap.X n → ℝ,
+  IntegrableOn f (WaveMap.box n R) →
+  (∫ x in WaveMap.box n R, f x) =
+    ∫ y in WaveMap.otherBox j R, ∫ z in Set.Icc (-R) R, f (WaveMap.insertCoord j y z)) : yui_aux_type% "∀ t : ℝ, 0 < t → ∀ j : Fin n,\n  ContDiff ℝ (⊤ : ℕ∞) (fun x : WaveMap.X n => WaveMap.flux u j (x,t)) ∧\n  (∀ x : WaveMap.X n, WaveMap.fluxDx u j (x,t) =\n    WaveMap.mixedProduct u j (x,t) + WaveMap.lapProduct u j (x,t))" := by
+  intro t ht j
+  obtain ⟨ha,hb⟩ := yui_aux_0001 n m u q h_H001 h_H002 h_T004 h_T008 t ht
+  constructor
+  · exact ha.inner ℝ (hb j)
+  · intro x
+    unfold WaveMap.fluxDx WaveMap.flux WaveMap.mixedProduct WaveMap.lapProduct WaveMap.dx
+    rw [fderiv_inner_apply (ha.differentiable (by simp)).differentiableAt
+      ((hb j).differentiable (by simp)).differentiableAt]
+    rw [real_inner_comm (WaveMap.dt u (x,t))]
+    simp only [real_inner_comm, add_comm]
+#check @checked
+#print axioms checked
+end YuiAuxiliary

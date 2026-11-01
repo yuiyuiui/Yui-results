@@ -1,0 +1,58 @@
+{
+  "base_sha256": "3de079096363f23c060bd8ceb5aa6a315819653783aa8b55b0187b030868ac9e",
+  "patches": [
+    {
+      "op": "replace",
+      "path": "/spec/header",
+      "value": "import Mathlib\nopen scoped ENNReal NNReal BigOperators\nnoncomputable section\n\nabbrev GDVec (m : ℕ) := EuclideanSpace ℝ (Fin m)\n\ndef GDLine (t : ℝ) : GDVec 1 :=\n  WithLp.toLp 2 (fun _ => t)\n\ndef GDInterval : Set ℝ := Set.Icc 0 1\n\ndef GDPoint {m : ℕ} (x : GDVec m) (t : ℝ) : GDVec (m + 1) :=\n  WithLp.toLp 2 (Fin.snoc (fun i => x i) t)\n\ndef GDProduct {m : ℕ} (A : Set (GDVec m)) : Set (GDVec (m + 1)) :=\n  {z | ∃ x ∈ A, ∃ t ∈ GDInterval, z = GDPoint x t}\n\ndef GDCost {X : Type*} [PseudoEMetricSpace X] (s : ℝ) (A : Set X) : ℝ≥0∞ :=\n  ⨆ (_ : A.Nonempty), (Metric.ediam A) ^ s\n\ndef GDContent {X : Type*} [PseudoEMetricSpace X] (s δ : ℝ) (A : Set X) : ℝ≥0∞ :=\n  ⨅ (U : ℕ → Set X) (_ : A ⊆ ⋃ i, U i)\n    (_ : ∀ i, Metric.ediam (U i) ≤ ENNReal.ofReal δ),\n    ∑' i, GDCost s (U i)\n\ndef GDMeasure {X : Type*} [PseudoEMetricSpace X] (s : ℝ) (A : Set X) : ℝ≥0∞ :=\n  ⨆ (δ : ℝ) (_ : 0 < δ), GDContent s δ A\n\ndef GDPositiveCover {X : Type*} [PseudoEMetricSpace X]\n    (A : Set X) (q r ε : ℝ) : Prop :=\n  ∃ (K : Set ℕ) (U : K → Set X),\n    A ⊆ ⋃ i, U i ∧\n    (∀ i, (U i).Nonempty ∧ 0 < Metric.ediam (U i) ∧\n      Metric.ediam (U i) ≤ ENNReal.ofReal r) ∧\n    (∑' i, (Metric.ediam (U i)) ^ q) < ENNReal.ofReal ε\n"
+    },
+    {
+      "op": "add",
+      "path": "/spec/steps/2",
+      "value": {
+        "id": "T018",
+        "statement": "Isometry GDLine ∧ Function.Bijective GDLine ∧\n  ∀ A : Set ℝ,\n    dimH (GDLine '' A) = dimH A ∧\n    (∀ s δ : ℝ, 0 < s → 0 < δ →\n      GDContent s δ (GDLine '' A) = GDContent s δ A) ∧\n    (∀ s : ℝ, 0 < s → GDMeasure s (GDLine '' A) = GDMeasure s A)",
+        "inputs": [],
+        "source_steps": [
+          "S007",
+          "S010"
+        ],
+        "explanation": "Checked implementation identification of the source's ℝ with its one-coordinate Euclidean space. GDLine puts t in the only coordinate and is a bijective isometry by the L2 metric formula. Transporting covers in both directions gives equality of the positive-exponent scale contents and measures. Native Hausdorff dimension is preserved by this isometry as well. This supplies the actual conversion needed to apply the m=1 instance of N001 to interval sets; no new mathematical assumption or norm comparison is introduced."
+      }
+    },
+    {
+      "op": "replace",
+      "path": "/spec/steps/5/inputs",
+      "value": [
+        "T002",
+        "T018"
+      ]
+    },
+    {
+      "op": "replace",
+      "path": "/spec/steps/5/explanation",
+      "value": "Partition [0,1] into N equal intervals, use cost N^(1-a) tending to zero and mesh 1/N tending to zero, then the critical-exponent clauses of N001 and the limit a↓1. Apply N001 with m=1 and A=GDLine '' GDInterval; T018 supplies the exact content, measure and dimension conversion to the real interval."
+    },
+    {
+      "op": "replace",
+      "path": "/spec/steps/7/inputs",
+      "value": [
+        "T002",
+        "T005",
+        "T006",
+        "T018"
+      ]
+    },
+    {
+      "op": "replace",
+      "path": "/spec/steps/7/explanation",
+      "value": "Export every N003 clause. The lower-content bound diverges as δ↓0 for 0<s<1, giving infinite measure. Apply N001 with m=1 and A=GDLine '' GDInterval, transporting both measure and dimension through T018 to obtain dimension at least one; combine with T005."
+    },
+    {
+      "op": "replace",
+      "path": "/spec/representation",
+      "value": "Use GDVec m = EuclideanSpace ℝ (Fin m) = PiLp 2 (fun _ : Fin m => ℝ), including m=0. The 2 is the ENNReal Lp exponent, not an index count: its metric is the square root of the sum of squared coordinate distances. GDPoint appends the real coordinate using Fin.snoc and WithLp.toLp 2; GDProduct E is exactly its image of E×[0,1] in GDVec (n+1). T009 checks the distance formula and decomposition. GDInterval is Icc (0:ℝ) 1. Metric.ediam is the ENNReal supremum of pairwise edist, with empty value zero and infinity for unbounded sets. GDCost uses an iSup over the proposition of set nonemptiness: this is zero for an empty set and otherwise the diameter's real power. GDContent takes iInf over sequences satisfying actual inclusion and scale bounds; GDMeasure takes iSup over positive real scales. Positive exponents have 0^s=0. ENNReal powers with real exponents resolve to ENNReal.rpow; the interval scale lower bound uses Real.rpow before ofReal. All costs and dimensions stay in ENNReal; ofReal s embeds a positive real exponent exactly, and natural n and numeral 1 are finite ENNReal values in dimension expressions. Native dimH is the iSup of nonnegative real exponents with infinite native Hausdorff measure under the Borel structure, with empty supremum zero. T001 proves the cover-to-native bridge; T002 uses inspected native lemmas with NNReal exponents. Boundedness is Bornology.IsBounded under the usual metric bornology. No M premise ports or background-note ports are needed; native Mathlib results are used directly. Lebesgue integration uses volume.restrict GDInterval and ENNReal-valued nonnegative integrals; lintegral_tsum requires Countable K and a.e. measurability, supplied by K⊆ℕ and open interval indicators, without measurability of arbitrary covers. The only one-dimensional coordinate view is GDLine: ℝ→GDVec 1. T018 is the explicit checked bijective-isometry/content/measure/dimension conversion used by interval consumers T005 and T007."
+    }
+  ],
+  "base_candidate": 1
+}

@@ -1,0 +1,20 @@
+{
+  "header": "import Mathlib\nopen scoped ENNReal NNReal BigOperators\nnoncomputable section\n\nabbrev GDVec (m : ℕ) := EuclideanSpace ℝ (Fin m)\n\ndef GDInterval : Set ℝ := Set.Icc 0 1\n\ndef GDPoint {m : ℕ} (x : GDVec m) (t : ℝ) : GDVec (m + 1) :=\n  WithLp.toLp 2 (Fin.snoc (fun i => x i) t)\n\ndef GDProduct {m : ℕ} (A : Set (GDVec m)) : Set (GDVec (m + 1)) :=\n  {z | ∃ x ∈ A, ∃ t ∈ GDInterval, z = GDPoint x t}\n\ndef GDCost {X : Type*} [PseudoEMetricSpace X] (s : ℝ) (A : Set X) : ℝ≥0∞ :=\n  ⨆ (_ : A.Nonempty), (Metric.ediam A) ^ s\n\ndef GDContent {X : Type*} [PseudoEMetricSpace X] (s δ : ℝ) (A : Set X) : ℝ≥0∞ :=\n  ⨅ (U : ℕ → Set X) (_ : A ⊆ ⋃ i, U i)\n    (_ : ∀ i, Metric.ediam (U i) ≤ ENNReal.ofReal δ),\n    ∑' i, GDCost s (U i)\n\ndef GDMeasure {X : Type*} [PseudoEMetricSpace X] (s : ℝ) (A : Set X) : ℝ≥0∞ :=\n  ⨆ (δ : ℝ) (_ : 0 < δ), GDContent s δ A\n\ndef GDPositiveCover {X : Type*} [PseudoEMetricSpace X]\n    (A : Set X) (q r ε : ℝ) : Prop :=\n  ∃ (K : Set ℕ) (U : K → Set X),\n    A ⊆ ⋃ i, U i ∧\n    (∀ i, (U i).Nonempty ∧ 0 < Metric.ediam (U i) ∧\n      Metric.ediam (U i) ≤ ENNReal.ofReal r) ∧\n    (∑' i, (Metric.ediam (U i)) ^ q) < ENNReal.ofReal ε\n",
+  "parameters": [
+    {
+      "name": "n",
+      "type": "ℕ"
+    },
+    {
+      "name": "E",
+      "type": "Set (GDVec n)"
+    }
+  ],
+  "types": [
+    "∀ (m : ℕ) (A : Set (GDVec m)) (s : ℝ), 0 < s → GDMeasure s A = MeasureTheory.Measure.hausdorffMeasure s A",
+    "∀ (x y : GDVec n) (t u : ℝ), dist (GDPoint x t) (GDPoint y u) = Real.sqrt (dist x y ^ 2 + |t-u| ^ 2)",
+    "GDPositiveCover E 2 1 1",
+    "Metric.IsBounded E ∧ (0 : ℝ≥0∞) ≤ dimH E ∧ dimH E ≤ (n : ℝ≥0∞)",
+    "∀ (K : Set ℕ) (V : K → Set (GDVec (n+1))), ∑' i, (Metric.ediam (V i)) ^ (2 : ℝ)"
+  ]
+}

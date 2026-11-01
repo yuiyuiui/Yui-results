@@ -1,0 +1,219 @@
+{
+  "header": "import Mathlib\n\nopen MeasureTheory Set Filter\nopen scoped BigOperators Topology\n\nnamespace WaveMap\n\nabbrev X (n : ℕ) := Fin n → ℝ\nabbrev V (m : ℕ) := EuclideanSpace ℝ (Fin m)\n\ndef domain (n : ℕ) : Set (X n × ℝ) := {p | 0 < p.2}\ndef box (n : ℕ) (R : ℝ) : Set (X n) :=\n  Set.pi Set.univ (fun _ => Set.Icc (-R) R)\ndef openBox (n : ℕ) (R : ℝ) : Set (X n) :=\n  Set.pi Set.univ (fun _ => Set.Ioo (-R) R)\ndef slab (t : ℝ) : Set ℝ := Set.Icc (t / 2) (3 * t / 2)\n\nnoncomputable def dt {n m : ℕ} (u : X n × ℝ → V m) : X n × ℝ → V m :=\n  fun p => deriv (fun r : ℝ => u (p.1, r)) p.2\nnoncomputable def dx {n m : ℕ} (u : X n × ℝ → V m) (j : Fin n) :\n    X n × ℝ → V m :=\n  fun p => fderiv ℝ (fun x : X n => u (x, p.2)) p.1 (Pi.single j 1)\nnoncomputable def lap {n m : ℕ} (u : X n × ℝ → V m) : X n × ℝ → V m :=\n  fun p => ∑ j : Fin n, dx (dx u j) j p\nnoncomputable def density {n m : ℕ} (u : X n × ℝ → V m) :\n    X n × ℝ → ℝ :=\n  fun p => ‖dt u p‖ ^ 2 + ∑ j : Fin n, ‖dx u j p‖ ^ 2\nnoncomputable def densityT {n m : ℕ} (u : X n × ℝ → V m) :\n    X n × ℝ → ℝ :=\n  fun p => deriv (fun r : ℝ => density u (p.1, r)) p.2\nnoncomputable def energy {n m : ℕ} (u : X n × ℝ → V m) (t : ℝ) : ℝ :=\n  ∫ x : X n, density u (x, t)\nnoncomputable def timeProduct {n m : ℕ} (u : X n × ℝ → V m) :\n    X n × ℝ → ℝ :=\n  fun p => inner ℝ (dt u p) (dt (dt u) p)\nnoncomputable def mixedProduct {n m : ℕ} (u : X n × ℝ → V m) (j : Fin n) :\n    X n × ℝ → ℝ :=\n  fun p => inner ℝ (dx u j p) (dx (dt u) j p)\nnoncomputable def lapProduct {n m : ℕ} (u : X n × ℝ → V m) (j : Fin n) :\n    X n × ℝ → ℝ :=\n  fun p => inner ℝ (dt u p) (dx (dx u j) j p)\nnoncomputable def flux {n m : ℕ} (u : X n × ℝ → V m) (j : Fin n) :\n    X n × ℝ → ℝ :=\n  fun p => inner ℝ (dt u p) (dx u j p)\nnoncomputable def fluxDx {n m : ℕ} (u : X n × ℝ → V m) (j : Fin n) :\n    X n × ℝ → ℝ :=\n  fun p => fderiv ℝ (fun x : X n => flux u j (x, p.2)) p.1 (Pi.single j 1)\n\ndef sectionGood {n : ℕ} (C : Set (X n)) (R : ℝ) (f : X n → ℝ) : Prop :=\n  Continuous f ∧ (∀ x, x ∉ C → f x = 0) ∧\n  (∃ B : ℝ, 0 ≤ B ∧ ∀ x ∈ box n R, |f x| ≤ B) ∧ Integrable f\n\ndef supportGeometry {n m : ℕ} (u : X n × ℝ → V m) (q : V m)\n    (t : ℝ) (C : Set (X n)) (R : ℝ) : Prop :=\n  IsCompact C ∧ 0 < R ∧ C ⊆ openBox n R ∧\n  (∀ x, x ∉ C → ∀ r ∈ slab t, u (x, r) = q) ∧\n  volume (box n R) = ENNReal.ofReal ((2 * R) ^ n) ∧\n  volume (box n R) < ⊤ ∧\n  (∀ k : ℕ, ∀ x, x ∉ C → ∀ r ∈ interior (slab t),\n    iteratedFDeriv ℝ (k + 1) u (x, r) = 0)\n\ndef supportSections {n m : ℕ} (u : X n × ℝ → V m)\n    (t : ℝ) (C : Set (X n)) (R : ℝ) : Prop :=\n  ∀ r ∈ interior (slab t),\n    sectionGood C R (fun x => density u (x, r)) ∧\n    sectionGood C R (fun x => densityT u (x, r)) ∧\n    sectionGood C R (fun x => timeProduct u (x, r)) ∧\n    (∀ j : Fin n,\n      sectionGood C R (fun x => mixedProduct u j (x, r)) ∧\n      sectionGood C R (fun x => lapProduct u j (x, r)) ∧\n      sectionGood C R (fun x => fluxDx u j (x, r)))\n\nnoncomputable def quotient {n m : ℕ} (u : X n × ℝ → V m)\n    (t h : ℝ) (x : X n) : ℝ :=\n  (density u (x, t + h) - density u (x, t)) / h\n\nabbrev Other {n : ℕ} (j : Fin n) := {i : Fin n // i ≠ j}\ndef insertCoord {n : ℕ} (j : Fin n) (y : Other j → ℝ) (z : ℝ) : X n :=\n  fun i => if h : i = j then z else y ⟨i, h⟩\ndef otherBox {n : ℕ} (j : Fin n) (R : ℝ) : Set (Other j → ℝ) :=\n  Set.pi Set.univ (fun _ => Set.Icc (-R) R)\n\nend WaveMap",
+  "parameters": [
+    {
+      "name": "n",
+      "type": "ℕ"
+    },
+    {
+      "name": "m",
+      "type": "ℕ"
+    },
+    {
+      "name": "u",
+      "type": "WaveMap.X n × ℝ → WaveMap.V m"
+    },
+    {
+      "name": "q",
+      "type": "WaveMap.V m"
+    }
+  ],
+  "premise_types": {
+    "H001": "1 ≤ n ∧ 1 ≤ m",
+    "H002": "ContDiffOn ℝ ((⊤ : ℕ∞) : WithTop ℕ∞) u (WaveMap.domain n)",
+    "H003": "‖q‖ = 1",
+    "H004": "∀ x : WaveMap.X n, ∀ t : ℝ, 0 < t → ‖u (x, t)‖ = 1",
+    "H005": "∀ x : WaveMap.X n, ∀ t : ℝ, 0 < t → ∃ a : ℝ, WaveMap.dt (WaveMap.dt u) (x, t) - WaveMap.lap u (x, t) = a • u (x, t)",
+    "H006": "∀ s t : ℝ, 0 < s → s < t → ∃ C : Set (WaveMap.X n), IsCompact C ∧ ∀ x : WaveMap.X n, x ∉ C → ∀ r ∈ Set.Icc s t, u (x, r) = q"
+  },
+  "conclusion_type": "(∀ t : ℝ, 0 < t →\n  Integrable (fun x : WaveMap.X n => WaveMap.density u (x, t)) ∧\n  DifferentiableAt ℝ (WaveMap.energy u) t ∧ deriv (WaveMap.energy u) t = 0) ∧\n  ∀ s t : ℝ, 0 < s → 0 < t → WaveMap.energy u s = WaveMap.energy u t",
+  "representation": "Use n,m : ℕ with H001 retaining positivity; these index precisely the positive integer dimensions of the source. X n = Fin n → ℝ is the Cartesian coordinate model of ℝ^n. Its standard product topology and finite-dimensional derivative structure agree with the usual Euclidean structure, although its norm instance is the sup norm; no spatial Euclidean norm enters any source formula. Its volume is the product of one-dimensional Lebesgue measures, as defined by MeasureSpace.pi. V m = EuclideanSpace ℝ (Fin m) = PiLp 2 (fun _ => ℝ), so its norm and inner ℝ are exactly the Euclidean norm and dot product. Fin n labels coordinates 0,...,n-1, corresponding bijectively to source coordinates 1,...,n; all sums range over every coordinate. u is an arbitrary total extension to X n × ℝ; H002 and all pointwise conclusions concern only the open set t>0. Every source positive-time function admits such an extension, and restriction recovers the source; derivative locality makes its nonpositive-time values irrelevant. H002 uses the inclusion of (⊤ : ℕ∞) into WithTop ℕ∞: this is the smoothness index, not the outer top, which would require analyticity. dt is the ordinary vector derivative in time; dx applies the spatial Fréchet derivative to Pi.single j 1, the jth unit coordinate vector, and repeated dx/dt give precisely the prescribed componentwise derivatives. density has no 1/2 factor. energy is Mathlib's total real Bochner integral; T004 establishes absolute integrability before its finite-energy meaning is used in T007 or any subsequent step. No integrability or differentiability is assumed by these definitions. sectionGood, supportGeometry and supportSections only package explicit N002 clauses as predicates and do not assert them. All positive-order joint derivatives are encoded by iteratedFDeriv ℝ (k+1); under smoothness this is equivalent to vanishing of all positive-order componentwise partial derivatives. H003 is retained although unused by the supplied route. M001–M004 are implemented by direct library use, not additional premise ports; Audit A notes remain local references. The only coordinate-view change actually needed is the insertion of one coordinate in R004; T008 proves the corresponding restricted integral identity before T009 uses it.",
+  "objects": [],
+  "steps": [
+    {
+      "id": "T001",
+      "statement": "∀ x : WaveMap.X n, ∀ t : ℝ, 0 < t → inner ℝ (u (x, t)) (WaveMap.dt u (x, t)) = 0 ∧ inner ℝ (WaveMap.dt u (x, t)) (WaveMap.dt (WaveMap.dt u) (x, t) - WaveMap.lap u (x, t)) = 0",
+      "inputs": [
+        "H001",
+        "H002",
+        "H004",
+        "H005"
+      ],
+      "source_steps": [
+        "S001"
+      ],
+      "explanation": "Differentiate the unit constraint in time, then use the pointwise scalar witness of H005 and dot-product symmetry. The witness is local and never differentiated."
+    },
+    {
+      "id": "T002",
+      "statement": "∀ x : WaveMap.X n, ∀ t : ℝ, 0 < t →\n  (inner ℝ (u (x, t)) (WaveMap.dt u (x, t)) = 0 ∧\n   inner ℝ (WaveMap.dt u (x, t)) (WaveMap.dt (WaveMap.dt u) (x, t) - WaveMap.lap u (x, t)) = 0) ∧\n  (∀ a : ℝ, WaveMap.dt (WaveMap.dt u) (x, t) - WaveMap.lap u (x, t) = a • u (x, t) →\n    a = (∑ j : Fin n, ‖WaveMap.dx u j (x, t)‖ ^ 2) - ‖WaveMap.dt u (x, t)‖ ^ 2) ∧\n  WaveMap.dt (WaveMap.dt u) (x, t) - WaveMap.lap u (x, t) =\n    ((∑ j : Fin n, ‖WaveMap.dx u j (x, t)‖ ^ 2) - ‖WaveMap.dt u (x, t)‖ ^ 2) • u (x, t)",
+      "inputs": [
+        "H001",
+        "H002",
+        "H004",
+        "H005",
+        "T001"
+      ],
+      "source_steps": [
+        "S002",
+        "S003"
+      ],
+      "explanation": "Retain T001. Twice differentiate the unit constraint in time and each coordinate, dot the normality equation with u, and sum. Prove the coefficient formula for every pointwise admissible scalar and substitute it back. This exports every clause of N001."
+    },
+    {
+      "id": "T003",
+      "statement": "∀ t : ℝ, 0 < t → ∃ C : Set (WaveMap.X n), ∃ R : ℝ, WaveMap.supportGeometry u q t C R",
+      "inputs": [
+        "H001",
+        "H002",
+        "H006"
+      ],
+      "source_steps": [
+        "S004",
+        "S005",
+        "S006"
+      ],
+      "explanation": "For each t>0 choose the compact support on [t/2,3t/2], enclose it strictly in a positive box, and compute its product Lebesgue volume. On the open complement times the interior slab u is locally constant, so every positive-order joint derivative vanishes. This is support geometry only, without selecting any witness globally."
+    },
+    {
+      "id": "T004",
+      "statement": "(∀ t : ℝ, 0 < t → ∃ C : Set (WaveMap.X n), ∃ R : ℝ,\n    WaveMap.supportGeometry u q t C R ∧ WaveMap.supportSections u t C R) ∧\n  (∀ t : ℝ, 0 < t → Integrable (fun x : WaveMap.X n => WaveMap.density u (x, t))) ∧\n  ContinuousOn (WaveMap.density u) (WaveMap.domain n) ∧\n  ContinuousOn (WaveMap.densityT u) (WaveMap.domain n)",
+      "inputs": [
+        "H001",
+        "H002",
+        "T003"
+      ],
+      "source_steps": [
+        "S006",
+        "S007",
+        "S008"
+      ],
+      "explanation": "For each compatible support witness obtain continuity, vanishing, compact-box bounds and absolute integrability for exactly the six families in N002, by a constant times the box indicator. Include joint continuity of density and its time derivative on t>0 and integrability at every positive time. Existential witnesses stay together with their section properties. Exports N002; establishes the finite-energy guard."
+    },
+    {
+      "id": "T005",
+      "statement": "∀ x : WaveMap.X n, ∀ t : ℝ, 0 < t →\n  HasDerivAt (fun r : ℝ => WaveMap.density u (x, r)) (WaveMap.densityT u (x, t)) t ∧\n  WaveMap.densityT u (x, t) =\n    2 * WaveMap.timeProduct u (x, t) + 2 * ∑ j : Fin n, WaveMap.mixedProduct u j (x, t)",
+      "inputs": [
+        "H001",
+        "H002"
+      ],
+      "source_steps": [
+        "S009"
+      ],
+      "explanation": "Apply the finite product rule and equality of mixed derivatives on the positive open domain. Supply an actual HasDerivAt assertion for density as well as the expanded derivative identity; this is the derivative used by the mean value theorem and pointwise quotient convergence."
+    },
+    {
+      "id": "T006",
+      "statement": "∀ t : ℝ, 0 < t → ∃ η B R : ℝ,\n  0 < η ∧ 0 ≤ B ∧ 0 < R ∧ η < t ∧\n  Integrable ((WaveMap.box n R).indicator (fun _ => B)) ∧\n  ∀ h : ℝ, 0 < |h| → |h| < η → ∀ x : WaveMap.X n,\n    |WaveMap.quotient u t h x| ≤ (WaveMap.box n R).indicator (fun _ => B) x",
+      "inputs": [
+        "H001",
+        "H002",
+        "T004",
+        "T005"
+      ],
+      "source_steps": [
+        "S010",
+        "S011"
+      ],
+      "explanation": "At each fixed t choose η=t/4 and compatible C,R. Compactness of box × [t-η,t+η] bounds densityT by a nonnegative B depending on t and the support witnesses, uniformly in x and in the allowed increments. Use exists_hasDerivAt_eq_slope on the ordered endpoints, together with zero density off the box. The integrable dominating function is the displayed box indicator times B; η<t ensures all sampled times are positive."
+    },
+    {
+      "id": "T007",
+      "statement": "(∀ t : ℝ, 0 < t →\n    HasDerivAt (WaveMap.energy u) (∫ x : WaveMap.X n, WaveMap.densityT u (x, t)) t ∧\n    Integrable (fun x : WaveMap.X n => WaveMap.densityT u (x, t)) ∧\n    Integrable (fun x : WaveMap.X n => WaveMap.timeProduct u (x, t)) ∧\n    ∀ j : Fin n, Integrable (fun x : WaveMap.X n => WaveMap.mixedProduct u j (x, t))) ∧\n  (∀ x : WaveMap.X n, ∀ t : ℝ, 0 < t →\n    WaveMap.densityT u (x, t) =\n      2 * WaveMap.timeProduct u (x, t) + 2 * ∑ j : Fin n, WaveMap.mixedProduct u j (x, t))",
+      "inputs": [
+        "H001",
+        "H002",
+        "T004",
+        "T005",
+        "T006"
+      ],
+      "source_steps": [
+        "S012",
+        "S013",
+        "S014"
+      ],
+      "explanation": "For any sequence of nonzero increments tending to zero inside the T006 range, density quotients are measurable, integrable, dominated by the single integrable bound and converge pointwise to densityT. Apply MeasureTheory.tendsto_integral_of_dominated_convergence with real codomain and Lebesgue volume. Linearity identifies the integral quotient with the energy quotient, using T004 at both positive times. Discharge the sequence assumptions and use the sequential criterion for the punctured real limit to get HasDerivAt of energy. Retain the density formula and integrability of every displayed term. This exports N003 without assuming an integral interchange."
+    },
+    {
+      "id": "T008",
+      "statement": "∀ (j : Fin n) (R : ℝ), 0 < R → ∀ f : WaveMap.X n → ℝ,\n  IntegrableOn f (WaveMap.box n R) →\n  (∫ x in WaveMap.box n R, f x) =\n    ∫ y in WaveMap.otherBox j R, ∫ z in Set.Icc (-R) R, f (WaveMap.insertCoord j y z)",
+      "inputs": [],
+      "source_steps": [
+        "S016"
+      ],
+      "explanation": "Prove the coordinate integration bridge for the actual insertion map and restricted boxes, under the stated IntegrableOn premise. Use the finite-product measure-preserving split (MeasureTheory.volume_preserving_piEquivPiSubtypeProd with predicate i ≠ j), evaluate its singleton complementary factor, and apply Fubini for the finite restricted measures. otherBox uses all coordinates except j in inherited order; when n=1 this is the singleton empty tuple with mass one. This is the checked conversion required by the coordinate FTC argument, not an assumption about arbitrary rearrangement of measures."
+    },
+    {
+      "id": "T009",
+      "statement": "∀ t : ℝ, 0 < t → ∀ j : Fin n,\n  (∀ x : WaveMap.X n, WaveMap.fluxDx u j (x, t) =\n    WaveMap.mixedProduct u j (x, t) + WaveMap.lapProduct u j (x, t)) ∧\n  Integrable (fun x : WaveMap.X n => WaveMap.fluxDx u j (x, t)) ∧\n  (∫ x : WaveMap.X n, WaveMap.fluxDx u j (x, t)) = 0",
+      "inputs": [
+        "H001",
+        "H002",
+        "T004",
+        "T008"
+      ],
+      "source_steps": [
+        "S015",
+        "S016",
+        "S017",
+        "S018"
+      ],
+      "explanation": "For flux = inner dt u (dx u j), derive the spatial product rule and use N002's support to make the endpoint values vanish. Apply intervalIntegral.integral_eq_sub_of_hasDerivAt_of_le on [-R,R] for every other-coordinate tuple; smoothness and compactness give derivative interval integrability. Endpoints have zero Lebesgue measure, identifying interval and closed-set integrals. Use T008, product integrability and MeasureTheory.integral_integral to conclude the box integral of fluxDx is zero, then its whole-space integral is zero by support. Retain absolute integrability and the pointwise product rule."
+    },
+    {
+      "id": "T010",
+      "statement": "∀ t : ℝ, 0 < t → ∀ j : Fin n,\n  (∫ x : WaveMap.X n, WaveMap.mixedProduct u j (x, t)) =\n    -(∫ x : WaveMap.X n, WaveMap.lapProduct u j (x, t)) ∧\n  Integrable (fun x : WaveMap.X n => WaveMap.mixedProduct u j (x, t)) ∧\n  Integrable (fun x : WaveMap.X n => WaveMap.lapProduct u j (x, t))",
+      "inputs": [
+        "H001",
+        "T004",
+        "T009"
+      ],
+      "source_steps": [
+        "S019"
+      ],
+      "explanation": "Integrate the T009 product identity by linearity, using T004 for both product integrabilities, and rearrange the zero total derivative integral. The mixedProduct convention already places dx u first using symmetry of the real Euclidean inner product. Generalize t>0 and j. Exports all of N004."
+    },
+    {
+      "id": "T011",
+      "statement": "∀ t : ℝ, 0 < t →\n  Integrable (fun x : WaveMap.X n => WaveMap.density u (x, t)) ∧\n  DifferentiableAt ℝ (WaveMap.energy u) t ∧ deriv (WaveMap.energy u) t = 0",
+      "inputs": [
+        "H001",
+        "H002",
+        "T002",
+        "T004",
+        "T007",
+        "T010"
+      ],
+      "source_steps": [
+        "S020",
+        "S021"
+      ],
+      "explanation": "Combine the differentiated integral identity and its expanded density with integration by parts in each finite coordinate. All terms are integrable by N002/N003/N004, allowing finite summation and integral linearity. Recombine the Laplacian and use the pointwise orthogonality of N001 to make the final integrand zero. Obtain differentiability and deriv energy = 0 at every t>0, retaining integrability."
+    },
+    {
+      "id": "T012",
+      "statement": "(∀ t : ℝ, 0 < t →\n  Integrable (fun x : WaveMap.X n => WaveMap.density u (x, t)) ∧\n  DifferentiableAt ℝ (WaveMap.energy u) t ∧ deriv (WaveMap.energy u) t = 0) ∧\n  ∀ s t : ℝ, 0 < s → 0 < t → WaveMap.energy u s = WaveMap.energy u t",
+      "inputs": [
+        "T011"
+      ],
+      "source_steps": [
+        "S022"
+      ],
+      "explanation": "Retain T011 and apply exists_hasDerivAt_eq_slope to energy on a positive interval with ordered endpoints. Differentiability gives continuity at the endpoints and zero derivative in the interior; slope zero gives equality of energies. Reverse endpoint order or handle equal times as needed. This is the complete P, including constancy, with no time-zero assertion."
+    }
+  ],
+  "terminal": "T012",
+  "source_outputs": {
+    "N001": "T002",
+    "N002": "T004",
+    "N003": "T007",
+    "N004": "T010",
+    "P": "T012"
+  },
+  "endpoint_correspondence": {
+    "P": {
+      "mode": "equivalent",
+      "explanation": "Positive integer dimensions are represented by n,m : ℕ with H001 : 1≤n ∧ 1≤m, a bijective encoding. X n is the usual real Cartesian coordinate space with product Lebesgue measure; V m has exactly the Euclidean norm and dot product. Fin n reindexes all n coordinates without changing finite sums. H002 asserts joint C∞ smoothness on precisely t>0, using the inner infinity smoothness index; H003/H004 keep both unit conditions. H005 is the original pointwise existential scalar normality equation, with no scalar field regularity. H006 retains a single compact spatial set for every entire positive closed time interval. A source map on t>0 extends arbitrarily to the total u used here, and any such u restricts back; locality preserves all positive-time derivatives and hypotheses in both directions. dt, dx and lap give the componentwise time/spatial derivatives and Laplacian, and density is exactly the unhalved sum of their Euclidean squares. T004 proves the guard that makes energy the actual finite Lebesgue integral. The conclusion explicitly asserts absolute integrability, real differentiability and zero derivative at every positive time, together with energy equality for every pair of positive times. Restriction and extension therefore give the whole source target in both directions; no conclusion at nonpositive times or additional hypothesis is present."
+    }
+  }
+}
