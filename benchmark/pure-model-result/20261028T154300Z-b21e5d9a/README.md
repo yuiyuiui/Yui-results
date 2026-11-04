@@ -1,6 +1,6 @@
 # Original pure-model run
 
-This directory preserves the original compiled candidate, whose external premises required later source-faithfulness repair. Its recorded elapsed time is **6 h 43 min**, with **190,950,431 observed input + output tokens**. For the completed strict-input proof and total repair costs, see the [accepted supplement](../../pure-model-supplement/20261101T114606Z-5d3193f6/README.md).
+This directory preserves the original compiled candidate, whose external premises required later source-faithfulness repair. Its recorded elapsed time is **6 h 43 min**, with **190,950,431 observed input + output tokens**. For the completed strict-input proof and total repair costs, see the [accepted supplement](../20261101T114606Z-5d3193f6/README.md). The [pure-model index](../README.md) keeps both stages together, with [reproduction instructions](../REPRODUCE.md).
 
 ## Original artifacts
 

@@ -1,6 +1,6 @@
 # Completed pure-model proof
 
-This is the public navigation entry for the accepted supplement. The recorded result is a checked Lean derivation from nine explicit original-literature inputs to the complete target, with separate-context semantic review of source fidelity. The literature theorems themselves remain assumptions.
+This is the public navigation entry for the accepted supplement. The recorded result is a checked Lean derivation from nine explicit original-literature inputs to the complete target, with separate-context semantic review of source fidelity. The literature theorems themselves remain assumptions. See the [pure-model index](../README.md) for the original run and this supplement together, and [REPRODUCE.md](../REPRODUCE.md) to rerun or rebuild.
 
 ## Proof and source correspondence
 
@@ -23,7 +23,7 @@ This is the public navigation entry for the accepted supplement. The recorded re
 
 - [Accounting](owner-records/accounting.json): original imperfect-interface run, supplementary author work, independent review and disclosed missing coverage.
 - [Per-turn native usage](owner-records/native-stage-usage.json).
-- [Original run and raw execution evidence](../../pure-model-result/20261028T154300Z-b21e5d9a/README.md).
+- [Original run and raw execution evidence](../20261028T154300Z-b21e5d9a/README.md).
 
 The combined recorded total is **11 h 6 min** and **248,548,201 observed input + output tokens**, including the accepted supplement and its evaluation. Cached-input and reasoning-output counters are subsets. Accounting remains partial.
 

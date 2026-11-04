@@ -9,15 +9,15 @@ To run these locally, complete [local setup](#local-setup), then use the [benchm
 | Method | Elapsed time | Observed input + output tokens | Results |
 | --- | ---: | ---: | --- |
 | **Yui** | **04:09:26** | **282,760,473** | [Full workflow](benchmark/results/20261031T212422Z-533b379994/) |
-| **Pure model, including supplement** | **11:06:03** | **248,548,201** | [Completed result](benchmark/pure-model-supplement/20261101T114606Z-5d3193f6/README.md) |
+| **Pure model, including supplement** | **11:06:03** | **248,548,201** | [Pure-model results](benchmark/pure-model-result/README.md) |
 
 **In this recorded benchmark, Yui completed the task 2.67× as fast as the pure model, using 13.8% more observed tokens.** The pure-model total includes its original attempt, supplementary repair and acceptance review.
 
 The input is the repository author's [natural-language proof](benchmark/aim-518-kdv-log-loss.pdf) of [AIM problem 518: removing the logarithmic loss in the Li–Wu KdV integrator](https://github.com/MColbrook/AIM/blob/main/problems/518-kdv-integrator-logarithmic-loss.md), listed as **SOLVED** by the AIM repository following independent AI review. The benchmark compares both approaches on the paper's complete Theorem 1 and tests Yui's reliability on a larger proof.
 
-Despite the [original prompt](benchmark/pure-model-result/20261028T154300Z-b21e5d9a/prompt.md), some external theorem statements in the pure-model proof were weakened consequences of the originals. The [supplement](benchmark/pure-model-supplement/20261101T114606Z-5d3193f6/) supplies faithful original statements, proves the missing Lean bridges and connects them to the unchanged original proof. The [completed Lean project](benchmark/pure-model-supplement/20261101T114606Z-5d3193f6/frozen-candidate-002/) compiled and passed the recorded acceptance review. Both approaches retain the cited literature theorems as explicit inputs.
+Despite the [original prompt](benchmark/pure-model-result/20261028T154300Z-b21e5d9a/prompt.md), some external theorem statements in the pure-model proof were weakened consequences of the originals. The [supplement](benchmark/pure-model-result/20261101T114606Z-5d3193f6/) supplies faithful original statements, proves the missing Lean bridges and connects them to the unchanged original proof. The [completed Lean project](benchmark/pure-model-result/20261101T114606Z-5d3193f6/frozen-candidate-002/) compiled and passed the recorded acceptance review. Both approaches retain the cited literature theorems as explicit inputs.
 
-**Configuration:** all model stages requested **gpt-6.1-sol / high / Standard**, using clean background Codex CLI processes. Yui allowed **20 local workers** in this benchmark; pure-model construction used one author session per run. These are recorded workflow timings with different parallelism. Usage is `PARTIAL`; token totals count observed input plus output, with cached and reasoning tokens already included. Detailed records: [Yui](benchmark/results/20261031T212422Z-533b379994/FINAL_OUTCOME.json), [pure model](benchmark/pure-model-supplement/20261101T114606Z-5d3193f6/owner-records/accounting.json), and [startup instructions](benchmark/README.md).
+**Configuration:** all model stages requested **gpt-6.1-sol / high / Standard**, using clean background Codex CLI processes. Yui allowed **20 local workers** in this benchmark; pure-model construction used one author session per run. These are recorded workflow timings with different parallelism. Usage is `PARTIAL`; token totals count observed input plus output, with cached and reasoning tokens already included. Detailed records: [Yui](benchmark/results/20261031T212422Z-533b379994/FINAL_OUTCOME.json), [pure model](benchmark/pure-model-result/20261101T114606Z-5d3193f6/owner-records/accounting.json), and [startup instructions](benchmark/README.md).
 
 ### Reproduce the benchmark
 
@@ -29,12 +29,12 @@ Use only benchmark/aim-518-kdv-log-loss.pdf as mathematical input, preserving th
 Run detached through NL0/Audit A and Lean/Audit B. Save to a new benchmark/results/<run-id>/ directory and report acceptance, elapsed time and token usage. Do not use earlier results as proof inputs.
 ```
 
-For the **pure-model arm**, use a separate fresh local Codex chat and paste:
+For the **pure-model arm**, start from its [results and instructions](benchmark/pure-model-result/README.md). Use a separate fresh local Codex chat and paste:
 
 ```text
-Independently rerun the pure-model benchmark now on benchmark/aim-518-kdv-log-loss.pdf, targeting the complete Theorem 1.
-Use one clean native Codex CLI author session with gpt-6.1-sol/high/Standard. Render the task from benchmark/pure-model-result/prompt.py using this machine's paths; give the author only that task, the paper, its cited sources and pinned Lean/Mathlib. Do not give it Yui rules, personal skills/memories or earlier results.
-Save the exact prompt, configuration, elapsed time, native token records and proof under a new benchmark/pure-model-result/<run-id>/. Independently check full target and external-theorem fidelity; continue the same author session for any required repairs, recording repair and acceptance-review costs separately in the total.
+Run a fresh from-scratch pure-model benchmark now. Start at benchmark/pure-model-result/README.md and follow section 1 of REPRODUCE.md, targeting the complete Theorem 1 of benchmark/aim-518-kdv-log-loss.pdf.
+Use one clean native author session with gpt-6.1-sol/high/Standard and pinned Lean/Mathlib. Do not give the author Yui proof rules, personal skills/memories or earlier results.
+Save the exact inputs, prompt, configuration, elapsed time, native token records, proof and separate acceptance review under a new benchmark/pure-model-result/<run-id>/.
 ```
 
 ## Tests

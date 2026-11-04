@@ -3,7 +3,7 @@
 You are the sole bare-model author for a post hoc supplementary benchmark. Use your ordinary native tools to complete the mathematical task below. No other proof agent or personal proof workflow is available. All mathematical construction, diagnosis, Lean compilation and repair must be your own work in this author session.
 
 Preparation status: NOT STARTED. This document is a task template, not start authorization.
-At a future explicitly authorized launch, resolve the named inputs from settings.json relative to the benchmark directory, stage only those inputs, and select a fresh working/output directory. Replace the placeholders below with the actual absolute paths before sending the task to the author.
+At a future explicitly authorized launch, resolve the named inputs from settings.json relative to the pure-model-result directory, stage only those inputs, and select a fresh working/output directory. Replace the placeholders below with the actual absolute paths before sending the task to the author.
 
 Working directory: {{WORK_DIRECTORY}}
 Allowed inputs:
@@ -87,9 +87,9 @@ Inspect the complete elaborated final signature, including implicit parameters a
 Do not use sorry, admit, sorryAx, new unproved axiom declarations, unproved opaque constants, unsafe proof substitutes or placeholders. Ordinary foundational axioms (propext, Classical.choice, Quot.sound) and explicitly allowed literature assumptions must be distinguished.
 
 Pinned Lean:
- /Users/syyui/.elan/toolchains/leanprover--lean4---v4.32.2/bin/lean
+ {{LEAN_BINARY}}
 Pinned Mathlib:
- /Users/syyui/formalization-tools/lean-mathlib-v4.32.2/mathlib
+ {{MATHLIB_DIRECTORY}}
 Mathlib commit:
  905b95818eb32af7874a58b427f50c1711a5e96c
 Use its existing dependency/cache arrangement. LEAN_PATH is provided for this directory, Mathlib and its pinned dependencies. Do not run lake update or modify the installation.
