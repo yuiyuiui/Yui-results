@@ -1,0 +1,40 @@
+{
+  "proof": {
+    "schema": "yui-local-proof-1",
+    "step": "T004",
+    "context_sha256": "08f4038015367f9494f54eb1937041b07902a665cd8283cbd65a904b9739296d",
+    "helpers": [
+      {
+        "name": "yui_aux_0001",
+        "statement": "∀ s δ : ℝ, 0 < s → 0 < δ → GDContent s δ E < ⊤",
+        "proof": "classical\nintro s δ hs hδ\nhave hcover : E ⊆ ⋃ x : E, Metric.ball (x : GDVec n) (δ / 2) := by\n  intro x hx\n  exact Set.mem_iUnion.mpr ⟨⟨x, hx⟩, by simpa using (half_pos hδ)⟩\nobtain ⟨t, ht⟩ := h_H002.elim_finite_subcover\n  (fun x : E => Metric.ball (x : GDVec n) (δ / 2))\n  (fun _ => Metric.isOpen_ball) hcover\nlet e : t ≃ Fin (Fintype.card t) := Fintype.equivFin t\nlet U : ℕ → Set (GDVec n) := fun i =>\n  if hi : i < Fintype.card t then\n    Metric.ball (((e.symm ⟨i, hi⟩ : t) : E) : GDVec n) (δ / 2)\n  else ∅\nhave hUcover : E ⊆ ⋃ i, U i := by\n  intro x hx\n  obtain ⟨y, hy, hxy⟩ := Set.mem_iUnion₂.mp (ht hx)\n  let j : t := ⟨y, hy⟩\n  refine Set.mem_iUnion.mpr ⟨(e j).val, ?_⟩\n  dsimp only [U]\n  rw [dif_pos (e j).isLt]\n  simpa only [Fin.eta, Equiv.symm_apply_apply] using hxy\nhave hUdiam : ∀ i, Metric.ediam (U i) ≤ ENNReal.ofReal δ := by\n  intro i\n  dsimp only [U]\n  split_ifs with hi\n  · apply Metric.ediam_le_of_forall_dist_le\n    intro x hx y hy\n    have hx' : dist x (((e.symm ⟨i, hi⟩ : t) : E) : GDVec n) < δ / 2 := hx\n    have hy' : dist y (((e.symm ⟨i, hi⟩ : t) : E) : GDVec n) < δ / 2 := hy\n    calc\n      dist x y ≤ dist x (((e.symm ⟨i, hi⟩ : t) : E) : GDVec n) +\n        dist y (((e.symm ⟨i, hi⟩ : t) : E) : GDVec n) := dist_triangle_right _ _ _\n      _ ≤ δ := by linarith\n  · simp\nhave hcost : ∀ i, GDCost s (U i) < ⊤ := by\n  intro i\n  have hd : Metric.ediam (U i) ≠ ⊤ :=\n    ne_top_of_le_ne_top ENNReal.ofReal_ne_top (hUdiam i)\n  by_cases hi : (U i).Nonempty\n  · simpa [GDCost, hi] using ENNReal.rpow_lt_top_of_nonneg hs.le hd\n  · simp [GDCost, hi]\nhave hsum : (∑' i, GDCost s (U i)) < ⊤ := by\n  rw [tsum_eq_sum (s := Finset.range (Fintype.card t)) (fun i hi => ?_)]\n  · exact ENNReal.sum_lt_top.mpr (fun i _ => hcost i)\n  · have hi' : ¬ i < Fintype.card t := by simpa only [Finset.mem_range] using hi\n    have hUi : U i = ∅ := by\n      dsimp only [U]\n      exact dif_neg hi'\n    simp [hUi, GDCost]\nexact lt_of_le_of_lt\n  (iInf_le_of_le U (iInf_le_of_le hUcover (iInf_le_of_le hUdiam le_rfl))) hsum",
+        "dependencies": [],
+        "context_sha256": "08f4038015367f9494f54eb1937041b07902a665cd8283cbd65a904b9739296d",
+        "sha256": "faa353e26972c7954620b1230a9f6fff4a0e2c2cc7cbb470584f161b0cf396b8",
+        "check": {
+          "exit_code": 0,
+          "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-p0em7t_5/output/Auxiliary.lean:44:68: warning: Variable name `h_T003` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (n : ℕ) (E : Set (GDVec n)),\n  IsCompact E →\n    Bornology.IsBounded E ∧ dimH E ≤ ↑n ∧ (n = 0 → E = Set.univ ∧ dimH E = 0) →\n      ∀ (s δ : ℝ), 0 < s → 0 < δ → GDContent s δ E < ∞\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+          "stderr": "",
+          "wall_seconds": 3.880457166582346,
+          "native_limits": {
+            "timeout_seconds": 180,
+            "max_heartbeats": 20000000
+          },
+          "source_path": "/Users/syyui/projects/Yui-results/test/geometry-product-dimension/rigorous-proof/20261101-fresh-full-18b3e2e0bf/native-checks/07dcac432f2747f29935b2a95af9b070.lean",
+          "source_sha256": "a22e607b86ca88fa0e2a345cea026bf3f99515a3bc74c5e4f2099acf3e53bc89",
+          "auxiliary_valid": true,
+          "axioms": [
+            "Classical.choice",
+            "Quot.sound",
+            "propext"
+          ],
+          "lean_sha256": "a22e607b86ca88fa0e2a345cea026bf3f99515a3bc74c5e4f2099acf3e53bc89",
+          "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+          "context_port": "T004",
+          "candidate": 3
+        }
+      }
+    ],
+    "body": "exact ⟨h_T003.1, bot_le, h_T003.2.1,\n  lt_of_le_of_lt h_T003.2.1 (by simp),\n  @yui_aux_0001 n E h_H002 h_T003, h_T003.2.2⟩"
+  }
+}

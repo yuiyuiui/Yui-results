@@ -1,0 +1,1658 @@
+{
+  "contract_version": 2,
+  "case_id": "benchmark",
+  "graph_sha256": "338c2fe0f346594566f3a3e4b2db4c7caef28653babc5defacfa5290cde37516",
+  "spec_sha256": "a9f6c6cf0bd01cf44b46894cd3fd60d8f5dcf81f889e57c646b903e35aa57620",
+  "parameters": [
+    {
+      "symbol": "T",
+      "type": "real number"
+    },
+    {
+      "symbol": "gamma",
+      "type": "real number"
+    },
+    {
+      "symbol": "R",
+      "type": "real number"
+    }
+  ],
+  "logic": {
+    "classical": true,
+    "rules": [
+      "direct",
+      "forall_introduction",
+      "implication_introduction",
+      "exists_elimination",
+      "case_elimination",
+      "contradiction_classical",
+      "natural_induction"
+    ],
+    "calculations": [
+      "equality: Equality reflexivity, symmetry, transitivity and substitution.",
+      "definitions: Unfold an explicitly supplied definition; this proves no extra property.",
+      "finite_algebra: Routine finite semiring/ring/field arithmetic, including zero/one laws, distributivity, associativity and finite polynomial identities. Correct elementary compression is permitted; a substantive missing argument is not.",
+      "finite_order: Routine ordered-field reasoning with actual signs/domains: order laws, adding inequalities, multiplication/division with sign conditions, and real square nonnegativity. Ordinary valid elementary inferences need no exhaustive displayed chain. Check that the conclusion follows; substantial named theorems still require inputs or verified-background admission.",
+      "finite_sums: Unfold and rearrange finite sums/products with explicitly given finite indices."
+    ],
+    "primitives": [
+      {
+        "symbol": "0",
+        "type": "typed numeral",
+        "meaning": "Zero of the explicitly specified mathematical type."
+      },
+      {
+        "symbol": "1",
+        "type": "typed numeral",
+        "meaning": "One of the explicitly specified mathematical type."
+      },
+      {
+        "symbol": "2",
+        "type": "typed numeral",
+        "meaning": "Two of the explicitly specified mathematical type, including an exponent two."
+      },
+      {
+        "symbol": "ℕ",
+        "type": "number system",
+        "meaning": "The natural numbers with their usual arithmetic."
+      },
+      {
+        "symbol": "ℤ",
+        "type": "number system",
+        "meaning": "The integers with their usual arithmetic."
+      },
+      {
+        "symbol": "ℚ",
+        "type": "number system",
+        "meaning": "The rational numbers with their usual ordered-field operations."
+      },
+      {
+        "symbol": "ℝ",
+        "type": "number system",
+        "meaning": "The real numbers with their usual ordered-field structure."
+      },
+      {
+        "symbol": "ℂ",
+        "type": "number system",
+        "meaning": "The complex numbers with their usual field structure."
+      },
+      {
+        "symbol": "∅",
+        "type": "typed set notation",
+        "meaning": "The empty set in the explicitly specified ambient type."
+      },
+      {
+        "symbol": "∞",
+        "type": "typed order notation",
+        "meaning": "The top element in an explicitly specified extended ordered codomain."
+      }
+    ]
+  },
+  "pins": {
+    "lean_version": "4.32.2",
+    "mathlib_commit": "905b95818eb32af7874a58b427f50c1711a5e96c",
+    "mathlib_root": "/Users/syyui/formalization-tools/lean-mathlib-v4.32.2/mathlib"
+  },
+  "foundation_profile": "elementary-language-4",
+  "standard_language": "Ordinary typed mathematical language: logical connectives, quantifiers, equality, sets, functions, tuples, finite indices and their usual notation. A type explicitly named natural numbers, integers, rationals, reals or complex numbers means that standard structure, with its usual numerals and arithmetic operations; these operation tokens need not be redeclared as project objects. The fixed finite calculation rules below, including a+0=a, are controller permissions, not an author claim. The core symbol table below is not a dictionary of all allowed mathematics. Objects and notation from any subject are introduced by this problem's parameters, D definitions or scoped locals, with their types and dependencies. Their properties need direct inputs or displayed local proofs; a familiar name or symbol supplies no theorem.",
+  "background_policy": "mathematical-background-v2-1",
+  "definitions": [
+    {
+      "id": "D001",
+      "symbol": "Torus",
+      "type": "compact measured additive group",
+      "definition": "Torus=reals/(2*pi*integers), with normalized measure dx/(2*pi). Periodic spatial products, integrals and derivatives are on this torus. A trigonometric polynomial is a finite sum of exp(i*k*x) with integer k.",
+      "depends_on": [],
+      "requires": [],
+      "binders": [],
+      "objects": []
+    },
+    {
+      "id": "D002",
+      "symbol": "Fourier",
+      "type": "Fourier transform on periodic distributions",
+      "definition": "For a periodic integrable f, hat f(k)=(2*pi)^(-1) integral_0^(2*pi) f(x)exp(-i*k*x) dx, k in Z. Extend Fourier coefficients to periodic distributions. Reality means hat f(-k)=conjugate(hat f(k)); mean zero means hat f(0)=0. For sequences, ell^2 is the square-summable sequence space with counting measure.",
+      "depends_on": [
+        "D001"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "f",
+          "type": "periodic function or distribution"
+        },
+        {
+          "symbol": "k",
+          "type": "integer frequency"
+        }
+      ],
+      "objects": [
+        "Torus",
+        "f",
+        "k"
+      ]
+    },
+    {
+      "id": "D003",
+      "symbol": "Sob",
+      "type": "family of real or complex Hilbert spaces indexed by real order",
+      "definition": "Write <k>=(1+k^2)^(1/2). H^s is the completion of trigonometric polynomials with ||f||_(H^s)^2=sum_{k in Z}<k>^(2s)|hat f(k)|^2, interpreted as distributions for s<0. L^2=H^0 and ||.||_2 denotes its normalized norm. For mean-zero f, ||f||_(dot H^s)^2=sum_{k!=0}|k|^(2s)|hat f(k)|^2. For s>=0, ||f||_(dot H^s)<=||f||_(H^s)<=2^(s/2)||f||_(dot H^s); for s<0, 2^(s/2)||f||_(dot H^s)<=||f||_(H^s)<=||f||_(dot H^s). In time L^infty norms are essential suprema, replaced by ordinary suprema for continuous representatives; derivative norms remain essential suprema.",
+      "depends_on": [
+        "D002"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "s",
+          "type": "real order"
+        },
+        {
+          "symbol": "f",
+          "type": "periodic distribution"
+        },
+        {
+          "symbol": "k",
+          "type": "integer frequency"
+        }
+      ],
+      "objects": [
+        "Fourier",
+        "s",
+        "f",
+        "k"
+      ]
+    },
+    {
+      "id": "D004",
+      "symbol": "S",
+      "type": "one-parameter family of linear Fourier operators",
+      "definition": "For real t, S_t=exp(-t*partial_x^3) has Fourier multiplier exp(i*t*k^3).",
+      "depends_on": [
+        "D002"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "t",
+          "type": "real time"
+        },
+        {
+          "symbol": "k",
+          "type": "integer frequency"
+        }
+      ],
+      "objects": [
+        "Fourier",
+        "t",
+        "k"
+      ]
+    },
+    {
+      "id": "D005",
+      "symbol": "P0",
+      "type": "spatial mean projection",
+      "definition": "P0 f=hat f(0), identified with a constant function.",
+      "depends_on": [
+        "D002"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "f",
+          "type": "periodic input"
+        }
+      ],
+      "objects": [
+        "Fourier",
+        "f"
+      ]
+    },
+    {
+      "id": "D006",
+      "symbol": "P",
+      "type": "projection onto mean-zero functions",
+      "definition": "P=identity-P0, where identity is the identity linear operator.",
+      "depends_on": [
+        "D005"
+      ],
+      "requires": [],
+      "binders": [],
+      "objects": [
+        "P0"
+      ]
+    },
+    {
+      "id": "D007",
+      "symbol": "Dinv",
+      "type": "inverse derivative Fourier operator",
+      "definition": "Dinv=partial_x^(-1) has multiplier (i*k)^(-1) for k!=0 and zero at zero. Write Dinv2=(Dinv)^2=partial_x^(-2). Spatial differentiation partial_x has multiplier i*k.",
+      "depends_on": [
+        "D002"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "k",
+          "type": "integer frequency"
+        }
+      ],
+      "objects": [
+        "Fourier",
+        "k"
+      ]
+    },
+    {
+      "id": "D008",
+      "symbol": "Scheme",
+      "type": "family of time-step maps and finite trajectories",
+      "definition": "For tau>0 and mean-zero f in L^2, define Ftau(f)=(1/6)P[(S_tau Dinv f)^2]-(1/6)S_tau P[(Dinv f)^2]. Define Htau(f)=(1/3)P[(S_tau Dinv f)*Dinv Ftau(f)]+(tau/9)(S_tau Dinv f)*P0(f^2)-(1/54)[S_(tau-s) Dinv[(S_s Dinv f)^3]]_(s=0)^(s=tau)-(1/(27*tau))[S_(tau-s) Dinv2[(S_(s-tau) Dinv2 Ftau(f))*(S_s Dinv f)]]_(s=0)^(s=tau). Brackets are upper endpoint minus lower endpoint and products are spatial products. Psi_tau(f)=S_tau f+Ftau(f)+Htau(f). For a positive integer L, tau=T/L and t_n=n*tau; U^0=u0, U^(n+1)=Psi_tau(U^n), 0<=n<L. This is the unmodified scheme with no frequency cutoff. Its elementary L^2 well-definedness and continuity are proved below.",
+      "depends_on": [
+        "D003",
+        "D004",
+        "D005",
+        "D006",
+        "D007"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "tau",
+          "type": "positive real step"
+        },
+        {
+          "symbol": "f",
+          "type": "mean-zero L^2 input"
+        },
+        {
+          "symbol": "s",
+          "type": "endpoint dummy time"
+        },
+        {
+          "symbol": "L",
+          "type": "positive integer"
+        },
+        {
+          "symbol": "n",
+          "type": "integer step index"
+        },
+        {
+          "symbol": "u0",
+          "type": "initial datum"
+        }
+      ],
+      "objects": [
+        "Sob",
+        "S",
+        "P0",
+        "P",
+        "Dinv",
+        "T",
+        "tau",
+        "f",
+        "s",
+        "L",
+        "n",
+        "u0"
+      ]
+    },
+    {
+      "id": "D010",
+      "symbol": "eta",
+      "type": "averaged covariance of two real phases",
+      "definition": "For tau>0, M_tau g=tau^(-1) integral_0^tau g(s)ds and eta_tau(alpha,beta)=M_tau(exp(-i*s*(alpha+beta)))-M_tau(exp(-i*s*alpha))*M_tau(exp(-i*s*beta)).",
+      "depends_on": [],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "tau",
+          "type": "positive real step"
+        },
+        {
+          "symbol": "g",
+          "type": "integrable scalar function"
+        },
+        {
+          "symbol": "alpha",
+          "type": "real phase"
+        },
+        {
+          "symbol": "beta",
+          "type": "real phase"
+        },
+        {
+          "symbol": "s",
+          "type": "integration variable"
+        }
+      ],
+      "objects": [
+        "tau",
+        "g",
+        "alpha",
+        "beta",
+        "s"
+      ]
+    },
+    {
+      "id": "D011",
+      "symbol": "Phase",
+      "type": "integer-frequency phase functions",
+      "definition": "For integers a,b,c and k=a+b+c, set p=a+b, alpha=3*a*b*p, beta=3*k*c*p, Phi=alpha+beta=k^3-a^3-b^3-c^3.",
+      "depends_on": [],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "a",
+          "type": "integer frequency"
+        },
+        {
+          "symbol": "b",
+          "type": "integer frequency"
+        },
+        {
+          "symbol": "c",
+          "type": "integer frequency"
+        }
+      ],
+      "objects": [
+        "a",
+        "b",
+        "c"
+      ]
+    },
+    {
+      "id": "D013",
+      "symbol": "R2",
+      "type": "family of trilinear Fourier operators initially on mean-zero trigonometric polynomials",
+      "definition": "For tau>0, real base time t_n and k!=0, hat R2_(t_n,tau)(f1,f2,f3)(k)=-(tau/(18*i*k))*sum_{a+b+c=k,a+b!=0}exp(-i*t_n*Phi)*eta_tau(alpha,beta)*hat f1(a)*hat f2(b)*hat f3(c), with zero coefficient at k=0; Phase gives alpha,beta,Phi. Write R2^n_tau for t_n=n*tau. Bounded extensions, when used, are proved below.",
+      "depends_on": [
+        "D002",
+        "D010",
+        "D011"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "tau",
+          "type": "positive real step"
+        },
+        {
+          "symbol": "t_n",
+          "type": "real base time"
+        },
+        {
+          "symbol": "k",
+          "type": "integer output"
+        },
+        {
+          "symbol": "f1",
+          "type": "first polynomial input"
+        },
+        {
+          "symbol": "f2",
+          "type": "second polynomial input"
+        },
+        {
+          "symbol": "f3",
+          "type": "third polynomial input"
+        },
+        {
+          "symbol": "a",
+          "type": "summed integer"
+        },
+        {
+          "symbol": "b",
+          "type": "summed integer"
+        },
+        {
+          "symbol": "c",
+          "type": "summed integer"
+        }
+      ],
+      "objects": [
+        "Fourier",
+        "eta",
+        "Phase",
+        "tau",
+        "t_n",
+        "k",
+        "f1",
+        "f2",
+        "f3",
+        "a",
+        "b",
+        "c"
+      ]
+    },
+    {
+      "id": "D014",
+      "symbol": "pstar",
+      "type": "positive real exponent",
+      "definition": "pstar=23/14.",
+      "depends_on": [],
+      "requires": [],
+      "binders": [],
+      "objects": []
+    },
+    {
+      "id": "D015",
+      "symbol": "B",
+      "type": "time-dependent bilinear distribution-valued map",
+      "definition": "B_t(f,g)=S_(-t) partial_x[(S_t f)(S_t g)]. Initially use smooth inputs; the negative Sobolev extension to L^2 inputs is proved below.",
+      "depends_on": [
+        "D004",
+        "D007"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "t",
+          "type": "real time"
+        },
+        {
+          "symbol": "f",
+          "type": "first input"
+        },
+        {
+          "symbol": "g",
+          "type": "second input"
+        }
+      ],
+      "objects": [
+        "S",
+        "Dinv",
+        "t",
+        "f",
+        "g"
+      ]
+    },
+    {
+      "id": "D016",
+      "symbol": "J",
+      "type": "time-dependent bilinear map",
+      "definition": "J_t(f,g)=S_(-t)P[(S_t Dinv f)(S_t Dinv g)].",
+      "depends_on": [
+        "D004",
+        "D006",
+        "D007"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "t",
+          "type": "real time"
+        },
+        {
+          "symbol": "f",
+          "type": "first input"
+        },
+        {
+          "symbol": "g",
+          "type": "second input"
+        }
+      ],
+      "objects": [
+        "S",
+        "P",
+        "Dinv",
+        "t",
+        "f",
+        "g"
+      ]
+    },
+    {
+      "id": "D017",
+      "symbol": "Ctri",
+      "type": "interval-dependent trilinear integral",
+      "definition": "For I=[a,b], C_I(f,g,h)=integral_a^b S_(-t)P{P[(S_t f(t))(S_t g(t))]*(S_t Dinv h(t))}dt. Constant inputs are identified with constant time paths. At smooth inputs this is an ordinary integral, and the source estimates supply its continuous extensions.",
+      "depends_on": [
+        "D004",
+        "D006",
+        "D007"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "I",
+          "type": "interval"
+        },
+        {
+          "symbol": "a",
+          "type": "left endpoint"
+        },
+        {
+          "symbol": "b",
+          "type": "right endpoint"
+        },
+        {
+          "symbol": "t",
+          "type": "integration variable"
+        },
+        {
+          "symbol": "f",
+          "type": "first path"
+        },
+        {
+          "symbol": "g",
+          "type": "second path"
+        },
+        {
+          "symbol": "h",
+          "type": "third path"
+        }
+      ],
+      "objects": [
+        "S",
+        "P",
+        "Dinv",
+        "I",
+        "a",
+        "b",
+        "t",
+        "f",
+        "g",
+        "h"
+      ]
+    },
+    {
+      "id": "D018",
+      "symbol": "X",
+      "type": "norm on time paths with weak derivative",
+      "definition": "For an interval I, ||f||_(X(I))=||f||_(L^infty(I;L^2))+||partial_t f||_(L^infty(I;H^(-pstar))). Use the continuous L^2 representative wherever supplied.",
+      "depends_on": [
+        "D003",
+        "D014"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "I",
+          "type": "time interval"
+        },
+        {
+          "symbol": "f",
+          "type": "time path"
+        }
+      ],
+      "objects": [
+        "Sob",
+        "pstar",
+        "I",
+        "f"
+      ]
+    },
+    {
+      "id": "D019",
+      "symbol": "Stage",
+      "type": "family of bilinear integrated quadratic stages",
+      "definition": "For a base time a>=0, step tau>0, t in [a,a+tau], and constant mean-zero inputs f,g, F_a(t;f,g)=(1/2)integral_a^t B_s(f,g)ds. Abbreviate F_a(t;f)=F_a(t;f,f). Its endpoint representation and extensions are proved below.",
+      "depends_on": [
+        "D015"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "a",
+          "type": "nonnegative base time"
+        },
+        {
+          "symbol": "tau",
+          "type": "positive step"
+        },
+        {
+          "symbol": "t",
+          "type": "stage time"
+        },
+        {
+          "symbol": "s",
+          "type": "integration variable"
+        },
+        {
+          "symbol": "f",
+          "type": "first input"
+        },
+        {
+          "symbol": "g",
+          "type": "second input"
+        }
+      ],
+      "objects": [
+        "B",
+        "a",
+        "tau",
+        "t",
+        "s",
+        "f",
+        "g"
+      ]
+    },
+    {
+      "id": "D020",
+      "symbol": "KdV",
+      "type": "distributional evolution equation and smooth-approximation solution convention",
+      "definition": "KdV is u_t+u_xxx=(1/2)partial_x(u^2), u(0)=u0, with real mean-zero data on Torus. An exact solution at regularity sigma>=0 means its unique real mean-zero C([0,T];H^sigma) distributional solution obtained as the limit of smooth-data solutions. This convention alone grants neither existence nor a bound; these are proved from the registered flow source. For an existing solution write its twisted path v(t)=S_(-t)u(t).",
+      "depends_on": [
+        "D001",
+        "D003",
+        "D004"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "u0",
+          "type": "initial datum"
+        },
+        {
+          "symbol": "u",
+          "type": "solution path"
+        },
+        {
+          "symbol": "sigma",
+          "type": "nonnegative order"
+        }
+      ],
+      "objects": [
+        "Torus",
+        "Sob",
+        "S",
+        "T",
+        "u0",
+        "u",
+        "sigma"
+      ]
+    },
+    {
+      "id": "D021",
+      "symbol": "Interp",
+      "type": "stepwise interpolation and residual construction from a smooth trajectory",
+      "definition": "For tau>0, t_n=n*tau, and a finite smooth mean-zero trajectory f_n, on I_n=[t_n,t_(n+1)] put F_n(t)=F_(t_n)(t;f_n,f_n), z_n=f_n+F_n, C_n(t)=integral_(t_n)^t B_s(f_n,F_n(s))ds, Q_n(t)=(1/2)integral_(t_n)^t B_s(F_n(s),F_n(s))ds, W_n=Q_n(t_(n+1))+R2_(t_n,tau)(f_n,f_n,f_n), V(t)=f_n+F_n(t)+C_n(t)+Q_n(t)-((t-t_n)/tau)*W_n, and Y_n=V-z_n. Put rho_n(t)=-integral_(t_n)^t B_s(Y_n,z_n)ds-(1/2)integral_(t_n)^t B_s(Y_n,Y_n)ds-((t-t_n)/tau)*W_n. The residual path mathcalR is the concatenation of these increments: mathcalR(0)=0 and mathcalR(t)=sum_(j<n)rho_j(t_(j+1))+rho_n(t) on I_n. This construction does not assert endpoint compatibility; that is proved when f_n are the twisted Scheme trajectory.",
+      "depends_on": [
+        "D013",
+        "D015",
+        "D019"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "tau",
+          "type": "positive step"
+        },
+        {
+          "symbol": "L",
+          "type": "positive trajectory length"
+        },
+        {
+          "symbol": "f_n",
+          "type": "finite smooth mean-zero sequence"
+        },
+        {
+          "symbol": "n",
+          "type": "integer step index"
+        },
+        {
+          "symbol": "t",
+          "type": "step time"
+        },
+        {
+          "symbol": "s",
+          "type": "integration variable"
+        },
+        {
+          "symbol": "j",
+          "type": "past step index"
+        }
+      ],
+      "objects": [
+        "R2",
+        "B",
+        "Stage",
+        "tau",
+        "L",
+        "f_n",
+        "n",
+        "t",
+        "s",
+        "j"
+      ]
+    }
+  ],
+  "inputs": [
+    {
+      "id": "H002",
+      "kind": "hypothesis",
+      "statement": "0<gamma<=1.",
+      "definitions": [],
+      "binders": [],
+      "objects": [
+        "gamma"
+      ]
+    },
+    {
+      "id": "N002",
+      "kind": "internal",
+      "statement": "For all I=[a,b] with 0<=a<=b and h=b-a<=1, all 0<=sigma<=1 and paths f_j in L^infty(I;H^sigma) with weak derivatives in L^infty(I;H^(-pstar)), Ctri satisfies ||C_I(f1,f2,f3)||_2<=C*h*product_j||f_j||_(X(I))+C*||f_i||_(L^infty H^(-pstar))*product_{j!=i}||f_j||_(L^infty L^2), each i=1,2,3. For time-independent inputs, ||C_I(f1,f2,f3)||_2<=C_sigma*h^sigma*product_j||f_j||_(H^sigma), including sigma=0. For 0<sigma<=1 choose a_sigma=1/2-sigma for sigma<1/2, a_sigma=1/8 for sigma=1/2, a_sigma=0 for sigma>1/2. Then 0<=a_sigma<1, and for every f in H^sigma and g in H^a_sigma, ||fg||_2<=C_sigma||f||_(H^sigma)||g||_(H^a_sigma). For any constant mean-zero w in H^sigma with ||w||_(H^sigma)<=M, 0<tau<=1 and a>=0, sup_[a,a+tau]||F_a(t;w)||_(H^a_sigma)<=C_(M,sigma)*tau^sigma and sup_[a,a+tau]||F_a(t;w)||_(H^(1+sigma))<=C_(M,sigma). All these are in the normalized norms, with constants uniform in endpoints and support.",
+      "definitions": [
+        "D003",
+        "D014",
+        "D017",
+        "D018",
+        "D019"
+      ],
+      "binders": [
+        {
+          "symbol": "I",
+          "type": "time interval"
+        },
+        {
+          "symbol": "a",
+          "type": "nonnegative base time"
+        },
+        {
+          "symbol": "b",
+          "type": "right time endpoint"
+        },
+        {
+          "symbol": "h",
+          "type": "interval length"
+        },
+        {
+          "symbol": "sigma",
+          "type": "Sobolev exponent"
+        },
+        {
+          "symbol": "f1",
+          "type": "first time path"
+        },
+        {
+          "symbol": "f2",
+          "type": "second time path"
+        },
+        {
+          "symbol": "f3",
+          "type": "third time path"
+        },
+        {
+          "symbol": "f",
+          "type": "first product input"
+        },
+        {
+          "symbol": "g",
+          "type": "second product input"
+        },
+        {
+          "symbol": "w",
+          "type": "constant stage input"
+        },
+        {
+          "symbol": "M",
+          "type": "nonnegative size bound"
+        },
+        {
+          "symbol": "tau",
+          "type": "positive step"
+        },
+        {
+          "symbol": "a_sigma",
+          "type": "chosen exponent"
+        }
+      ],
+      "objects": [
+        "I",
+        "a",
+        "b",
+        "h",
+        "sigma",
+        "f1",
+        "f2",
+        "f3",
+        "f",
+        "g",
+        "w",
+        "M",
+        "tau",
+        "a_sigma",
+        "Sob",
+        "pstar",
+        "Ctri",
+        "X",
+        "Stage"
+      ]
+    },
+    {
+      "id": "N005",
+      "kind": "internal",
+      "statement": "For 0<=sigma<=1, tau>0, any real base time a, and mean-zero fj in H^sigma, ||R2_(a,tau)(f1,f2,f3)||_2<=C_sigma*tau^(1+sigma)*product_j||fj||_(H^sigma), uniformly in a,tau and Fourier support. The bound holds after inserting any multiplier of modulus <=1, including restriction to Phi=0 or Phi!=0. Polynomial approximation defines its unique continuous trilinear extension. Moreover, for 0<gamma<=1, mean-zero w in H^gamma with ||w||_(H^gamma)<=M, f in mean-zero L^2, delta=||f-w||_2<=1 and 0<tau<=1, ||R2_(a,tau)(f,f,f)||_2<=C_(M,gamma)*tau*(tau^gamma+delta). This estimate requires no H^gamma bound on f.",
+      "definitions": [
+        "D003",
+        "D011",
+        "D013"
+      ],
+      "binders": [
+        {
+          "symbol": "sigma",
+          "type": "exponent"
+        },
+        {
+          "symbol": "tau",
+          "type": "positive step"
+        },
+        {
+          "symbol": "a",
+          "type": "real base time"
+        },
+        {
+          "symbol": "f1",
+          "type": "first input"
+        },
+        {
+          "symbol": "f2",
+          "type": "second input"
+        },
+        {
+          "symbol": "f3",
+          "type": "third input"
+        },
+        {
+          "symbol": "w",
+          "type": "exact-data input"
+        },
+        {
+          "symbol": "f",
+          "type": "L^2 input"
+        },
+        {
+          "symbol": "M",
+          "type": "size bound"
+        },
+        {
+          "symbol": "delta",
+          "type": "L^2 distance"
+        }
+      ],
+      "objects": [
+        "gamma",
+        "sigma",
+        "tau",
+        "a",
+        "f1",
+        "f2",
+        "f3",
+        "w",
+        "f",
+        "M",
+        "delta",
+        "Sob",
+        "Phase",
+        "R2"
+      ]
+    },
+    {
+      "id": "N006",
+      "kind": "internal",
+      "statement": "There is an absolute C>0 such that the following bounds hold uniformly in time. For mean-zero f,g in L^2 and all real t, ||Dinv f||_(H^1)+||Dinv f||_infinity<=C||f||_2, ||B_t(f,g)||_(H^(-pstar))<=C||f||_2||g||_2, ||J_t(f,g)||_(H^1)<=C||f||_2||g||_2, and ||Dinv P(fg)||_2<=C||f||_2||g||_2. For mean-zero A, ||A||_(H^(-pstar))<=||Dinv A||_2 whenever the latter is finite; ||J_t(A,g)||_2<=C||Dinv A||_2||g||_2. For all A,A2 in H^1, the algebra bound is: ||A*A2||_(H^1)<=C||A||_(H^1)||A2||_(H^1). S_t is unitary in every H^s, preserves reality/mean and is strongly continuous. For continuous, piecewise time-smooth spatially smooth mean-zero paths f,g on [a,b], integral_a^b B_t(f,g)dt=(1/3)[J_t(f,g)]_a^b-(1/3)integral_a^b[J_t(f',g)+J_t(f,g')]dt. Also J_t is symmetric and integral_I J_t(B_t(f,g),h)dt=C_I(f,g,h). In particular F_a(t;f,g)=[J_s(f,g)]_(s=a)^(s=t)/6 for constant inputs. All bounded product maps extend from polynomials by density.",
+      "definitions": [
+        "D002",
+        "D003",
+        "D004",
+        "D006",
+        "D007",
+        "D014",
+        "D015",
+        "D016",
+        "D017",
+        "D019"
+      ],
+      "binders": [
+        {
+          "symbol": "f",
+          "type": "mean-zero input or path"
+        },
+        {
+          "symbol": "g",
+          "type": "mean-zero input or path"
+        },
+        {
+          "symbol": "h",
+          "type": "third input path"
+        },
+        {
+          "symbol": "A",
+          "type": "input"
+        },
+        {
+          "symbol": "A2",
+          "type": "second H^1 product input"
+        },
+        {
+          "symbol": "t",
+          "type": "real time"
+        },
+        {
+          "symbol": "s",
+          "type": "Sobolev order"
+        },
+        {
+          "symbol": "a",
+          "type": "left endpoint"
+        },
+        {
+          "symbol": "b",
+          "type": "right endpoint"
+        },
+        {
+          "symbol": "I",
+          "type": "interval"
+        }
+      ],
+      "objects": [
+        "f",
+        "g",
+        "h",
+        "A",
+        "A2",
+        "t",
+        "s",
+        "a",
+        "b",
+        "I",
+        "Sob",
+        "Fourier",
+        "S",
+        "P",
+        "Dinv",
+        "pstar",
+        "B",
+        "J",
+        "Ctri",
+        "Stage"
+      ]
+    },
+    {
+      "id": "N007",
+      "kind": "internal",
+      "statement": "For each fixed tau>0, Psi_tau from Scheme is a continuous polynomial map from mean-zero L^2 to mean-zero L^2, preserving reality; Ftau maps L^2 continuously to H^1. Smooth data produce smooth iterates. For any trajectory produced by Scheme from smooth mean-zero data, f_n=S_(-t_n)U^n, the Interp construction has V(t_n)=f_n, V(t_(n+1))=f_(n+1), is continuous and piecewise smooth in time and spatially smooth, and has mean-zero values, which are real whenever the initial datum is real. On each open step, V'=B_t(V,V)/2+mathcalR', where mathcalR'=-B_t(Y_n,z_n)-B_t(Y_n,Y_n)/2-W_n/tau. Thus mathcalR is continuous with the defining increments and the displayed residual identity holds a.e.",
+      "definitions": [
+        "D008",
+        "D013",
+        "D015",
+        "D021"
+      ],
+      "binders": [
+        {
+          "symbol": "tau",
+          "type": "positive step"
+        },
+        {
+          "symbol": "L",
+          "type": "positive integer"
+        },
+        {
+          "symbol": "U",
+          "type": "scheme trajectory"
+        },
+        {
+          "symbol": "f_n",
+          "type": "twisted trajectory"
+        },
+        {
+          "symbol": "V",
+          "type": "interpolant"
+        },
+        {
+          "symbol": "mathcalR",
+          "type": "residual"
+        }
+      ],
+      "objects": [
+        "tau",
+        "L",
+        "U",
+        "f_n",
+        "V",
+        "mathcalR",
+        "Scheme",
+        "R2",
+        "B",
+        "Interp",
+        "S"
+      ]
+    }
+  ],
+  "output": {
+    "id": "N008",
+    "kind": "internal",
+    "statement": "Let 0<tau<=1, let u be a smooth real mean-zero exact KdV solution on [0,T], v=S_(-t)u, and M>=1+sup_[0,T]||v||_(H^gamma). On any step of the smooth twisted Scheme trajectory f_n, assume delta_n=||f_n-v(t_n)||_2<=1 and put q_n=tau^gamma+delta_n. For Interp, with constants C_M depending only on M,gamma,T, uniformly in n,tau and support: sup_(I_n)||F_n||_(H^1)<=C_M, sup_(I_n)||F_n-F_(t_n)(t;v(t_n))||_(H^1)<=C_M*delta_n; sup_(I_n)(||F_n||_(H^a_gamma)+||F_n||_2)<=C_M*q_n; ||z_n||_(X(I_n))<=C_M; sup_(I_n)||B_t(F_n,F_n)||_2<=C_M*q_n; sup_(I_n)||Q_n||_2+||W_n||_2<=C_M*tau*q_n; sup_(I_n)||Dinv B_t(f_n,F_n)||_2<=C_M*q_n; sup_(I_n)||Dinv Y_n||_2<=C_M*tau*q_n and sup_(I_n)||Dinv Y_n'||_2<=C_M*q_n; sup_(I_n)||Y_n||_2<=C_M*q_n, ||Y_n||_(X(I_n))<=C_M*q_n and sup_(I_n)||Y_n||_(H^(-pstar))<=C_M*tau*q_n. Here a_gamma=1/2-gamma if gamma<1/2, 1/8 if gamma=1/2, and 0 if gamma>1/2. No numerical H^gamma norm is used.",
+    "definitions": [
+      "D003",
+      "D004",
+      "D007",
+      "D008",
+      "D014",
+      "D015",
+      "D018",
+      "D019",
+      "D020",
+      "D021"
+    ],
+    "binders": [
+      {
+        "symbol": "tau",
+        "type": "positive step"
+      },
+      {
+        "symbol": "u",
+        "type": "smooth exact solution"
+      },
+      {
+        "symbol": "v",
+        "type": "twisted exact solution"
+      },
+      {
+        "symbol": "M",
+        "type": "size bound"
+      },
+      {
+        "symbol": "n",
+        "type": "step index"
+      },
+      {
+        "symbol": "f_n",
+        "type": "twisted numerical step value"
+      },
+      {
+        "symbol": "delta_n",
+        "type": "step error"
+      },
+      {
+        "symbol": "q_n",
+        "type": "smallness quantity"
+      },
+      {
+        "symbol": "a_gamma",
+        "type": "auxiliary exponent"
+      }
+    ],
+    "objects": [
+      "T",
+      "gamma",
+      "tau",
+      "u",
+      "v",
+      "M",
+      "n",
+      "f_n",
+      "delta_n",
+      "q_n",
+      "a_gamma",
+      "Sob",
+      "S",
+      "Dinv",
+      "Scheme",
+      "pstar",
+      "B",
+      "X",
+      "Stage",
+      "KdV",
+      "Interp"
+    ]
+  },
+  "inference": {
+    "id": "R008",
+    "inputs": [
+      "H002",
+      "N002",
+      "N005",
+      "N006",
+      "N007"
+    ],
+    "output": "N008",
+    "definitions": [
+      "D003",
+      "D004",
+      "D007",
+      "D008",
+      "D014",
+      "D015",
+      "D016",
+      "D017",
+      "D018",
+      "D019",
+      "D020",
+      "D021"
+    ],
+    "rules": [
+      "direct",
+      "forall_introduction",
+      "implication_introduction",
+      "case_elimination"
+    ],
+    "locals": [
+      {
+        "symbol": "tau",
+        "type": "real step",
+        "scope": "R008/argument",
+        "start": "S001",
+        "end": "S005",
+        "kind": "arbitrary",
+        "declaration": "Fix tau as specified in this proof.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": []
+      },
+      {
+        "symbol": "u",
+        "type": "smooth exact solution",
+        "scope": "R008/argument",
+        "start": "S001",
+        "end": "S005",
+        "kind": "arbitrary",
+        "declaration": "Fix u as specified in this proof.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": []
+      },
+      {
+        "symbol": "v",
+        "type": "twisted exact solution",
+        "scope": "R008/argument",
+        "start": "S001",
+        "end": "S005",
+        "kind": "arbitrary",
+        "declaration": "Fix v as specified in this proof.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": []
+      },
+      {
+        "symbol": "M",
+        "type": "real bound",
+        "scope": "R008/argument",
+        "start": "S001",
+        "end": "S005",
+        "kind": "arbitrary",
+        "declaration": "Fix M as specified in this proof.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": []
+      },
+      {
+        "symbol": "n",
+        "type": "step index",
+        "scope": "R008/argument",
+        "start": "S001",
+        "end": "S005",
+        "kind": "arbitrary",
+        "declaration": "Fix n as specified in this proof.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": []
+      },
+      {
+        "symbol": "f",
+        "type": "numerical step input",
+        "scope": "R008/argument",
+        "start": "S001",
+        "end": "S005",
+        "kind": "definition",
+        "declaration": "Set f=f_n, the twisted numerical value on this step.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": []
+      },
+      {
+        "symbol": "w",
+        "type": "exact step input",
+        "scope": "R008/argument",
+        "start": "S001",
+        "end": "S005",
+        "kind": "definition",
+        "declaration": "Set w=v(t_n).",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "v",
+          "n"
+        ]
+      },
+      {
+        "symbol": "delta",
+        "type": "step distance",
+        "scope": "R008/argument",
+        "start": "S001",
+        "end": "S005",
+        "kind": "definition",
+        "declaration": "Set delta=||f-w||_2.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "f",
+          "w",
+          "Sob"
+        ]
+      },
+      {
+        "symbol": "q",
+        "type": "step smallness",
+        "scope": "R008/argument",
+        "start": "S001",
+        "end": "S005",
+        "kind": "definition",
+        "declaration": "Set q=tau^gamma+delta.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "tau",
+          "gamma",
+          "delta"
+        ]
+      },
+      {
+        "symbol": "A",
+        "type": "exact-data stage",
+        "scope": "R008/argument",
+        "start": "S002",
+        "end": "S002",
+        "kind": "definition",
+        "declaration": "Set A(t)=F_(t_n)(t;w,w).",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "w",
+          "n",
+          "Stage"
+        ]
+      },
+      {
+        "symbol": "D",
+        "type": "stage difference",
+        "scope": "R008/argument",
+        "start": "S002",
+        "end": "S002",
+        "kind": "definition",
+        "declaration": "Set D(t)=F_n(t)-A(t).",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "A",
+          "Interp"
+        ]
+      },
+      {
+        "symbol": "a_gamma",
+        "type": "auxiliary product order",
+        "scope": "R008/argument",
+        "start": "S001",
+        "end": "S005",
+        "kind": "definition",
+        "declaration": "Set a_gamma=1/2-gamma below 1/2, 1/8 at 1/2, and 0 above 1/2.",
+        "from_inputs": [
+          "H002"
+        ],
+        "from_local": [],
+        "objects": [
+          "gamma"
+        ]
+      }
+    ],
+    "argument": [
+      {
+        "id": "S001",
+        "text": "Fix a smooth exact solution and a smooth numerical trajectory, a step n and M, and assume L1: 0<tau<=1, M>=1+sup||v||_(H^gamma), delta=||f-w||_2<=1, with f=f_n and w=v(t_n). Put q=tau^gamma+delta<=2. H002 gives the positive gamma range. In particular ||f||_2<=M and ||w||_(H^gamma)<=M. By N006, F_n(t)=[J_s(f,f)]_(t_n)^t/6, so sup||F_n||_(H^1)<=C_M. Bilinearity of J gives sup||F_n-F_(t_n)(t;w,w)||_(H^1)<=C_M*delta. N002 gives the exact-data stage bound in H^a_gamma; since a_gamma<1 the H^1 difference controls this weaker norm. Consequently sup(||F_n||_(H^a_gamma)+||F_n||_2)<=C_M*q. Also z_n'=B_t(f,f)/2 and N006 imply ||z_n||_X<=C_M.",
+        "uses": [
+          "H002",
+          "N002",
+          "N006",
+          "N007"
+        ],
+        "uses_local": [],
+        "objects": [
+          "tau",
+          "u",
+          "v",
+          "M",
+          "n",
+          "f",
+          "w",
+          "delta",
+          "q",
+          "Sob",
+          "S",
+          "Dinv",
+          "Scheme",
+          "pstar",
+          "B",
+          "J",
+          "Ctri",
+          "X",
+          "Stage",
+          "KdV",
+          "Interp",
+          "T",
+          "gamma",
+          "R",
+          "a_gamma"
+        ],
+        "produces": [
+          {
+            "id": "F001",
+            "statement": "Under L1, q<=2, sup||F_n||_(H^1)<=C_M, sup||F_n-F_(t_n)(t;w,w)||_(H^1)<=C_M*delta, sup(||F_n||_(H^a_gamma)+||F_n||_2)<=C_M*q and ||z_n||_X<=C_M.",
+            "binders": [],
+            "objects": [
+              "tau",
+              "u",
+              "v",
+              "M",
+              "n",
+              "f",
+              "w",
+              "delta",
+              "q",
+              "Sob",
+              "S",
+              "Dinv",
+              "Scheme",
+              "pstar",
+              "B",
+              "J",
+              "Ctri",
+              "X",
+              "Stage",
+              "KdV",
+              "Interp",
+              "T",
+              "gamma",
+              "R"
+            ],
+            "assumptions": [
+              "L1"
+            ]
+          }
+        ],
+        "introduces": [
+          "L1"
+        ],
+        "discharges": []
+      },
+      {
+        "id": "S002",
+        "text": "Write A=F_(t_n)(t;w,w), D=F_n-A. For the exact-data square, N002's product estimate with f=partial_x(S_t A), g=S_t A gives ||partial_x[(S_t A)^2]||_2<=2*C_gamma||A||_(H^(1+gamma))||A||_(H^a_gamma)<=C_M*tau^gamma. For the difference of squares, (S_t F_n)^2-(S_t A)^2=(S_t D)*S_t(F_n+A). The H^1 algebra inequality of N006, F001, and ||D||_(H^1)<=C_M*delta bound its derivative by C_M*delta. Thus sup||B_t(F_n,F_n)||_2<=C_M*q. Integration gives sup||Q_n||_2<=C_M*tau*q. N005 applied to f and w gives ||R2^n_tau(f,f,f)||_2<=C_M*tau*q, hence ||W_n||_2<=C_M*tau*q.",
+        "uses": [
+          "N002",
+          "N005",
+          "N006"
+        ],
+        "uses_local": [
+          "F001"
+        ],
+        "objects": [
+          "tau",
+          "u",
+          "v",
+          "M",
+          "n",
+          "f",
+          "w",
+          "delta",
+          "q",
+          "A",
+          "D",
+          "Sob",
+          "S",
+          "Dinv",
+          "Scheme",
+          "pstar",
+          "B",
+          "J",
+          "Ctri",
+          "X",
+          "Stage",
+          "KdV",
+          "Interp",
+          "T",
+          "gamma",
+          "R",
+          "a_gamma"
+        ],
+        "produces": [
+          {
+            "id": "F002",
+            "statement": "Under L1 sup||B_t(F_n,F_n)||_2<=C_M*q and sup||Q_n||_2+||W_n||_2<=C_M*tau*q.",
+            "binders": [],
+            "objects": [
+              "tau",
+              "u",
+              "v",
+              "M",
+              "n",
+              "f",
+              "w",
+              "delta",
+              "q",
+              "Sob",
+              "S",
+              "Dinv",
+              "Scheme",
+              "pstar",
+              "B",
+              "J",
+              "Ctri",
+              "X",
+              "Stage",
+              "KdV",
+              "Interp",
+              "T",
+              "gamma",
+              "R"
+            ],
+            "assumptions": [
+              "L1"
+            ]
+          }
+        ],
+        "introduces": [],
+        "discharges": []
+      },
+      {
+        "id": "S003",
+        "text": "The exact formula Dinv B_t(f,F_n)=S_(-t)P[(S_t f)(S_t F_n)] splits into the w product and the (f-w) product. By N002 and F001 the first is <=C_gamma||w||_(H^gamma)||F_n||_(H^a_gamma)<=C_M*q. The second is <=||f-w||_2||S_t F_n||_infinity<=C_M*delta by N006 and the uniform H^1 stage bound. Therefore sup||Dinv B_t(f,F_n)||_2<=C_M*q. Now Y_n'=B_t(f,F_n)+B_t(F_n,F_n)/2-W_n/tau. F002, boundedness of Dinv on mean-zero L^2, and integration from Y_n(t_n)=0 yield sup||Dinv Y_n'||_2<=C_M*q and sup||Dinv Y_n||_2<=C_M*tau*q.",
+        "uses": [
+          "N002",
+          "N006"
+        ],
+        "uses_local": [
+          "F001",
+          "F002"
+        ],
+        "objects": [
+          "tau",
+          "u",
+          "v",
+          "M",
+          "n",
+          "f",
+          "w",
+          "delta",
+          "q",
+          "Sob",
+          "S",
+          "Dinv",
+          "Scheme",
+          "pstar",
+          "B",
+          "J",
+          "Ctri",
+          "X",
+          "Stage",
+          "KdV",
+          "Interp",
+          "T",
+          "gamma",
+          "R",
+          "a_gamma"
+        ],
+        "produces": [
+          {
+            "id": "F003",
+            "statement": "Under L1, sup||Dinv B_t(f,F_n)||_2<=C_M*q, sup||Dinv Y_n||_2<=C_M*tau*q and sup||Dinv Y_n'||_2<=C_M*q.",
+            "binders": [],
+            "objects": [
+              "tau",
+              "u",
+              "v",
+              "M",
+              "n",
+              "f",
+              "w",
+              "delta",
+              "q",
+              "Sob",
+              "S",
+              "Dinv",
+              "Scheme",
+              "pstar",
+              "B",
+              "J",
+              "Ctri",
+              "X",
+              "Stage",
+              "KdV",
+              "Interp",
+              "T",
+              "gamma",
+              "R"
+            ],
+            "assumptions": [
+              "L1"
+            ]
+          }
+        ],
+        "introduces": [],
+        "discharges": []
+      },
+      {
+        "id": "S004",
+        "text": "For the strong Y_n bound apply N006's normal form to C_n(t)=integral B_s(f,F_n(s))ds, using F_n(t_n)=0 and F_n'=B_s(f,f)/2. Symmetry of J and its cubic identity give exactly C_n(t)=J_t(f,F_n(t))/3-C_[t_n,t](f,f,f)/6. The first term is O_M(q) in L^2 by N006 and F001. For the second use N002's constant-input estimate at exponent gamma on (w,w,w); expand its difference from (f,f,f) by trilinearity and use N002 at exponent zero, with ||f-w||_2=delta and ||f||_2+||w||_2<=2M. The result is C_M*(tau^gamma+delta)=C_M*q. Combining with Y_n=C_n+Q_n-((t-t_n)/tau)W_n and F002 proves sup||Y_n||_2<=C_M*q.",
+        "uses": [
+          "N002",
+          "N006"
+        ],
+        "uses_local": [
+          "F001",
+          "F002"
+        ],
+        "objects": [
+          "tau",
+          "u",
+          "v",
+          "M",
+          "n",
+          "f",
+          "w",
+          "delta",
+          "q",
+          "Sob",
+          "S",
+          "Dinv",
+          "Scheme",
+          "pstar",
+          "B",
+          "J",
+          "Ctri",
+          "X",
+          "Stage",
+          "KdV",
+          "Interp",
+          "T",
+          "gamma",
+          "R",
+          "a_gamma"
+        ],
+        "produces": [
+          {
+            "id": "F004",
+            "statement": "Under L1 sup||Y_n||_2<=C_M*q, with the exact normal form C_n(t)=J_t(f,F_n(t))/3-C_[t_n,t](f,f,f)/6.",
+            "binders": [],
+            "objects": [
+              "tau",
+              "u",
+              "v",
+              "M",
+              "n",
+              "f",
+              "w",
+              "delta",
+              "q",
+              "Sob",
+              "S",
+              "Dinv",
+              "Scheme",
+              "pstar",
+              "B",
+              "J",
+              "Ctri",
+              "X",
+              "Stage",
+              "KdV",
+              "Interp",
+              "T",
+              "gamma",
+              "R"
+            ],
+            "assumptions": [
+              "L1"
+            ]
+          }
+        ],
+        "introduces": [],
+        "discharges": []
+      },
+      {
+        "id": "S005",
+        "text": "Because pstar>1, N006's mean-zero weak-norm comparison and F003 give sup||Y_n||_(H^(-pstar))<=C_M*tau*q and sup||Y_n'||_(H^(-pstar))<=C_M*q. Together with F004 these give ||Y_n||_X<=C_M*q. All constants depended only on the displayed low norms, gamma and the fixed horizon; no higher norm of f was used. Discharge L1 and quantify the data and step, yielding the asserted conclusion.",
+        "uses": [
+          "N006"
+        ],
+        "uses_local": [
+          "F001",
+          "F002",
+          "F003",
+          "F004"
+        ],
+        "objects": [
+          "tau",
+          "u",
+          "v",
+          "M",
+          "n",
+          "f",
+          "w",
+          "delta",
+          "q",
+          "Sob",
+          "S",
+          "Dinv",
+          "Scheme",
+          "pstar",
+          "B",
+          "J",
+          "Ctri",
+          "X",
+          "Stage",
+          "KdV",
+          "Interp",
+          "T",
+          "gamma",
+          "R",
+          "a_gamma"
+        ],
+        "produces": [],
+        "introduces": [],
+        "discharges": [
+          "L1"
+        ]
+      }
+    ],
+    "applications": []
+  },
+  "warning": "Direct inputs and fixed logic are supplied. Audit A may record mathematically checked routine background with actual conditions and justification; exact Lean bindings belong to nl02lean. No ancestor proof or extra H is available. A packet is not an audit certificate.",
+  "packet_sha256": "04a80804a580b40da65534c586aa68ec2da8a57c0bc20e4c624b4e032f61f96b"
+}

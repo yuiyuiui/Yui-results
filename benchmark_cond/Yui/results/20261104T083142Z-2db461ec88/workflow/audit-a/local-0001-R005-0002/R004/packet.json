@@ -1,0 +1,1096 @@
+{
+  "contract_version": 2,
+  "case_id": "preparation",
+  "graph_sha256": "3ce849d715d287c3b5dd369038023959c399461238d60ec2f6c946a5e88a9cf3",
+  "spec_sha256": "572cc1eef408bb067626aaa87a6315b9b9e83c49ff9a5a5f334b9ef037855fde",
+  "parameters": [
+    {
+      "symbol": "T",
+      "type": "real number"
+    },
+    {
+      "symbol": "gamma",
+      "type": "real number"
+    },
+    {
+      "symbol": "R",
+      "type": "real number"
+    },
+    {
+      "symbol": "u0",
+      "type": "periodic distribution on torus"
+    }
+  ],
+  "logic": {
+    "classical": true,
+    "rules": [
+      "direct",
+      "forall_introduction",
+      "implication_introduction",
+      "natural_induction",
+      "contradiction_classical"
+    ],
+    "calculations": [
+      "equality: Equality reflexivity, symmetry, transitivity and substitution.",
+      "definitions: Unfold an explicitly supplied definition; this proves no extra property.",
+      "finite_algebra: Routine finite semiring/ring/field arithmetic, including zero/one laws, distributivity, associativity and finite polynomial identities. Correct elementary compression is permitted; a substantive missing argument is not.",
+      "finite_order: Routine ordered-field reasoning with actual signs/domains: order laws, adding inequalities, multiplication/division with sign conditions, and real square nonnegativity. Ordinary valid elementary inferences need no exhaustive displayed chain. Check that the conclusion follows; substantial named theorems still require inputs or verified-background admission.",
+      "finite_sums: Unfold and rearrange finite sums/products with explicitly given finite indices."
+    ],
+    "primitives": [
+      {
+        "symbol": "0",
+        "type": "typed numeral",
+        "meaning": "Zero of the explicitly specified mathematical type."
+      },
+      {
+        "symbol": "1",
+        "type": "typed numeral",
+        "meaning": "One of the explicitly specified mathematical type."
+      },
+      {
+        "symbol": "2",
+        "type": "typed numeral",
+        "meaning": "Two of the explicitly specified mathematical type, including an exponent two."
+      },
+      {
+        "symbol": "ℕ",
+        "type": "number system",
+        "meaning": "The natural numbers with their usual arithmetic."
+      },
+      {
+        "symbol": "ℤ",
+        "type": "number system",
+        "meaning": "The integers with their usual arithmetic."
+      },
+      {
+        "symbol": "ℚ",
+        "type": "number system",
+        "meaning": "The rational numbers with their usual ordered-field operations."
+      },
+      {
+        "symbol": "ℝ",
+        "type": "number system",
+        "meaning": "The real numbers with their usual ordered-field structure."
+      },
+      {
+        "symbol": "ℂ",
+        "type": "number system",
+        "meaning": "The complex numbers with their usual field structure."
+      },
+      {
+        "symbol": "∅",
+        "type": "typed set notation",
+        "meaning": "The empty set in the explicitly specified ambient type."
+      },
+      {
+        "symbol": "∞",
+        "type": "typed order notation",
+        "meaning": "The top element in an explicitly specified extended ordered codomain."
+      }
+    ]
+  },
+  "pins": {
+    "lean_version": "4.32.2",
+    "mathlib_commit": "905b95818eb32af7874a58b427f50c1711a5e96c",
+    "mathlib_root": "/Users/syyui/formalization-tools/lean-mathlib-v4.32.2/mathlib"
+  },
+  "foundation_profile": "elementary-language-4",
+  "standard_language": "Ordinary typed mathematical language: logical connectives, quantifiers, equality, sets, functions, tuples, finite indices and their usual notation. A type explicitly named natural numbers, integers, rationals, reals or complex numbers means that standard structure, with its usual numerals and arithmetic operations; these operation tokens need not be redeclared as project objects. The fixed finite calculation rules below, including a+0=a, are controller permissions, not an author claim. The core symbol table below is not a dictionary of all allowed mathematics. Objects and notation from any subject are introduced by this problem's parameters, D definitions or scoped locals, with their types and dependencies. Their properties need direct inputs or displayed local proofs; a familiar name or symbol supplies no theorem.",
+  "background_policy": "mathematical-background-v2-1",
+  "definitions": [
+    {
+      "id": "D001",
+      "symbol": "torus",
+      "type": "compact additive group with normalized measure",
+      "definition": "torus=ℝ/(2πℤ), written \\mathbb T in formulas; integration uses dx/(2π). The parameter T denotes the time horizon.",
+      "depends_on": [],
+      "requires": [],
+      "binders": [],
+      "objects": []
+    },
+    {
+      "id": "D002",
+      "symbol": "Fourier",
+      "type": "Fourier coefficient map on the torus",
+      "definition": "For integrable f, Fourier(f)(k) = fhat(k) = (2 pi)^(-1) integral_0^{2 pi} f(x) exp(-ikx) dx; extend by distributional duality.",
+      "depends_on": [
+        "D001"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "f",
+          "type": "periodic distribution"
+        },
+        {
+          "symbol": "k",
+          "type": "integer"
+        }
+      ],
+      "objects": [
+        "torus"
+      ]
+    },
+    {
+      "id": "D003",
+      "symbol": "H",
+      "type": "Fourier Sobolev scale with norms",
+      "definition": "For real s, H^s is the completion of trigonometric polynomials with norm squared sum_{k in Z} <k>^(2s)|fhat(k)|^2, <k>=(1+k^2)^(1/2). Negative spaces are distributions. L2=H^0 with normalized measure. On mean-zero distributions dot H^s has squared norm sum_{k!=0}|k|^(2s)|fhat(k)|^2. Smooth means spatially C-infinity. Real means fhat(-k)=conjugate(fhat(k)), and mean-zero means fhat(0)=0. Sequence ell2 uses counting measure. Time L-infinity norms are essential suprema, except time suprema of continuous representatives. Generic constants C may change; C_M depends only on gamma,T,M, never on a Fourier support bound or timestep.",
+      "depends_on": [
+        "D001",
+        "D002"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "s",
+          "type": "real"
+        },
+        {
+          "symbol": "f",
+          "type": "periodic distribution"
+        }
+      ],
+      "objects": [
+        "torus",
+        "Fourier"
+      ]
+    },
+    {
+      "id": "D012",
+      "symbol": "M_tau",
+      "type": "average over one step",
+      "definition": "M_tau(g)=tau^(-1) integral_0^tau g(s) ds for tau>0.",
+      "depends_on": [],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "tau",
+          "type": "positive real"
+        },
+        {
+          "symbol": "g",
+          "type": "integrable complex scalar function"
+        },
+        {
+          "symbol": "s",
+          "type": "integration variable"
+        }
+      ],
+      "objects": []
+    },
+    {
+      "id": "D013",
+      "symbol": "eta",
+      "type": "two-phase average covariance",
+      "definition": "\\eta_\\tau(\\alpha,\\beta)=M_\\tau(e^{-is(\\alpha+\\beta)})\n-M_\\tau(e^{-is\\alpha})M_\\tau(e^{-is\\beta}).",
+      "depends_on": [
+        "D012"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "tau",
+          "type": "positive real"
+        },
+        {
+          "symbol": "alpha",
+          "type": "real"
+        },
+        {
+          "symbol": "beta",
+          "type": "real"
+        }
+      ],
+      "objects": [
+        "M_tau"
+      ]
+    },
+    {
+      "id": "D014",
+      "symbol": "R2",
+      "type": "averaged cubic remainder on mean-zero polynomials, subsequently extended",
+      "definition": "R2 = R^n_{2,tau}. For tau>0, real t_n and mean-zero polynomial f1,f2,f3, its output at k=0 is zero, and at k!=0 is -tau/(18 i k) sum_{a+b+c=k,a+b!=0} exp(-i t_n Phi) eta_tau(alpha,beta) f1hat(a) f2hat(b) f3hat(c), where p=a+b, alpha=3abp, beta=3kcp, Phi=alpha+beta=k^3-a^3-b^3-c^3. The polynomial definition grants no bounded extension; a bounded extension must be proved separately.",
+      "depends_on": [
+        "D013",
+        "D002"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "tau",
+          "type": "positive real"
+        },
+        {
+          "symbol": "t_n",
+          "type": "real"
+        },
+        {
+          "symbol": "f1",
+          "type": "mean-zero polynomial"
+        },
+        {
+          "symbol": "f2",
+          "type": "mean-zero polynomial"
+        },
+        {
+          "symbol": "f3",
+          "type": "mean-zero polynomial"
+        },
+        {
+          "symbol": "k",
+          "type": "integer"
+        },
+        {
+          "symbol": "a",
+          "type": "integer summation frequency"
+        },
+        {
+          "symbol": "b",
+          "type": "integer summation frequency"
+        },
+        {
+          "symbol": "c",
+          "type": "integer summation frequency"
+        },
+        {
+          "symbol": "p",
+          "type": "integer a+b"
+        },
+        {
+          "symbol": "alpha",
+          "type": "phase 3abp"
+        },
+        {
+          "symbol": "beta",
+          "type": "phase 3kcp"
+        },
+        {
+          "symbol": "Phi",
+          "type": "phase alpha+beta"
+        }
+      ],
+      "objects": [
+        "eta",
+        "Fourier"
+      ]
+    },
+    {
+      "id": "D015",
+      "symbol": "N3",
+      "type": "third largest magnitude of a frequency quadruple",
+      "definition": "For nonzero integer a,b,c,d with a+b+c+d=0, N1>=N2>=N3>=N4 is the decreasing rearrangement of |a|,|b|,|c|,|d|; N3(a,b,c,d) is its third entry. Ties may be ordered arbitrarily.",
+      "depends_on": [],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "a",
+          "type": "nonzero integer"
+        },
+        {
+          "symbol": "b",
+          "type": "nonzero integer"
+        },
+        {
+          "symbol": "c",
+          "type": "nonzero integer"
+        },
+        {
+          "symbol": "d",
+          "type": "nonzero integer"
+        }
+      ],
+      "objects": []
+    }
+  ],
+  "inputs": [
+    {
+      "id": "H001",
+      "kind": "hypothesis",
+      "statement": "T>0, 0<gamma<=1, and R>0.",
+      "definitions": [],
+      "binders": [],
+      "objects": [
+        "T",
+        "gamma",
+        "R"
+      ]
+    },
+    {
+      "id": "N002",
+      "kind": "internal",
+      "statement": "For all tau>0 and real alpha,beta, eta_tau(alpha,beta)=0 if alpha beta=0; otherwise |eta|<=2 min(|alpha/beta|,|beta/alpha|) and |eta|<=tau min(|alpha|,|beta|). For nonzero integers a,b,c,d with a+b+c+d=0, set A=|ab|, B0=|cd| and sorted magnitudes N1>=N2>=N3>=N4. Then N1<=3N2, |d|^(-1)min(A/B0,B0/A)<=3/N3, and |a+b|/max(A,B0)<=6/N3.",
+      "definitions": [
+        "D013",
+        "D015"
+      ],
+      "binders": [
+        {
+          "symbol": "tau",
+          "type": "positive real"
+        },
+        {
+          "symbol": "alpha",
+          "type": "real phase"
+        },
+        {
+          "symbol": "beta",
+          "type": "real phase"
+        },
+        {
+          "symbol": "a",
+          "type": "nonzero integer"
+        },
+        {
+          "symbol": "b",
+          "type": "nonzero integer"
+        },
+        {
+          "symbol": "c",
+          "type": "nonzero integer"
+        },
+        {
+          "symbol": "d",
+          "type": "nonzero integer"
+        },
+        {
+          "symbol": "A",
+          "type": "|ab|"
+        },
+        {
+          "symbol": "B0",
+          "type": "|cd|"
+        },
+        {
+          "symbol": "N1",
+          "type": "largest magnitude"
+        },
+        {
+          "symbol": "N2",
+          "type": "second magnitude"
+        },
+        {
+          "symbol": "N4",
+          "type": "smallest magnitude"
+        }
+      ],
+      "objects": [
+        "T",
+        "gamma",
+        "R",
+        "u0",
+        "eta",
+        "N3",
+        "tau",
+        "alpha",
+        "beta",
+        "a",
+        "b",
+        "c",
+        "d",
+        "A",
+        "B0",
+        "N1",
+        "N2",
+        "N4"
+      ]
+    },
+    {
+      "id": "N003",
+      "kind": "internal",
+      "statement": "For all nonnegative x1,x2,x3,x4 in ell2(Z excluding zero), sum_{a+b+c+d=0,abcd!=0}x1(a)x2(b)x3(c)x4(d)/N3(a,b,c,d)<=C product_{r=1}^4||xr||_ell2. C is absolute; the same holds after restricting to any subset. The infinite positive sum is the supremum of finite nonnegative sums.",
+      "definitions": [
+        "D015",
+        "D003"
+      ],
+      "binders": [
+        {
+          "symbol": "x1",
+          "type": "nonnegative ell2 sequence"
+        },
+        {
+          "symbol": "x2",
+          "type": "nonnegative ell2 sequence"
+        },
+        {
+          "symbol": "x3",
+          "type": "nonnegative ell2 sequence"
+        },
+        {
+          "symbol": "x4",
+          "type": "nonnegative ell2 sequence"
+        },
+        {
+          "symbol": "a",
+          "type": "summation integer"
+        },
+        {
+          "symbol": "b",
+          "type": "summation integer"
+        },
+        {
+          "symbol": "c",
+          "type": "summation integer"
+        },
+        {
+          "symbol": "d",
+          "type": "summation integer"
+        },
+        {
+          "symbol": "r",
+          "type": "slot index"
+        }
+      ],
+      "objects": [
+        "T",
+        "gamma",
+        "R",
+        "u0",
+        "N3",
+        "H",
+        "x1",
+        "x2",
+        "x3",
+        "x4",
+        "a",
+        "b",
+        "c",
+        "d",
+        "r"
+      ]
+    }
+  ],
+  "output": {
+    "id": "N004",
+    "kind": "internal",
+    "statement": "For every lambda in [0,1], tau>0 and real t_n, R2 has a unique bounded trilinear extension from mean-zero H^lambda inputs to mean-zero L2, with ||R^n_{2,tau}(f1,f2,f3)||_2<=C tau^(1+lambda) product_j||fj||_{H^lambda}, uniformly in t_n,tau and Fourier support. This holds with any multiplier of modulus <=1 inserted in its sum, hence separately on Phi=0 and Phi!=0. For nonzero abck and a+b!=0, |eta_tau(alpha,beta)|/(|k||abc|^lambda)<=6^(1-lambda)18^lambda tau^lambda/N3(a,b,c,-k). Consequently, for mean-zero w in H^gamma, mean-zero f in L2, ||w||_{H^gamma}<=M, delta=||f-w||_2<=1, and 0<tau<=1, ||R^n_{2,tau}(f,f,f)||_2<=C_M tau(tau^gamma+delta).",
+    "definitions": [
+      "D014",
+      "D015",
+      "D003"
+    ],
+    "binders": [
+      {
+        "symbol": "lambda",
+        "type": "real exponent in [0,1]"
+      },
+      {
+        "symbol": "tau",
+        "type": "positive real"
+      },
+      {
+        "symbol": "t_n",
+        "type": "real step time"
+      },
+      {
+        "symbol": "f1",
+        "type": "mean-zero H^lambda input"
+      },
+      {
+        "symbol": "f2",
+        "type": "mean-zero H^lambda input"
+      },
+      {
+        "symbol": "f3",
+        "type": "mean-zero H^lambda input"
+      },
+      {
+        "symbol": "w",
+        "type": "mean-zero H^gamma function"
+      },
+      {
+        "symbol": "f",
+        "type": "mean-zero L2 function"
+      },
+      {
+        "symbol": "M",
+        "type": "H^gamma bound"
+      },
+      {
+        "symbol": "delta",
+        "type": "||f-w||_2"
+      },
+      {
+        "symbol": "a",
+        "type": "integer"
+      },
+      {
+        "symbol": "b",
+        "type": "integer"
+      },
+      {
+        "symbol": "c",
+        "type": "integer"
+      },
+      {
+        "symbol": "k",
+        "type": "a+b+c"
+      },
+      {
+        "symbol": "alpha",
+        "type": "3ab(a+b)"
+      },
+      {
+        "symbol": "beta",
+        "type": "3kc(a+b)"
+      },
+      {
+        "symbol": "Phi",
+        "type": "k^3-a^3-b^3-c^3"
+      }
+    ],
+    "objects": [
+      "T",
+      "gamma",
+      "R",
+      "u0",
+      "R2",
+      "N3",
+      "H",
+      "lambda",
+      "tau",
+      "t_n",
+      "f1",
+      "f2",
+      "f3",
+      "w",
+      "f",
+      "M",
+      "delta",
+      "a",
+      "b",
+      "c",
+      "k",
+      "alpha",
+      "beta",
+      "Phi"
+    ]
+  },
+  "inference": {
+    "id": "R004",
+    "inputs": [
+      "H001",
+      "N002",
+      "N003"
+    ],
+    "output": "N004",
+    "definitions": [
+      "D014",
+      "D015",
+      "D003"
+    ],
+    "rules": [
+      "direct",
+      "forall_introduction",
+      "implication_introduction"
+    ],
+    "locals": [
+      {
+        "symbol": "y",
+        "type": "arbitrary ell2 dual sequence on nonzero integers",
+        "scope": "R004/argument",
+        "start": "S001",
+        "end": "S002",
+        "kind": "arbitrary",
+        "declaration": "Fix any ell2 dual sequence y when dualizing the polynomial remainder.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": []
+      },
+      {
+        "symbol": "lambda",
+        "type": "exponent in [0,1]",
+        "scope": "R004/argument",
+        "start": "S001",
+        "end": "S002",
+        "kind": "arbitrary",
+        "declaration": "Fix lambda as an arbitrary exponent in [0,1]; its stated restrictions, if any, are temporary antecedents, not granted by this declaration.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": []
+      },
+      {
+        "symbol": "tau",
+        "type": "positive step",
+        "scope": "R004/argument",
+        "start": "S001",
+        "end": "S002",
+        "kind": "arbitrary",
+        "declaration": "Fix tau as an arbitrary positive step; its stated restrictions, if any, are temporary antecedents, not granted by this declaration.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": []
+      },
+      {
+        "symbol": "t_n",
+        "type": "real time",
+        "scope": "R004/argument",
+        "start": "S001",
+        "end": "S002",
+        "kind": "arbitrary",
+        "declaration": "Fix t_n as an arbitrary real time; its stated restrictions, if any, are temporary antecedents, not granted by this declaration.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": []
+      },
+      {
+        "symbol": "f1",
+        "type": "mean-zero polynomial input then H^lambda limit",
+        "scope": "R004/argument",
+        "start": "S001",
+        "end": "S002",
+        "kind": "arbitrary",
+        "declaration": "Fix f1 as an arbitrary mean-zero polynomial input then H^lambda limit; its stated restrictions, if any, are temporary antecedents, not granted by this declaration.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": []
+      },
+      {
+        "symbol": "f2",
+        "type": "mean-zero polynomial input then H^lambda limit",
+        "scope": "R004/argument",
+        "start": "S001",
+        "end": "S002",
+        "kind": "arbitrary",
+        "declaration": "Fix f2 as an arbitrary mean-zero polynomial input then H^lambda limit; its stated restrictions, if any, are temporary antecedents, not granted by this declaration.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": []
+      },
+      {
+        "symbol": "f3",
+        "type": "mean-zero polynomial input then H^lambda limit",
+        "scope": "R004/argument",
+        "start": "S001",
+        "end": "S002",
+        "kind": "arbitrary",
+        "declaration": "Fix f3 as an arbitrary mean-zero polynomial input then H^lambda limit; its stated restrictions, if any, are temporary antecedents, not granted by this declaration.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": []
+      },
+      {
+        "symbol": "f",
+        "type": "mean-zero L2 input",
+        "scope": "R004/argument",
+        "start": "S001",
+        "end": "S002",
+        "kind": "arbitrary",
+        "declaration": "Fix f as an arbitrary mean-zero L2 input; its stated restrictions, if any, are temporary antecedents, not granted by this declaration.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": []
+      },
+      {
+        "symbol": "w",
+        "type": "mean-zero H^gamma comparison",
+        "scope": "R004/argument",
+        "start": "S001",
+        "end": "S002",
+        "kind": "arbitrary",
+        "declaration": "Fix w as an arbitrary mean-zero H^gamma comparison; its stated restrictions, if any, are temporary antecedents, not granted by this declaration.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": []
+      },
+      {
+        "symbol": "M",
+        "type": "Sobolev bound",
+        "scope": "R004/argument",
+        "start": "S001",
+        "end": "S002",
+        "kind": "arbitrary",
+        "declaration": "Fix M as an arbitrary Sobolev bound; its stated restrictions, if any, are temporary antecedents, not granted by this declaration.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": []
+      },
+      {
+        "symbol": "delta",
+        "type": "||f-w||_2",
+        "scope": "R004/argument",
+        "start": "S001",
+        "end": "S002",
+        "kind": "definition",
+        "declaration": "Define delta=||f-w||_2.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "f",
+          "w",
+          "H"
+        ]
+      },
+      {
+        "symbol": "a",
+        "type": "nonzero frequency",
+        "scope": "R004/argument",
+        "start": "S001",
+        "end": "S002",
+        "kind": "arbitrary",
+        "declaration": "Fix a as an arbitrary nonzero frequency; its stated restrictions, if any, are temporary antecedents, not granted by this declaration.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": []
+      },
+      {
+        "symbol": "b",
+        "type": "nonzero frequency",
+        "scope": "R004/argument",
+        "start": "S001",
+        "end": "S002",
+        "kind": "arbitrary",
+        "declaration": "Fix b as an arbitrary nonzero frequency; its stated restrictions, if any, are temporary antecedents, not granted by this declaration.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": []
+      },
+      {
+        "symbol": "c",
+        "type": "nonzero frequency",
+        "scope": "R004/argument",
+        "start": "S001",
+        "end": "S002",
+        "kind": "arbitrary",
+        "declaration": "Fix c as an arbitrary nonzero frequency; its stated restrictions, if any, are temporary antecedents, not granted by this declaration.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": []
+      },
+      {
+        "symbol": "k",
+        "type": "a+b+c nonzero output",
+        "scope": "R004/argument",
+        "start": "S001",
+        "end": "S002",
+        "kind": "definition",
+        "declaration": "Define k=a+b+c.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "a",
+          "b",
+          "c"
+        ]
+      },
+      {
+        "symbol": "d",
+        "type": "-k",
+        "scope": "R004/argument",
+        "start": "S001",
+        "end": "S002",
+        "kind": "definition",
+        "declaration": "Define d=-k.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "k"
+        ]
+      },
+      {
+        "symbol": "p",
+        "type": "a+b nonzero",
+        "scope": "R004/argument",
+        "start": "S001",
+        "end": "S002",
+        "kind": "definition",
+        "declaration": "Define p=a+b.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "a",
+          "b"
+        ]
+      },
+      {
+        "symbol": "A",
+        "type": "|ab|",
+        "scope": "R004/argument",
+        "start": "S001",
+        "end": "S002",
+        "kind": "definition",
+        "declaration": "Define A=|ab|.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "a",
+          "b"
+        ]
+      },
+      {
+        "symbol": "B0",
+        "type": "nonnegative real",
+        "scope": "R004/argument",
+        "start": "S001",
+        "end": "S002",
+        "kind": "definition",
+        "declaration": "Define B0=|ck|.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "c",
+          "k"
+        ]
+      },
+      {
+        "symbol": "alpha",
+        "type": "3abp",
+        "scope": "R004/argument",
+        "start": "S001",
+        "end": "S002",
+        "kind": "definition",
+        "declaration": "Define alpha=3abp.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "a",
+          "b",
+          "p"
+        ]
+      },
+      {
+        "symbol": "beta",
+        "type": "3kcp",
+        "scope": "R004/argument",
+        "start": "S001",
+        "end": "S002",
+        "kind": "definition",
+        "declaration": "Define beta=3kcp.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "k",
+          "c",
+          "p"
+        ]
+      },
+      {
+        "symbol": "eta0",
+        "type": "eta_tau(alpha,beta), written eta in formulas",
+        "scope": "R004/argument",
+        "start": "S001",
+        "end": "S002",
+        "kind": "definition",
+        "declaration": "Define eta0=eta_tau(alpha,beta), abbreviated eta in the display.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "eta",
+          "tau",
+          "alpha",
+          "beta"
+        ]
+      },
+      {
+        "symbol": "x1",
+        "type": "weighted absolute coefficient sequence",
+        "scope": "R004/argument",
+        "start": "S001",
+        "end": "S002",
+        "kind": "definition",
+        "declaration": "Define x1(a)=|a|^lambda |f1hat(a)|.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "lambda",
+          "f1",
+          "Fourier"
+        ]
+      },
+      {
+        "symbol": "x2",
+        "type": "weighted absolute coefficient sequence",
+        "scope": "R004/argument",
+        "start": "S001",
+        "end": "S002",
+        "kind": "definition",
+        "declaration": "Define x2(b)=|b|^lambda |f2hat(b)|.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "lambda",
+          "f2",
+          "Fourier"
+        ]
+      },
+      {
+        "symbol": "x3",
+        "type": "weighted absolute coefficient sequence",
+        "scope": "R004/argument",
+        "start": "S001",
+        "end": "S002",
+        "kind": "definition",
+        "declaration": "Define x3(c)=|c|^lambda |f3hat(c)|.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "lambda",
+          "f3",
+          "Fourier"
+        ]
+      },
+      {
+        "symbol": "x4",
+        "type": "absolute dual sequence",
+        "scope": "R004/argument",
+        "start": "S001",
+        "end": "S002",
+        "kind": "definition",
+        "declaration": "Define x4(d)=|y(-d)| for an arbitrary ell2 dual sequence y.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "y"
+        ]
+      }
+    ],
+    "argument": [
+      {
+        "id": "S001",
+        "text": "H001 supplies 0<gamma<=1 for the final numerical-state specialization. Independently fix lambda in [0,1], tau>0, step time t_n, and mean-zero polynomial inputs. Temporarily assume these range conditions as L1. Use the following computation with the proof's letter gamma replaced everywhere by lambda; no numerical state regularity is assumed.\n Only nonzero \\(abck\\) and \\(p=a+b\\ne0\\) need consideration. Set \\(k=a+b+c\\), \\(d=-k\\), \\(p=a+b\\), \\(A=|ab|\\), \\(B0=|ck|\\), \\(\\alpha=3abp\\), \\(\\beta=3kcp\\), and write eta0=eta_tau(alpha,beta) as eta in this calculation. N002 and the first majorant in N002 give\n\\[\n\\frac{|\\eta|}{|k|}\\le\\frac6{N_3}.\n\\]\nFor the other endpoint, observe that \\(A B0=|abck|\\), and use the linear phase bound in N002 and the second majorant in N002:\n\\[\n\\frac{|\\eta|}{\\tau|abck|}\\le3\\frac{|p|\\min(A,B0)}{A B0}\n=3\\frac{|p|}{\\max(A,B0)}\\le\\frac{18}{N_3}.\n\\]\nTaking the geometric mean of these two bounds yields\n\\[\n\\boxed{\\frac{|\\eta_\\tau(\\alpha,\\beta)|}{|k||abc|^\\lambda}\n\\le\\frac{6^{1-\\lambda}18^\\lambda\\tau^\\lambda}{N_3(a,b,c,-k)}.} \n\\]\n\n\n\nDualize the remainder definition D014 against an \\(\\ell^2\\) sequence and take absolute values. Apply N003 with \\(x_1(a)=|a|^\\lambda|\\widehat f_1(a)|\\) and analogously for \\(x_2,x_3\\); \\(x_4(d)\\) is the absolute value of the dual coefficient at \\(-d\\). Their norms are bounded by the inhomogeneous Sobolev norms and the dual norm. The factors \\(e^{-it_n\\Phi}\\) have modulus one. The sum is bounded by C_lambda tau^(1+lambda) product_j||f_j||_{H^lambda}; deleting summands or multiplying them by scalars of modulus at most one preserves this absolute-value estimate. Polynomial approximation and the bound extend the operator to the claimed spaces. \nHere the two estimates used are directly N002 and the four-linear estimate is N003. At lambda=0 or 1 use the corresponding endpoint directly, so no 0^0 convention is needed.",
+        "uses": [
+          "H001",
+          "N002",
+          "N003"
+        ],
+        "uses_local": [],
+        "objects": [
+          "R2",
+          "N3",
+          "H",
+          "lambda",
+          "tau",
+          "t_n",
+          "f1",
+          "f2",
+          "f3",
+          "f",
+          "w",
+          "M",
+          "delta",
+          "a",
+          "b",
+          "c",
+          "k",
+          "d",
+          "p",
+          "A",
+          "B0",
+          "alpha",
+          "beta",
+          "eta0",
+          "x1",
+          "x2",
+          "x3",
+          "x4",
+          "T",
+          "gamma",
+          "R",
+          "u0",
+          "y"
+        ],
+        "produces": [
+          {
+            "id": "F001",
+            "statement": "For all lambda in [0,1], tau>0, real t_n and mean-zero polynomial f1,f2,f3, ||R^n_{2,tau}(f1,f2,f3)||_2<=C_lambda tau^(1+lambda) product_{j=1}^3||f_j||_{H^lambda}, with constants independent of support and time. The same estimate holds after any summand restriction or insertion of multipliers of modulus <=1. For nonzero a,b,c,k=a+b+c with p=a+b!=0, alpha=3abp and beta=3kcp, |eta_tau(alpha,beta)|/(|k||abc|^lambda)<=6^(1-lambda)18^lambda tau^lambda/N3(a,b,c,-k).",
+            "binders": [],
+            "objects": [
+              "R2",
+              "N3",
+              "H",
+              "lambda",
+              "tau",
+              "t_n",
+              "f1",
+              "f2",
+              "f3",
+              "f",
+              "w",
+              "M",
+              "delta",
+              "a",
+              "b",
+              "c",
+              "k",
+              "d",
+              "p",
+              "A",
+              "B0",
+              "alpha",
+              "beta",
+              "eta0",
+              "x1",
+              "x2",
+              "x3",
+              "x4",
+              "T",
+              "gamma",
+              "R",
+              "u0",
+              "y"
+            ],
+            "assumptions": [
+              "L1"
+            ]
+          }
+        ],
+        "introduces": [
+          "L1"
+        ],
+        "discharges": []
+      },
+      {
+        "id": "S002",
+        "text": "The polynomial estimate F001 makes each Cauchy approximation converge in L2: expand a trilinear difference into three terms and apply the same bound. It gives a unique continuous trilinear extension to the mean-zero H^lambda completions and preserves the multiplier restrictions. For the numerical-state estimate fix mean-zero w in H^gamma, f in L2, ||w||_{H^gamma}<=M, delta=||f-w||_2<=1, and 0<tau<=1.  Apply F001 at lambda=gamma with exponent \\(\\gamma\\) to \\((w,w,w)\\). Expand the difference between the cubic expressions at \\(f\\) and at \\(w\\), and apply F001 at lambda=0 to every difference term. This gives \\(C\\tau\\delta(\\|f\\|_{L^2}+\\|w\\|_{L^2})^2\\). No \\(H^\\gamma\\) bound on the numerical state is used. \nIndeed ||f||_2<=M+1, so the difference is bounded by C_M tau delta, while the value at w is <=C M^3 tau^(1+gamma). These establish both assertions. Discharge L1 and the stated conditional specialization, retaining all its conditions in the output.",
+        "uses": [],
+        "uses_local": [
+          "F001"
+        ],
+        "objects": [
+          "R2",
+          "N3",
+          "H",
+          "lambda",
+          "tau",
+          "t_n",
+          "f1",
+          "f2",
+          "f3",
+          "f",
+          "w",
+          "M",
+          "delta",
+          "a",
+          "b",
+          "c",
+          "k",
+          "d",
+          "p",
+          "A",
+          "B0",
+          "alpha",
+          "beta",
+          "eta0",
+          "x1",
+          "x2",
+          "x3",
+          "x4",
+          "T",
+          "gamma",
+          "R",
+          "u0",
+          "y"
+        ],
+        "produces": [],
+        "introduces": [],
+        "discharges": [
+          "L1"
+        ]
+      }
+    ],
+    "applications": []
+  },
+  "warning": "Direct inputs and fixed logic are supplied. Audit A may record mathematically checked routine background with actual conditions and justification; exact Lean bindings belong to nl02lean. No ancestor proof or extra H is available. A packet is not an audit certificate.",
+  "packet_sha256": "a7dd6e44f69419d52e36452e2b66dd9ff36f98868acfcda38b0d21e36a184f76"
+}

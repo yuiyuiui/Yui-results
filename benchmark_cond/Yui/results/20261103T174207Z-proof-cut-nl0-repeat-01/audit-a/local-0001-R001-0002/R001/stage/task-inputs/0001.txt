@@ -1,0 +1,1119 @@
+{
+  "contract_version": 2,
+  "case_id": "benchmark",
+  "graph_sha256": "338c2fe0f346594566f3a3e4b2db4c7caef28653babc5defacfa5290cde37516",
+  "spec_sha256": "a9f6c6cf0bd01cf44b46894cd3fd60d8f5dcf81f889e57c646b903e35aa57620",
+  "parameters": [
+    {
+      "symbol": "T",
+      "type": "real number"
+    },
+    {
+      "symbol": "gamma",
+      "type": "real number"
+    },
+    {
+      "symbol": "R",
+      "type": "real number"
+    }
+  ],
+  "logic": {
+    "classical": true,
+    "rules": [
+      "direct",
+      "forall_introduction",
+      "implication_introduction",
+      "exists_elimination",
+      "case_elimination",
+      "contradiction_classical",
+      "natural_induction"
+    ],
+    "calculations": [
+      "equality: Equality reflexivity, symmetry, transitivity and substitution.",
+      "definitions: Unfold an explicitly supplied definition; this proves no extra property.",
+      "finite_algebra: Routine finite semiring/ring/field arithmetic, including zero/one laws, distributivity, associativity and finite polynomial identities. Correct elementary compression is permitted; a substantive missing argument is not.",
+      "finite_order: Routine ordered-field reasoning with actual signs/domains: order laws, adding inequalities, multiplication/division with sign conditions, and real square nonnegativity. Ordinary valid elementary inferences need no exhaustive displayed chain. Check that the conclusion follows; substantial named theorems still require inputs or verified-background admission.",
+      "finite_sums: Unfold and rearrange finite sums/products with explicitly given finite indices."
+    ],
+    "primitives": [
+      {
+        "symbol": "0",
+        "type": "typed numeral",
+        "meaning": "Zero of the explicitly specified mathematical type."
+      },
+      {
+        "symbol": "1",
+        "type": "typed numeral",
+        "meaning": "One of the explicitly specified mathematical type."
+      },
+      {
+        "symbol": "2",
+        "type": "typed numeral",
+        "meaning": "Two of the explicitly specified mathematical type, including an exponent two."
+      },
+      {
+        "symbol": "ℕ",
+        "type": "number system",
+        "meaning": "The natural numbers with their usual arithmetic."
+      },
+      {
+        "symbol": "ℤ",
+        "type": "number system",
+        "meaning": "The integers with their usual arithmetic."
+      },
+      {
+        "symbol": "ℚ",
+        "type": "number system",
+        "meaning": "The rational numbers with their usual ordered-field operations."
+      },
+      {
+        "symbol": "ℝ",
+        "type": "number system",
+        "meaning": "The real numbers with their usual ordered-field structure."
+      },
+      {
+        "symbol": "ℂ",
+        "type": "number system",
+        "meaning": "The complex numbers with their usual field structure."
+      },
+      {
+        "symbol": "∅",
+        "type": "typed set notation",
+        "meaning": "The empty set in the explicitly specified ambient type."
+      },
+      {
+        "symbol": "∞",
+        "type": "typed order notation",
+        "meaning": "The top element in an explicitly specified extended ordered codomain."
+      }
+    ]
+  },
+  "pins": {
+    "lean_version": "4.32.2",
+    "mathlib_commit": "905b95818eb32af7874a58b427f50c1711a5e96c",
+    "mathlib_root": "/Users/syyui/formalization-tools/lean-mathlib-v4.32.2/mathlib"
+  },
+  "foundation_profile": "elementary-language-4",
+  "standard_language": "Ordinary typed mathematical language: logical connectives, quantifiers, equality, sets, functions, tuples, finite indices and their usual notation. A type explicitly named natural numbers, integers, rationals, reals or complex numbers means that standard structure, with its usual numerals and arithmetic operations; these operation tokens need not be redeclared as project objects. The fixed finite calculation rules below, including a+0=a, are controller permissions, not an author claim. The core symbol table below is not a dictionary of all allowed mathematics. Objects and notation from any subject are introduced by this problem's parameters, D definitions or scoped locals, with their types and dependencies. Their properties need direct inputs or displayed local proofs; a familiar name or symbol supplies no theorem.",
+  "background_policy": "mathematical-background-v2-1",
+  "definitions": [
+    {
+      "id": "D001",
+      "symbol": "Torus",
+      "type": "compact measured additive group",
+      "definition": "Torus=reals/(2*pi*integers), with normalized measure dx/(2*pi). Periodic spatial products, integrals and derivatives are on this torus. A trigonometric polynomial is a finite sum of exp(i*k*x) with integer k.",
+      "depends_on": [],
+      "requires": [],
+      "binders": [],
+      "objects": []
+    },
+    {
+      "id": "D002",
+      "symbol": "Fourier",
+      "type": "Fourier transform on periodic distributions",
+      "definition": "For a periodic integrable f, hat f(k)=(2*pi)^(-1) integral_0^(2*pi) f(x)exp(-i*k*x) dx, k in Z. Extend Fourier coefficients to periodic distributions. Reality means hat f(-k)=conjugate(hat f(k)); mean zero means hat f(0)=0. For sequences, ell^2 is the square-summable sequence space with counting measure.",
+      "depends_on": [
+        "D001"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "f",
+          "type": "periodic function or distribution"
+        },
+        {
+          "symbol": "k",
+          "type": "integer frequency"
+        }
+      ],
+      "objects": [
+        "Torus",
+        "f",
+        "k"
+      ]
+    },
+    {
+      "id": "D003",
+      "symbol": "Sob",
+      "type": "family of real or complex Hilbert spaces indexed by real order",
+      "definition": "Write <k>=(1+k^2)^(1/2). H^s is the completion of trigonometric polynomials with ||f||_(H^s)^2=sum_{k in Z}<k>^(2s)|hat f(k)|^2, interpreted as distributions for s<0. L^2=H^0 and ||.||_2 denotes its normalized norm. For mean-zero f, ||f||_(dot H^s)^2=sum_{k!=0}|k|^(2s)|hat f(k)|^2. For s>=0, ||f||_(dot H^s)<=||f||_(H^s)<=2^(s/2)||f||_(dot H^s); for s<0, 2^(s/2)||f||_(dot H^s)<=||f||_(H^s)<=||f||_(dot H^s). In time L^infty norms are essential suprema, replaced by ordinary suprema for continuous representatives; derivative norms remain essential suprema.",
+      "depends_on": [
+        "D002"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "s",
+          "type": "real order"
+        },
+        {
+          "symbol": "f",
+          "type": "periodic distribution"
+        },
+        {
+          "symbol": "k",
+          "type": "integer frequency"
+        }
+      ],
+      "objects": [
+        "Fourier",
+        "s",
+        "f",
+        "k"
+      ]
+    },
+    {
+      "id": "D004",
+      "symbol": "S",
+      "type": "one-parameter family of linear Fourier operators",
+      "definition": "For real t, S_t=exp(-t*partial_x^3) has Fourier multiplier exp(i*t*k^3).",
+      "depends_on": [
+        "D002"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "t",
+          "type": "real time"
+        },
+        {
+          "symbol": "k",
+          "type": "integer frequency"
+        }
+      ],
+      "objects": [
+        "Fourier",
+        "t",
+        "k"
+      ]
+    },
+    {
+      "id": "D007",
+      "symbol": "Dinv",
+      "type": "inverse derivative Fourier operator",
+      "definition": "Dinv=partial_x^(-1) has multiplier (i*k)^(-1) for k!=0 and zero at zero. Write Dinv2=(Dinv)^2=partial_x^(-2). Spatial differentiation partial_x has multiplier i*k.",
+      "depends_on": [
+        "D002"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "k",
+          "type": "integer frequency"
+        }
+      ],
+      "objects": [
+        "Fourier",
+        "k"
+      ]
+    },
+    {
+      "id": "D015",
+      "symbol": "B",
+      "type": "time-dependent bilinear distribution-valued map",
+      "definition": "B_t(f,g)=S_(-t) partial_x[(S_t f)(S_t g)]. Initially use smooth inputs; the negative Sobolev extension to L^2 inputs is proved below.",
+      "depends_on": [
+        "D004",
+        "D007"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "t",
+          "type": "real time"
+        },
+        {
+          "symbol": "f",
+          "type": "first input"
+        },
+        {
+          "symbol": "g",
+          "type": "second input"
+        }
+      ],
+      "objects": [
+        "S",
+        "Dinv",
+        "t",
+        "f",
+        "g"
+      ]
+    },
+    {
+      "id": "D020",
+      "symbol": "KdV",
+      "type": "distributional evolution equation and smooth-approximation solution convention",
+      "definition": "KdV is u_t+u_xxx=(1/2)partial_x(u^2), u(0)=u0, with real mean-zero data on Torus. An exact solution at regularity sigma>=0 means its unique real mean-zero C([0,T];H^sigma) distributional solution obtained as the limit of smooth-data solutions. This convention alone grants neither existence nor a bound; these are proved from the registered flow source. For an existing solution write its twisted path v(t)=S_(-t)u(t).",
+      "depends_on": [
+        "D001",
+        "D003",
+        "D004"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "u0",
+          "type": "initial datum"
+        },
+        {
+          "symbol": "u",
+          "type": "solution path"
+        },
+        {
+          "symbol": "sigma",
+          "type": "nonnegative order"
+        }
+      ],
+      "objects": [
+        "Torus",
+        "Sob",
+        "S",
+        "T",
+        "u0",
+        "u",
+        "sigma"
+      ]
+    }
+  ],
+  "inputs": [
+    {
+      "id": "H001",
+      "kind": "hypothesis",
+      "statement": "T>0.",
+      "definitions": [],
+      "binders": [],
+      "objects": [
+        "T"
+      ]
+    },
+    {
+      "id": "H002",
+      "kind": "hypothesis",
+      "statement": "0<gamma<=1.",
+      "definitions": [],
+      "binders": [],
+      "objects": [
+        "gamma"
+      ]
+    },
+    {
+      "id": "H003",
+      "kind": "hypothesis",
+      "statement": "R>0.",
+      "definitions": [],
+      "binders": [],
+      "objects": [
+        "R"
+      ]
+    },
+    {
+      "id": "E001",
+      "kind": "external",
+      "statement": "Source flow assertions on the normalized 2*pi torus, in mean-zero homogeneous spaces: for real mean-zero initial datum q, define U_t=U*U_x+U_xxx and its twist y_k(t)=exp(i*t*k^3)hat U(t,k), satisfying y'_k=(i*k/2)sum_{r+s=k}exp(3*i*k*r*s*t)y_r*y_s. (i) For sigma>=0, horizon b>0, and ||q||_2<=B0, the Galerkin approximations with nonlinearity projected onto |k|<=m are uniformly bounded in L^infty([0,b];dot H^sigma) by A_sigma depending only on sigma,b,B0,||q||_(dot H^sigma). (ii) If sigma>0 and 0<rho<sigma, a subsequence converges strongly in L^p([0,b];H^rho), every fixed 1<p<infinity, and weak-* in L^infty dot H^sigma to a coefficientwise integral solution with the same bound and ||y(t)||_2=||q||_2 a.e.. (iii) That solution is unique, is in C([0,b];dot H^sigma), conserves L^2 for every time, and depends Lipschitz continuously on initial data in dot H^sigma: for sigma>1/2 the constant may depend on sigma,b and the two initial dot H^sigma norms; for 0<sigma<=1/2 the continuity and uniqueness assertions hold with the same indicated topology. For sigma=0 there is a unique C([0,b];dot H^0) solution obtained by smooth approximation, Lipschitz in its data. (iv) For -1<theta<=0, any two such flows whose initial L^2 norms sum to at most B0 satisfy sup_[0,b]||y-z||_(dot H^theta)<=C'(B0,theta)*C_(B0,theta)^b*||y(0)-z(0)||_(dot H^theta). The same norm statements hold for U by the Fourier twist.",
+      "definitions": [
+        "D001",
+        "D002",
+        "D003"
+      ],
+      "binders": [
+        {
+          "symbol": "q",
+          "type": "source real mean-zero initial datum"
+        },
+        {
+          "symbol": "sigma",
+          "type": "real Sobolev order"
+        },
+        {
+          "symbol": "b",
+          "type": "positive horizon"
+        },
+        {
+          "symbol": "B0",
+          "type": "L^2 bound"
+        },
+        {
+          "symbol": "rho",
+          "type": "intermediate positive order"
+        },
+        {
+          "symbol": "theta",
+          "type": "negative or zero order"
+        },
+        {
+          "symbol": "y",
+          "type": "source twisted solution"
+        },
+        {
+          "symbol": "z",
+          "type": "second source twisted solution"
+        }
+      ],
+      "objects": [
+        "Torus",
+        "Fourier",
+        "Sob",
+        "q",
+        "sigma",
+        "b",
+        "B0",
+        "rho",
+        "theta",
+        "y",
+        "z"
+      ],
+      "source_contract": {
+        "hypotheses": [
+          "The source data are real and mean-zero on the 2*pi torus, and the horizon b is positive.",
+          "The Sobolev orders in (i)-(iii) satisfy the indicated nonnegative or positive ranges, and the initial homogeneous norms are finite.",
+          "For (i) the initial L^2 norm is bounded by B0; for (iv) the sum of the two initial L^2 norms is at most B0 and -1<theta<=0."
+        ]
+      }
+    }
+  ],
+  "output": {
+    "id": "N001",
+    "kind": "internal",
+    "statement": "For every real mean-zero q in H^gamma with ||q||_(H^gamma)<=R, KdV has the exact solution prescribed in D020; it belongs to C([0,T];H^gamma), and sup_[0,T]||u(t)||_(H^gamma)<=A(T,gamma,R)<infinity uniformly in q. For smooth q the solution is smooth. The twist v=S_(-t)u has the same norms and satisfies v'=B_t(v,v)/2. For any two such solutions with initial L^2 norms summing to at most B0, sup_[0,T]||u-Utilde||_2<=C(T,B0)||q-qtilde||_2. In particular smooth approximations with bounded H^gamma norm converge in C([0,T];L^2); M=1+sup_[0,T]||v||_(H^gamma) is bounded by 1+A(T,gamma,R).",
+    "definitions": [
+      "D001",
+      "D002",
+      "D003",
+      "D004",
+      "D015",
+      "D020"
+    ],
+    "binders": [
+      {
+        "symbol": "q",
+        "type": "initial datum"
+      },
+      {
+        "symbol": "B0",
+        "type": "positive L^2 bound"
+      },
+      {
+        "symbol": "qtilde",
+        "type": "second datum"
+      },
+      {
+        "symbol": "Utilde",
+        "type": "second solution"
+      },
+      {
+        "symbol": "A",
+        "type": "positive uniform bound"
+      },
+      {
+        "symbol": "M",
+        "type": "solution size"
+      },
+      {
+        "symbol": "u",
+        "type": "exact solution"
+      },
+      {
+        "symbol": "v",
+        "type": "twisted solution"
+      }
+    ],
+    "objects": [
+      "T",
+      "gamma",
+      "R",
+      "q",
+      "B0",
+      "qtilde",
+      "Utilde",
+      "A",
+      "M",
+      "u",
+      "v",
+      "KdV",
+      "Sob",
+      "S",
+      "B"
+    ]
+  },
+  "inference": {
+    "id": "R001",
+    "inputs": [
+      "H001",
+      "H002",
+      "H003",
+      "E001"
+    ],
+    "output": "N001",
+    "definitions": [
+      "D001",
+      "D002",
+      "D003",
+      "D004",
+      "D015",
+      "D020"
+    ],
+    "rules": [
+      "direct",
+      "forall_introduction",
+      "implication_introduction",
+      "case_elimination"
+    ],
+    "locals": [
+      {
+        "symbol": "q",
+        "type": "periodic distribution",
+        "scope": "R001/argument",
+        "start": "S001",
+        "end": "S005",
+        "kind": "arbitrary",
+        "declaration": "Fix an arbitrary q, with its properties introduced by the local antecedent L1.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": []
+      },
+      {
+        "symbol": "Jref",
+        "type": "linear map on periodic distributions",
+        "scope": "R001/argument",
+        "start": "S001",
+        "end": "S005",
+        "kind": "definition",
+        "declaration": "Define (Jref(f))(x)=-f(-x) for every periodic distribution f.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "Torus"
+        ]
+      },
+      {
+        "symbol": "Q",
+        "type": "periodic distribution",
+        "scope": "R001/argument",
+        "start": "S001",
+        "end": "S005",
+        "kind": "definition",
+        "declaration": "Define Q=Jref(q).",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "Jref",
+          "q"
+        ]
+      },
+      {
+        "symbol": "U",
+        "type": "source solution path",
+        "scope": "R001/argument",
+        "start": "S001",
+        "end": "S005",
+        "kind": "witness",
+        "declaration": "Take the unique source flow of E001 with initial datum Q, at order gamma and horizon T, under L1.",
+        "from_inputs": [
+          "E001",
+          "H001",
+          "H002",
+          "H003"
+        ],
+        "from_local": [],
+        "objects": [
+          "Q",
+          "T",
+          "gamma",
+          "R"
+        ]
+      },
+      {
+        "symbol": "p",
+        "type": "sequence of trigonometric polynomials",
+        "scope": "R001/argument",
+        "start": "S002",
+        "end": "S003",
+        "kind": "definition",
+        "declaration": "For every integer n>=1 define p(n) by retaining the Fourier coefficients of Q at |k|<=n and setting all other coefficients to zero.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "Q",
+          "Fourier"
+        ]
+      },
+      {
+        "symbol": "e",
+        "type": "sequence of trigonometric polynomials",
+        "scope": "R001/argument",
+        "start": "S002",
+        "end": "S003",
+        "kind": "definition",
+        "declaration": "For every integer n>=1 set e(n)(x)=(exp(i*(n+1)*x)+exp(-i*(n+1)*x))/sqrt(2).",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "Torus"
+        ]
+      },
+      {
+        "symbol": "d",
+        "type": "sequence of real numbers",
+        "scope": "R001/argument",
+        "start": "S002",
+        "end": "S003",
+        "kind": "definition",
+        "declaration": "For every integer n>=1 set d(n)=sqrt(R^2-||p(n)||_(dot H^gamma)^2); nonnegativity of the radicand is proved in S002.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "p",
+          "R",
+          "gamma",
+          "Sob"
+        ]
+      },
+      {
+        "symbol": "Qpad",
+        "type": "sequence of periodic functions",
+        "scope": "R001/argument",
+        "start": "S002",
+        "end": "S003",
+        "kind": "definition",
+        "declaration": "For every integer n>=1 set Qpad(n)=p(n)+(n+1)^(-gamma)*d(n)*e(n).",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "p",
+          "d",
+          "e",
+          "gamma"
+        ]
+      },
+      {
+        "symbol": "K",
+        "type": "real number",
+        "scope": "R001/argument",
+        "start": "S003",
+        "end": "S005",
+        "kind": "witness",
+        "declaration": "Choose K>=1 from E001(i), with sigma=gamma, b=T, B0=R and exact initial dot H^gamma norm R, as justified in S003. The choice depends only on T,gamma,R.",
+        "from_inputs": [
+          "E001",
+          "H001",
+          "H002",
+          "H003"
+        ],
+        "from_local": [
+          "F002"
+        ],
+        "objects": [
+          "T",
+          "gamma",
+          "R"
+        ]
+      },
+      {
+        "symbol": "Upad",
+        "type": "sequence of source solution paths",
+        "scope": "R001/argument",
+        "start": "S003",
+        "end": "S003",
+        "kind": "witness",
+        "declaration": "For every integer n>=1 take Upad(n) to be the unique source flow from datum Qpad(n), supplied by E001(ii)-(iii).",
+        "from_inputs": [
+          "E001",
+          "H001",
+          "H002"
+        ],
+        "from_local": [
+          "F002"
+        ],
+        "objects": [
+          "Qpad",
+          "T",
+          "gamma",
+          "R"
+        ]
+      },
+      {
+        "symbol": "A",
+        "type": "real number",
+        "scope": "R001/argument",
+        "start": "S004",
+        "end": "S005",
+        "kind": "definition",
+        "declaration": "Set A=2^(gamma/2)*K, a positive constant depending only on T,gamma,R.",
+        "from_inputs": [],
+        "from_local": [
+          "F003"
+        ],
+        "objects": [
+          "K",
+          "gamma",
+          "T",
+          "R"
+        ]
+      },
+      {
+        "symbol": "u",
+        "type": "periodic distribution-valued path",
+        "scope": "R001/argument",
+        "start": "S004",
+        "end": "S005",
+        "kind": "definition",
+        "declaration": "Set u(t)=Jref(U(t)), that is u(t,x)=-U(t,-x).",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "Jref",
+          "U"
+        ]
+      },
+      {
+        "symbol": "v",
+        "type": "periodic distribution-valued path",
+        "scope": "R001/argument",
+        "start": "S004",
+        "end": "S005",
+        "kind": "definition",
+        "declaration": "Set v(t)=S_(-t)u(t).",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "u",
+          "S"
+        ]
+      },
+      {
+        "symbol": "M",
+        "type": "real number",
+        "scope": "R001/argument",
+        "start": "S004",
+        "end": "S005",
+        "kind": "definition",
+        "declaration": "Set M=1+sup_[0,T]||v(t)||_(H^gamma). Its finiteness and bound are proved in S004.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "v",
+          "T",
+          "gamma",
+          "Sob"
+        ]
+      },
+      {
+        "symbol": "B0",
+        "type": "real number",
+        "scope": "R001/argument",
+        "start": "S005",
+        "end": "S005",
+        "kind": "arbitrary",
+        "declaration": "Fix an arbitrary real B0; positivity and the comparison premise are assumed locally under L2.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": []
+      },
+      {
+        "symbol": "qtilde",
+        "type": "periodic distribution",
+        "scope": "R001/argument",
+        "start": "S005",
+        "end": "S005",
+        "kind": "arbitrary",
+        "declaration": "Fix arbitrary qtilde with the properties assumed locally under L2.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": []
+      },
+      {
+        "symbol": "Utilde",
+        "type": "periodic distribution-valued path",
+        "scope": "R001/argument",
+        "start": "S005",
+        "end": "S005",
+        "kind": "arbitrary",
+        "declaration": "Fix arbitrary Utilde, assumed under L2 to be the corresponding second solution constructed above.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": []
+      },
+      {
+        "symbol": "C",
+        "type": "function of a positive real horizon and a positive real L2 bound",
+        "scope": "R001/argument",
+        "start": "S005",
+        "end": "S005",
+        "kind": "definition",
+        "declaration": "For positive b and beta set C(b,beta)=C'(beta,0)*C_(beta,0)^b, using the constants supplied by E001(iv); enlarge to a positive constant if necessary.",
+        "from_inputs": [
+          "E001"
+        ],
+        "from_local": [],
+        "objects": []
+      },
+      {
+        "symbol": "qapp",
+        "type": "sequence of periodic functions",
+        "scope": "R001/argument",
+        "start": "S005",
+        "end": "S005",
+        "kind": "arbitrary",
+        "declaration": "Fix an arbitrary sequence qapp, with its approximation properties assumed locally under L3.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": []
+      },
+      {
+        "symbol": "uapp",
+        "type": "sequence of solution paths",
+        "scope": "R001/argument",
+        "start": "S005",
+        "end": "S005",
+        "kind": "witness",
+        "declaration": "Under L3 take the smooth flows uapp(j) for qapp(j), obtained by applying E001 to the reflected smooth data and the transformation in S004.",
+        "from_inputs": [
+          "E001",
+          "H001",
+          "H002"
+        ],
+        "from_local": [
+          "F004"
+        ],
+        "objects": [
+          "qapp",
+          "Jref",
+          "T",
+          "gamma"
+        ]
+      },
+      {
+        "symbol": "betaapp",
+        "type": "real number",
+        "scope": "R001/argument",
+        "start": "S005",
+        "end": "S005",
+        "kind": "definition",
+        "declaration": "Under L3 set betaapp=1+||q||_2+sup_j||qapp(j)||_2, which is finite and positive by the bounded H^gamma norm assumption.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "q",
+          "qapp",
+          "Sob"
+        ]
+      }
+    ],
+    "argument": [
+      {
+        "id": "S001",
+        "text": "Fix arbitrary q and introduce L1: q is real and mean-zero, q belongs to H^gamma and ||q||_(H^gamma)<=R. H001-H003 give T>0, 0<gamma<=1 and R>0. Define Jref(f)(x)=-f(-x) and Q=Jref(q). Its Fourier formula is hat(Jref(f))(k)=-hat f(-k); thus Jref is an involution preserving reality, mean zero and every H^s and mean-zero dot H^s norm, by reindexing the even weighted square sums. In particular ||Q||_2<=R and ||Q||_(dot H^gamma)<=R. Apply E001(i)-(iii) with sigma=gamma, b=T, B0=R and source datum Q (in (ii) one may take rho=gamma/2). This supplies a unique source solution U in C([0,T];dot H^gamma), satisfying its coefficientwise integral equation and conserving ||U(t)||_2=||Q||_2 for every t. D003 gives continuity also in H^gamma. The bound furnished at this point is allowed to depend on the exact norm ||Q||_(dot H^gamma); no uniformity over the ball is inferred here. If q is smooth, apply E001 at each higher order sigma>gamma. These source flows embed into the gamma class and uniqueness identifies them with U. Smooth periodic data have finite norms at every order by repeated integration by parts in the Fourier formula. Conversely the Cauchy-Schwarz estimate for differentiated Fourier series gives H^s into C^j when s>j+1/2. Hence these higher-order continuities and the source evolution yield spatial smoothness and then, by iterating that polynomial evolution, all mixed time and spatial derivatives.",
+        "uses": [
+          "H001",
+          "H002",
+          "H003",
+          "E001"
+        ],
+        "uses_local": [],
+        "objects": [
+          "q",
+          "Jref",
+          "Q",
+          "U",
+          "T",
+          "gamma",
+          "R",
+          "Torus",
+          "Fourier",
+          "Sob"
+        ],
+        "produces": [
+          {
+            "id": "F001",
+            "statement": "Under L1, Q=Jref(q) is real and mean-zero with ||Q||_2<=R and ||Q||_(dot H^gamma)<=R. The source flow U with datum Q exists uniquely, belongs to C([0,T];H^gamma), satisfies the source coefficientwise integral equation and conserves L2. Smooth q gives smooth U.",
+            "binders": [],
+            "objects": [
+              "q",
+              "Jref",
+              "Q",
+              "U",
+              "T",
+              "gamma",
+              "R",
+              "Sob"
+            ],
+            "assumptions": [
+              "L1"
+            ]
+          }
+        ],
+        "introduces": [
+          "L1"
+        ],
+        "discharges": []
+      },
+      {
+        "id": "S002",
+        "text": "Construct approximations whose exact homogeneous norm is fixed. For every integer n>=1 let p(n) be the Fourier truncation of Q to |k|<=n, and set e(n)(x)=(exp(i*(n+1)*x)+exp(-i*(n+1)*x))/sqrt(2). The Fourier supports of p(n) and e(n) are disjoint, e(n) is real and mean-zero, ||e(n)||_2=1 and ||e(n)||_(dot H^gamma)=(n+1)^gamma. Deleting nonnegative summands shows ||p(n)||_(dot H^gamma)<=R. Thus d(n)=sqrt(R^2-||p(n)||_(dot H^gamma)^2) is defined and lies in [0,R]. Define Qpad(n)=p(n)+(n+1)^(-gamma)*d(n)*e(n). Orthogonality of these disjoint Fourier supports gives ||Qpad(n)||_(dot H^gamma)^2=||p(n)||_(dot H^gamma)^2+d(n)^2=R^2, so its exact norm equals R. Each Qpad(n) is a smooth real mean-zero trigonometric polynomial, and ||Qpad(n)||_2<=||Qpad(n)||_(dot H^gamma)=R because all its frequencies are nonzero integers. Finally ||Qpad(n)-Q||_2<=||p(n)-Q||_2+R*(n+1)^(-gamma) tends to zero: the first term is a tail of the convergent Fourier norm series, and the second tends to zero since gamma>0. Only L2 convergence of these padded approximations is asserted.",
+        "uses": [],
+        "uses_local": [
+          "F001"
+        ],
+        "objects": [
+          "Q",
+          "p",
+          "e",
+          "d",
+          "Qpad",
+          "R",
+          "gamma",
+          "Torus",
+          "Fourier",
+          "Sob"
+        ],
+        "produces": [
+          {
+            "id": "F002",
+            "statement": "For every integer n>=1, Qpad(n) is smooth, real and mean-zero, ||Qpad(n)||_(dot H^gamma)=R and ||Qpad(n)||_2<=R. Moreover Qpad(n) converges to Q in L2 as n tends to infinity.",
+            "binders": [],
+            "objects": [
+              "Qpad",
+              "Q",
+              "gamma",
+              "R",
+              "Sob"
+            ],
+            "assumptions": [
+              "L1"
+            ]
+          }
+        ],
+        "introduces": [],
+        "discharges": []
+      },
+      {
+        "id": "S003",
+        "text": "Use E001 with sigma=gamma, b=T and B0=R for every datum Qpad(n). By F002, each has exact initial dot H^gamma norm R. Thus the bound in E001 is evaluated at the single fixed tuple (gamma,T,R,R). Choose this finite Galerkin bound, enlarged to K>=1, depending only on T,gamma,R. For each integer n>=1, E001 supplies a subsequential integral solution with this same bound and identifies it with the unique continuous source flow Upad(n). Therefore ||Upad(n)(t)||_(dot H^gamma)<=K almost everywhere in time. Continuity in dot H^gamma gives this inequality at every t in [0,T], since a strict violation would persist on a relative time interval of positive measure. Next apply the two-flow estimate in E001 with theta=0, b=T and L2 bound 2*R to Upad(n) and U. F001 and F002 verify that their initial L2 norms sum to at most 2*R. Fourier twisting preserves the L2 distance at each time. Consequently sup_[0,T]||Upad(n)(t)-U(t)||_2<=C'(2*R,0)*C_(2*R,0)^T*||Qpad(n)-Q||_2, tending to zero by F002. Fix any t in [0,T] and any integer m>=1. Coefficient convergence from this L2 convergence shows that sum_{0<|k|<=m}|k|^(2*gamma)*|hat U(t,k)|^2 is the limit of the corresponding finite sums for Upad(n)(t), each bounded by K^2. Taking the supremum over m yields ||U(t)||_(dot H^gamma)<=K by the definition of the nonnegative Fourier norm series. This holds at every t, so sup_[0,T]||U(t)||_(dot H^gamma)<=K. This derives the uniform ball bound using exact-norm padding and L2 stability; it does not assume any monotonicity of the bound as its numerical arguments vary.",
+        "uses": [
+          "E001"
+        ],
+        "uses_local": [
+          "F001",
+          "F002"
+        ],
+        "objects": [
+          "Q",
+          "U",
+          "Qpad",
+          "Upad",
+          "K",
+          "T",
+          "gamma",
+          "R",
+          "Fourier",
+          "Sob",
+          "S"
+        ],
+        "produces": [
+          {
+            "id": "F003",
+            "statement": "K>=1 is finite and depends only on T,gamma,R, and sup_[0,T]||U(t)||_(dot H^gamma)<=K.",
+            "binders": [],
+            "objects": [
+              "K",
+              "U",
+              "T",
+              "gamma",
+              "R",
+              "Sob"
+            ],
+            "assumptions": [
+              "L1"
+            ]
+          }
+        ],
+        "introduces": [],
+        "discharges": []
+      },
+      {
+        "id": "S004",
+        "text": "Set A=2^(gamma/2)*K and u(t,x)=-U(t,-x)=Jref(U(t)). At (t,-x), u_t=-U_t, u_x=U_x and u_xxx=U_xxx. Therefore u_t+u_xxx=-U*U_x=u*u_x=partial_x(u^2)/2 and u(0)=q. For rough data these identities hold distributionally: products of L2 functions are L1 by Cauchy-Schwarz, and product differences obey ||fg-f1*g1||_1<=||f-f1||_2*||g||_2+||f1||_2*||g-g1||_2. Thus the continuous L2 source paths have continuous L1 squares and continuous bounded product Fourier coefficients. Its coefficientwise integral equations can be tested against smooth space-time functions, whose Fourier coefficients decay faster than the polynomial derivative factors; this gives the distributional equation. Reflection is involutive, so uniqueness transfers from the source. Conversely any solution in the stated continuous class transforms to the source coefficientwise integral class by testing each Fourier mode, so the same uniqueness applies. Norm preservation by Jref, F003 and D003 imply sup_[0,T]||u(t)||_(H^gamma)<=2^(gamma/2)*K=A. It is continuous into H^gamma, and smooth if q is smooth by F001. Define v(t)=S_(-t)u(t). The multiplier in D004 has modulus one and conjugate values at opposite frequencies, so S_t preserves these norms, reality and mean zero. Strong continuity follows by checking finitely many coefficients and bounding the remaining weighted tail by four times the norm tail. Hence v is also continuous in H^gamma and has the same time-dependent norms as u. Differentiating each integrated Fourier equation with the multiplier exp(-i*t*k^3) cancels the linear term, giving v'=S_(-t)partial_x[(S_t v)^2]/2=B_t(v,v)/2 as a distributional identity. The expression defining B is valid here on L2 inputs: each product coefficient is bounded by the product of their L2 norms; after the derivative its magnitude is at most |k| times that product, so the H^(-2) squared norm is bounded by sum_k k^2*<k>^(-4) times the squared product of the input norms, a finite series. Thus the smooth formula extends continuously to these inputs and agrees distributionally. Finally set M=1+sup_[0,T]||v(t)||_(H^gamma); this is finite and at most 1+A.",
+        "uses": [],
+        "uses_local": [
+          "F001",
+          "F003"
+        ],
+        "objects": [
+          "q",
+          "Jref",
+          "U",
+          "K",
+          "A",
+          "u",
+          "v",
+          "M",
+          "T",
+          "gamma",
+          "R",
+          "Torus",
+          "Fourier",
+          "Sob",
+          "S",
+          "B",
+          "KdV"
+        ],
+        "produces": [
+          {
+            "id": "F004",
+            "statement": "Under L1, u is the unique real mean-zero C([0,T];H^gamma) distributional KdV solution with datum q, smooth when q is smooth. It satisfies sup_[0,T]||u(t)||_(H^gamma)<=A, with positive A=2^(gamma/2)*K depending only on T,gamma,R. The twist v=S_(-t)u has the same norms and satisfies v'=B_t(v,v)/2 distributionally; M=1+sup_[0,T]||v(t)||_(H^gamma)<=1+A.",
+            "binders": [],
+            "objects": [
+              "q",
+              "u",
+              "v",
+              "A",
+              "K",
+              "M",
+              "T",
+              "gamma",
+              "R",
+              "Sob",
+              "S",
+              "B",
+              "KdV"
+            ],
+            "assumptions": [
+              "L1"
+            ]
+          }
+        ],
+        "introduces": [],
+        "discharges": []
+      },
+      {
+        "id": "S005",
+        "text": "Fix arbitrary B0,qtilde,Utilde and assume locally L2: B0>0, qtilde is real and mean-zero, belongs to H^gamma and satisfies ||qtilde||_(H^gamma)<=R, Utilde is its constructed solution, and ||q||_2+||qtilde||_2<=B0. The reflected paths Jref(u) and Jref(Utilde) are the source flows with data Jref(q) and Jref(qtilde), by the equation conversion and uniqueness above. Apply E001(iv) with theta=0 and b=T. Mean-zero dot H^0 equals L2, and both the source Fourier twist and Jref preserve the L2 distance. With C(T,B0)=C'(B0,0)*C_(B0,0)^T (enlarged if necessary), this gives sup_[0,T]||u-Utilde||_2<=C(T,B0)||q-qtilde||_2. Discharge L2 and quantify these comparison objects. For the approximation assertion, fix an arbitrary sequence qapp and assume locally L3: its terms are smooth, real and mean-zero, converge to q in L2, and have a common finite H^gamma bound. Apply E001 at each reflected smooth datum to get its smooth source flow, and set uapp(j) to be the reflected target flow; its existence follows at every positive Sobolev order. The common H^gamma bound gives a common L2 bound, so E001(iv), applied directly to each of these source flows and U, yields sup_[0,T]||uapp(j)-u||_2<=C(T,betaapp)||qapp(j)-q||_2, where betaapp=1+||q||_2+sup_j||qapp(j)||_2 is finite, positive and bounds all the initial L2 norm sums. Therefore uapp converges to u in C([0,T];L2). Discharge L3 and quantify qapp. In particular choose qapp to be the symmetric Fourier truncations of q. They are smooth, real and mean-zero, have H^gamma norm at most R and converge to q in H^gamma (hence in L2), by the tail formula for the norm series. Thus u is precisely the smooth-approximation solution specified in D020; the comparison also makes its approximation limit independent of the chosen bounded sequence. All clauses for u,v,A,M are already established in F004, and A was chosen using only T,gamma,R. Discharge L1 and universally quantify q to obtain the full asserted output.",
+        "uses": [
+          "E001"
+        ],
+        "uses_local": [
+          "F001",
+          "F003",
+          "F004"
+        ],
+        "objects": [
+          "q",
+          "Jref",
+          "U",
+          "u",
+          "v",
+          "A",
+          "K",
+          "M",
+          "B0",
+          "qtilde",
+          "Utilde",
+          "C",
+          "qapp",
+          "uapp",
+          "T",
+          "gamma",
+          "R",
+          "Torus",
+          "Fourier",
+          "Sob",
+          "S",
+          "B",
+          "KdV",
+          "betaapp"
+        ],
+        "produces": [],
+        "introduces": [
+          "L2",
+          "L3"
+        ],
+        "discharges": [
+          "L2",
+          "L3",
+          "L1"
+        ]
+      }
+    ],
+    "applications": [
+      {
+        "id": "A001",
+        "input": "E001",
+        "at": "S001",
+        "bindings": "Use (i)-(iii) with sigma=gamma, b=T, source datum Q=Jref(q)=-q(-x), B0=R and, in (ii), rho=gamma/2. Only a possibly exact-norm-dependent bound is claimed here.",
+        "hypothesis_checks": [
+          "L1 and the Fourier formula for Jref give real mean-zero source data on the normalized torus; H001 gives T>0.",
+          "H002 gives gamma>0 and 0<gamma/2<gamma. L1 and D003 give finite homogeneous norm.",
+          "The initial L2 norm is at most R by L1 and norm preservation. Clause (iv) is not used in this application."
+        ]
+      },
+      {
+        "id": "A002",
+        "input": "E001",
+        "at": "S001",
+        "bindings": "For smooth q, apply (i)-(iii) at every sigma>gamma with b=T, source datum Q=Jref(q) and B0=R; uniqueness at gamma identifies the resulting flows.",
+        "hypothesis_checks": [
+          "Under L1 and the smooth-data conditional, Q is smooth, real and mean-zero; T>0 by H001.",
+          "Smoothness gives finite norms at every chosen sigma>gamma>0; for (ii) choose any rho between zero and sigma.",
+          "The reflected initial L2 norm is at most R. Clause (iv) is not used here."
+        ]
+      },
+      {
+        "id": "A003",
+        "input": "E001",
+        "at": "S003",
+        "bindings": "Apply (i)-(iii) for every Qpad(n), with sigma=gamma, b=T, B0=R and exact initial dot H^gamma norm equal to R; choose rho=gamma/2 in (ii). K is the common bound at this one fixed tuple of numerical arguments.",
+        "hypothesis_checks": [
+          "F002 proves every Qpad(n) is real and mean-zero on the torus; H001 supplies T>0.",
+          "H002 supplies the permitted orders. F002 proves the exact finite homogeneous norm R for every datum, rather than merely an upper bound by R.",
+          "F002 gives ||Qpad(n)||_2<=R. The bound of (i) passes through (ii) to the unique flow of (iii); clause (iv) is not part of this application."
+        ]
+      },
+      {
+        "id": "A004",
+        "input": "E001",
+        "at": "S003",
+        "bindings": "Use (iv) with theta=0, b=T, B0=2*R and source flows Upad(n),U for every integer n>=1.",
+        "hypothesis_checks": [
+          "F001 and F002 give the real mean-zero source data and the source flows supplied by (ii)-(iii); H001 gives the positive horizon.",
+          "theta=0 is in (-1,0], and both flows have positive order gamma and hence belong to the L2 class.",
+          "F001 gives ||Q||_2<=R and F002 gives ||Qpad(n)||_2<=R, so their initial norm sum is <=2*R. H003 gives 2*R>0."
+        ]
+      },
+      {
+        "id": "A005",
+        "input": "E001",
+        "at": "S005",
+        "bindings": "Use (iv) with theta=0, b=T, bound B0 and source flows Jref(u),Jref(Utilde), with respective data Jref(q),Jref(qtilde), under the temporary antecedent L2.",
+        "hypothesis_checks": [
+          "L1,L2 and the established construction give real mean-zero source data and flows; H001 gives T>0.",
+          "Both flows are at positive order gamma; theta=0 is the permitted endpoint and dot H^0 equals L2 for mean-zero data.",
+          "L2 assumes the initial L2 norm sum is at most the positive B0, and Jref preserves it."
+        ]
+      },
+      {
+        "id": "A006",
+        "input": "E001",
+        "at": "S005",
+        "bindings": "Under L3, apply (i)-(iii) at each smooth reflected datum Jref(qapp(j)), b=T, at order gamma and every higher positive order, using any positive common upper bound for their initial L2 norms. No common higher-order a priori bound is inferred in this application.",
+        "hypothesis_checks": [
+          "L3 supplies smooth real mean-zero data and reflection preserves these properties; H001 supplies T>0.",
+          "Each smooth datum has finite homogeneous norms at every order used; gamma>0 and each chosen higher order is positive.",
+          "L3's bounded H^gamma norms bound the initial L2 norms. The common L2 upper bound is only an applicability parameter; exact higher norms may vary here."
+        ]
+      },
+      {
+        "id": "A007",
+        "input": "E001",
+        "at": "S005",
+        "bindings": "Under L3, apply (iv) to the source flows Jref(uapp(j)) and U with theta=0, b=T, and bound betaapp=1+||q||_2+sup_j||qapp(j)||_2.",
+        "hypothesis_checks": [
+          "L3 and the source construction give real mean-zero source flows and data; T>0 by H001.",
+          "All these flows are in the positive-order class, so the L2 endpoint theta=0 in (-1,0] is applicable.",
+          "The bounded H^gamma norms in L3 and L1 show betaapp is finite and positive and bounds all required L2 norm sums. Reflection preserves all these norms."
+        ]
+      }
+    ]
+  },
+  "warning": "Direct inputs and fixed logic are supplied. Audit A may record mathematically checked routine background with actual conditions and justification; exact Lean bindings belong to nl02lean. No ancestor proof or extra H is available. A packet is not an audit certificate.",
+  "packet_sha256": "23cc4dcd8cb4f92dabb324130365bd29aa19360fbc27ab99c8dd3acd7854e9cb"
+}

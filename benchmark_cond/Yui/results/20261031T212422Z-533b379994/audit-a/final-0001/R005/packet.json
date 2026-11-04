@@ -1,0 +1,750 @@
+{
+  "contract_version": 2,
+  "case_id": "benchmark",
+  "graph_sha256": "b2e27be9cff9d51b56beb8118e64690a2142629470829eee3869eaa7aa3af7d5",
+  "spec_sha256": "791c53dbac36e0a043c0e0e79679797dd4c0af6a24cd5c32dd0d594719e78229",
+  "parameters": [
+    {
+      "symbol": "T",
+      "type": "real number"
+    },
+    {
+      "symbol": "gamma",
+      "type": "real number"
+    },
+    {
+      "symbol": "R",
+      "type": "real number"
+    }
+  ],
+  "logic": {
+    "classical": true,
+    "rules": [
+      "direct",
+      "forall_introduction",
+      "implication_introduction",
+      "case_elimination",
+      "exists_elimination",
+      "natural_induction",
+      "contradiction_classical"
+    ],
+    "calculations": [
+      "equality: Equality reflexivity, symmetry, transitivity and substitution.",
+      "definitions: Unfold an explicitly supplied definition; this proves no extra property.",
+      "finite_algebra: Routine finite semiring/ring/field arithmetic, including zero/one laws, distributivity, associativity and finite polynomial identities. Correct elementary compression is permitted; a substantive missing argument is not.",
+      "finite_order: Routine ordered-field reasoning with actual signs/domains: order laws, adding inequalities, multiplication/division with sign conditions, and real square nonnegativity. Ordinary valid elementary inferences need no exhaustive displayed chain. Check that the conclusion follows; substantial named theorems still require inputs or verified-background admission.",
+      "finite_sums: Unfold and rearrange finite sums/products with explicitly given finite indices."
+    ],
+    "primitives": [
+      {
+        "symbol": "0",
+        "type": "typed numeral",
+        "meaning": "Zero of the explicitly specified mathematical type."
+      },
+      {
+        "symbol": "1",
+        "type": "typed numeral",
+        "meaning": "One of the explicitly specified mathematical type."
+      },
+      {
+        "symbol": "2",
+        "type": "typed numeral",
+        "meaning": "Two of the explicitly specified mathematical type, including an exponent two."
+      },
+      {
+        "symbol": "ℕ",
+        "type": "number system",
+        "meaning": "The natural numbers with their usual arithmetic."
+      },
+      {
+        "symbol": "ℤ",
+        "type": "number system",
+        "meaning": "The integers with their usual arithmetic."
+      },
+      {
+        "symbol": "ℚ",
+        "type": "number system",
+        "meaning": "The rational numbers with their usual ordered-field operations."
+      },
+      {
+        "symbol": "ℝ",
+        "type": "number system",
+        "meaning": "The real numbers with their usual ordered-field structure."
+      },
+      {
+        "symbol": "ℂ",
+        "type": "number system",
+        "meaning": "The complex numbers with their usual field structure."
+      },
+      {
+        "symbol": "∅",
+        "type": "typed set notation",
+        "meaning": "The empty set in the explicitly specified ambient type."
+      },
+      {
+        "symbol": "∞",
+        "type": "typed order notation",
+        "meaning": "The top element in an explicitly specified extended ordered codomain."
+      }
+    ]
+  },
+  "pins": {
+    "lean_version": "4.32.2",
+    "mathlib_commit": "905b95818eb32af7874a58b427f50c1711a5e96c",
+    "mathlib_root": "/Users/syyui/formalization-tools/lean-mathlib-v4.32.2/mathlib"
+  },
+  "foundation_profile": "elementary-language-4",
+  "standard_language": "Ordinary typed mathematical language: logical connectives, quantifiers, equality, sets, functions, tuples, finite indices and their usual notation. A type explicitly named natural numbers, integers, rationals, reals or complex numbers means that standard structure, with its usual numerals and arithmetic operations; these operation tokens need not be redeclared as project objects. The fixed finite calculation rules below, including a+0=a, are controller permissions, not an author claim. The core symbol table below is not a dictionary of all allowed mathematics. Objects and notation from any subject are introduced by this problem's parameters, D definitions or scoped locals, with their types and dependencies. Their properties need direct inputs or displayed local proofs; a familiar name or symbol supplies no theorem.",
+  "background_policy": "mathematical-background-v2-1",
+  "definitions": [
+    {
+      "id": "D001",
+      "symbol": "Torus",
+      "type": "compact measure space",
+      "definition": "Torus=ℝ/(2*pi*ℤ), with measure dx/(2*pi) on [0,2*pi). Here ℝ denotes the real number system, distinct from the radius parameter R.",
+      "binders": [],
+      "objects": [],
+      "depends_on": [],
+      "requires": []
+    },
+    {
+      "id": "D002",
+      "symbol": "Fourier",
+      "type": "Fourier coefficient map",
+      "definition": "For a periodic integrable f and k in Z, Fourier(f)(k)=(2*pi)^(-1) integral_0^(2*pi) f(x) exp(-i*k*x) dx; write hat f(k). Extend by completion and distribution duality.",
+      "binders": [
+        {
+          "symbol": "f",
+          "type": "periodic integrable function or distribution"
+        },
+        {
+          "symbol": "k",
+          "type": "integer"
+        }
+      ],
+      "objects": [
+        "Torus"
+      ],
+      "depends_on": [
+        "D001"
+      ],
+      "requires": []
+    },
+    {
+      "id": "D003",
+      "symbol": "H",
+      "type": "family of complex Hilbert spaces",
+      "definition": "For real s, H^s(Torus) is the completion of trigonometric polynomials for ||f||_(H^s)^2=sum_(k in Z)(1+k^2)^s |hat f(k)|^2. Negative spaces are periodic distributions. L^2=H^0 with the normalized measure. Real means hat f(-k)=overline(hat f(k)); mean-zero means hat f(0)=0. Write ||.||_2 for ||.||_(L^2).",
+      "binders": [
+        {
+          "symbol": "s",
+          "type": "real"
+        },
+        {
+          "symbol": "f",
+          "type": "periodic function or distribution"
+        }
+      ],
+      "objects": [
+        "Torus",
+        "Fourier"
+      ],
+      "depends_on": [
+        "D001",
+        "D002"
+      ],
+      "requires": []
+    },
+    {
+      "id": "D005",
+      "symbol": "S",
+      "type": "one-parameter group of Fourier multipliers",
+      "definition": "S_t=exp(-t*partial_x^3), hat(S_t f)(k)=exp(i*t*k^3)*hat f(k). Thus S_(t+r)=S_t S_r, S_0=I and each S_t is an isometry on every H^s by its unit-modulus multiplier.",
+      "binders": [
+        {
+          "symbol": "t",
+          "type": "real"
+        },
+        {
+          "symbol": "r",
+          "type": "real"
+        },
+        {
+          "symbol": "f",
+          "type": "periodic distribution"
+        },
+        {
+          "symbol": "k",
+          "type": "integer"
+        },
+        {
+          "symbol": "s",
+          "type": "real"
+        }
+      ],
+      "objects": [
+        "Fourier",
+        "H"
+      ],
+      "depends_on": [
+        "D002",
+        "D003"
+      ],
+      "requires": []
+    },
+    {
+      "id": "D006",
+      "symbol": "P0",
+      "type": "projection onto the constant functions",
+      "definition": "P0 f=hat f(0), the mean, identified with a constant function.",
+      "binders": [
+        {
+          "symbol": "f",
+          "type": "periodic distribution"
+        }
+      ],
+      "objects": [
+        "Fourier"
+      ],
+      "depends_on": [
+        "D002"
+      ],
+      "requires": []
+    },
+    {
+      "id": "D007",
+      "symbol": "P",
+      "type": "projection onto the mean-zero functions",
+      "definition": "P=I-P0.",
+      "binders": [],
+      "objects": [
+        "P0"
+      ],
+      "depends_on": [
+        "D006"
+      ],
+      "requires": []
+    },
+    {
+      "id": "D008",
+      "symbol": "Dinv",
+      "type": "inverse spatial derivative Fourier multiplier",
+      "definition": "Dinv=partial_x^(-1); hat(Dinv f)(k)=(i*k)^(-1)hat f(k) for k!=0 and zero for k=0. Dinv2=(Dinv)^2=partial_x^(-2). These formulas define maps H^s -> H^(s+1) and H^s -> H^(s+2), respectively.",
+      "binders": [
+        {
+          "symbol": "f",
+          "type": "periodic distribution"
+        },
+        {
+          "symbol": "k",
+          "type": "integer"
+        },
+        {
+          "symbol": "s",
+          "type": "real"
+        }
+      ],
+      "objects": [
+        "Fourier",
+        "H"
+      ],
+      "depends_on": [
+        "D002",
+        "D003"
+      ],
+      "requires": []
+    },
+    {
+      "id": "D016",
+      "symbol": "pstar",
+      "type": "positive real",
+      "definition": "pstar=23/14.",
+      "binders": [],
+      "objects": [],
+      "depends_on": [],
+      "requires": []
+    },
+    {
+      "id": "D018",
+      "symbol": "B",
+      "type": "time-dependent symmetric bilinear operator",
+      "definition": "B_t(f,g)=S_(-t) partial_x[(S_t f)(S_t g)], initially for smooth periodic inputs, and in H^(-pstar) for L^2 inputs by the bound proved below.",
+      "binders": [
+        {
+          "symbol": "t",
+          "type": "real"
+        },
+        {
+          "symbol": "f",
+          "type": "periodic function"
+        },
+        {
+          "symbol": "g",
+          "type": "periodic function"
+        }
+      ],
+      "objects": [
+        "S",
+        "H",
+        "pstar"
+      ],
+      "depends_on": [
+        "D003",
+        "D005",
+        "D016"
+      ],
+      "requires": []
+    },
+    {
+      "id": "D019",
+      "symbol": "J",
+      "type": "time-dependent symmetric normal-form bilinear operator",
+      "definition": "J_t(f,g)=S_(-t)P[(S_t Dinv f)(S_t Dinv g)].",
+      "binders": [
+        {
+          "symbol": "t",
+          "type": "real"
+        },
+        {
+          "symbol": "f",
+          "type": "periodic function or suitable distribution"
+        },
+        {
+          "symbol": "g",
+          "type": "periodic function or suitable distribution"
+        }
+      ],
+      "objects": [
+        "S",
+        "P",
+        "Dinv"
+      ],
+      "depends_on": [
+        "D005",
+        "D007",
+        "D008"
+      ],
+      "requires": []
+    },
+    {
+      "id": "D020",
+      "symbol": "Ctri",
+      "type": "time-integrated trilinear operator",
+      "definition": "Ctri_I(f,g,h)=integral_I S_(-t)P{P[(S_t f(t))(S_t g(t))]*(S_t Dinv h(t))} dt. For time-independent inputs suppress their t dependence. Initially use smooth spatial inputs, with piecewise smooth continuous time dependence; bounded extensions are justified by the explicit sources or estimates below.",
+      "binders": [
+        {
+          "symbol": "I",
+          "type": "compact real interval"
+        },
+        {
+          "symbol": "f",
+          "type": "time-dependent periodic function"
+        },
+        {
+          "symbol": "g",
+          "type": "time-dependent periodic function"
+        },
+        {
+          "symbol": "h",
+          "type": "time-dependent periodic function"
+        },
+        {
+          "symbol": "t",
+          "type": "real integration variable"
+        }
+      ],
+      "objects": [
+        "S",
+        "P",
+        "Dinv"
+      ],
+      "depends_on": [
+        "D005",
+        "D007",
+        "D008"
+      ],
+      "requires": []
+    },
+    {
+      "id": "D021",
+      "symbol": "Fstage",
+      "type": "bilinear first-stage integral family",
+      "definition": "Fstage_(a,t)(f,g)=(1/2) integral_a^t B_s(f,g) ds for time-independent smooth mean-zero f,g and a<=t. Fstage_(a,t)(f) abbreviates Fstage_(a,t)(f,f).",
+      "binders": [
+        {
+          "symbol": "a",
+          "type": "real"
+        },
+        {
+          "symbol": "t",
+          "type": "real with t>=a"
+        },
+        {
+          "symbol": "f",
+          "type": "smooth mean-zero periodic function"
+        },
+        {
+          "symbol": "g",
+          "type": "smooth mean-zero periodic function"
+        },
+        {
+          "symbol": "s",
+          "type": "real integration variable"
+        }
+      ],
+      "objects": [
+        "B"
+      ],
+      "depends_on": [
+        "D018"
+      ],
+      "requires": []
+    }
+  ],
+  "inputs": [],
+  "output": {
+    "id": "N005",
+    "kind": "internal",
+    "statement": "The following estimates have constants uniform in the real time t. For mean-zero f in L^2, ||Dinv f||_(H^1)+||Dinv f||_infinity<=C||f||_2. For any A0,B0 in H^1, ||A0*B0||_(H^1)<=C||A0||_(H^1)||B0||_(H^1). For f,g in L^2, ||B_t(f,g)||_(H^(-pstar))<=C||f||_2||g||_2, ||J_t(f,g)||_(H^1)<=C||f||_2||g||_2, and ||Dinv P(f*g)||_2<=C||f||_2||g||_2. For mean-zero A0 with Dinv A0 in L^2 and g in L^2, ||A0||_(H^(-pstar))<=||Dinv A0||_2 and ||J_t(A0,g)||_2<=C||Dinv A0||_2||g||_2. For smooth mean-zero time-dependent f,g on [a,b], integral_a^b B_t(f,g)dt=(1/3)[J_t(f,g)]_a^b-(1/3)integral_a^b[J_t(f',g)+J_t(f,g')]dt. J is symmetric and integral_I J_t(B_t(f,g),h)dt=Ctri_I(f,g,h). These identities hold piecewise and sum across internal endpoints for continuous piecewise smooth paths. For time-independent mean-zero f,g, Fstage_(a,t)(f,g)=(1/6)[J_s(f,g)]_(s=a)^(s=t). The bounded products extend from polynomials by density.",
+    "definitions": [
+      "D002",
+      "D003",
+      "D005",
+      "D007",
+      "D008",
+      "D016",
+      "D018",
+      "D019",
+      "D020",
+      "D021"
+    ],
+    "binders": [
+      {
+        "symbol": "t",
+        "type": "real time"
+      },
+      {
+        "symbol": "a",
+        "type": "real left endpoint"
+      },
+      {
+        "symbol": "b",
+        "type": "real right endpoint with a<=b"
+      },
+      {
+        "symbol": "I",
+        "type": "compact real interval"
+      },
+      {
+        "symbol": "f",
+        "type": "periodic function or time-dependent path as specified"
+      },
+      {
+        "symbol": "g",
+        "type": "periodic function or path as specified"
+      },
+      {
+        "symbol": "h",
+        "type": "periodic function or path as specified"
+      },
+      {
+        "symbol": "A0",
+        "type": "periodic function or distribution as specified"
+      },
+      {
+        "symbol": "B0",
+        "type": "H^1 function"
+      }
+    ],
+    "objects": [
+      "t",
+      "a",
+      "b",
+      "I",
+      "f",
+      "g",
+      "h",
+      "A0",
+      "B0",
+      "Dinv",
+      "H",
+      "B",
+      "J",
+      "Ctri",
+      "pstar",
+      "P",
+      "Fstage"
+    ]
+  },
+  "inference": {
+    "id": "R005",
+    "inputs": [],
+    "output": "N005",
+    "definitions": [
+      "D002",
+      "D003",
+      "D005",
+      "D007",
+      "D008",
+      "D016",
+      "D018",
+      "D019",
+      "D020",
+      "D021"
+    ],
+    "locals": [
+      {
+        "symbol": "f",
+        "type": "periodic input or time-dependent path as specified in each quantified assertion",
+        "kind": "arbitrary",
+        "declaration": "Fix f with the regularity of the assertion currently being proved.",
+        "scope": "argument",
+        "start": "S001",
+        "end": "S004",
+        "objects": [],
+        "from_inputs": [],
+        "from_local": []
+      },
+      {
+        "symbol": "g",
+        "type": "periodic input or time-dependent path as specified in each quantified assertion",
+        "kind": "arbitrary",
+        "declaration": "Fix g with the regularity of the assertion currently being proved.",
+        "scope": "argument",
+        "start": "S001",
+        "end": "S004",
+        "objects": [],
+        "from_inputs": [],
+        "from_local": []
+      },
+      {
+        "symbol": "h",
+        "type": "periodic input or time-dependent path as specified in each quantified assertion",
+        "kind": "arbitrary",
+        "declaration": "Fix h with the regularity of the assertion currently being proved.",
+        "scope": "argument",
+        "start": "S001",
+        "end": "S004",
+        "objects": [],
+        "from_inputs": [],
+        "from_local": []
+      },
+      {
+        "symbol": "A0",
+        "type": "periodic input or distribution",
+        "kind": "arbitrary",
+        "declaration": "Fix A0 with the regularity in the assertion being proved.",
+        "scope": "argument",
+        "start": "S001",
+        "end": "S002",
+        "objects": [],
+        "from_inputs": [],
+        "from_local": []
+      },
+      {
+        "symbol": "B0",
+        "type": "periodic input",
+        "kind": "arbitrary",
+        "declaration": "Fix B0 with the regularity in the assertion being proved.",
+        "scope": "argument",
+        "start": "S001",
+        "end": "S001",
+        "objects": [],
+        "from_inputs": [],
+        "from_local": []
+      },
+      {
+        "symbol": "t",
+        "type": "real",
+        "kind": "arbitrary",
+        "declaration": "Fix real time t, later the integration variable.",
+        "scope": "argument",
+        "start": "S001",
+        "end": "S004",
+        "objects": [],
+        "from_inputs": [],
+        "from_local": []
+      },
+      {
+        "symbol": "a",
+        "type": "real",
+        "kind": "arbitrary",
+        "declaration": "Fix the left endpoint a.",
+        "scope": "argument",
+        "start": "S003",
+        "end": "S004",
+        "objects": [],
+        "from_inputs": [],
+        "from_local": []
+      },
+      {
+        "symbol": "b",
+        "type": "real with b>=a",
+        "kind": "arbitrary",
+        "declaration": "Fix b>=a.",
+        "scope": "argument",
+        "start": "S003",
+        "end": "S004",
+        "objects": [],
+        "from_inputs": [],
+        "from_local": []
+      },
+      {
+        "symbol": "I",
+        "type": "compact real interval",
+        "kind": "arbitrary",
+        "declaration": "Fix I for the integrated identity.",
+        "scope": "argument",
+        "start": "S004",
+        "end": "S004",
+        "objects": [],
+        "from_inputs": [],
+        "from_local": []
+      }
+    ],
+    "argument": [
+      {
+        "id": "S001",
+        "text": "For any mean-zero L^2 f, Cauchy-Schwarz in its Fourier series gives ||Dinv f||_infinity<=(sum_(k!=0)k^(-2))^(1/2)||f||_2, and coefficient weights give ||Dinv f||_(H^1)<=sqrt(2)||f||_2. For a general H^1 function its mean plus this estimate for its derivative gives ||A0||_infinity<=C||A0||_(H^1). The product rule then gives ||A0*B0||_(H^1)<=C||A0||_(H^1)||B0||_(H^1). Apply it to S_t Dinv f and S_t Dinv g and use S_t isometric and P contractive to obtain ||J_t(f,g)||_(H^1)<=C||f||_2||g||_2. Each assertion is quantified over inputs in its indicated space.",
+        "uses": [],
+        "uses_local": [],
+        "objects": [
+          "f",
+          "g",
+          "A0",
+          "B0",
+          "t",
+          "Dinv",
+          "H",
+          "J",
+          "S",
+          "P",
+          "Fourier"
+        ],
+        "produces": [
+          {
+            "id": "F001",
+            "statement": "Uniformly in t, for mean-zero f in L^2, ||Dinv f||_(H^1)+||Dinv f||_infinity<=C||f||_2; for A0,B0 in H^1, ||A0*B0||_(H^1)<=C||A0||_(H^1)||B0||_(H^1); and for f,g in L^2, ||J_t(f,g)||_(H^1)<=C||f||_2||g||_2.",
+            "objects": [
+              "Dinv",
+              "H",
+              "J",
+              "S"
+            ],
+            "assumptions": [],
+            "binders": []
+          }
+        ],
+        "introduces": [],
+        "discharges": []
+      },
+      {
+        "id": "S002",
+        "text": "For L^2 f,g, every Fourier coefficient of the product (S_t f)(S_t g) has modulus <=||f||_2||g||_2 by Cauchy-Schwarz in the convolution. Hence ||B_t(f,g)||_(H^(-pstar))^2<=||f||_2^2||g||_2^2 sum_(k!=0) k^2<k>^(-2*pstar), a finite sum because pstar=23/14>3/2. The same coefficient bound with sum k^(-2) proves ||Dinv P(f*g)||_2<=C||f||_2||g||_2. For mean-zero A0, <k>^(-pstar)<=|k|^(-1), so ||A0||_(H^(-pstar))<=||Dinv A0||_2. Finally J_t(A0,g) is a product of S_t Dinv A0 in L^2 and S_t Dinv g in L^infinity, followed by contractions, so its L^2 norm is <=C||Dinv A0||_2||g||_2 by F001. Approximation by polynomials and these continuous bilinear bounds justify the products and their extensions.",
+        "uses": [],
+        "uses_local": [
+          "F001"
+        ],
+        "objects": [
+          "f",
+          "g",
+          "A0",
+          "t",
+          "B",
+          "J",
+          "Dinv",
+          "P",
+          "S",
+          "H",
+          "pstar",
+          "Fourier"
+        ],
+        "produces": [
+          {
+            "id": "F002",
+            "statement": "For L^2 f,g, ||B_t(f,g)||_(H^(-pstar))<=C||f||_2||g||_2 and ||Dinv P(f*g)||_2<=C||f||_2||g||_2. For mean-zero A0 with Dinv A0 in L^2, ||A0||_(H^(-pstar))<=||Dinv A0||_2 and ||J_t(A0,g)||_2<=C||Dinv A0||_2||g||_2.",
+            "objects": [
+              "B",
+              "J",
+              "Dinv",
+              "H",
+              "pstar"
+            ],
+            "assumptions": [],
+            "binders": []
+          }
+        ],
+        "introduces": [],
+        "discharges": []
+      },
+      {
+        "id": "S003",
+        "text": "For the normal-form clause take smooth mean-zero paths f,g on [a,b]. At k!=0 the coefficient of J_t is sum_(r+s=k) exp(-i*t*3*k*r*s)*(i*r)^(-1)*(i*s)^(-1)*hat f(r)*hat g(s). Differentiating the phase gives 3*i*k times the product coefficients. Therefore d_t J_t(f,g)=3*B_t(f,g)+J_t(f',g)+J_t(f,g'). Smooth spatial Fourier series and all derivatives used here converge absolutely, so differentiation and integration are legitimate. Integration gives the displayed two-endpoint normal form. For piecewise smooth continuous paths apply this on each subinterval; intermediate J endpoint values cancel because the paths are continuous.",
+        "uses": [],
+        "uses_local": [],
+        "objects": [
+          "f",
+          "g",
+          "t",
+          "a",
+          "b",
+          "J",
+          "B",
+          "Fourier"
+        ],
+        "produces": [
+          {
+            "id": "F003",
+            "statement": "For smooth or continuous piecewise smooth mean-zero paths f,g, integral_a^b B_t(f,g)dt=(1/3)[J_t(f,g)]_a^b-(1/3)integral_a^b[J_t(f',g)+J_t(f,g')]dt.",
+            "objects": [
+              "f",
+              "g",
+              "a",
+              "b",
+              "J",
+              "B"
+            ],
+            "assumptions": [],
+            "binders": []
+          }
+        ],
+        "introduces": [],
+        "discharges": []
+      },
+      {
+        "id": "S004",
+        "text": "Symmetry of J is immediate from the product formula. Since Dinv partial_x=P, substitution gives J_t(B_t(f,g),h)=S_(-t)P{P[(S_t f)(S_t g)]*(S_t Dinv h)}, whose integral on I is exactly Ctri_I(f,g,h); no inverse derivative is commuted through a product. For constant f,g, integrate F003 and multiply by 1/2 to obtain Fstage_(a,t)(f,g)=(1/6)[J_s(f,g)]_a^t. This establishes every identity asserted in the output assertion.",
+        "uses": [],
+        "uses_local": [
+          "F003"
+        ],
+        "objects": [
+          "f",
+          "g",
+          "h",
+          "t",
+          "a",
+          "I",
+          "J",
+          "B",
+          "Ctri",
+          "Fstage",
+          "Dinv",
+          "P",
+          "S"
+        ],
+        "produces": [],
+        "introduces": [],
+        "discharges": []
+      }
+    ],
+    "applications": [],
+    "rules": [
+      "direct",
+      "forall_introduction",
+      "implication_introduction"
+    ]
+  },
+  "warning": "Direct inputs and fixed logic are supplied. Audit A may record mathematically checked routine background with actual conditions and justification; exact Lean bindings belong to nl02lean. No ancestor proof or extra H is available. A packet is not an audit certificate.",
+  "packet_sha256": "df1063aecd285e101417a93fc40bf32ecf2d8604863451ab1824d7f8a4bbffff"
+}

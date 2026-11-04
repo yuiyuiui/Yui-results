@@ -1,0 +1,9 @@
+import Proof
+#check Fin.sum_univ_eq_sum_range
+#check Fin.sum_univ_eq_sum_range
+#check Fin.sum_univ_succ
+#check Fintype.sum_bool
+#check Bool.sum_bool
+#check Fintype.sum_prod_type
+#check Finset.sum_le_sum_of_inj
+#check Equiv.intEquivNatSumNat
