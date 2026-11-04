@@ -1,0 +1,1032 @@
+{
+  "contract_version": 2,
+  "case_id": "benchmark",
+  "graph_sha256": "e63822d4542f352e4850ae8046fc80312d1ee8fa0f1b85e77bbfc8fc79913594",
+  "spec_sha256": "068ae79eada9e7bd161be0516980d5d3bc95dea2c156e6209cb8370edf71d102",
+  "parameters": [
+    {
+      "symbol": "T",
+      "type": "real"
+    },
+    {
+      "symbol": "gamma",
+      "type": "real"
+    },
+    {
+      "symbol": "R",
+      "type": "real"
+    }
+  ],
+  "logic": {
+    "classical": true,
+    "rules": [
+      "direct",
+      "forall_introduction",
+      "implication_introduction",
+      "natural_induction",
+      "contradiction_classical"
+    ],
+    "calculations": [
+      "equality: Equality reflexivity, symmetry, transitivity and substitution.",
+      "definitions: Unfold an explicitly supplied definition; this proves no extra property.",
+      "finite_algebra: Routine finite semiring/ring/field arithmetic, including zero/one laws, distributivity, associativity and finite polynomial identities. Correct elementary compression is permitted; a substantive missing argument is not.",
+      "finite_order: Routine ordered-field reasoning with actual signs/domains: order laws, adding inequalities, multiplication/division with sign conditions, and real square nonnegativity. Ordinary valid elementary inferences need no exhaustive displayed chain. Check that the conclusion follows; substantial named theorems still require inputs or verified-background admission.",
+      "finite_sums: Unfold and rearrange finite sums/products with explicitly given finite indices."
+    ],
+    "primitives": [
+      {
+        "symbol": "0",
+        "type": "typed numeral",
+        "meaning": "Zero of the explicitly specified mathematical type."
+      },
+      {
+        "symbol": "1",
+        "type": "typed numeral",
+        "meaning": "One of the explicitly specified mathematical type."
+      },
+      {
+        "symbol": "2",
+        "type": "typed numeral",
+        "meaning": "Two of the explicitly specified mathematical type, including an exponent two."
+      },
+      {
+        "symbol": "ℕ",
+        "type": "number system",
+        "meaning": "The natural numbers with their usual arithmetic."
+      },
+      {
+        "symbol": "ℤ",
+        "type": "number system",
+        "meaning": "The integers with their usual arithmetic."
+      },
+      {
+        "symbol": "ℚ",
+        "type": "number system",
+        "meaning": "The rational numbers with their usual ordered-field operations."
+      },
+      {
+        "symbol": "ℝ",
+        "type": "number system",
+        "meaning": "The real numbers with their usual ordered-field structure."
+      },
+      {
+        "symbol": "ℂ",
+        "type": "number system",
+        "meaning": "The complex numbers with their usual field structure."
+      },
+      {
+        "symbol": "∅",
+        "type": "typed set notation",
+        "meaning": "The empty set in the explicitly specified ambient type."
+      },
+      {
+        "symbol": "∞",
+        "type": "typed order notation",
+        "meaning": "The top element in an explicitly specified extended ordered codomain."
+      }
+    ]
+  },
+  "pins": {
+    "lean_version": "4.32.2",
+    "mathlib_commit": "905b95818eb32af7874a58b427f50c1711a5e96c",
+    "mathlib_root": "/Users/syyui/formalization-tools/lean-mathlib-v4.32.2/mathlib"
+  },
+  "foundation_profile": "elementary-language-4",
+  "standard_language": "Ordinary typed mathematical language: logical connectives, quantifiers, equality, sets, functions, tuples, finite indices and their usual notation. A type explicitly named natural numbers, integers, rationals, reals or complex numbers means that standard structure, with its usual numerals and arithmetic operations; these operation tokens need not be redeclared as project objects. The fixed finite calculation rules below, including a+0=a, are controller permissions, not an author claim. The core symbol table below is not a dictionary of all allowed mathematics. Objects and notation from any subject are introduced by this problem's parameters, D definitions or scoped locals, with their types and dependencies. Their properties need direct inputs or displayed local proofs; a familiar name or symbol supplies no theorem.",
+  "background_policy": "mathematical-background-v2-1",
+  "definitions": [
+    {
+      "id": "D001",
+      "symbol": "Ttor",
+      "type": "periodic measured domain",
+      "definition": "Ttor = reals/(2*pi*integers), with normalized measure dx/(2*pi); spatial products and integrals are on this domain.",
+      "depends_on": [],
+      "requires": [],
+      "binders": [],
+      "objects": []
+    },
+    {
+      "id": "D002",
+      "symbol": "Fourier",
+      "type": "Fourier coefficient transform",
+      "definition": "For an integrable periodic f, Fourier(f)(k)=hat f(k)=(2*pi)^(-1) integral_0^(2*pi) f(x) exp(-i*k*x) dx; the transform extends to distributions by duality.",
+      "depends_on": [
+        "D001"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "f",
+          "type": "periodic distribution"
+        },
+        {
+          "symbol": "k",
+          "type": "integer"
+        }
+      ],
+      "objects": [
+        "Ttor",
+        "f",
+        "k"
+      ]
+    },
+    {
+      "id": "D003",
+      "symbol": "H",
+      "type": "family of periodic Sobolev spaces",
+      "definition": "For every real s, H^s(Ttor) is the completion of trigonometric polynomials with ||f||_(H^s)^2=sum_(k in Z) <k>^(2*s)|hat f(k)|^2, <k>=(1+k^2)^(1/2). Negative spaces are interpreted as distributions. Homogeneous norms on zero-mean distributions are ||f||_(dot H^s)^2=sum_(k!=0)|k|^(2*s)|hat f(k)|^2. Real means hat f(-k)=conjugate(hat f(k)); mean zero means hat f(0)=0.",
+      "depends_on": [
+        "D001",
+        "D002"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "s",
+          "type": "real"
+        },
+        {
+          "symbol": "f",
+          "type": "periodic distribution"
+        }
+      ],
+      "objects": [
+        "Ttor",
+        "Fourier",
+        "s",
+        "f"
+      ]
+    },
+    {
+      "id": "D004",
+      "symbol": "L2",
+      "type": "normalized Hilbert space and norm",
+      "definition": "L2=H^0(Ttor), with ||f||_2^2=(2*pi)^(-1) integral |f|^2 dx. More generally L^p uses the same normalized measure; L^infinity is essential supremum. Sequence ell^2 uses counting measure on Z (or Z\\{0} when specified). Time suprema use continuous representatives; derivative norms are essential suprema.",
+      "depends_on": [
+        "D001",
+        "D003"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "f",
+          "type": "periodic L2 function"
+        },
+        {
+          "symbol": "p",
+          "type": "real exponent at least one"
+        }
+      ],
+      "objects": [
+        "Ttor",
+        "H",
+        "f",
+        "p"
+      ]
+    },
+    {
+      "id": "D005",
+      "symbol": "S",
+      "type": "Airy group indexed by real time",
+      "definition": "S_t=exp(-t*partial_x^3), hat(S_t f)(k)=exp(i*t*k^3) hat f(k).",
+      "depends_on": [
+        "D002",
+        "D003"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "t",
+          "type": "real"
+        },
+        {
+          "symbol": "f",
+          "type": "periodic distribution"
+        },
+        {
+          "symbol": "k",
+          "type": "integer"
+        }
+      ],
+      "objects": [
+        "Fourier",
+        "H",
+        "t",
+        "f",
+        "k"
+      ]
+    },
+    {
+      "id": "D006",
+      "symbol": "P0",
+      "type": "spatial mean projection",
+      "definition": "P0(f)=hat f(0), identified with a constant function.",
+      "depends_on": [
+        "D002"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "f",
+          "type": "periodic distribution"
+        }
+      ],
+      "objects": [
+        "Fourier",
+        "f"
+      ]
+    },
+    {
+      "id": "D007",
+      "symbol": "Pnz",
+      "type": "projection onto nonzero modes",
+      "definition": "Pnz=I-P0, denoted P in the supplied proof. Fourier projections P_leq(N) and P_gt(N) retain |k|<=N and |k|>N respectively, for N>=0.",
+      "depends_on": [
+        "D002",
+        "D006"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "N",
+          "type": "nonnegative real"
+        }
+      ],
+      "objects": [
+        "Fourier",
+        "P0",
+        "N"
+      ]
+    },
+    {
+      "id": "D008",
+      "symbol": "Dinv",
+      "type": "inverse derivative and its square",
+      "definition": "Dinv=partial_x^(-1) has Fourier multiplier (i*k)^(-1) at nonzero integer k and zero at k=0. Dinv2=(Dinv)^2 is denoted D^(-2).",
+      "depends_on": [
+        "D002"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "k",
+          "type": "integer"
+        }
+      ],
+      "objects": [
+        "Fourier",
+        "k"
+      ]
+    },
+    {
+      "id": "D016",
+      "symbol": "Bop",
+      "type": "time-dependent bilinear KdV operator",
+      "definition": "Bop_t(f,g)=S_(-t)*partial_x[(S_t f)(S_t g)], initially for smooth periodic functions and by distributional product for L2 inputs.",
+      "depends_on": [
+        "D004",
+        "D005"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "t",
+          "type": "real"
+        },
+        {
+          "symbol": "f",
+          "type": "periodic L2 function"
+        },
+        {
+          "symbol": "g",
+          "type": "periodic L2 function"
+        }
+      ],
+      "objects": [
+        "S",
+        "L2",
+        "t",
+        "f",
+        "g"
+      ]
+    },
+    {
+      "id": "D021",
+      "symbol": "Stage",
+      "type": "frozen quadratic stage",
+      "definition": "For a grid start t_n=n*tau, tau>0, and time-independent mean-zero w, Stage_n(t;w)=(1/2) integral_(t_n)^t Bop_s(w,w) ds for t in [t_n,t_n+tau]. The associated bilinear stage has w1,w2 in its two slots.",
+      "depends_on": [
+        "D016"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "n",
+          "type": "nonnegative integer"
+        },
+        {
+          "symbol": "tau",
+          "type": "positive real"
+        },
+        {
+          "symbol": "t",
+          "type": "real in the step"
+        },
+        {
+          "symbol": "w",
+          "type": "mean-zero periodic function"
+        }
+      ],
+      "objects": [
+        "Bop",
+        "n",
+        "tau",
+        "t",
+        "w"
+      ]
+    },
+    {
+      "id": "D022",
+      "symbol": "agamma",
+      "type": "Sobolev product exponent",
+      "definition": "For 0<gamma<=1, agamma=1/2-gamma if gamma<1/2, agamma=1/8 if gamma=1/2, and agamma=0 if gamma>1/2.",
+      "depends_on": [],
+      "requires": [
+        "H002"
+      ],
+      "binders": [],
+      "objects": [
+        "gamma"
+      ]
+    },
+    {
+      "id": "D024",
+      "symbol": "Hsrc",
+      "type": "family of source periodic Sobolev spaces",
+      "definition": "For each real s, Hsrc^s is the space of 2*pi-periodic distributions h with 2*pi*sum_(k in Z)(1+k^2)^s*|Fourier(h)(k)|^2 finite, equipped with the square root of that expression as its norm. The Fourier transform is D002, on the same periodic coordinate Ttor, including the zero mode. Equivalently it is the completion of trigonometric polynomials in this unnormalized norm, with negative orders interpreted distributionally. This is the unnormalized Fourier Sobolev convention used in the Li–Wu source estimates.",
+      "depends_on": [
+        "D001",
+        "D002"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "s",
+          "type": "real"
+        },
+        {
+          "symbol": "h",
+          "type": "periodic distribution"
+        }
+      ],
+      "objects": [
+        "Ttor",
+        "Fourier",
+        "s",
+        "h"
+      ]
+    },
+    {
+      "id": "D025",
+      "symbol": "L2src",
+      "type": "source unnormalized periodic Hilbert space",
+      "definition": "L2src=Hsrc^0 on the same torus Ttor. Its norm on functions is (integral_0^(2*pi)|h(x)|^2 dx)^(1/2). Source time L^infinity norms and distributional time derivatives use these spatial norms, continuous representatives for suprema and essential suprema for derivative norms, with the same time coordinate as in D004.",
+      "depends_on": [
+        "D001",
+        "D024"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "h",
+          "type": "periodic L2 function"
+        }
+      ],
+      "objects": [
+        "Ttor",
+        "Hsrc",
+        "h"
+      ]
+    }
+  ],
+  "inputs": [
+    {
+      "id": "H002",
+      "kind": "hypothesis",
+      "statement": "0<gamma<=1.",
+      "definitions": [],
+      "binders": [],
+      "objects": [
+        "gamma"
+      ]
+    },
+    {
+      "id": "E003",
+      "kind": "external",
+      "statement": "Let 0<sigma_s<=1, tau_s>0, t_j=j*tau_s>=0 and t in [t_j,t_j+tau_s]. For time-independent mean-zero g1,g2 in Hsrc^sigma_s define Fsrc_j(t;g1,g2)=(1/2)integral_(t_j)^t exp(s partial_x^3)*partial_x[(exp(-s partial_x^3)g1)(exp(-s partial_x^3)g2)]ds. With beta0=2*sigma_s-3/2 for sigma_s<1/2, beta0=-1/2-epsilon for sigma_s=1/2 (any fixed sufficiently small epsilon>0), and beta0=sigma_s-1 for sigma_s>1/2, the source gives, for beta in [beta0,1+sigma_s], ||Fsrc_j(t;g1,g2)||_(Hsrc^beta)<=C*tau_s^((1+sigma_s-beta)/(1+sigma_s-beta0))*||g1||_(Hsrc^sigma_s)*||g2||_(Hsrc^sigma_s), with C depending only on exponents (and epsilon) and uniform in j,tau_s,t and support. Its endpoint formula is (1/6)[S_(-s) Pnz((S_s Dinv g1)(S_s Dinv g2))]_(s=t_j)^(s=t).",
+      "definitions": [
+        "D003",
+        "D005",
+        "D007",
+        "D008",
+        "D024",
+        "D025"
+      ],
+      "binders": [
+        {
+          "symbol": "sigma_s",
+          "type": "real parameter as quantified"
+        },
+        {
+          "symbol": "tau_s",
+          "type": "real parameter as quantified"
+        },
+        {
+          "symbol": "t_j",
+          "type": "real parameter as quantified"
+        },
+        {
+          "symbol": "t",
+          "type": "real parameter as quantified"
+        },
+        {
+          "symbol": "beta",
+          "type": "real parameter as quantified"
+        },
+        {
+          "symbol": "beta0",
+          "type": "real parameter as quantified"
+        },
+        {
+          "symbol": "epsilon",
+          "type": "real parameter as quantified"
+        },
+        {
+          "symbol": "g1",
+          "type": "mean-zero periodic function"
+        },
+        {
+          "symbol": "g2",
+          "type": "mean-zero periodic function"
+        }
+      ],
+      "objects": [
+        "H",
+        "S",
+        "Pnz",
+        "Dinv",
+        "sigma_s",
+        "tau_s",
+        "t_j",
+        "t",
+        "beta",
+        "beta0",
+        "epsilon",
+        "g1",
+        "g2",
+        "Hsrc",
+        "L2src"
+      ],
+      "source_contract": {
+        "hypotheses": [
+          "0<sigma_s<=1 and time-independent mean-zero g1,g2 in Hsrc^sigma_s.",
+          "tau_s>0, t_j=j*tau_s>=0 and t lies in the step.",
+          "beta0 and beta are chosen in the displayed cases and interval; epsilon is fixed positive and small in the middle case."
+        ]
+      }
+    },
+    {
+      "id": "E004",
+      "kind": "external",
+      "statement": "For sigma_s in [0,1], ||g*h||_(L2src)<=C_sigma_s ||g||_(Hsrc^sigma_s)||h||_(Hsrc^a(sigma_s)), where a(0)=1/2+epsilon, a(sigma_s)=1/2-sigma_s for 0<sigma_s<1/2, a(1/2)=epsilon, and a(sigma_s)=0 for 1/2<sigma_s<=1, with any fixed sufficiently small epsilon>0 at the indicated endpoints. The functions are arbitrary periodic functions in these two spaces; constants depend only on the chosen exponents.",
+      "definitions": [
+        "D003",
+        "D004",
+        "D024",
+        "D025"
+      ],
+      "binders": [
+        {
+          "symbol": "sigma_s",
+          "type": "real"
+        },
+        {
+          "symbol": "epsilon",
+          "type": "positive real"
+        },
+        {
+          "symbol": "g",
+          "type": "periodic function"
+        },
+        {
+          "symbol": "h",
+          "type": "periodic function"
+        }
+      ],
+      "objects": [
+        "H",
+        "L2",
+        "sigma_s",
+        "epsilon",
+        "g",
+        "h",
+        "Hsrc",
+        "L2src"
+      ],
+      "source_contract": {
+        "hypotheses": [
+          "sigma_s is in [0,1] and epsilon is fixed positive at the specified endpoints.",
+          "g belongs to Hsrc^sigma_s and h to the displayed Hsrc^a(sigma_s)."
+        ]
+      }
+    }
+  ],
+  "output": {
+    "id": "N007",
+    "kind": "internal",
+    "statement": "For 0<tau<=1, n>=0, t in [n*tau,(n+1)*tau] and mean-zero w in H^gamma with ||w||_(H^gamma)<=M0, sup_t||Stage_n(t;w)||_(H^agamma)<=C_(M0,gamma)*tau^gamma and sup_t||Stage_n(t;w)||_(H^(1+gamma))<=C_(M0,gamma). Also ||fg||_2<=C_gamma||f||_(H^gamma)||g||_(H^agamma) for all f,g in these spaces, without mean restrictions. All constants are independent of n,tau and support.",
+    "definitions": [
+      "D003",
+      "D004",
+      "D016",
+      "D021",
+      "D022"
+    ],
+    "binders": [
+      {
+        "symbol": "tau",
+        "type": "real"
+      },
+      {
+        "symbol": "n",
+        "type": "nonnegative integer"
+      },
+      {
+        "symbol": "t",
+        "type": "real"
+      },
+      {
+        "symbol": "w",
+        "type": "periodic function"
+      },
+      {
+        "symbol": "M0",
+        "type": "real"
+      },
+      {
+        "symbol": "f",
+        "type": "periodic function"
+      },
+      {
+        "symbol": "g",
+        "type": "periodic function"
+      }
+    ],
+    "objects": [
+      "gamma",
+      "H",
+      "L2",
+      "Bop",
+      "Stage",
+      "agamma",
+      "tau",
+      "n",
+      "t",
+      "w",
+      "M0",
+      "f",
+      "g"
+    ]
+  },
+  "inference": {
+    "id": "R007",
+    "inputs": [
+      "H002",
+      "E003",
+      "E004"
+    ],
+    "output": "N007",
+    "definitions": [
+      "D003",
+      "D004",
+      "D005",
+      "D016",
+      "D021",
+      "D022",
+      "D024",
+      "D025"
+    ],
+    "rules": [
+      "direct",
+      "forall_introduction",
+      "implication_introduction"
+    ],
+    "locals": [
+      {
+        "symbol": "eps",
+        "type": "real",
+        "scope": "R007/argument",
+        "start": "S002",
+        "end": "S003",
+        "kind": "witness",
+        "declaration": "Choose once a witness eps from F002, before choosing any functions, step or time. Thus 0<eps<=1/8 and the two quantified inequalities in F002 hold.",
+        "from_inputs": [],
+        "from_local": [
+          "F002"
+        ],
+        "objects": []
+      },
+      {
+        "symbol": "f",
+        "type": "periodic function",
+        "scope": "R007/product",
+        "start": "S002",
+        "end": "S002",
+        "kind": "arbitrary",
+        "declaration": "Fix arbitrary f; the memberships f in H^gamma and g in H^agamma are assumed only under L1.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "H",
+          "gamma",
+          "agamma"
+        ]
+      },
+      {
+        "symbol": "g",
+        "type": "periodic function",
+        "scope": "R007/product",
+        "start": "S002",
+        "end": "S002",
+        "kind": "arbitrary",
+        "declaration": "Fix arbitrary g; the memberships f in H^gamma and g in H^agamma are assumed only under L1.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "H",
+          "gamma",
+          "agamma"
+        ]
+      },
+      {
+        "symbol": "M0",
+        "type": "real",
+        "scope": "R007/stage",
+        "start": "S003",
+        "end": "S003",
+        "kind": "arbitrary",
+        "declaration": "Fix arbitrary M0 for the stage assertion; assume all its data and step conditions only under L2.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": []
+      },
+      {
+        "symbol": "tau",
+        "type": "real",
+        "scope": "R007/stage",
+        "start": "S003",
+        "end": "S003",
+        "kind": "arbitrary",
+        "declaration": "Fix arbitrary tau for the stage assertion; assume all its data and step conditions only under L2.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": []
+      },
+      {
+        "symbol": "n",
+        "type": "nonnegative integer",
+        "scope": "R007/stage",
+        "start": "S003",
+        "end": "S003",
+        "kind": "arbitrary",
+        "declaration": "Fix arbitrary n for the stage assertion; assume all its data and step conditions only under L2.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": []
+      },
+      {
+        "symbol": "t",
+        "type": "real",
+        "scope": "R007/stage",
+        "start": "S003",
+        "end": "S003",
+        "kind": "arbitrary",
+        "declaration": "Fix arbitrary t for the stage assertion; assume all its data and step conditions only under L2.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": []
+      },
+      {
+        "symbol": "w",
+        "type": "periodic function",
+        "scope": "R007/stage",
+        "start": "S003",
+        "end": "S003",
+        "kind": "arbitrary",
+        "declaration": "Fix arbitrary w for the stage assertion; assume all its data and step conditions only under L2.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": []
+      },
+      {
+        "symbol": "d3",
+        "type": "positive real",
+        "scope": "R007/epsilon_existence",
+        "start": "S004",
+        "end": "S006",
+        "kind": "witness",
+        "declaration": "Choose d3>0 witnessing the sufficiently-small clause of E003 at sigma_s=1/2, as spelled out in S004.",
+        "from_inputs": [
+          "E003"
+        ],
+        "from_local": [],
+        "objects": []
+      },
+      {
+        "symbol": "d4",
+        "type": "positive real",
+        "scope": "R007/epsilon_existence",
+        "start": "S005",
+        "end": "S006",
+        "kind": "witness",
+        "declaration": "Choose d4>0 witnessing the sufficiently-small clause of E004 at sigma_s=1/2, as spelled out in S005.",
+        "from_inputs": [
+          "E004"
+        ],
+        "from_local": [],
+        "objects": []
+      }
+    ],
+    "argument": [
+      {
+        "id": "S001",
+        "text": "D003 and D024 give ||h||_(Hsrc^s)^2=2*pi*||h||_(H^s)^2 at every real s. Multiplication of a norm by sqrt(2*pi)>0 preserves Cauchy sequences and zero-distance equivalence on polynomials. Thus the identity on polynomials identifies the completions as distributions with the same Fourier coefficients. It follows that ||h||_(Hsrc^s)=sqrt(2*pi)||h||_(H^s) and zero mean is preserved. D004 and D025 identify the order-zero spaces with L2 and L2src. For r<=s the weights satisfy (1+k^2)^r<=(1+k^2)^s, so comparison of the nonnegative sums yields H^s contained in H^r and ||h||_(H^r)<=||h||_(H^s); the source norms satisfy the identical comparison.",
+        "uses": [],
+        "uses_local": [],
+        "objects": [
+          "H",
+          "Hsrc",
+          "L2",
+          "L2src",
+          "Fourier"
+        ],
+        "produces": [
+          {
+            "id": "F001",
+            "statement": "For every real s, Hsrc^s and H^s have the same periodic distributions and ||h||_(Hsrc^s)=sqrt(2*pi)||h||_(H^s); zero mean is preserved. At s=0 these are L2src and L2. For real r<=s, H^s is contained in H^r and ||h||_(H^r)<=||h||_(H^s), with the same assertion for source norms.",
+            "binders": [
+              {
+                "symbol": "s",
+                "type": "real"
+              },
+              {
+                "symbol": "r",
+                "type": "real"
+              },
+              {
+                "symbol": "h",
+                "type": "periodic distribution"
+              }
+            ],
+            "objects": [
+              "H",
+              "Hsrc",
+              "L2",
+              "L2src",
+              "s",
+              "r",
+              "h"
+            ],
+            "assumptions": []
+          }
+        ],
+        "introduces": [],
+        "discharges": []
+      },
+      {
+        "id": "S004",
+        "text": "At sigma_s=1/2, the sufficiently-small clause of E003 means there exists d3>0 such that its estimate holds whenever 0<epsilon<d3, for all other parameters satisfying its hypotheses. Choose such a d3.",
+        "uses": [
+          "E003",
+          "E004"
+        ],
+        "uses_local": [],
+        "objects": [
+          "d3"
+        ],
+        "produces": [],
+        "introduces": [],
+        "discharges": []
+      },
+      {
+        "id": "S005",
+        "text": "Similarly the sufficiently-small clause of E004 at sigma_s=1/2 gives d4>0 such that its product estimate holds whenever 0<epsilon<d4 for all functions in its specified spaces. Choose such a d4.",
+        "uses": [
+          "E003",
+          "E004"
+        ],
+        "uses_local": [],
+        "objects": [
+          "d3",
+          "d4"
+        ],
+        "produces": [],
+        "introduces": [],
+        "discharges": []
+      },
+      {
+        "id": "S006",
+        "text": "Since d3>0 and d4>0, min(d3,d4,1/8)/2>0. This number is at most 1/8 and is less than d3 and d4. Substitution in the universally quantified epsilon intervals established above yields F002.",
+        "uses": [
+          "E003",
+          "E004"
+        ],
+        "uses_local": [],
+        "objects": [
+          "d3",
+          "d4"
+        ],
+        "produces": [
+          {
+            "id": "F002",
+            "statement": "There exists eps with 0<eps<=1/8 such that the following inequalities hold. For each beta in [-1/2-eps,3/2] there is C3 depending only on beta and eps such that, for every tau_s>0, nonnegative integer j, t in [j*tau_s,(j+1)*tau_s] and time-independent mean-zero g1,g2 in Hsrc^(1/2), ||(1/2) integral_(j*tau_s)^t S_(-s) partial_x[(S_s g1)(S_s g2)] ds||_(Hsrc^beta)<=C3*tau_s^((3/2-beta)/(2+eps))*||g1||_(Hsrc^(1/2))*||g2||_(Hsrc^(1/2)). There is also C4 depending only on eps such that, for every p in Hsrc^(1/2) and q in Hsrc^eps, ||p*q||_(L2src)<=C4*||p||_(Hsrc^(1/2))*||q||_(Hsrc^eps). The eps and constants are independent of the functions, grid indices, times, step sizes and support.",
+            "binders": [
+              {
+                "symbol": "eps",
+                "type": "real"
+              },
+              {
+                "symbol": "beta",
+                "type": "real"
+              },
+              {
+                "symbol": "C3",
+                "type": "real"
+              },
+              {
+                "symbol": "C4",
+                "type": "real"
+              },
+              {
+                "symbol": "tau_s",
+                "type": "real"
+              },
+              {
+                "symbol": "j",
+                "type": "nonnegative integer"
+              },
+              {
+                "symbol": "t",
+                "type": "real"
+              },
+              {
+                "symbol": "s",
+                "type": "real integration variable"
+              },
+              {
+                "symbol": "g1",
+                "type": "periodic function"
+              },
+              {
+                "symbol": "g2",
+                "type": "periodic function"
+              },
+              {
+                "symbol": "p",
+                "type": "periodic function"
+              },
+              {
+                "symbol": "q",
+                "type": "periodic function"
+              }
+            ],
+            "objects": [
+              "Hsrc",
+              "L2src",
+              "S",
+              "eps",
+              "beta",
+              "C3",
+              "C4",
+              "tau_s",
+              "j",
+              "t",
+              "s",
+              "g1",
+              "g2",
+              "p",
+              "q"
+            ],
+            "assumptions": []
+          }
+        ],
+        "introduces": [],
+        "discharges": []
+      },
+      {
+        "id": "S002",
+        "text": "Choose once eps as in F002; keep this fixed through the stage argument. Fix arbitrary periodic f,g and assume L1: f belongs to H^gamma and g belongs to H^agamma. H002 gives 0<gamma<=1. Apply E004 with sigma_s=gamma, source g=f and source h=g. If gamma<1/2 its required second exponent is 1/2-gamma=agamma, and if gamma>1/2 it is 0=agamma. If gamma=1/2, use epsilon=eps, which is admissible by F002. The required second exponent is then eps, rather than agamma=1/8. Since eps<=1/8, F001 gives g in H^eps and ||g||_(H^eps)<=||g||_(H^(1/8)). In all cases F001 supplies the actual source memberships and converts the source inequality, leaving a factor sqrt(2*pi) in its constant. Thus ||fg||_2<=C_gamma||f||_(H^gamma)||g||_(H^agamma). At gamma=1/2 the constant may depend on the single fixed eps chosen solely from the two source statements; it is independent of f,g and all numerical data. Discharge L1 and quantify f,g to obtain the unrestricted product assertion.",
+        "uses": [
+          "H002",
+          "E004"
+        ],
+        "uses_local": [
+          "F001",
+          "F002"
+        ],
+        "objects": [
+          "eps",
+          "f",
+          "g",
+          "gamma",
+          "agamma",
+          "H",
+          "Hsrc",
+          "L2",
+          "L2src"
+        ],
+        "produces": [],
+        "introduces": [
+          "L1"
+        ],
+        "discharges": [
+          "L1"
+        ]
+      },
+      {
+        "id": "S003",
+        "text": "Fix arbitrary real M0,tau,t, nonnegative integer n and periodic w. Assume L2: 0<tau<=1, t in [n*tau,(n+1)*tau], and w is time-independent, mean-zero, belongs to H^gamma and satisfies ||w||_(H^gamma)<=M0. In particular M0>=0. H002 and F001 give 0<gamma<=1 and w in Hsrc^gamma with ||w||_(Hsrc^gamma)<=sqrt(2*pi)*M0. In E003 set sigma_s=gamma, tau_s=tau, j=n, t_j=n*tau and g1=g2=w. For gamma=1/2 use epsilon=eps from F002, so beta0=-1/2-eps; otherwise use the source's prescribed beta0. The source integral is Stage_n(t;w): D005 identifies exp(s partial_x^3)=S_(-s) and exp(-s partial_x^3)=S_s, D016 identifies the integrand, and D021 has the same integral and factor 1/2. This equality holds on polynomials and for the distributional stage by extension; the source bounds provide its bounded extension in the norms used here. Apply E003 first with beta=agamma. For gamma<1/2, beta0=2*gamma-3/2 and agamma=1/2-gamma, giving agamma-beta0=2-3*gamma>0, agamma<=1+gamma, and theta=(1/2+2*gamma)/(5/2-gamma). Its denominator is positive, and theta>=gamma since the numerator minus gamma times the denominator is (gamma-1/4)^2+7/16>0. For gamma=1/2, beta0=-1/2-eps<agamma=1/8<3/2, and theta=(11/8)/(2+eps). Since 0<eps<=1/8, theta>=11/17>1/2=gamma. For gamma>1/2, beta0=gamma-1<=0=agamma<=1+gamma and theta=(1+gamma)/2>=gamma because gamma<=1. Thus each beta is allowed and each exponent denominator is positive. After F001 converts both sides, E003 yields ||Stage_n(t;w)||_(H^agamma)<=C_gamma*tau^theta*||w||_(H^gamma)^2. Because 0<tau<=1 and theta>=gamma, tau^theta<=tau^gamma: (theta-gamma)log(tau)<=0. This gives the first pointwise bound by C_gamma*M0^2*tau^gamma. Apply E003 again to the same data with beta=1+gamma; this upper endpoint is allowed in all three cases and its time exponent is zero. Norm conversion gives ||Stage_n(t;w)||_(H^(1+gamma))<=C_gamma*M0^2. Both constants are uniform in n,tau,t and support by E003; any dependence on eps is on the single fixed choice in S002. Taking one larger constant depending only on M0,gamma gives both asserted bounds. The stage has continuous representatives in these norms: the E003 endpoint formula, boundedness of Dinv from H^gamma to H^(1+gamma), strong continuity of the Airy multipliers, and continuity of multiplication on H^(1+gamma) give this. For completeness, the inverse-derivative bound follows from (1+k^2)/k^2<=2 on nonzero modes. Strong continuity follows by finite Fourier truncation and uniformly small square-summable tails. For r=1+gamma>1/2, multiplication is bounded on H^r by the weighted convolution inequality <k>^r<=C_r(<l>^r+<k-l>^r), the ell^1-ell^2 convolution bound, and Cauchy-Schwarz with sum_k<k>^(-2*r)<infinity. These establish the endpoint formula's continuity and the polynomial extension; H^(1+gamma) embeds in H^agamma by F001. The pointwise estimates with a common constant therefore bound both time suprema on the step as specified by D004. Discharge L2 and universally quantify the arbitrary stage data. Together with the product estimate, these are all the required assertions; the auxiliary eps does not occur in them.",
+        "uses": [
+          "H002",
+          "E003"
+        ],
+        "uses_local": [
+          "F001",
+          "F002"
+        ],
+        "objects": [
+          "eps",
+          "M0",
+          "tau",
+          "n",
+          "t",
+          "w",
+          "gamma",
+          "agamma",
+          "H",
+          "Hsrc",
+          "L2",
+          "S",
+          "Bop",
+          "Stage",
+          "Pnz",
+          "Dinv",
+          "Fourier"
+        ],
+        "produces": [],
+        "introduces": [
+          "L2"
+        ],
+        "discharges": [
+          "L2"
+        ]
+      }
+    ],
+    "applications": [
+      {
+        "id": "A001",
+        "input": "E004",
+        "at": "S002",
+        "bindings": "sigma_s=gamma, source g=f, source h=g; at gamma=1/2 set epsilon=eps, so the required second exponent is eps and is compared to agamma=1/8.",
+        "hypothesis_checks": [
+          "H002 gives sigma_s in (0,1]. At gamma=1/2 the witness eps chosen from F002 is positive and satisfies E004's sufficiently-small requirement; the sigma_s=0 endpoint is unused.",
+          "Under L1, F001 gives f in Hsrc^gamma. If gamma differs from 1/2 the required second space equals Hsrc^agamma. At gamma=1/2, eps<=1/8 and F001 give g in Hsrc^eps with its norm bounded by sqrt(2*pi)||g||_(H^agamma). No mean condition is imposed."
+        ]
+      },
+      {
+        "id": "A002",
+        "input": "E003",
+        "at": "S003",
+        "bindings": "sigma_s=gamma, tau_s=tau, j=n, t_j=n*tau, g1=g2=w, beta=agamma; at gamma=1/2 use epsilon=eps from F002 and beta0=-1/2-eps.",
+        "hypothesis_checks": [
+          "H002 supplies the exponent range. L2 supplies time independence, zero mean and membership in H^gamma; F001 identifies this with Hsrc^gamma and gives the norm bound sqrt(2*pi)*M0.",
+          "L2 gives tau>0, n a nonnegative integer and arbitrary t in [n*tau,n*tau+tau], so t_j=n*tau>=0.",
+          "S003 checks beta0<=agamma<=1+gamma in all three cases. In the middle case eps is an admissible sufficiently-small positive value by F002, not the unsupported value 1/8; theta=(11/8)/(2+eps)>=11/17>gamma."
+        ]
+      },
+      {
+        "id": "A003",
+        "input": "E003",
+        "at": "S003",
+        "bindings": "Same datum, time and admissible epsilon=eps as A002, with beta=1+gamma.",
+        "hypothesis_checks": [
+          "H002, L2 and F001 give the same legitimate source datum and exponent conditions as for A002.",
+          "The same L2 positive-step and time conditions apply.",
+          "beta=1+gamma is the source upper endpoint. In each case beta0<=1+gamma and 1+gamma-beta0>0 by S003; F002 supplies admissibility of eps when gamma=1/2. The numerator of the time exponent is zero."
+        ]
+      }
+    ]
+  },
+  "warning": "Direct inputs and fixed logic are supplied. Audit A may record mathematically checked routine background with actual conditions and justification; exact Lean bindings belong to nl02lean. No ancestor proof or extra H is available. A packet is not an audit certificate.",
+  "packet_sha256": "c1e42d34cc3e19c52c05cfb1a5f7e4975252019675c3d0058bc501969d8ad758"
+}

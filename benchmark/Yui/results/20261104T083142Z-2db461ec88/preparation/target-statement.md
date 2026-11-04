@@ -1,0 +1,71 @@
+# Selected target: complete Theorem 1
+
+Source: this run's original.pdf, Theorem 1 on page 2, with the standing conventions and solution class on pages 2–3. The entire source paper, including its supplied proof, is checked-source.md.
+
+The time grid in scheme (2) is \(\tau=T/L\), \(t_n=n\tau\), with \(L\) a positive integer and \(n=0,\ldots,L\). The maximum in Theorem 1 is over all these grid points. For fixed \(T>0\), \(0<\gamma\le1\) and \(R>0\), its \(C,\tau_0>0\) depend only on \(T,\gamma,R\) and are uniform over the specified initial-data ball and all grids with \(\tau\le\tau_0\). The theorem is for the displayed time-semidiscrete update without a spatial cutoff.
+
+The following is the complete source statement and its standing context, transcribed from pages 2–3.
+
+## 2 The scheme and the main result
+
+Use normalized measure \(dx/(2\pi)\) on \(\mathbb T=\mathbb R/(2\pi\mathbb Z)\); changing to unnormalized \(L^2\) only changes constants. Write \(S_t=e^{-t\partial_x^3}\), so that \(\widehat{S_tf}(k)=e^{itk^3}\widehat f(k)\). Let \(P_0\) be the mean, \(P=I-P_0\), and define \(D^{-1}=\partial_x^{-1}\) with multiplier \((ik)^{-1}\) for \(k\ne0\) and zero at zero. Set \(D^{-2}=(D^{-1})^2\). Write
+\[
+\widehat f(k)=(2\pi)^{-1}\int_0^{2\pi}f(x)e^{-ikx}\,dx
+\quad\hbox{and}\quad
+\|f\|_{H^s}^2=\sum_{k\in\mathbb Z}\langle k\rangle^{2s}|\widehat f(k)|^2,
+\qquad \langle k\rangle=(1+k^2)^{1/2}.
+\]
+Spaces are the completions of trigonometric polynomials in these norms, with negative spaces interpreted as distributions. Orthogonality gives the normalized \(L^2\) identity for polynomials and hence for their completions. For mean-zero functions and \(s\ge0\), \(\|f\|_{\dot H^s}\le\|f\|_{H^s}\le2^{s/2}\|f\|_{\dot H^s}\); for \(s<0\), \(2^{s/2}\|f\|_{\dot H^s}\le\|f\|_{H^s}\le\|f\|_{\dot H^s}\). Real-valued means \(\widehat f(-k)=\overline{\widehat f(k)}\). All time suprema concern continuous representatives; derivative norms are essential suprema. The exact solution is the unique real mean-zero \(C([0,T];H^\gamma)\) solution obtained by smooth approximation, and satisfies the equation distributionally. The constants \(C_M\) may change from line to line and depend on \(\gamma,T,M\), but are uniform in \(n,\tau\) and spectral support.
+
+The equation is
+\[
+u_t+u_{xxx}=\tfrac12\partial_x(u^2),\qquad u(0)=u_0. \tag{1}
+\]
+The fixed scheme is \(u^0=u_0\) and
+\[
+u^{n+1}=S_\tau u^n+F_\tau(u^n)+H_\tau(u^n),\qquad \tau=T/L, \tag{2}
+\]
+where
+\[
+\begin{aligned}
+F_\tau(f)&=\tfrac16 P[(S_\tau D^{-1}f)^2]-\tfrac16 S_\tau P[(D^{-1}f)^2],\\
+H_\tau(f)&=\tfrac13 P[(S_\tau D^{-1}f)D^{-1}F_\tau(f)]
++\tfrac{\tau}{9}(S_\tau D^{-1}f)P_0(f^2)\\
+&\quad-\tfrac1{54}\left[S_{\tau-s}D^{-1}[(S_sD^{-1}f)^3]\right]_{s=0}^{s=\tau}\\
+&\quad-\tfrac1{27\tau}\left[S_{\tau-s}D^{-2}[(S_{s-\tau}D^{-2}F_\tau(f))(S_sD^{-1}f)]\right]_{s=0}^{s=\tau}.
+\end{aligned}
+\]
+This is the scheme of [1, Eq. (1.4)], without a spatial frequency cutoff.
+
+**Theorem 1 (Logarithm-free convergence).** Let \(T>0\), \(0<\gamma\le1\), and \(R>0\). For real, mean-zero \(u_0\in H^\gamma(\mathbb T)\) with \(\|u_0\|_{H^\gamma}\le R\), there are \(C,\tau_0>0\), depending only on \(T,\gamma,R\), such that the scheme (2) satisfies
+\[
+\max_{0\le n\le L}\|u(n\tau)-u^n\|_{L^2}\le C\tau^\gamma
+\qquad\text{whenever }\tau=T/L\le\tau_0.
+\]
+
+The periodic KdV bounds of Babin–Ilyin–Titi control the exact flow on the initial-data ball. The continuous estimates of [1, Proposition 3.4 and Lemma 7.2] will be used in the stability proof. The logarithmic convergence theorem itself is not used. For the exact twisted solution \(v(t)=S_{-t}u(t)\), set
+\[
+M=1+\sup_{0\le t\le T}\|v(t)\|_{H^\gamma}.
+\]
+The source statements and the sign transformation giving a bound for \(M\) are recorded below in Section 2.1. No convergence theorem for the numerical scheme is used as an input. Intermediate constants may depend on \(M,\gamma,T\), but never on the timestep or a Fourier support bound.
+
+<!-- PDF page 3 -->
+
+### 2.1 The exact KdV flow
+
+The source [2, Theorems 4.2–4.3, 5.1, 6.3–6.5] treats \(U_t=UU_x+U_{xxx}\) on the same torus, with normalized measure and mean-zero homogeneous Sobolev norms. Theorem 4.2 bounds its Galerkin flows on \([0,T]\) in \(\dot H^s\) by a constant depending only on \(s,T,\|U_0\|_{\dot H^s}\) and an upper bound for \(\|U_0\|_2\). Theorem 4.3 gives a distributional limiting solution with the same bound. Theorems 5.1 (\(s>1/2\)) and 6.3 (\(0<s\le1/2\)) give its uniqueness, \(C([0,T];\dot H^s)\) regularity and continuous dependence. Theorem 6.4 covers \(s=0\), and Theorem 6.5 with \(\theta=0\) states that, for two flows whose initial \(L^2\) norms sum to at most \(B\),
+\(\sup_{[0,T]}\|U-\widetilde U\|_2\le C(T,B)\|U_0-\widetilde U_0\|_2\).
+Together these results specify the continuous flow and the uniform bounds needed here.
+
+Define \(u(t,x)=-U(t,-x)\). Then \(u_t=-U_t\), \(u_x=U_x\), \(u_{xxx}=U_{xxx}\) at \((t,-x)\), and consequently \(u_t+u_{xxx}=uu_x\). Fourier coefficients become \(\widehat u(k)=-\widehat U(-k)\), preserving every Sobolev norm, reality and zero mean. This transforms the source equation to (1). The norm comparison above transfers all bounds to our \(H^\gamma\) norm. Hence there is \(A(T,\gamma,R)<\infty\) such that every smooth initial datum in the stated ball satisfies \(\sup_{[0,T]}\|u(t)\|_{H^\gamma}\le A\). The same bound holds for the limiting solution: for each finite set of frequencies pass to the limit in its finite norm sum, then take the supremum over finite sets. Thus \(M\le1+A(T,\gamma,R)\) uniformly. Continuous dependence in \(L^2\) is precisely the input used in the final density passage. No change of torus length or amplitude scaling is needed.
+
+
+## Supplied proof route
+
+The following sentences are transcribed from the supplied paper's abstract/introduction:
+
+"The main estimate concerns the exact averaged cubic remainder. Retaining both ratios of its two oscillatory phases bounds the dual four-frequency multiplier by the reciprocal of the third largest frequency. A dyadic four-linear estimate sums this majorant without a logarithm and includes a mixed \(L^2\) endpoint. That endpoint controls the remainder at the numerical state without a numerical Sobolev bound. We then prove the full global estimate using the continuous trilinear bounds of Li and Wu, a stepwise residual calculation, low–high frequency stability, a restarted bootstrap, and density."
+
+"In particular, the normal-form identity keeps both endpoints when the time interval is restarted, and its forcing term is estimated from the actual stepwise residual. A fixed-timestep approximation argument then removes the temporary smoothness used in the calculations."
+
+The complete supplied proof, including all definitions, transformations, evolution equations, identities, estimates, experimental sections and bibliography, is retained in checked-source.md in original page order.

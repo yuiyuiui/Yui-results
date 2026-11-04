@@ -7,7 +7,7 @@ new independent attempt at the whole paper.
 
 ## Environment and fixed inputs
 
-- Use the original [paper](../aim-518-kdv-log-loss.pdf), SHA-256
+- Use the original [paper](aim-518-kdv-log-loss.pdf), SHA-256
   `5d6432bf9c097991bf5d853f38e831a539b4f052f0ccf4010bba6e37b54507b6`.
 - Use Lean **4.32.2** and Mathlib commit
   `905b95818eb32af7874a58b427f50c1711a5e96c`, with its pinned dependencies and
@@ -37,7 +37,7 @@ Open a fresh local Codex task at the repository root and give it this instructio
 ```text
 Run a new from-scratch pure-model benchmark now. Start at
 benchmark/pure-model-result/README.md and follow section 1 of REPRODUCE.md.
-Use only benchmark/aim-518-kdv-log-loss.pdf and its cited sources as mathematical
+Use only benchmark/pure-model-result/aim-518-kdv-log-loss.pdf and its cited sources as mathematical
 inputs, with the pinned Lean/Mathlib. Render the author task from prompt.py.
 Use one clean native author session, gpt-6.1-sol/high/Standard, without Yui proof
 rules, personal skills/memories, other agents or previous benchmark results.
@@ -71,7 +71,7 @@ the following from this directory after selecting actual absolute paths:
 
 ```sh
 python3 -B runner.py --work /absolute/path/to/new-run \
-  --paper /absolute/path/to/benchmark/aim-518-kdv-log-loss.pdf \
+  --paper /absolute/path/to/benchmark/pure-model-result/aim-518-kdv-log-loss.pdf \
   --lean /absolute/path/to/lean --mathlib /absolute/path/to/mathlib \
   --codex /absolute/path/to/codex --prepare-only
 ```

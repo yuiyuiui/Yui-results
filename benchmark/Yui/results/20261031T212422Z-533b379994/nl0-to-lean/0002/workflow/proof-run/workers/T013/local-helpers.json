@@ -1,0 +1,321 @@
+[
+  {
+    "name": "yui_aux_0001",
+    "statement": "∀ (s : ℝ) (k : ℤ), 0 < KdVPlan.weight s k ∧ KdVPlan.weight (-s/2) k * KdVPlan.weight (s/2) k = 1 ∧ KdVPlan.weight s k * (KdVPlan.weight (-s/2) k)^2 = 1 ∧ (KdVPlan.weight (s/2) k)^2 = KdVPlan.weight s k",
+    "proof": "intro s k\nhave hb : 0 < 1 + (k : ℝ)^2 := by positivity\nhave hm : ∀ a b : ℝ, KdVPlan.weight a k * KdVPlan.weight b k = KdVPlan.weight (a+b) k := by\n  intro a b\n  exact (Real.rpow_add hb a b).symm\nhave hs : ∀ a : ℝ, (KdVPlan.weight a k)^2 = KdVPlan.weight (a+a) k := by\n  intro a\n  simpa only [pow_two] using hm a a\nrefine ⟨Real.rpow_pos_of_pos hb _, ?_, ?_, ?_⟩\n· rw [hm]\n  have : -s/2 + s/2 = 0 := by ring\n  rw [this]\n  simp [KdVPlan.weight]\n· rw [hs, hm]\n  have : s + (-s/2 + -s/2) = 0 := by ring\n  rw [this]\n  simp [KdVPlan.weight]\n· rw [hs]\n  congr 1\n  ring",
+    "dependencies": [],
+    "context_sha256": "2b3f60f22f6af5a7cee85bc0af058bc6a41dd1d01ee8f72131a9a7b25e7587c6",
+    "sha256": "c139ab2b9e3bb82818fbb20777cc9c22dc474478db892d8400557ad80ff61a74",
+    "check": {
+      "exit_code": 0,
+      "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-l6oiyjzr/output/Auxiliary.lean:525:17: warning: Variable name `T` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-l6oiyjzr/output/Auxiliary.lean:525:25: warning: Variable name `gamma` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-l6oiyjzr/output/Auxiliary.lean:525:37: warning: Variable name `R` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (T gamma R s : ℝ) (k : ℤ),\n  0 < KdVPlan.weight s k ∧\n    KdVPlan.weight (-s / 2) k * KdVPlan.weight (s / 2) k = 1 ∧\n      KdVPlan.weight s k * KdVPlan.weight (-s / 2) k ^ 2 = 1 ∧ KdVPlan.weight (s / 2) k ^ 2 = KdVPlan.weight s k\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+      "stderr": "",
+      "wall_seconds": 4.332720957696438,
+      "native_limits": {
+        "timeout_seconds": 180,
+        "max_heartbeats": 20000000
+      },
+      "source_path": "/Users/syyui/projects/Yui-results/benchmark/results/20261031T212422Z-533b379994/native-checks/b66882a5e4c14963ac0ecd3135800a90.lean",
+      "source_sha256": "35fff0be0d94a3444cb4598a282794cecfd5def3f671af8eb6f7173a3e3cf66c",
+      "auxiliary_valid": true,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "lean_sha256": "35fff0be0d94a3444cb4598a282794cecfd5def3f671af8eb6f7173a3e3cf66c",
+      "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+      "context_port": "T013",
+      "candidate": 2
+    }
+  },
+  {
+    "name": "yui_aux_0002",
+    "statement": "∀ (s : ℝ) (f : KdVPlan.Coeff) (k : ℤ), ‖(KdVPlan.weight (s/2) k : ℂ) * f k‖^2 = KdVPlan.weight s k * ‖f k‖^2 ∧ KdVPlan.weight s k * ‖(KdVPlan.weight (-s/2) k : ℂ) * f k‖^2 = ‖f k‖^2 ∧ (KdVPlan.weight (-s/2) k : ℂ) * ((KdVPlan.weight (s/2) k : ℂ) * f k) = f k",
+    "proof": "intro s f k\nhave hw := yui_aux_0001 T gamma R s k\nhave hn := (yui_aux_0001 T gamma R (-s) k).1.le\nhave hp : 0 ≤ KdVPlan.weight (-s/2) k := (yui_aux_0001 T gamma R (-s/2) k).1.le\nhave hp' : 0 ≤ KdVPlan.weight (s/2) k := (yui_aux_0001 T gamma R (s/2) k).1.le\nrefine ⟨?_, ?_, ?_⟩\n· rw [norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg hp', mul_pow, hw.2.2.2]\n· rw [norm_mul, Complex.norm_real, Real.norm_eq_abs, abs_of_nonneg hp, mul_pow, ← mul_assoc, hw.2.2.1, one_mul]\n· rw [← mul_assoc, ← Complex.ofReal_mul, hw.2.1]\n  simp",
+    "dependencies": [
+      "yui_aux_0001"
+    ],
+    "context_sha256": "2b3f60f22f6af5a7cee85bc0af058bc6a41dd1d01ee8f72131a9a7b25e7587c6",
+    "sha256": "39252ad8f3140df1c6ea93538c99fd38f4bd8a99a6df8045f51d85f420efe9cb",
+    "check": {
+      "exit_code": 0,
+      "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-ez9lyvoj/output/Auxiliary.lean:525:22: warning: Variable name `T` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-ez9lyvoj/output/Auxiliary.lean:525:30: warning: Variable name `gamma` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-ez9lyvoj/output/Auxiliary.lean:525:42: warning: Variable name `R` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (T gamma R s : ℝ) (f : KdVPlan.Coeff) (k : ℤ),\n  ‖↑(KdVPlan.weight (s / 2) k) * f k‖ ^ 2 = KdVPlan.weight s k * ‖f k‖ ^ 2 ∧\n    KdVPlan.weight s k * ‖↑(KdVPlan.weight (-s / 2) k) * f k‖ ^ 2 = ‖f k‖ ^ 2 ∧\n      ↑(KdVPlan.weight (-s / 2) k) * (↑(KdVPlan.weight (s / 2) k) * f k) = f k\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+      "stderr": "",
+      "wall_seconds": 4.140668124891818,
+      "native_limits": {
+        "timeout_seconds": 180,
+        "max_heartbeats": 20000000
+      },
+      "source_path": "/Users/syyui/projects/Yui-results/benchmark/results/20261031T212422Z-533b379994/native-checks/213dbf68ae164110a8c1f87cb92b6c1e.lean",
+      "source_sha256": "e4cc5edd8210e4b18020efa9e261e684a0b53e84c352fe7898ef5bde4305d33b",
+      "auxiliary_valid": true,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "lean_sha256": "e4cc5edd8210e4b18020efa9e261e684a0b53e84c352fe7898ef5bde4305d33b",
+      "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+      "context_port": "T013",
+      "candidate": 3
+    }
+  },
+  {
+    "name": "yui_aux_0003",
+    "statement": "∀ (s : ℝ) (x : lp (fun _ : ℤ => ℂ) 2), KdVPlan.MemH s (KdVPlan.FromLP s x) ∧ KdVPlan.hn s (KdVPlan.FromLP s x) = ‖x‖",
+    "proof": "intro s x\nhave hx : Summable (fun k : ℤ => ‖x k‖^2) := by\n  simpa using (lp.memℓp x).summable (by norm_num : 0 < (2 : ℝ≥0∞).toReal)\nhave he : (fun k => KdVPlan.weight s k * ‖KdVPlan.FromLP s x k‖^2) = (fun k => ‖x k‖^2) := by\n  funext k\n  exact (yui_aux_0002 T gamma R s x k).2.1\nrefine ⟨?_, ?_⟩\n· unfold KdVPlan.MemH\n  rw [he]\n  exact hx\n· unfold KdVPlan.hn\n  rw [he, lp.norm_eq_tsum_rpow (by norm_num : 0 < (2 : ℝ≥0∞).toReal)]\n  simp [Real.sqrt_eq_rpow]",
+    "dependencies": [
+      "yui_aux_0002"
+    ],
+    "context_sha256": "2b3f60f22f6af5a7cee85bc0af058bc6a41dd1d01ee8f72131a9a7b25e7587c6",
+    "sha256": "23f439e5c427fd28e6481cc30fe6e9b37030208f44e8c73499e792aa2618d439",
+    "check": {
+      "exit_code": 0,
+      "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-h02thfq_/output/Auxiliary.lean:525:22: warning: Variable name `T` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-h02thfq_/output/Auxiliary.lean:525:30: warning: Variable name `gamma` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-h02thfq_/output/Auxiliary.lean:525:42: warning: Variable name `R` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (T gamma R s : ℝ) (x : ↥(lp (fun x => ℂ) 2)),\n  KdVPlan.MemH s (KdVPlan.FromLP s x) ∧ KdVPlan.hn s (KdVPlan.FromLP s x) = ‖x‖\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+      "stderr": "",
+      "wall_seconds": 4.951870208140463,
+      "native_limits": {
+        "timeout_seconds": 180,
+        "max_heartbeats": 20000000
+      },
+      "source_path": "/Users/syyui/projects/Yui-results/benchmark/results/20261031T212422Z-533b379994/native-checks/ebab2c59636f44589a939ea8b53724a9.lean",
+      "source_sha256": "eb3794d1a8093828db7320043233a64e7bb88ec503adacf73fa1bd0df749a294",
+      "auxiliary_valid": true,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "lean_sha256": "eb3794d1a8093828db7320043233a64e7bb88ec503adacf73fa1bd0df749a294",
+      "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+      "context_port": "T013",
+      "candidate": 4
+    }
+  },
+  {
+    "name": "yui_aux_0004",
+    "statement": "∀ (s : ℝ) (f : KdVPlan.Coeff), KdVPlan.MemH s f ↔ ∃ x : lp (fun _ : ℤ => ℂ) 2, f = KdVPlan.FromLP s x",
+    "proof": "intro s f\nconstructor\n· intro hf\n  have hx : Memℓp (fun k : ℤ => (KdVPlan.weight (s/2) k : ℂ) * f k) 2 := by\n    apply memℓp_gen\n    have he : (fun k : ℤ => ‖(KdVPlan.weight (s/2) k : ℂ)*f k‖ ^ (2 : ℝ≥0∞).toReal) =\n        (fun k => KdVPlan.weight s k * ‖f k‖^2) := by\n      funext k\n      simpa using (yui_aux_0002 T gamma R s f k).1\n    rw [he]\n    exact hf\n  refine ⟨⟨_, hx⟩, ?_⟩\n  funext k\n  exact ((yui_aux_0002 T gamma R s f k).2.2).symm\n· rintro ⟨x, rfl⟩\n  exact (yui_aux_0003 T gamma R s x).1",
+    "dependencies": [
+      "yui_aux_0002",
+      "yui_aux_0003"
+    ],
+    "context_sha256": "2b3f60f22f6af5a7cee85bc0af058bc6a41dd1d01ee8f72131a9a7b25e7587c6",
+    "sha256": "7222dd811f065464672fc528bfd151ee1471db95ca5819698a249a2a0ccee88f",
+    "check": {
+      "exit_code": 0,
+      "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-peamu4tw/output/Auxiliary.lean:525:22: warning: Variable name `T` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-peamu4tw/output/Auxiliary.lean:525:30: warning: Variable name `gamma` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-peamu4tw/output/Auxiliary.lean:525:42: warning: Variable name `R` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (T gamma R s : ℝ) (f : KdVPlan.Coeff), KdVPlan.MemH s f ↔ ∃ x, f = KdVPlan.FromLP s x\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+      "stderr": "",
+      "wall_seconds": 5.1644089999608696,
+      "native_limits": {
+        "timeout_seconds": 180,
+        "max_heartbeats": 20000000
+      },
+      "source_path": "/Users/syyui/projects/Yui-results/benchmark/results/20261031T212422Z-533b379994/native-checks/73ad6f6821774f8eae4798418476a18b.lean",
+      "source_sha256": "13012cc23fbc9b25043e9fca82e16d2ecf5633a7806c9fa89de808b0cc89b0fa",
+      "auxiliary_valid": true,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "lean_sha256": "13012cc23fbc9b25043e9fca82e16d2ecf5633a7806c9fa89de808b0cc89b0fa",
+      "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+      "context_port": "T013",
+      "candidate": 5
+    }
+  },
+  {
+    "name": "yui_aux_0005",
+    "statement": "∀ (s : ℝ) (x y : lp (fun _ : ℤ => ℂ) 2), KdVPlan.FromLP s (x-y) = KdVPlan.FromLP s x-KdVPlan.FromLP s y",
+    "proof": "intro s x y\nfunext k\nchange (KdVPlan.weight (-s/2) k : ℂ)*(x k-y k) =\n  (KdVPlan.weight (-s/2) k : ℂ)*x k-(KdVPlan.weight (-s/2) k : ℂ)*y k\nring",
+    "dependencies": [],
+    "context_sha256": "2b3f60f22f6af5a7cee85bc0af058bc6a41dd1d01ee8f72131a9a7b25e7587c6",
+    "sha256": "a28918a19967255312c1ac59a5cab0aeb90d511ca8fc4f9f7d31f6c5575aa820",
+    "check": {
+      "exit_code": 0,
+      "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-vspbtsip/output/Auxiliary.lean:525:22: warning: Variable name `T` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-vspbtsip/output/Auxiliary.lean:525:30: warning: Variable name `gamma` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-vspbtsip/output/Auxiliary.lean:525:42: warning: Variable name `R` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-vspbtsip/output/Auxiliary.lean:592:17: warning: Variable name `T` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-vspbtsip/output/Auxiliary.lean:592:25: warning: Variable name `gamma` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-vspbtsip/output/Auxiliary.lean:592:37: warning: Variable name `R` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (T gamma R s : ℝ) (x y : ↥(lp (fun x => ℂ) 2)),\n  KdVPlan.FromLP s (x - y) = KdVPlan.FromLP s x - KdVPlan.FromLP s y\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+      "stderr": "",
+      "wall_seconds": 4.553277457598597,
+      "native_limits": {
+        "timeout_seconds": 180,
+        "max_heartbeats": 20000000
+      },
+      "source_path": "/Users/syyui/projects/Yui-results/benchmark/results/20261031T212422Z-533b379994/native-checks/4dfb9843145d42cf95d666a1f7fb08ec.lean",
+      "source_sha256": "113edc25e2396677ceff0fc51db213e5937a67592547e5920a7d77030bdd5afc",
+      "auxiliary_valid": true,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "lean_sha256": "113edc25e2396677ceff0fc51db213e5937a67592547e5920a7d77030bdd5afc",
+      "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+      "context_port": "T013",
+      "candidate": 6
+    }
+  },
+  {
+    "name": "yui_aux_0006",
+    "statement": "∀ (q r : ℝ) (f : KdVPlan.Coeff), q ≤ r → KdVPlan.MemH r f → KdVPlan.HB q f (KdVPlan.hn r f)",
+    "proof": "intro q r f hqr hf\nhave hn : ∀ s k, 0 ≤ KdVPlan.weight s k * ‖f k‖^2 := by\n  intro s k\n  exact mul_nonneg (yui_aux_0001 T gamma R s k).1.le (sq_nonneg _)\nhave hle : ∀ k, KdVPlan.weight q k * ‖f k‖^2 ≤ KdVPlan.weight r k * ‖f k‖^2 := by\n  intro k\n  apply mul_le_mul_of_nonneg_right _ (sq_nonneg _)\n  exact Real.rpow_le_rpow_of_exponent_le (by nlinarith [sq_nonneg (k : ℝ)]) hqr\nhave hq : KdVPlan.MemH q f := Summable.of_nonneg_of_le (hn q) hle hf\nrefine ⟨hq, Real.sqrt_le_sqrt ?_⟩\nexact hq.tsum_le_tsum hle hf",
+    "dependencies": [
+      "yui_aux_0001"
+    ],
+    "context_sha256": "2b3f60f22f6af5a7cee85bc0af058bc6a41dd1d01ee8f72131a9a7b25e7587c6",
+    "sha256": "53f767bce808ad43a7eb71d5dd403c916b2925eb8272ed26f551f8dea9bfb63b",
+    "check": {
+      "exit_code": 0,
+      "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-b34n_5m0/output/Auxiliary.lean:525:22: warning: Variable name `T` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-b34n_5m0/output/Auxiliary.lean:525:30: warning: Variable name `gamma` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-b34n_5m0/output/Auxiliary.lean:525:42: warning: Variable name `R` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-b34n_5m0/output/Auxiliary.lean:592:22: warning: Variable name `T` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-b34n_5m0/output/Auxiliary.lean:592:30: warning: Variable name `gamma` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-b34n_5m0/output/Auxiliary.lean:592:42: warning: Variable name `R` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (T gamma R q r : ℝ) (f : KdVPlan.Coeff), q ≤ r → KdVPlan.MemH r f → KdVPlan.HB q f (KdVPlan.hn r f)\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+      "stderr": "",
+      "wall_seconds": 4.458810041192919,
+      "native_limits": {
+        "timeout_seconds": 180,
+        "max_heartbeats": 20000000
+      },
+      "source_path": "/Users/syyui/projects/Yui-results/benchmark/results/20261031T212422Z-533b379994/native-checks/67fbdc2fa714469484b10b018c5ba33f.lean",
+      "source_sha256": "2027cc9fb6e4533d2f1733ca274b35c0112804a41faad5a26991fad8c1fdf046",
+      "auxiliary_valid": true,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "lean_sha256": "2027cc9fb6e4533d2f1733ca274b35c0112804a41faad5a26991fad8c1fdf046",
+      "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+      "context_port": "T013",
+      "candidate": 7
+    }
+  },
+  {
+    "name": "yui_aux_0007",
+    "statement": "∀ (s : ℝ) (f : KdVPlan.Coeff), KdVPlan.MemH s f → ∀ n : ℕ, KdVPlan.MemH s (KdVPlan.cutoff (n : ℝ) f-f)",
+    "proof": "intro s f hf n\napply Summable.of_nonneg_of_le (f := fun k => KdVPlan.weight s k * ‖f k‖^2)\n· intro k\n  exact mul_nonneg (yui_aux_0001 T gamma R s k).1.le (sq_nonneg _)\n· intro k\n  by_cases hk : |(k : ℝ)| ≤ (n : ℝ)\n  · simp [KdVPlan.cutoff, hk]\n    exact mul_nonneg (yui_aux_0001 T gamma R s k).1.le (sq_nonneg _)\n  · simp [KdVPlan.cutoff, hk]\n· exact hf",
+    "dependencies": [
+      "yui_aux_0001"
+    ],
+    "context_sha256": "2b3f60f22f6af5a7cee85bc0af058bc6a41dd1d01ee8f72131a9a7b25e7587c6",
+    "sha256": "b39af158a8ff6ccd7b9c78492d105980a296064c9e8a78dd8a7c099c3ea11a2e",
+    "check": {
+      "exit_code": 0,
+      "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-x74beroc/output/Auxiliary.lean:525:22: warning: Variable name `T` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-x74beroc/output/Auxiliary.lean:525:30: warning: Variable name `gamma` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-x74beroc/output/Auxiliary.lean:525:42: warning: Variable name `R` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-x74beroc/output/Auxiliary.lean:592:22: warning: Variable name `T` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-x74beroc/output/Auxiliary.lean:592:30: warning: Variable name `gamma` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-x74beroc/output/Auxiliary.lean:592:42: warning: Variable name `R` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (T gamma R s : ℝ) (f : KdVPlan.Coeff),\n  KdVPlan.MemH s f → ∀ (n : ℕ), KdVPlan.MemH s (KdVPlan.cutoff (↑n) f - f)\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+      "stderr": "",
+      "wall_seconds": 3.923520874697715,
+      "native_limits": {
+        "timeout_seconds": 180,
+        "max_heartbeats": 20000000
+      },
+      "source_path": "/Users/syyui/projects/Yui-results/benchmark/results/20261031T212422Z-533b379994/native-checks/a05fb35eea0a4860a097b2f67ee715cf.lean",
+      "source_sha256": "db838d7489d59fa7009c13d391836f90cd941e0f4720f1845de707e9e2b9f193",
+      "auxiliary_valid": true,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "lean_sha256": "db838d7489d59fa7009c13d391836f90cd941e0f4720f1845de707e9e2b9f193",
+      "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+      "context_port": "T013",
+      "candidate": 9
+    }
+  },
+  {
+    "name": "yui_aux_0008",
+    "statement": "∀ a : ℕ → ℝ, Tendsto a atTop (nhds 0) → Tendsto (fun n => Real.sqrt (a n)) atTop (nhds 0)",
+    "proof": "intro a ha\nhave hc : Tendsto Real.sqrt (nhds (0 : ℝ)) (nhds (Real.sqrt 0)) :=\n  Real.continuous_sqrt.continuousAt.tendsto\nsimpa only [Function.comp_def, Real.sqrt_zero] using hc.comp ha",
+    "dependencies": [],
+    "context_sha256": "2b3f60f22f6af5a7cee85bc0af058bc6a41dd1d01ee8f72131a9a7b25e7587c6",
+    "sha256": "1d078c28697e421593e35b59b91d9dfe27e0de86592c04d15df53979ac410949",
+    "check": {
+      "exit_code": 0,
+      "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-hx7ad3_y/output/Auxiliary.lean:525:22: warning: Variable name `T` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-hx7ad3_y/output/Auxiliary.lean:525:30: warning: Variable name `gamma` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-hx7ad3_y/output/Auxiliary.lean:525:42: warning: Variable name `R` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-hx7ad3_y/output/Auxiliary.lean:592:22: warning: Variable name `T` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-hx7ad3_y/output/Auxiliary.lean:592:30: warning: Variable name `gamma` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-hx7ad3_y/output/Auxiliary.lean:592:42: warning: Variable name `R` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-hx7ad3_y/output/Auxiliary.lean:624:17: warning: Variable name `T` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-hx7ad3_y/output/Auxiliary.lean:624:25: warning: Variable name `gamma` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-hx7ad3_y/output/Auxiliary.lean:624:37: warning: Variable name `R` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (T gamma R : ℝ) (a : ℕ → ℝ), Tendsto a atTop (nhds 0) → Tendsto (fun n => √(a n)) atTop (nhds 0)\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+      "stderr": "",
+      "wall_seconds": 5.535846458282322,
+      "native_limits": {
+        "timeout_seconds": 180,
+        "max_heartbeats": 20000000
+      },
+      "source_path": "/Users/syyui/projects/Yui-results/benchmark/results/20261031T212422Z-533b379994/native-checks/d221053a45c243d1a446f904e7e69692.lean",
+      "source_sha256": "b5961034b076451cabd07310cb8eb5c1ef8a9c389b5ea21efc4dfc907f9eb107",
+      "auxiliary_valid": true,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "lean_sha256": "b5961034b076451cabd07310cb8eb5c1ef8a9c389b5ea21efc4dfc907f9eb107",
+      "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+      "context_port": "T013",
+      "candidate": 11
+    }
+  },
+  {
+    "name": "yui_aux_0009",
+    "statement": "∀ (s : ℝ) (f : KdVPlan.Coeff), KdVPlan.MemH s f → KdVPlan.SeqConv s (fun n : ℕ => KdVPlan.cutoff (n : ℝ) f) f",
+    "proof": "intro s f hf\nhave hnon : ∀ k, 0 ≤ KdVPlan.weight s k * ‖f k‖^2 := by\n  intro k\n  exact mul_nonneg (yui_aux_0001 T gamma R s k).1.le (sq_nonneg _)\nlet A : ℕ → ℤ → ℝ := fun n k => KdVPlan.weight s k * ‖(KdVPlan.cutoff (n : ℝ) f-f) k‖^2\nhave he : ∀ n k, A n k = if |(k : ℝ)| ≤ (n : ℝ) then 0 else KdVPlan.weight s k * ‖f k‖^2 := by\n  intro n k\n  dsimp [A, KdVPlan.cutoff]\n  split_ifs <;> simp_all\nhave hAn : ∀ n k, 0 ≤ A n k := by\n  intro n k\n  rw [he]\n  split_ifs\n  · exact le_rfl\n  · exact hnon k\nhave hAle : ∀ n k, A n k ≤ KdVPlan.weight s k * ‖f k‖^2 := by\n  intro n k\n  rw [he]\n  split_ifs\n  · exact hnon k\n  · exact le_rfl\nhave hmem := yui_aux_0007 T gamma R s f hf\nhave hpoint : ∀ k, Tendsto (fun n => A n k) atTop (nhds 0) := by\n  intro k\n  obtain ⟨m, hm⟩ := exists_nat_ge |(k : ℝ)|\n  apply tendsto_const_nhds.congr'\n  filter_upwards [eventually_ge_atTop m] with n hn\n  rw [he, if_pos (hm.trans (by exact_mod_cast hn))]\nhave ht : Tendsto (fun n => ∑' k, A n k) atTop (nhds 0) := by\n  simpa using tendsto_tsum_of_dominated_convergence hf hpoint\n    (Filter.Eventually.of_forall (fun n k => by\n      rw [Real.norm_eq_abs, abs_of_nonneg (hAn n k)]\n      exact hAle n k))\nhave hnorm : Tendsto (fun n : ℕ => KdVPlan.hn s (KdVPlan.cutoff (n : ℝ) f-f)) atTop (nhds 0) := by\n  exact yui_aux_0008 T gamma R (fun n => ∑' k, A n k) ht\nrefine ⟨hf, ?_⟩\nintro ε hε\nobtain ⟨m, hm⟩ := eventually_atTop.1 (hnorm.eventually (gt_mem_nhds hε))\nexact ⟨m, fun n hn => ⟨hmem n, (hm n hn).le⟩⟩",
+    "dependencies": [
+      "yui_aux_0001",
+      "yui_aux_0007",
+      "yui_aux_0008"
+    ],
+    "context_sha256": "2b3f60f22f6af5a7cee85bc0af058bc6a41dd1d01ee8f72131a9a7b25e7587c6",
+    "sha256": "b2f5ff29ae0af691f7cf1ab766ce80f4d41c0b789ec4157ec0adc8a433e8efed",
+    "check": {
+      "exit_code": 0,
+      "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-xl243i2c/output/Auxiliary.lean:525:22: warning: Variable name `T` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-xl243i2c/output/Auxiliary.lean:525:30: warning: Variable name `gamma` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-xl243i2c/output/Auxiliary.lean:525:42: warning: Variable name `R` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-xl243i2c/output/Auxiliary.lean:592:22: warning: Variable name `T` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-xl243i2c/output/Auxiliary.lean:592:30: warning: Variable name `gamma` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-xl243i2c/output/Auxiliary.lean:592:42: warning: Variable name `R` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-xl243i2c/output/Auxiliary.lean:624:22: warning: Variable name `T` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-xl243i2c/output/Auxiliary.lean:624:30: warning: Variable name `gamma` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-xl243i2c/output/Auxiliary.lean:624:42: warning: Variable name `R` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (T gamma R s : ℝ) (f : KdVPlan.Coeff),\n  KdVPlan.MemH s f → KdVPlan.SeqConv s (fun n => KdVPlan.cutoff (↑n) f) f\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+      "stderr": "",
+      "wall_seconds": 5.170771208126098,
+      "native_limits": {
+        "timeout_seconds": 180,
+        "max_heartbeats": 20000000
+      },
+      "source_path": "/Users/syyui/projects/Yui-results/benchmark/results/20261031T212422Z-533b379994/native-checks/cac9e3a178fa423dab8abe173ff38b8d.lean",
+      "source_sha256": "7f6300a01df555c371b90f2b479dd68d02615036429bab88f2f11991031ef57f",
+      "auxiliary_valid": true,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "lean_sha256": "7f6300a01df555c371b90f2b479dd68d02615036429bab88f2f11991031ef57f",
+      "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+      "context_port": "T013",
+      "candidate": 12
+    }
+  },
+  {
+    "name": "yui_aux_0010",
+    "statement": "∀ (s : ℝ) (f : ℕ → KdVPlan.Coeff), (∀ n, KdVPlan.MemH s (f n)) → (∀ ε > 0, ∃ m : ℕ, ∀ n ≥ m, ∀ j ≥ m, KdVPlan.HB s (f n-f j) ε) → ∃ g, KdVPlan.SeqConv s f g",
+    "proof": "classical\nintro s f hf hc\nchoose x hx using fun n => (yui_aux_0004 T gamma R s (f n)).1 (hf n)\nhave hd : ∀ n j, dist (x n) (x j) = KdVPlan.hn s (f n-f j) := by\n  intro n j\n  rw [dist_eq_norm, ← (yui_aux_0003 T gamma R s (x n-x j)).2,\n    yui_aux_0005 T gamma R, ← hx n, ← hx j]\nhave hcx : CauchySeq x := by\n  apply Metric.cauchySeq_iff.2\n  intro ε hε\n  obtain ⟨m, hm⟩ := hc (ε/2) (by positivity)\n  refine ⟨m, ?_⟩\n  intro n hn j hj\n  rw [hd]\n  exact lt_of_le_of_lt (hm n hn j hj).2 (by linarith)\nobtain ⟨y, hy⟩ := cauchySeq_tendsto_of_complete hcx\nrefine ⟨KdVPlan.FromLP s y, (yui_aux_0003 T gamma R s y).1, ?_⟩\nintro ε hε\nobtain ⟨m, hm⟩ := eventually_atTop.1 ((Metric.tendsto_nhds.1 hy) ε hε)\nrefine ⟨m, ?_⟩\nintro n hn\nhave he : f n-KdVPlan.FromLP s y = KdVPlan.FromLP s (x n-y) := by\n  rw [yui_aux_0005 T gamma R, ← hx n]\nrw [he]\nrefine ⟨(yui_aux_0003 T gamma R s (x n-y)).1, ?_⟩\nrw [(yui_aux_0003 T gamma R s (x n-y)).2]\nexact (by simpa only [dist_eq_norm] using hm n hn : ‖x n-y‖ < ε).le",
+    "dependencies": [
+      "yui_aux_0003",
+      "yui_aux_0004",
+      "yui_aux_0005"
+    ],
+    "context_sha256": "2b3f60f22f6af5a7cee85bc0af058bc6a41dd1d01ee8f72131a9a7b25e7587c6",
+    "sha256": "6fa5058b6e564d5b53835f3731982c3b814dd09dac26e1613c140d610a4e4384",
+    "check": {
+      "exit_code": 0,
+      "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-eyw7ul39/output/Auxiliary.lean:525:22: warning: Variable name `T` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-eyw7ul39/output/Auxiliary.lean:525:30: warning: Variable name `gamma` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-eyw7ul39/output/Auxiliary.lean:525:42: warning: Variable name `R` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-eyw7ul39/output/Auxiliary.lean:592:22: warning: Variable name `T` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-eyw7ul39/output/Auxiliary.lean:592:30: warning: Variable name `gamma` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-eyw7ul39/output/Auxiliary.lean:592:42: warning: Variable name `R` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-eyw7ul39/output/Auxiliary.lean:624:22: warning: Variable name `T` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-eyw7ul39/output/Auxiliary.lean:624:30: warning: Variable name `gamma` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-eyw7ul39/output/Auxiliary.lean:624:42: warning: Variable name `R` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (T gamma R s : ℝ) (f : ℕ → KdVPlan.Coeff),\n  (∀ (n : ℕ), KdVPlan.MemH s (f n)) →\n    (∀ ε > 0, ∃ m, ∀ n ≥ m, ∀ j ≥ m, KdVPlan.HB s (f n - f j) ε) → ∃ g, KdVPlan.SeqConv s f g\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+      "stderr": "",
+      "wall_seconds": 4.960118624847382,
+      "native_limits": {
+        "timeout_seconds": 180,
+        "max_heartbeats": 20000000
+      },
+      "source_path": "/Users/syyui/projects/Yui-results/benchmark/results/20261031T212422Z-533b379994/native-checks/e8e0415ab6b546a09fb834904ddb71d7.lean",
+      "source_sha256": "87be57f845aca3042f06b5292dee1b73061f25b11283392b692a75538769762f",
+      "auxiliary_valid": true,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "lean_sha256": "87be57f845aca3042f06b5292dee1b73061f25b11283392b692a75538769762f",
+      "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+      "context_port": "T013",
+      "candidate": 13
+    }
+  }
+]

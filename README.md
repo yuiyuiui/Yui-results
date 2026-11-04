@@ -8,31 +8,29 @@ To run these locally, complete [local setup](#local-setup), then use the [benchm
 
 | Method | Elapsed time | Observed input + output tokens | Results |
 | --- | ---: | ---: | --- |
-| **Yui** | **04:09:26** | **282,760,473** | [Full workflow](benchmark/results/20261031T212422Z-533b379994/) |
+| **Yui** | **04:09:26** | **282,760,473** | [Full workflow](benchmark/Yui/results/20261031T212422Z-533b379994/) |
 | **Pure model, including supplement** | **11:06:03** | **248,548,201** | [Pure-model results](benchmark/pure-model-result/README.md) |
 
 **In this recorded benchmark, Yui completed the task 2.67× as fast as the pure model, using 13.8% more observed tokens.** The pure-model total includes its original attempt, supplementary repair and acceptance review.
 
-The input is the repository author's [natural-language proof](benchmark/aim-518-kdv-log-loss.pdf) of [AIM problem 518: removing the logarithmic loss in the Li–Wu KdV integrator](https://github.com/MColbrook/AIM/blob/main/problems/518-kdv-integrator-logarithmic-loss.md), listed as **SOLVED** by the AIM repository following independent AI review. The benchmark compares both approaches on the paper's complete Theorem 1 and tests Yui's reliability on a larger proof.
+The input is the repository author's [natural-language proof](benchmark/Yui/aim-518-kdv-log-loss.pdf) of [AIM problem 518: removing the logarithmic loss in the Li–Wu KdV integrator](https://github.com/MColbrook/AIM/blob/main/problems/518-kdv-integrator-logarithmic-loss.md), listed as **SOLVED** by the AIM repository following independent AI review. The benchmark compares both approaches on the paper's complete Theorem 1 and tests Yui's reliability on a larger proof.
 
 Despite the [original prompt](benchmark/pure-model-result/20261028T154300Z-b21e5d9a/prompt.md), some external theorem statements in the pure-model proof were weakened consequences of the originals. The [supplement](benchmark/pure-model-result/20261101T114606Z-5d3193f6/) supplies faithful original statements, proves the missing Lean bridges and connects them to the unchanged original proof. The [completed Lean project](benchmark/pure-model-result/20261101T114606Z-5d3193f6/frozen-candidate-002/) compiled and passed the recorded acceptance review. Both approaches retain the cited literature theorems as explicit inputs.
 
-**Configuration:** all model stages requested **gpt-6.1-sol / high / Standard**, using clean background Codex CLI processes. Yui allowed **20 local workers** in this benchmark; pure-model construction used one author session per run. These are recorded workflow timings with different parallelism. Usage is `PARTIAL`; token totals count observed input plus output, with cached and reasoning tokens already included. Detailed records: [Yui](benchmark/results/20261031T212422Z-533b379994/FINAL_OUTCOME.json), [pure model](benchmark/pure-model-result/20261101T114606Z-5d3193f6/owner-records/accounting.json), and [startup instructions](benchmark/README.md).
+**Configuration:** all model stages requested **gpt-6.1-sol / high / Standard**, using clean background Codex CLI processes. Yui allowed **20 local workers** in this benchmark; pure-model construction used one author session per run. These are recorded workflow timings with different parallelism. Usage is `PARTIAL`; token totals count observed input plus output, with cached and reasoning tokens already included. Detailed records: [Yui](benchmark/Yui/results/20261031T212422Z-533b379994/FINAL_OUTCOME.json), [pure model](benchmark/pure-model-result/20261101T114606Z-5d3193f6/owner-records/accounting.json), and [Yui entry](benchmark/Yui/README.md).
 
 ### Reproduce the benchmark
 
 After [setup](#local-setup), paste this into a fresh local Codex chat to run the **Yui arm**:
 
 ```text
-Use $rigorous-proof to start a fresh full Yui benchmark now. Follow benchmark/AGENTS.md and benchmark/settings.json, regenerating and verifying local preparation first.
-Use only benchmark/aim-518-kdv-log-loss.pdf as mathematical input, preserving the complete Theorem 1. Use gpt-6.1-sol/high/Standard for both phases and 20 local workers.
-Run detached through NL0/Audit A and Lean/Audit B. Save to a new benchmark/results/<run-id>/ directory and report acceptance, elapsed time and token usage. Do not use earlier results as proof inputs.
+Execute benchmark/Yui/README.md.
 ```
 
 For the **pure-model arm**, start from its [results and instructions](benchmark/pure-model-result/README.md). Use a separate fresh local Codex chat and paste:
 
 ```text
-Run a fresh from-scratch pure-model benchmark now. Start at benchmark/pure-model-result/README.md and follow section 1 of REPRODUCE.md, targeting the complete Theorem 1 of benchmark/aim-518-kdv-log-loss.pdf.
+Run a fresh from-scratch pure-model benchmark now. Start at benchmark/pure-model-result/README.md and follow section 1 of REPRODUCE.md, targeting the complete Theorem 1 of benchmark/pure-model-result/aim-518-kdv-log-loss.pdf.
 Use one clean native author session with gpt-6.1-sol/high/Standard and pinned Lean/Mathlib. Do not give the author Yui proof rules, personal skills/memories or earlier results.
 Save the exact inputs, prompt, configuration, elapsed time, native token records, proof and separate acceptance review under a new benchmark/pure-model-result/<run-id>/.
 ```
@@ -91,13 +89,13 @@ The [MIT license](LICENSE) applies to original material owned by this repository
 
 ### Benchmark papers
 
-The retained 31 PDF files represent three documents, with repeated copies in run evidence:
+The retained 159 PDF files represent three documents, with repeated copies in run evidence:
 
 | Document | Retained copies | Source and rights boundary |
 | --- | ---: | --- |
-| Kaiwen Jin, *Removing the logarithmic loss in the Li-Wu KdV integrator* | 7 | Repository author's supplied manuscript, including `benchmark/aim-518-kdv-log-loss.pdf` and copies named `target.pdf`. Original author-owned content is under MIT; quoted third-party material retains its own terms. |
-| Buyang Li and Yifei Wu, *An Unfiltered Low-Regularity Integrator for the KdV Equation with Solutions Below H1* | 12 | Copies named `li-wu.pdf` and the corresponding source-access/input-byte files. [Author manuscript](https://www.polyu.edu.hk/ama/profile/byli/FoCM-3.pdf); [arXiv record](https://arxiv.org/abs/2206.09320). Excluded from MIT; permission to redistribute the retained manuscript has not been verified. |
-| Anatoli V. Babin, Alexei A. Ilyin and Edriss S. Titi, *On the regularization mechanism for the periodic Korteweg-de Vries equation* | 12 | Copies named `babin-ilyin-titi.pdf` and the corresponding source-access/input-byte files. [arXiv source record](https://arxiv.org/abs/0910.1389v2). Excluded from MIT; the source record links to an [arXiv non-exclusive distribution license](https://arxiv.org/licenses/nonexclusive-distrib/1.0/license.html), not a project-wide MIT grant. Separate redistribution permission has not been established here. |
+| Kaiwen Jin, *Removing the logarithmic loss in the Li-Wu KdV integrator* | 9 | Repository author's supplied manuscript, including `benchmark/Yui/aim-518-kdv-log-loss.pdf`, the pure-model arm's byte-identical copy and copies named `target.pdf`. Original author-owned content is under MIT; quoted third-party material retains its own terms. |
+| Buyang Li and Yifei Wu, *An Unfiltered Low-Regularity Integrator for the KdV Equation with Solutions Below H1* | 75 | Copies named `li-wu.pdf` and the corresponding source-access/input-byte files. [Author manuscript](https://www.polyu.edu.hk/ama/profile/byli/FoCM-3.pdf); [arXiv record](https://arxiv.org/abs/2206.09320). Excluded from MIT; permission to redistribute the retained manuscript has not been verified. |
+| Anatoli V. Babin, Alexei A. Ilyin and Edriss S. Titi, *On the regularization mechanism for the periodic Korteweg-de Vries equation* | 75 | Copies named `babin-ilyin-titi.pdf` and the corresponding source-access/input-byte files. [arXiv source record](https://arxiv.org/abs/0910.1389v2). Excluded from MIT; the source record links to an [arXiv non-exclusive distribution license](https://arxiv.org/licenses/nonexclusive-distrib/1.0/license.html), not a project-wide MIT grant. Separate redistribution permission has not been established here. |
 
 Page renderings, extracted text and quotations from these papers retain the underlying material's rights. Original source/version records remain with each run. Retaining a source for audit does not establish a right to redistribute it; this notice does not claim complete publication clearance.
 

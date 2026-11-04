@@ -4,7 +4,7 @@ import argparse
 import importlib.util
 from pathlib import Path
 import sys
-sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
+sys.path.insert(0,str(Path(__file__).resolve().parent))
 from skill_check import require_skill
 from prompt import render
 
@@ -19,7 +19,7 @@ def main(argv=None):
     supervisor=importlib.util.module_from_spec(spec);spec.loader.exec_module(supervisor)
     # The measured direct session receives only render(), not the Yui skill.
     return supervisor.main(default_work=Path(__file__).resolve().parent,prompt_factory=render,
-        default_paper=Path(__file__).resolve().parents[1]/'aim-518-kdv-log-loss.pdf',argv=argv)
+        default_paper=Path(__file__).resolve().parent/'aim-518-kdv-log-loss.pdf',argv=argv)
 
 
 if __name__=='__main__':

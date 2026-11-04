@@ -3,7 +3,7 @@
 This is the entry point for the bare-model benchmark: its original run,
 supplementary repair, preparation templates and reproduction instructions are
 kept together here. The input paper is
-[the complete Theorem 1 of the supplied manuscript](../aim-518-kdv-log-loss.pdf).
+[the complete Theorem 1 of the supplied manuscript](aim-518-kdv-log-loss.pdf).
 
 To run a new experiment or rebuild the retained proof, start with
 [REPRODUCE.md](REPRODUCE.md). No generated preparation file is needed to read
@@ -45,6 +45,9 @@ pure-model-result/
   REPRODUCE.md                      Fresh experiment, supplement and rebuild
   prompt.py                         From-scratch author task renderer
   runner.py                         Historical direct-supervisor launcher
+  skill_check.py                    This arm's own legacy-supervisor discovery
+  aim-518-kdv-log-loss.pdf           This arm's byte-identical original paper
+  tests/                            Bare-model launcher compatibility tests
   supplement-preparation/           Reusable supplement prompt and input settings
   20261028T154300Z-b21e5d9a/          Original candidate and execution evidence
   20261101T114606Z-5d3193f6/          Supplement, frozen candidates and review evidence
@@ -54,6 +57,11 @@ The [supplement preparation](supplement-preparation/README.md) is an input
 template, not another run or a live execution status. The supplement's actual
 status is in its result directory. The original and supplementary task prompts
 remain with their respective run records.
+
+The launcher and its test use this directory's discovery helper, not the Yui
+benchmark's configuration, helpers or tests. Run `python3 -B -m unittest discover
+-s tests -v` from this directory to check that compatibility without starting a
+model. The Yui arm has its own independent entry under `../Yui/`.
 
 ## Location changes
 
