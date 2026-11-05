@@ -18,10 +18,10 @@ creation. Both the trusted [Yui-results project](../../.codex/config.toml) and
 the paired Yui checkout select Standard. Send only
 `Execute <path>/README.md`, using the absolute entry path when starting in Yui.
 
-Confirm the selected model profile in the owning chat. Start this single run
-with the steps below. Its ten-minute reports use a timed wait in this same
-chat while the detached workers run. No host automation or schedule ID is a
-prerequisite for `begin`, `prepare` or `launch`.
+Confirm the selected model profile in the owning chat. Prefer a permitted
+ten-minute scheduled wakeup for status reports. If it cannot be established,
+continue with an in-chat timed wait and the same ten-minute reports. Either
+monitoring mode allows this run to proceed through preparation and dispatch.
 
 ## Formalization goal
 
@@ -220,34 +220,61 @@ instead of automatically making a replacement run.
 
 ## 4. Dispatch once and report in this chat
 
-Use the same chat that prepared the job. Run each command once, replacing
-`RUN` with the absolute path returned by `begin`.
+### Choose the monitoring mode
+
+Use the same chat that prepared the job. Run exactly one of the two launch commands
+below, replacing `RUN` with the absolute path returned by `begin`.
+
+**Prefer a permitted ten-minute wakeup.** If host rules permit scheduling for
+this run and a scheduling tool is available, establish one wakeup every
+600 seconds in this same chat. Reuse a verified matching schedule or make
+one creation attempt. For Codex hosts that permit this operation, use
+`automation_update` with its current tool schema. Bind the exact README and
+`RUN/workflow` paths, and request a Chinese status on every wake.
+
+Only a confirmed matching active schedule and its actual returned ID count as
+success. Store that ID as `HEARTBEAT_ID`, then launch once.
+
+```sh
+python3 -B prepare_yui.py launch RUN --heartbeat-id "$HEARTBEAT_ID"
+```
+
+This records `RECORDED_BY_OWNER` in `RUN/OWNER_MONITOR_STATE.json`. After the
+initial verification below, post the initial status and end this foreground turn.
+Each scheduled wake reads status once, reports in Chinese and ends its turn.
+
+**Fallback when a wakeup cannot be established.** If scheduling is
+restricted, unavailable, unsuccessful or unconfirmed, report the reason once
+in Chinese and continue with the same prepared run. Proceed directly with
+in-chat observation. Run the plain launch command below.
 
 ```sh
 python3 -B prepare_yui.py launch RUN
+```
+
+This records `OWNER_CHAT_WAIT`. Omit `--heartbeat-id` entirely in this mode.
+After initial verification, keep the current turn open and use the interruptible
+`clock.sleep` tool with `duration_ms=600000`. After each wait, observe once
+and report in Chinese, then wait again while the case remains live.
+
+### Verify and observe the selected run
+
+Both commands dispatch with `--detach`. Verify the dispatch receipt, controller
+PID, start time and process group with one initial observation.
+
+```sh
 python3 -B prepare_yui.py observe RUN
 ```
 
-`launch` records the actual owner chat and workflow in
-`RUN/OWNER_MONITOR_STATE.json` with `registration: OWNER_CHAT_WAIT`, then
-dispatches the workers with `--detach`. Check the dispatch receipt and the
-controller PID, start time and process group in the first observation. Post
-the initial phase in Chinese. If the launch result is ambiguous, use the same
-run's observation and dispatch records to establish what started. Do not
-issue a second launch.
+In either mode, run this observation once per ten-minute interval. Report the
+phase, available counts and any fault or decision, even when progress is unchanged.
+Follow the remaining sections for user decisions, cancellation and terminal
+validation. A monitoring setup failure selects the fallback and continues the
+authorized run. Mathematical or execution faults keep their own handling.
 
-**Wait ten minutes in this turn** while the workers run. In Codex use the
-interruptible `clock.sleep` tool with `duration_ms=600000`. At each timed wake,
-run `python3 -B prepare_yui.py observe RUN` once. Post a short Chinese status with
-the phase, available counts and any fault or decision, even when progress is
-unchanged. Repeat the timed wait until the case terminates. An incoming user
-message can interrupt the wait. Respect cancellation or a requested decision
-and continue only the authorized observation. Keep this turn open between
-checks. Do not create a job-specific automation or background observer.
-
-Previously dispatched runs keep their recorded owner and mode. The optional
-`--heartbeat-id` argument is for a permitted schedule that already has an
-actual host-issued ID. A fresh run on this host uses the plain launch above.
+If dispatch is ambiguous, inspect the existing run's observation and dispatch
+records before any further action. Never repeat an ambiguous launch. Previously
+dispatched runs continue with their recorded owner and monitoring mode.
 
 ## 5. Observe and handle actual faults within Yui's boundaries
 
@@ -375,6 +402,6 @@ unconfirmed exit must leave diagnostics and report CLEANUP_BLOCKED, not claim
 a clean disk/memory state. The final Chinese report must state cleanup status.
 Once the run is terminal, owned processes have exited, and the reports and
 cleanup are complete, set `status` to `COMPLETED` in
-`RUN/OWNER_MONITOR_STATE.json`. Preserve the owner, run and mode. For an older
+`RUN/OWNER_MONITOR_STATE.json`. Preserve the owner, run and mode. For a
 run with a permitted host schedule, close it by its saved ID and record the
 outcome. Post the final Chinese status and end the turn.

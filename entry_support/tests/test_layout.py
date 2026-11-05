@@ -25,7 +25,7 @@ class EntryLayout(unittest.TestCase):
                 self.assertIn('OWNER_CHAT_WAIT', text)
                 self.assertIn('even when progress is', text)
                 self.assertNotIn('end the turn before beginning', text)
-                self.assertNotIn('launch RUN --heartbeat-id', text)
+                self.assertIn(f'python3 -B {script} launch RUN --heartbeat-id', text)
         pages=[ROOT/'README.md',ROOT/'benchmark_cond/README.md',ROOT/'benchmark_uncond/README.md',
                ROOT/'benchmark_cond/pure-model-result/README.md',ROOT/'benchmark_cond/pure-model-result/REPRODUCE.md',*exercises,*benchmarks]
         for path in pages:
@@ -37,6 +37,29 @@ class EntryLayout(unittest.TestCase):
                 with self.subTest(page=str(path.relative_to(ROOT)),link=target):
                     if parsed.path:self.assertTrue((path.parent/unquote(parsed.path)).exists())
                     elif parsed.fragment:self.assertIn(parsed.fragment,headings)
+
+    def test_all_eight_entries_prefer_a_permitted_wakeup_and_continue_on_failure(self):
+        entries = sorted(ROOT.glob('test_*/*/README.md')) + sorted(ROOT.glob('benchmark_*/Yui/README.md'))
+        self.assertEqual(len(entries), 8)
+        procedures = []
+        for path in entries:
+            with self.subTest(entry=str(path.relative_to(ROOT))):
+                body = path.read_text()
+                start = body.index('### Choose the monitoring mode')
+                end = body.index('\n## ', start)
+                procedure = body[start:end].replace('prepare_yui.py', 'run_test.py')
+                procedures.append(procedure)
+                self.assertLess(procedure.index('Prefer a permitted ten-minute wakeup'),
+                                procedure.index('Fallback when a wakeup cannot be established'))
+                self.assertIn('restricted, unavailable, unsuccessful or unconfirmed', procedure)
+                self.assertIn('continue with the same prepared run', procedure)
+                self.assertIn('Run exactly one of the two launch commands', procedure)
+                self.assertIn('end this foreground turn', procedure)
+                self.assertIn('duration_ms=600000', procedure)
+                self.assertIn('even when progress is unchanged', procedure)
+                self.assertIn('RECORDED_BY_OWNER', procedure)
+                self.assertIn('OWNER_CHAT_WAIT', procedure)
+        self.assertTrue(all(body == procedures[0] for body in procedures))
 
     def test_foreground_defaults_match_all_eight_worker_profiles(self):
         project = tomllib.loads((ROOT/'.codex/config.toml').read_text())

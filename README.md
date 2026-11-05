@@ -12,9 +12,11 @@ sets them for chats opened there. When using `create_thread`, select
 `Execute <path>/README.md`, using the absolute entry path when starting in Yui.
 
 Each entry launches detached workers and records which chat owns the run.
-That chat verifies the dispatch, waits ten minutes at a time and posts one
-short Chinese status after each observation, including unchanged progress.
-It ends the turn after terminal validation, reporting and cleanup.
+Prefer a permitted ten-minute wakeup so the owner can end its turn between
+status reports. If scheduling is restricted or cannot be established, the
+owner continues in the current turn with ten-minute waits and observations.
+Both modes post a short Chinese status every interval, including unchanged
+progress, and follow the same terminal validation, reporting and cleanup.
 
 ## Benchmark
 
