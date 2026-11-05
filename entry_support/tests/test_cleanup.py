@@ -74,10 +74,15 @@ time.sleep(60)
         p=subprocess.Popen([sys.executable,'-B','-c',code,str(self.frozen),str(self.workflow),'yes' if stubborn else 'no'],start_new_session=True)
         self.processes.append(p);wait_file(ready,p);row=json.loads(ready.read_text());self.scratch.append(row);return p,row
 
-    def clean(self,ok=True):
-        result=subprocess.run([sys.executable,'-B',str(SUPPORT/'resource_cleanup.py'),str(self.workflow),str(self.frozen)],capture_output=True,text=True,timeout=30)
+    def clean(self,ok=True,*,cleaner=SUPPORT/'resource_cleanup.py'):
+        result=subprocess.run([sys.executable,'-B',str(cleaner),str(self.workflow),str(self.frozen)],capture_output=True,text=True,timeout=30)
         self.assertEqual(result.returncode,0 if ok else 1,result.stdout+result.stderr)
         return json.loads(result.stdout)
+
+    def retain(self,path):
+        record=self.workflow/'result.json'
+        record.write_text(json.dumps({'workspace_retention':{'workspace':str(path)}}))
+        return record
 
     def test_reaps_owned_processes_and_scratch_preserving_sources_shared_links_and_evidence(self):
         owner,row=self.owner(stubborn=True)
@@ -106,8 +111,75 @@ time.sleep(60)
 
     def test_retained_workspace_health_evidence_is_not_invalidated(self):
         owner,row=self.owner()
-        (self.workflow/'result.json').write_text(json.dumps({'workspace_retention':{'workspace':row['work']}}))
+        self.retain(row['work'])
         self.clean(False);self.assertIsNone(owner.poll());self.assertTrue(Path(row['work']).exists())
+
+    def test_retained_parent_alias_blocks_all_entry_cleaners_before_signalling(self):
+        owner,row=self.owner()
+        work=Path(row['work']).resolve()
+        alias=self.root/'temporary-directory-alias'
+        alias.symlink_to(work.parent,target_is_directory=True)
+        recorded=alias/work.name
+        self.assertNotEqual(str(work),str(recorded))
+        self.assertTrue(work.samefile(recorded))
+        record=self.retain(recorded);before=record.read_bytes()
+        evidence=work/'retained-evidence.txt';evidence.write_text('neutral stage evidence')
+        for entry in (SUPPORT,SUPPORT.parent/'benchmark_cond/Yui',SUPPORT.parent/'benchmark_uncond/Yui'):
+            result=self.clean(False,cleaner=entry/'resource_cleanup.py')
+            self.assertEqual(result['status'],'CLEANUP_BLOCKED',entry)
+            self.assertIn('Runtime must release',result['error'])
+            self.assertIsNone(owner.poll())
+            os.kill(row['child'],0)
+            self.assertEqual(evidence.read_text(),'neutral stage evidence')
+            self.assertEqual(record.read_bytes(),before)
+
+    def test_unresolvable_retained_link_blocks_until_it_identifies_a_distinct_workspace(self):
+        owner,row=self.owner();work=Path(row['work'])
+        alias=self.root/'retained-work'
+        alias.symlink_to(alias,target_is_directory=True)
+        record=self.retain(alias);before=record.read_bytes()
+        self.assertEqual(self.clean(False)['status'],'CLEANUP_BLOCKED')
+        self.assertIsNone(owner.poll());os.kill(row['child'],0)
+        self.assertTrue(work.is_dir())
+        other=self.root/'separate'/work.name;other.mkdir(parents=True)
+        evidence=other/'keep.txt';evidence.write_text('another directory')
+        alias.unlink();alias.symlink_to(other,target_is_directory=True)
+        self.assertFalse(work.samefile(alias))
+        self.assertEqual(self.clean()['status'],'CLEANED')
+        self.assertFalse(work.exists());self.assertIsNotNone(owner.poll())
+        self.assertEqual(evidence.read_text(),'another directory')
+        self.assertEqual(record.read_bytes(),before)
+
+    def test_missing_retained_path_requires_verified_release_before_cleaning_other_scratch(self):
+        owner,row=self.owner();work=Path(row['work'])
+        released=self.root/'released-work';released.mkdir();released.rmdir()
+        retention={'workspace':str(released),'logs':str(self.workflow),'status':'OWNED_RETAINED'}
+        record=self.workflow/'result.json'
+        record.write_text(json.dumps({'workspace_retention':retention,'temporary_workspace_removed':False}))
+        before=record.read_bytes()
+        receipt={'workspace_retention':retention,'cleanup_confirmed':True,'authorization':'ROLE_COMPLETED',
+                 'result_sha256':digest(record)}
+        release=self.workflow/'resources/release.json'
+        for invalid in (None,{**receipt,'result_sha256':'0'*64}):
+            if invalid:release.write_text(json.dumps(invalid))
+            self.assertEqual(self.clean(False)['status'],'CLEANUP_BLOCKED')
+            self.assertIsNone(owner.poll());self.assertTrue(work.is_dir())
+        release.write_text(json.dumps(receipt))
+        self.assertEqual(self.clean()['status'],'CLEANED')
+        self.assertFalse(work.exists());self.assertIsNotNone(owner.poll())
+        self.assertEqual(record.read_bytes(),before)
+
+    def test_ambiguous_retention_blocks_and_explicit_legacy_removal_allows_cleanup(self):
+        owner,row=self.owner();work=Path(row['work']);record=self.workflow/'result.json'
+        for invalid in ('malformed',{'status':'OWNED_RETAINED'},{'workspace':23},{'workspace':'relative'}):
+            with self.subTest(retention=invalid):
+                record.write_text(json.dumps({'workspace_retention':invalid}))
+                self.assertEqual(self.clean(False)['status'],'CLEANUP_BLOCKED')
+                self.assertIsNone(owner.poll());self.assertTrue(work.is_dir())
+        record.write_text(json.dumps({'workspace_retention':{'workspace':str(self.root/'old-work')},
+                                      'temporary_workspace_removed':True}))
+        self.assertEqual(self.clean()['status'],'CLEANED')
+        self.assertFalse(work.exists());self.assertIsNotNone(owner.poll())
 
     def test_job_binding_and_symlink_boundaries_are_enforced(self):
         p=self.workflow/'case-result.json';record=json.loads(p.read_text());record['job']['sha256']='0'*64;p.write_text(json.dumps(record))

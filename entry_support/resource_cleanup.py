@@ -9,6 +9,28 @@ import sys
 import time
 
 
+def stage_retains_workspace(stage,workspace):
+    result=json.loads(stage.read_text())
+    retention=result.get('workspace_retention',{})
+    if not isinstance(retention,dict):
+        raise ValueError('Invalid workspace retention record: '+str(stage))
+    if not retention:return False
+    recorded=retention.get('workspace')
+    if not isinstance(recorded,str) or not os.path.isabs(recorded):
+        raise ValueError('Expected an absolute retained workspace path: '+str(stage))
+    try:
+        return os.path.samefile(workspace,recorded)
+    except FileNotFoundError as error:
+        if error.filename!=recorded:raise
+        # A stage record can outlive its workspace. Only a confirmed release
+        # allows other owned scratch to be cleaned when that path is missing.
+        if result.get('temporary_workspace_removed') is True:return False
+        if result.get('temporary_workspace_removed') is False:
+            from run_resources import safe_stage_workspace
+            if safe_stage_workspace(result):return False
+        raise ValueError('Cannot verify release of missing retained workspace: '+recorded) from error
+
+
 def clean_workflow(workflow,runtime,*,grace=2):
     if any(p.is_symlink() for raw in (workflow,runtime) for p in [Path(raw),*Path(raw).parents]):
         raise ValueError('Cleanup cannot follow a symlink workflow or runtime')
@@ -33,10 +55,8 @@ def clean_workflow(workflow,runtime,*,grace=2):
         # erase it and invalidate the proof evidence during garbage collection.
         for path,record in inv['workspaces'].items():
             info=json.loads(Path(record).read_text());stage=Path(info['logs'])/'result.json'
-            if stage.is_file():
-                retained=json.loads(stage.read_text()).get('workspace_retention',{})
-                if retained.get('workspace')==str(path):
-                    raise ValueError('Runtime must release the evidence-bound native workspace first: '+str(path))
+            if stage.is_file() and stage_retains_workspace(stage,path):
+                raise ValueError('Runtime must release the evidence-bound native workspace first: '+str(path))
         live=owned.discover(inv,owned.process_table(),owned.CORE)
         if inv['errors']:raise ValueError('Unconfirmed process ownership: '+str(inv['errors']))
         if os.getpid() in live:raise ValueError('Cleanup cannot stop its own caller')
