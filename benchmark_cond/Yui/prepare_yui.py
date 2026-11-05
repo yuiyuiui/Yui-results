@@ -372,7 +372,7 @@ def validate_job(run, record):
     profiles = config['profiles'] if config['track'] == 'full' else dict(nl0=config['profiles']['nl0'], lean=config['profiles']['nl0'])
     expected = {'root': str(workflow), 'problem': str(prep/'original.pdf'),
                 'track': config['track'], 'policy': config['policy'],
-                'profiles': profiles, 'max_concurrency': config['workers'],
+                'profiles': profiles, 'max_concurrency': config.get('workers', 'auto'),
                 'source': None, 'audit': None, 'time_budget_seconds': None}
     mismatches = [key for key, value in expected.items() if job.get(key) != value]
     if job.get('formalization','conditional') != config['formalization']:mismatches.append('formalization')
@@ -413,9 +413,11 @@ def prepare(value, *, codex=None):
         raise ValueError('Never overwrite or reuse a workflow directory')
     command = [sys.executable, '-B', str(Path(installed['root'])/'nl0/scripts/yui.py'),
                'prepare', str(prep/'original.pdf'), '--track', config['track'],
-               '--policy', config['policy'], '--max-concurrency', str(config['workers']),
+               '--policy', config['policy'],
                '--material', str(prep/'checked-source.md'), '--target-file', str(prep/'target-selection.json'),
                '--output', str(run/'workflow')]
+    if 'workers' in config:
+        command.extend(['--max-concurrency', str(config['workers'])])
     if config['formalization']=='unconditional' or record['environment'].get('unconditional_supported'):
         command += ['--formalization',config['formalization']]
     for phase in ('nl0', 'lean'):

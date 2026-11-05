@@ -30,10 +30,10 @@ This entry keeps `formalization: conditional` and its current `track: nl0`. It t
 ## Scope, authority and configuration
 
 - [settings.json](settings.json) selects the full Theorem 1 of the supplied
-  original paper, `full` or `nl0`, `normal` repair, both model profiles, worker
-  count, source hash, runtime pins and monitoring. This checkout is configured
-  for `nl0`, gpt-6.1-sol/high/Standard and 20 workers. `nl0` means NL0 plus
-  Audit A only; do not start interfaces, Lean or Audit B for that setting.
+  original paper, `full` or `nl0`, `normal` repair, both model profiles, source
+  hash, runtime pins and monitoring. This checkout uses `nl0` with
+  gpt-6.1-sol/high/Standard. Yui sizes each local worker pool from that
+  phase's node count. The `nl0` track ends after NL0 and Audit A.
 - Read [AGENTS.md](AGENTS.md), then the exact registered `$rigorous-proof`
   `SKILL.md` returned by stage 1. Use its bundled operation, source qualification,
   repair and acceptance rules. This benchmark supplies the configuration and
@@ -208,11 +208,11 @@ to bind `target-statement.md` to this run's `original.pdf`. It creates
 - The explicit `formalization` goal from this directory's settings.
 - This run's complete `checked-source.md` as its sole extra material.
 - This run's source-bound target selection.
-- The configured track, normal policy, phase profiles and worker count.
+- The configured track, normal repair policy and phase profiles.
 - A fresh output at `RUN/workflow/`.
 
 Neither command starts a model or Lean proof. Job preparation is checked for
-unexpected documents, imported authority, target drift, profile/worker changes
+unexpected documents, imported authority, target drift, profile or concurrency changes
 and output escape. Source, entry, configuration, tools or installed-runtime
 changes make preparation stale and block launch. Do not repair that by rewriting
 old bindings. A failed submitted preparation remains a failed attempt; report it

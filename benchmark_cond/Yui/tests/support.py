@@ -32,7 +32,8 @@ if cmd=='prepare':
  if mode=='bad_json':print('not JSON');raise SystemExit(0)
  if mode=='json_list':print('[]');raise SystemExit(0)
  p=argparse.ArgumentParser();p.add_argument('problem',type=Path)
- for name in ('track','policy','max-concurrency','target-file','output'):
+ p.add_argument('--max-concurrency', default='auto')
+ for name in ('track','policy','target-file','output'):
   p.add_argument('--'+name,required=True)
  p.add_argument('--material')
  p.add_argument('--formalization',default='conditional')
@@ -48,7 +49,8 @@ if cmd=='prepare':
  inputs.append(('target-selection.json',v.problem,Path(v.target_file).read_bytes()))
  for name,source,data in inputs:
   dest=w/'inputs'/name;dest.write_bytes(data);docs.append({'id':name,'path':name,'sha256':binding(dest)['sha256'],'original':binding(source),'extraction':'synthetic'})
- job={'formalization':v.formalization,'root':str(w),'problem':str(v.problem),'track':v.track,'policy':v.policy,'profiles':profiles,'max_concurrency':int(v.max_concurrency),'source':None,'audit':None,'time_budget_seconds':None,'documents':docs,'target_selection':selection}
+ max_concurrency = 'auto' if v.max_concurrency == 'auto' else int(v.max_concurrency)
+ job={'formalization':v.formalization,'root':str(w),'problem':str(v.problem),'track':v.track,'policy':v.policy,'profiles':profiles,'max_concurrency':max_concurrency,'source':None,'audit':None,'time_budget_seconds':None,'documents':docs,'target_selection':selection}
  if mode=='extra_input':job['documents'].append({'id':'prior.md'})
  if mode=='wrong_formalization':job['formalization']='conditional' if v.formalization=='unconditional' else 'unconditional'
  if mode=='wrong_track':job['track']='full' if v.track=='nl0' else 'nl0'

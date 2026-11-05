@@ -169,7 +169,10 @@ class PipelineTests(Fixture):
     def test_full_job_uses_only_three_bound_current_run_documents(self):
         run=self.prepared();job=json.loads((run/'workflow/job.json').read_text())
         self.assertEqual(self.record(run)['status'],'JOB_PREPARED')
-        self.assertEqual(job['track'],'full');self.assertEqual(job['max_concurrency'],20)
+        self.assertEqual(job['track'],'full')
+        self.assertEqual(job['max_concurrency'], 'auto')
+        self.assertNotIn('--max-concurrency', self.runtime_calls()[0])
+        self.assertNotIn('--workers', self.runtime_calls()[0])
         self.assertEqual(job['profiles'],self.config['profiles'])
         self.assertEqual(job['policy'],'normal')
         self.assertEqual([d['id'] for d in job['documents']],['problem.md','material-001.md','target-selection.json'])
@@ -177,6 +180,18 @@ class PipelineTests(Fixture):
         calls=self.runtime_calls();self.assertEqual([x[0] for x in calls],['prepare'])
         self.assertIn('--output',calls[0]);self.assertIn(str(run/'workflow'),calls[0])
         self.assertNotIn('--use-config-profiles',calls[0]);self.assertNotIn('--source',calls[0])
+
+    def test_legacy_worker_cap_stays_bound_after_the_entry_switches_to_auto(self):
+        self.config['workers'] = 20
+        run = self.prepared()
+        self.launch(run)
+        args = self.runtime_calls()[0]
+        self.assertEqual(args[args.index('--max-concurrency') + 1], '20')
+        del self.config['workers']
+        self.save_config()
+        self.assertEqual(prepare_yui.validate_job(run, self.record(run))['max_concurrency'], 20)
+        self.terminal(run)
+        self.assertEqual(self.cli('finish', run)['status'], 'WORKFLOW-PASSED')
 
     def test_nl0_track_does_not_require_or_select_an_unused_lean_model(self):
         self.config['track']='nl0';self.config['profiles']['lean']['id']='unused-and-unavailable';self.save_config()

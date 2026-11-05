@@ -10,8 +10,8 @@ from owner_monitor import validate_monitor
 ROOT = Path(__file__).resolve().parent
 NAME = 'Yui'
 SKILL = 'rigorous-proof'
-KEYS = {'schema_version', 'benchmark_name', 'skill_name', 'paper', 'paper_sha256',
-        'target', 'target_label', 'track', 'policy', 'workers', 'profiles', 'limits',
+REQUIRED_KEYS = {'schema_version', 'benchmark_name', 'skill_name', 'paper', 'paper_sha256',
+        'target', 'target_label', 'track', 'policy', 'profiles', 'limits',
         'runtime', 'preparation', 'results_directory', 'monitor', 'source_policy',
         'reuse_previous_results', 'formalization'}
 
@@ -35,7 +35,7 @@ def local_path(value, *, root=ROOT):
 
 def load_config(root=ROOT):
     config = json.loads((Path(root) / 'settings.json').read_text())
-    if not isinstance(config, dict) or set(config) != KEYS:
+    if not isinstance(config, dict) or set(config) - {'workers'} != REQUIRED_KEYS:
         raise ValueError('Use exactly the documented Yui settings fields')
     if config['schema_version'] != 'yui-benchmark-setup-2':
         raise ValueError('Unsupported Yui benchmark configuration')
@@ -55,8 +55,8 @@ def load_config(root=ROOT):
         raise ValueError('Choose explicit conditional or unconditional formalization')
     if config['formalization']=='unconditional' and config['track']!='full':
         raise ValueError('Unconditional formalization requires the full track')
-    if type(config['workers']) is not int or config['workers'] < 1:
-        raise ValueError('Configure a positive integer worker count')
+    if 'workers' in config and (type(config['workers']) is not int or config['workers'] < 1):
+        raise ValueError('An explicit worker cap must be a positive integer')
     profiles = config['profiles']
     if not isinstance(profiles, dict) or set(profiles) != {'nl0', 'lean'}:
         raise ValueError('Configure both profile slots; an unused slot is not dispatched')

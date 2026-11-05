@@ -27,7 +27,9 @@ class ModeAndCleanupTests(Fixture):
         job=json.loads((run/'workflow/job.json').read_text())
         self.assertEqual(job['formalization'],'unconditional')
         self.assertEqual(job['profiles'],self.config['profiles'])
-        self.assertEqual(job['max_concurrency'],20)
+        self.assertEqual(job['max_concurrency'], 'auto')
+        self.assertNotIn('--max-concurrency', self.runtime_calls()[0])
+        self.assertNotIn('--workers', self.runtime_calls()[0])
         self.assertEqual(len(job['documents']),3)
         self.assertIn('--formalization',self.runtime_calls()[0])
 

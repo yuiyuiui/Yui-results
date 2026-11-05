@@ -61,6 +61,13 @@ class EntryLayout(unittest.TestCase):
                 self.assertIn('OWNER_CHAT_WAIT', procedure)
         self.assertTrue(all(body == procedures[0] for body in procedures))
 
+    def test_all_eight_entries_omit_worker_count(self):
+        paths = sorted(ROOT.glob('test_*/*/settings.json')) + sorted(ROOT.glob('benchmark_*/Yui/settings.json'))
+        self.assertEqual(len(paths), 8)
+        for path in paths:
+            with self.subTest(entry=str(path.relative_to(ROOT))):
+                self.assertNotIn('workers', json.loads(path.read_text()))
+
     def test_foreground_defaults_match_all_eight_worker_profiles(self):
         project = tomllib.loads((ROOT/'.codex/config.toml').read_text())
         self.assertEqual((project['model'], project['model_reasoning_effort'], project['service_tier']),

@@ -11,6 +11,9 @@ sets them for chats opened there. When using `create_thread`, select
 `model="gpt-6.1-sol"` and `thinking="high"` at creation. Give the task only
 `Execute <path>/README.md`, using the absolute entry path when starting in Yui.
 
+Fresh test and Yui benchmark runs let Yui size each local review or Lean proof
+pool from the number of nodes in that phase.
+
 Each entry launches detached workers and records which chat owns the run.
 Prefer a permitted ten-minute wakeup so the owner can end its turn between
 status reports. If scheduling is restricted or cannot be established, the

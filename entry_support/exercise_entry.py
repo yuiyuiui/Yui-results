@@ -45,15 +45,17 @@ class Entry:
     def config(self):
         c=json.loads(local(self.root,'settings.json').read_text())
         fields={'schema','case_id','input','input_sha256','target_heading','formalization','track','policy',
-            'workers','profiles','results_directory','limits','monitor'}
-        if not isinstance(c,dict) or set(c)!=fields or c['schema']!='yui-exercise-entry-1':raise ValueError('Unknown exercise settings')
+            'profiles','results_directory','limits','monitor'}
+        if not isinstance(c, dict) or set(c) - {'workers'} != fields or c['schema'] != 'yui-exercise-entry-1':
+            raise ValueError('Unknown exercise settings')
         if c['case_id']!=self.root.name or c['input']!='problem.md' or c['results_directory']!='rigorous-proof':raise ValueError('Wrong exercise identity or local paths')
         headings={'geometry-product-dimension':'## Fixed interpretation and complete target',
             'lie-module-irreducibility':'## Definitions and complete target','wave-map-energy':'## Fixed interpretation and complete target'}
         if c['target_heading']!=headings.get(c['case_id']):raise ValueError('Use the problem\'s complete target section')
         if c['formalization'] not in {'conditional','unconditional'} or c['track']!='full' or c['policy']!='normal':raise ValueError('Use an explicit full conditional/unconditional goal and normal policy')
         if not isinstance(c['input_sha256'],str) or not re.fullmatch('[0-9a-f]{64}',c['input_sha256']):raise ValueError('Bind the original problem bytes')
-        if type(c['workers']) is not int or c['workers']<1:raise ValueError('Use a positive worker count')
+        if 'workers' in c and (type(c['workers']) is not int or c['workers'] < 1):
+            raise ValueError('An explicit worker cap must be a positive integer')
         if set(c['profiles'])!={'nl0','lean'}:raise ValueError('Both phase profiles are required')
         for p in c['profiles'].values():
             if set(p)!={'id','reasoning_effort','speed','automatic_fallback'} or not all(isinstance(p[k],str) and p[k] for k in ('id','reasoning_effort','speed')) or p['automatic_fallback'] is not False:
@@ -160,8 +162,10 @@ print(json.dumps(select(prep/'problem.md',[{'id':'complete-target','label':'Comp
         write(prep/'target-selection.json',selection,exclusive=True)
         workflow=run/'workflow'
         args=[sys.executable,'-B',str(Path(r['installed']['root'])/'nl0/scripts/yui.py'),'prepare',str(prep/'problem.md'),
-            '--track','full','--policy','normal','--max-concurrency',str(c['workers']),
+            '--track','full','--policy','normal',
             '--target-file',str(prep/'target-selection.json'),'--output',str(workflow)]
+        if 'workers' in c:
+            args.extend(['--max-concurrency', str(c['workers'])])
         if r['configuration']['formalization']=='unconditional' or r['installed'].get('unconditional_supported'):
             args+=['--formalization',c['formalization']]
         else:
@@ -182,7 +186,7 @@ print(json.dumps(select(prep/'problem.md',[{'id':'complete-target','label':'Comp
     def validate_job(self,run,r):
         w=run/'workflow';job=json.loads(local(w,'job.json').read_text());c=r['configuration'];prep=run/'preparation'
         expected={'root':str(w),'problem':str(prep/'problem.md'),'track':'full','policy':'normal','profiles':c['profiles'],
-            'max_concurrency':c['workers'],'source':None,'audit':None,'time_budget_seconds':None}
+            'max_concurrency':c.get('workers', 'auto'),'source':None,'audit':None,'time_budget_seconds':None}
         if any(job.get(k)!=v for k,v in expected.items()) or job.get('formalization','conditional')!=c['formalization'] or 'resume' in job:
             raise ValueError('Prepared job changed goal, inputs or configuration')
         selection=json.loads((prep/'target-selection.json').read_text())

@@ -28,8 +28,10 @@ monitoring mode allows this run to proceed through preparation and dispatch.
   interpretations. The target comes from its configured complete-target section,
   read fresh from this run's copy. Use no old target-selection JSON.
 - Goal: **unconditional**, `full`, normal repair; 2basis → the same NL0/Audit A and Lean/Audit B → b2lean final closure.
-- Both phase profiles: **gpt-6.1-sol / high / Standard**, no fallback;
-  **10 local workers**, unlimited total budget, 180-second native-call limit.
+- Both phase profiles use **gpt-6.1-sol / high / Standard** with no model
+  fallback, an unlimited total budget and a 180-second native-call limit.
+- Yui sizes the local review and Lean proof pools from the number of nodes
+  in each phase.
 - Use only the exact registered `$rigorous-proof` installation and its bundled
   operation/rules. Read its SKILL.md after discovery. Do not substitute a sibling
   checkout, another skill, a peer task or an owner-written proof.
@@ -82,8 +84,8 @@ This is an owner readback record, not independent mathematical acceptance.
 python3 -B run_test.py prepare RUN
 ```
 
-`prepare` freezes the reviewed target, profiles and worker count under
-`RUN/workflow`. Only `launch` starts workers.
+`prepare` freezes the reviewed target, phase profiles and automatic
+concurrency policy under `RUN/workflow`. Only `launch` starts workers.
 
 ### Choose the monitoring mode
 

@@ -17,7 +17,7 @@ class ConfigurationTests(Fixture):
     def test_checked_in_defaults_are_explicit(self):
         config=benchmark_config.load_config()
         self.assertEqual(config['benchmark_name'],'Yui')
-        self.assertEqual(config['workers'],20)
+        self.assertNotIn('workers', config)
         self.assertIn(config['track'],{'full','nl0'})
         self.assertEqual(config['policy'],'normal')
         self.assertFalse(config['reuse_previous_results'])
@@ -43,7 +43,7 @@ class ConfigurationTests(Fixture):
             for value in values:
                 with self.subTest(field=field,value=value):self.reject(lambda d:d.update({field:value}))
 
-    def test_workers_must_be_positive_integers(self):
+    def test_explicit_worker_caps_must_be_positive_integers(self):
         for value in [True,False,0,-1,1.5,'20',None]:
             with self.subTest(value=value):self.reject(lambda d:d.update(workers=value))
 

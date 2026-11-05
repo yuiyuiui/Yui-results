@@ -81,14 +81,43 @@ class ExerciseEntries(Fixture):
         job=json.loads((run/'workflow/job.json').read_text());self.assertEqual(job['formalization'],'conditional')
         self.assertNotIn('--formalization',self.runtime_calls()[0])
 
-    def test_both_modes_forward_profiles_workers_fresh_target_and_only_two_documents(self):
+    def test_both_modes_use_auto_workers_fresh_target_and_only_two_documents(self):
         for mode in ('conditional','unconditional'):
             with self.subTest(mode=mode):
                 run=self.started(mode);job=json.loads((run/'workflow/job.json').read_text())
-                self.assertEqual(job['formalization'],mode);self.assertEqual(job['max_concurrency'],10)
+                self.assertEqual(job['formalization'],mode)
+                self.assertEqual(job['max_concurrency'], 'auto')
+                argv = json.loads((run/'prepare-attempt.json').read_text())['argv']
+                self.assertNotIn('--max-concurrency', argv)
+                self.assertNotIn('--workers', argv)
                 self.assertEqual([d['id'] for d in job['documents']],['problem.md','target-selection.json'])
                 self.assertEqual(job['target_selection']['document']['path'],str(run/'preparation/problem.md'))
                 self.assertIn('For n a natural number',job['target_selection']['full_target'])
+
+    def test_legacy_worker_cap_stays_bound_after_the_entry_switches_to_auto(self):
+        path = self.entry_root/'settings.json'
+        settings = json.loads(path.read_text())
+        settings['workers'] = 10
+        path.write_text(json.dumps(settings))
+        run = self.started('conditional')
+        self.entry.launch(run)
+        args = self.runtime_calls()[0]
+        self.assertEqual(args[args.index('--max-concurrency') + 1], '10')
+        updated = json.loads(path.read_text())
+        del updated['workers']
+        path.write_text(json.dumps(updated))
+        saved = json.loads((run/'TEST_RUN.json').read_text())
+        self.assertEqual(self.entry.validate_job(run, saved)['max_concurrency'], 10)
+        self.terminal(run)
+        self.assertEqual(self.entry.finish(run)['status'], 'WORKFLOW-PASSED')
+
+    def test_auto_entry_rejects_an_unrequested_numeric_worker_cap(self):
+        run = Path(self.entry.begin()['run'])
+        self.source_review(run)
+        with patch.dict(os.environ, {'YUI_TEST_MODE': 'wrong_workers'}):
+            with self.assertRaisesRegex(ValueError, 'configuration'):
+                self.entry.prepare(run)
+        self.assertFalse((run/'dispatch-attempt.json').exists())
 
     def test_source_readback_false_extra_or_changed_target_prevents_prepare(self):
         run=Path(self.entry.begin()['run'])
@@ -301,12 +330,19 @@ class InstalledExercisePreparation(unittest.TestCase):
         runtime=Path(os.environ['YUI_TEST_INSTALLATION']).resolve()
         registered={'root':str(runtime),'skill_md':str(runtime/'SKILL.md'),'skill_sha256':digest(runtime/'SKILL.md')}
         with tempfile.TemporaryDirectory(prefix='entry-prepare-contract-') as directory:
-            for mode,family in [('conditional','test_cond'),('unconditional','test_uncond')]:
-                with self.subTest(mode=mode):
-                    root=Path(directory)/family/'geometry-product-dimension';root.mkdir(parents=True)
+            settings = sorted(REPO.glob('test_*/*/settings.json'))
+            self.assertEqual(len(settings), 6)
+            for path in settings:
+                source = path.parent
+                family = source.parent.name
+                mode = 'conditional' if family == 'test_cond' else 'unconditional'
+                with self.subTest(entry=str(source.relative_to(REPO))):
+                    root=Path(directory)/family/source.name;root.mkdir(parents=True)
                     for name in ('README.md','settings.json','run_test.py'):shutil.copyfile(REPO/family/root.name/name,root/name)
-                    (root/'problem.md').write_text('# Neutral source\n\n## Fixed interpretation and complete target\n\nFor every n : Nat, n = n.\n\n## Fixed natural-language proof\n\nReflexivity.\n')
-                    config=json.loads((root/'settings.json').read_text());config['input_sha256']=digest(root/'problem.md')
+                    config=json.loads((root/'settings.json').read_text())
+                    heading=config['target_heading']
+                    (root/'problem.md').write_text(f'# Neutral source\n\n{heading}\n\nFor every n : Nat, n = n.\n\n## Fixed natural-language proof\n\nReflexivity.\n')
+                    config['input_sha256']=digest(root/'problem.md')
                     (root/'settings.json').write_text(json.dumps(config));entry=Entry(root)
                     with patch('exercise_entry.require_skill',return_value=registered):
                         run=Path(entry.begin()['run']);p=run/'preparation/source-review.json';review=json.loads(p.read_text())
@@ -314,6 +350,10 @@ class InstalledExercisePreparation(unittest.TestCase):
                         p.write_text(json.dumps(review));entry.prepare(run)
                     record=json.loads((run/'TEST_RUN.json').read_text());job=entry.validate_job(run,record)
                     self.assertEqual(job['formalization'],mode)
+                    self.assertEqual(job['max_concurrency'], 'auto')
+                    argv = json.loads((run/'prepare-attempt.json').read_text())['argv']
+                    self.assertNotIn('--max-concurrency', argv)
+                    self.assertNotIn('--workers', argv)
                     self.assertIn('For every n : Nat',job['target_selection']['full_target'])
                     self.assertEqual(len(job['documents']),2)
                     self.assertFalse((run/'dispatch-attempt.json').exists())

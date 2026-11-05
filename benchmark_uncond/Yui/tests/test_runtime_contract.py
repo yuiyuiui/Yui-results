@@ -37,7 +37,7 @@ class InstalledRuntimeContractTests(unittest.TestCase):
             local=Path(temp).resolve()/'Yui';local.mkdir()
             for name in prepare_yui.STARTUP_FILES:
                 shutil.copyfile(prepare_yui.ROOT/name,local/name)
-            config=benchmark_config.load_config();config['track']='nl0';config['formalization']='conditional'
+            config=benchmark_config.load_config()
             pdf=local/config['paper'];neutral_pdf(pdf)
             config['paper_sha256']=prepare_yui.sha256(pdf)
             (local/'settings.json').write_text(json.dumps(config))
@@ -54,7 +54,13 @@ class InstalledRuntimeContractTests(unittest.TestCase):
                 prepare_yui.write(prep/'source-review.json',review)
                 self.assertEqual(prepare_yui.freeze(run)['status'],'INPUTS_FROZEN')
                 self.assertEqual(prepare_yui.prepare(run)['status'],'JOB_PREPARED')
-                self.assertEqual(prepare_yui.validate_job(run,{'configuration':config})['track'],'nl0')
+                job=prepare_yui.validate_job(run,{'configuration':config})
+                self.assertEqual(job['track'],config['track'])
+                self.assertEqual(job['formalization'],config['formalization'])
+                self.assertEqual(job['max_concurrency'], 'auto')
+                argv = prepare_yui.read(run/'prepare-attempt.json')['argv']
+                self.assertNotIn('--max-concurrency', argv)
+                self.assertNotIn('--workers', argv)
                 self.assertFalse((run/'dispatch-attempt.json').exists())
                 self.assertFalse((run/'workflow/execution-status.json').exists())
 
@@ -83,7 +89,7 @@ print(json.dumps(select(pdf,[{'id':'theorem-1','label':'Theorem 1','statement':'
                     target=prepare_yui.runtime_program({'root':str(installed)},program,str(pdf))
                     (prep/'target-selection.json').write_text(json.dumps(target))
                     command=[sys.executable,'-B',str(installed/'nl0/scripts/yui.py'),'prepare',str(pdf),
-                             '--track',track,'--formalization',mode,'--policy','normal','--max-concurrency',str(config['workers']),
+                             '--track',track,'--formalization',mode,'--policy','normal',
                              '--material',str(checked),'--target-file',str(prep/'target-selection.json'),
                              '--output',str(run/'workflow')]
                     for phase in ('nl0','lean'):
@@ -94,6 +100,7 @@ print(json.dumps(select(pdf,[{'id':'theorem-1','label':'Theorem 1','statement':'
                     self.assertEqual(json.loads(result.stdout)['status'],'PREPARED_NOT_STARTED')
                     job=prepare_yui.validate_job(run,{'configuration':config})
                     self.assertEqual(job['track'],track)
+                    self.assertEqual(job['max_concurrency'], 'auto')
                     self.assertTrue((run/'workflow/runtime/nl0/scripts/yui.py').is_file())
                     for name in ['launch.json','execution-status.json','case-result.json']:
                         self.assertFalse((run/'workflow'/name).exists(),name)
