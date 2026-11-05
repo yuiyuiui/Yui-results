@@ -4,6 +4,17 @@ This repository stores test and benchmark results for [Yui](https://github.com/y
 
 To run these locally, complete [local setup](#local-setup), then use the [benchmark](#reproduce-the-benchmark) or [test](#execute-one-problem-in-a-fresh-task) prompts below in fresh local Codex chats opened at this repository root.
 
+For all six tests and both Yui benchmarks, start the foreground task with
+**gpt-6.1-sol / high / Standard**. This trusted checkout loads the defaults from
+[its project configuration](.codex/config.toml). The paired Yui checkout also
+sets them for chats opened there. When using `create_thread`, select
+`model="gpt-6.1-sol"` and `thinking="high"` at creation. Give the task only
+`Execute <path>/README.md`, using the absolute entry path when starting in Yui.
+
+Each entry registers a ten-minute heartbeat in its owning chat before launching
+the detached workers. The owner posts one short Chinese status on every wake,
+including unchanged progress, and ends the turn between checks.
+
 ## Benchmark
 
 | Method | Elapsed time | Observed input + output tokens | Results |

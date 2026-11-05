@@ -58,7 +58,7 @@ if cmd=='prepare':
  if mode=='resume':job['resume']={'prior':'old-result'}
  if mode=='wrong_target':job['target_selection']={**selection,'full_target':'wrong'}
  if mode=='foreign_source':job['documents'][0]['original']['path']='/another-run/original.pdf'
- write(w/'job.json',job);shutil.copytree(ROOT,w/'runtime')
+ write(w/'job.json',job);write(w/'owner-context.json',{'thread_id':os.environ.get('CODEX_THREAD_ID')});shutil.copytree(ROOT,w/'runtime')
  print(json.dumps({'status':'PREPARED_NOT_STARTED','runs':[str(w)]}))
 elif cmd=='execute':
  w=Path(a[1]);assert a[2:]==['--detach']
@@ -66,7 +66,7 @@ elif cmd=='execute':
  if mode=='execute_exit':print('synthetic launch failure after possible dispatch',file=sys.stderr);raise SystemExit(9)
  controller={'pid':123456,'pgid':123456,'started':'synthetic identity'}
  if mode=='missing_identity':controller.pop('started')
- print(json.dumps({'status':'DISPATCHED','runs':[str(w)],'controller':controller}))
+ print(json.dumps({'status':'DISPATCHED','runs':[str(w)],'controller':controller,'owner_observation':{'registration':'HOST_REGISTRATION_REQUIRED','notifications':'meaningful_changes_only'}}))
 elif cmd in ('observe','cancel'):
  w=Path(a[1])
  if cmd=='cancel':write(w/'cancel-request.json',{'status':'CANCEL_REQUESTED'});print(json.dumps({'status':'CANCEL_REQUESTED'}))
@@ -140,7 +140,7 @@ class Fixture(unittest.TestCase):
         self.registry = {'data':[{'skills':[self.entry],'errors':[]}]}
         self.write_codex()
         self.env = dict(os.environ, PATH=str(self.tools)+os.pathsep+os.environ.get('PATH',''),
-                        YUI_CODEX_BINARY=str(self.binary), YUI_TEST_CALLS=str(self.calls))
+                        YUI_CODEX_BINARY=str(self.binary), YUI_TEST_CALLS=str(self.calls), CODEX_THREAD_ID='fixture-owner')
         self.env.pop('YUI_TEST_MODE', None)
 
     def save_config(self):
@@ -174,6 +174,9 @@ class Fixture(unittest.TestCase):
         self.assertEqual(result.returncode, 0 if ok else 1, result.stdout+result.stderr)
         value = json.loads(result.stdout)
         return value
+
+    def launch(self, run, **options):
+        return self.cli('launch', run, '--heartbeat-id', 'fixture-heartbeat', **options)
 
     def begin(self, *, run_id=None, mode=None):
         args=['begin']+(['--run-id',run_id] if run_id else [])

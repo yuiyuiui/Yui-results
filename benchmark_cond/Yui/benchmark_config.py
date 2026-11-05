@@ -81,7 +81,7 @@ def load_config(root=ROOT):
     if type(prep['render_dpi']) is not int or not 72 <= prep['render_dpi'] <= 300:
         raise ValueError('PDF rendering DPI must be an integer from 72 to 300')
     if not isinstance(config['monitor'], dict) or type(config['monitor'].get('interval_seconds')) is not int or config['monitor'] != dict(interval_seconds=600, foreground='end_turn_after_handoff',
-                                 notifications='meaningful_changes_only'):
+                                 notifications='every_wake'):
         raise ValueError('Keep the bounded ten-minute host monitoring contract')
     if config['reuse_previous_results'] is not False:
         raise ValueError('Previous benchmark results are not construction inputs')

@@ -79,7 +79,7 @@ class PipelineTests(Fixture):
         value=self.cli('cancel',run)
         self.assertEqual(value['status'],'CANCELLED_PREPARATION')
         self.assertFalse(value['yui_model_dispatched'])
-        self.cli('freeze',run,ok=False);self.cli('launch',run,ok=False)
+        self.cli('freeze',run,ok=False);self.launch(run,ok=False)
         self.assertTrue((run/'preparation/original.pdf').is_file())
         self.assertEqual(self.runtime_calls(),[])
 
@@ -184,7 +184,7 @@ class PipelineTests(Fixture):
         job=json.loads((run/'workflow/job.json').read_text())
         self.assertEqual(job['track'],'nl0')
         self.assertEqual(job['profiles']['lean'],job['profiles']['nl0'])
-        self.cli('launch',run);self.terminal(run)
+        self.launch(run);self.terminal(run)
         final=self.cli('finish',run)
         self.assertEqual(final['status'],'DRAFT-AUDIT-PASSED')
         self.assertEqual(final['bound_artifact_validation']['audit_b'],'NOT_AVAILABLE')
@@ -242,7 +242,7 @@ class PipelineTests(Fixture):
                 if path.name=='settings.json':
                     config=dict(self.config,workers=21);path.write_text(json.dumps(config))
                 else:path.write_bytes(before+b'\nchanged')
-                self.cli('launch',run,ok=False)
+                self.launch(run,ok=False)
                 self.assertFalse((run/'dispatch-attempt.json').exists())
                 path.write_bytes(before)
         self.assertEqual([x[0] for x in self.runtime_calls()],['prepare'])
@@ -251,15 +251,15 @@ class PipelineTests(Fixture):
         run=self.prepared()
         job=run/'workflow/job.json';before=job.read_text()
         data=json.loads(before);data['unexpected']='change';job.write_text(json.dumps(data))
-        self.assertIn('job changed',self.cli('launch',run,ok=False)['error'])
+        self.assertIn('job changed',self.launch(run,ok=False)['error'])
         job.write_text(before)
         material=run/'workflow/inputs/material-001.md';material.write_text('changed')
-        self.assertIn('job input changed',self.cli('launch',run,ok=False)['error'])
+        self.assertIn('job input changed',self.launch(run,ok=False)['error'])
         self.assertEqual([x[0] for x in self.runtime_calls()],['prepare'])
 
     def test_frozen_runtime_mutation_blocks_execution_and_observation(self):
         run=self.prepared();path=run/'workflow/runtime/nl0/scripts/yui.py';path.write_text('raise SystemExit(99)')
-        self.assertIn('frozen runtime changed',self.cli('launch',run,ok=False)['error'])
+        self.assertIn('frozen runtime changed',self.launch(run,ok=False)['error'])
         self.assertIn('frozen runtime changed',self.cli('observe',run,ok=False)['error'])
         self.assertEqual([x[0] for x in self.runtime_calls()],['prepare'])
 
@@ -270,10 +270,24 @@ class PipelineTests(Fixture):
         self.assertEqual((run/'workflow/sentinel').read_text(),'keep')
         self.assertEqual(self.runtime_calls(),[])
 
+    def test_launch_requires_a_heartbeat_before_any_dispatch_attempt(self):
+        run = self.prepared()
+        error = self.cli('launch', run, ok=False)['error']
+        self.assertIn('--heartbeat-id', error)
+        self.assertEqual([call[0] for call in self.runtime_calls()], ['prepare'])
+        self.assertFalse((run/'dispatch-attempt.json').exists())
+
     def test_launch_is_one_detached_call_and_cannot_be_repeated(self):
-        run=self.prepared();value=self.cli('launch',run)
+        run=self.prepared();value=self.launch(run)
         self.assertEqual(value['status'],'DISPATCHED')
-        self.cli('launch',run,ok=False);self.cli('prepare',run,ok=False)
+        state = json.loads((run/'OWNER_MONITOR_STATE.json').read_text())
+        self.assertEqual(state['automation_id'], 'fixture-heartbeat')
+        self.assertEqual(state['target_thread_id'], 'fixture-owner')
+        self.assertEqual(state['runs'], [str(run/'workflow')])
+        self.assertEqual(state['observe_command'][-3:], [str(self.local/'prepare_yui.py'), 'observe', str(run)])
+        self.assertEqual(value['owner_observation']['notifications'], 'every_wake')
+        self.assertEqual(value['owner_observation']['registration'], 'RECORDED_BY_OWNER')
+        self.launch(run,ok=False);self.cli('prepare',run,ok=False)
         calls=self.runtime_calls();self.assertEqual([x[0] for x in calls],['prepare','execute'])
         self.assertEqual(calls[-1],['execute',str(run/'workflow'),'--detach'])
         self.assertEqual(self.record(run)['status'],'DISPATCHED')
@@ -282,18 +296,18 @@ class PipelineTests(Fixture):
     def test_retained_dispatch_attempt_blocks_a_second_call_even_if_state_is_prepared(self):
         run=self.prepared()
         (run/'dispatch-attempt.json').write_text('{"attempt":"already reserved"}')
-        self.cli('launch',run,ok=False)
+        self.launch(run,ok=False)
         self.assertEqual([x[0] for x in self.runtime_calls()],['prepare'])
         self.assertIn('already reserved',(run/'dispatch-attempt.json').read_text())
 
     def test_launch_fault_or_missing_identity_preserves_attempt_and_never_retries(self):
         for mode in ['execute_exit','missing_identity']:
             with self.subTest(mode=mode):
-                run=self.prepared();self.cli('launch',run,ok=False,mode=mode)
+                run=self.prepared();self.launch(run,ok=False,mode=mode)
                 self.assertEqual(self.record(run)['status'],'DISPATCH_ERROR')
                 self.assertTrue((run/'dispatch-attempt.json').exists())
                 self.assertTrue((run/'dispatch-result.json').exists())
-                self.cli('launch',run,ok=False)
+                self.launch(run,ok=False)
         self.assertEqual(sum(x[0]=='execute' for x in self.runtime_calls()),2)
 
     def test_json_process_retains_partial_timeout_output(self):
@@ -307,7 +321,7 @@ class PipelineTests(Fixture):
         self.assertEqual(value['stderr'],'partial stderr')
 
     def test_observation_is_bounded_and_writes_only_owner_log(self):
-        run=self.prepared();self.cli('launch',run)
+        run=self.prepared();self.launch(run)
         before=(run/'workflow/job.json').read_bytes()
         value=self.cli('observe',run)
         self.assertFalse(value['all_terminal'])
@@ -320,7 +334,7 @@ class PipelineTests(Fixture):
         self.assertEqual(self.cli('cancel',run)['status'],'CANCEL_REQUESTED')
         self.assertEqual((run/'workflow/job.json').read_bytes(),before)
         self.assertEqual(self.record(run)['status'],'CANCEL_REQUESTED')
-        self.cli('launch',run,ok=False)
+        self.launch(run,ok=False)
         self.cli('finish',run,ok=False)
         self.assertFalse((run/'FINAL_OUTCOME.json').exists())
         self.terminal(run,'CANCELLED')
@@ -329,14 +343,14 @@ class PipelineTests(Fixture):
         self.assertIsNone(final['timing']['launch_started_at_utc'])
 
     def test_observation_from_another_workflow_cannot_supply_exit_evidence(self):
-        run=self.prepared();self.cli('launch',run);self.terminal(run)
+        run=self.prepared();self.launch(run);self.terminal(run)
         value=self.cli('observe',run,ok=False,mode='foreign_observation')
         self.assertIn('exact workflow map',value['error'])
         self.assertFalse((run/'OWNER_MONITOR_LOG.jsonl').exists())
         self.assertFalse((run/'FINAL_OUTCOME.json').exists())
 
     def test_live_paused_or_unverified_process_exit_cannot_finish(self):
-        run=self.prepared();self.cli('launch',run)
+        run=self.prepared();self.launch(run)
         self.cli('finish',run,ok=False)
         self.terminal(run)
         for name in ['paused.json','still-live.json']:
@@ -348,7 +362,7 @@ class PipelineTests(Fixture):
         self.assertEqual(self.record(run)['status'],'DISPATCHED')
 
     def test_finish_validates_bound_existing_evidence_and_preserves_partial_usage(self):
-        run=self.prepared();self.cli('launch',run);self.terminal(run)
+        run=self.prepared();self.launch(run);self.terminal(run)
         stage=run/'workflow/nl0-to-lean/workers/T001';stage.mkdir(parents=True)
         (stage/'result.json').write_text(json.dumps({'execution_health':'FAULT','measurement_valid':False}))
         final=self.cli('finish',run)
@@ -363,7 +377,7 @@ class PipelineTests(Fixture):
         self.assertTrue(all(x[0] in {'prepare','execute','observe'} for x in self.runtime_calls()))
 
     def test_conditional_outcome_is_never_promoted(self):
-        run=self.prepared();self.cli('launch',run);self.terminal(run,'WORKFLOW-CONDITIONAL')
+        run=self.prepared();self.launch(run);self.terminal(run,'WORKFLOW-CONDITIONAL')
         receipt=run/'workflow/synthetic-machine-acceptance.json'
         receipt.write_text(json.dumps({'status':'AUDIT-B-CONDITIONAL','source_conditional':True}))
         final=self.cli('finish',run)
@@ -371,7 +385,7 @@ class PipelineTests(Fixture):
         self.assertTrue(final['bound_artifact_validation']['audit_b']['source_conditional'])
 
     def test_forged_job_binding_or_invalid_receipt_prevents_final_acceptance(self):
-        run=self.prepared();self.cli('launch',run);self.terminal(run)
+        run=self.prepared();self.launch(run);self.terminal(run)
         case=run/'workflow/case-result.json';data=json.loads(case.read_text());original=case.read_text()
         data['job']['sha256']='0'*64;case.write_text(json.dumps(data))
         self.assertIn('not bound',self.cli('finish',run,ok=False)['error'])
@@ -381,7 +395,7 @@ class PipelineTests(Fixture):
         self.assertFalse((run/'FINAL_OUTCOME.json').exists())
 
     def test_final_receipt_outside_own_run_is_rejected(self):
-        run=self.prepared();self.cli('launch',run);self.terminal(run)
+        run=self.prepared();self.launch(run);self.terminal(run)
         case=run/'workflow/case-result.json';data=json.loads(case.read_text())
         data['result']['audit_b']['receipt_path']=str(self.base/'old-result.json')
         case.write_text(json.dumps(data))

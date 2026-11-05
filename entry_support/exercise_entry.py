@@ -13,6 +13,7 @@ import uuid
 
 from common import digest,local,write,json_call,runtime_call,support_bindings,CAPABILITY_CHECK,terminal_check,terminal_ready
 from skill_check import require_skill
+from owner_monitor import record_monitor
 
 
 def utc():return datetime.now(timezone.utc).isoformat()
@@ -58,7 +59,10 @@ class Entry:
             if set(p)!={'id','reasoning_effort','speed','automatic_fallback'} or not all(isinstance(p[k],str) and p[k] for k in ('id','reasoning_effort','speed')) or p['automatic_fallback'] is not False:
                 raise ValueError('Use complete explicit profiles without fallback')
         if c['limits']!={'case_seconds':None,'stage_seconds':None,'tokens':None,'model_calls':None,'native_seconds':180}:raise ValueError('Keep the configured unlimited total and 180-second native limits')
-        if c['monitor']!={'interval_seconds':600,'notifications':'meaningful_changes_only'}:raise ValueError('Keep bounded monitoring without repeated unchanged notices')
+        monitor = c['monitor']
+        if (not isinstance(monitor, dict) or type(monitor.get('interval_seconds')) is not int or
+                monitor != dict(interval_seconds=600, foreground='end_turn_after_handoff', notifications='every_wake')):
+            raise ValueError('Report at every ten-minute heartbeat and end each foreground turn')
         target_section(local(self.root,'problem.md').read_text(),c['target_heading'])
         return c
 
@@ -201,12 +205,13 @@ print(json.dumps(select(prep/'problem.md',[{'id':'complete-target','label':'Comp
         if runtime_binding(root)!=r['frozen_runtime_sha256']:raise ValueError('Frozen runtime changed')
         return root
 
-    def launch(self,run):
+    def launch(self,run,*,heartbeat_id=None):
         run,r=self.owned(run)
         if r['status']!='JOB_PREPARED':raise ValueError('Dispatch once from JOB_PREPARED; inspect an old attempt, never repeat it')
         self.current(r);self.verify_inputs(run,r);self.validate_job(run,r)
         if digest(local(run,'workflow/job.json'))!=r['job_sha256']:raise ValueError('Prepared job changed')
         args=[sys.executable,'-B',str(self.frozen(run,r)/'nl0/scripts/yui.py'),'execute',str(run/'workflow'),'--detach']
+        monitor = record_monitor(heartbeat_id, run, self.root/'run_test.py', r['configuration']['monitor'], write=write)
         write(run/'dispatch-attempt.json',{'argv':args,'started_at_utc':utc()},exclusive=True)
         self.save(run,r,'DISPATCHING',launch_started_at_utc=utc())
         try:
@@ -215,6 +220,7 @@ print(json.dumps(select(prep/'problem.md',[{'id':'complete-target','label':'Comp
             if result.get('status')!='DISPATCHED' or result.get('runs')!=[str(run/'workflow')] or not all(who.get(k) is not None for k in ('pid','pgid','started')):
                 raise ValueError('Unverified dispatch; inspect actual owned processes')
             self.save(run,r,'DISPATCHED',model_started=None)
+            result['owner_observation'] = {**result.get('owner_observation', {}), **monitor}
             return result
         except Exception as error:self.save(run,r,'DISPATCH_ERROR',error=str(error));raise
 
@@ -276,12 +282,14 @@ print(json.dumps(select(prep/'problem.md',[{'id':'complete-target','label':'Comp
 def main(root,argv=None):
     parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('command',choices=['check','begin','prepare','launch','observe','cancel','finish','cleanup'])
     parser.add_argument('run',type=Path,nargs='?');parser.add_argument('--codex',type=Path);parser.add_argument('--run-id')
+    parser.add_argument('--heartbeat-id', help='Host heartbeat ID returned to this owner for launch')
     args=parser.parse_args(argv);entry=Entry(root)
     try:
         if args.command=='check':result=entry.check(args.codex)
         elif args.command=='begin':result=entry.begin(args.run_id,args.codex)
         elif args.run is None:raise ValueError('Select the exact run returned by begin')
         elif args.command in {'observe','cancel'}:result=entry.action(args.run,args.command)
+        elif args.command=='launch':result=entry.launch(args.run,heartbeat_id=args.heartbeat_id)
         else:result=getattr(entry,args.command)(args.run)
         print(json.dumps(result,ensure_ascii=False,indent=2));return 0
     except (OSError,ValueError,KeyError,TypeError,subprocess.SubprocessError) as error:

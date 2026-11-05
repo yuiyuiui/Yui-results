@@ -42,30 +42,30 @@ class ModeAndCleanupTests(Fixture):
         self.assertFalse((run/'dispatch-attempt.json').exists())
 
     def test_unconditional_final_receipt_is_validated(self):
-        self.unconditional();run=self.prepared();self.cli('launch',run);self.terminal(run)
+        self.unconditional();run=self.prepared();self.launch(run);self.terminal(run)
         final=self.cli('finish',run)
         self.assertEqual(final['bound_artifact_validation']['basis_closure']['achieved_scope'],'UNCONDITIONAL_LEAN')
 
     def test_intermediate_only_result_cannot_claim_unconditional_completion(self):
-        self.unconditional();run=self.prepared();self.cli('launch',run);self.terminal(run)
+        self.unconditional();run=self.prepared();self.launch(run);self.terminal(run)
         (run/'workflow/b2lean/report.json').unlink()
         self.cli('finish',run,ok=False);self.assertFalse((run/'FINAL_OUTCOME.json').exists())
 
     def test_qualified_closure_keeps_conditional_status(self):
-        self.unconditional();run=self.prepared();self.cli('launch',run);self.terminal(run,'WORKFLOW-CONDITIONAL')
+        self.unconditional();run=self.prepared();self.launch(run);self.terminal(run,'WORKFLOW-CONDITIONAL')
         final=self.cli('finish',run)
         self.assertEqual(final['status'],'WORKFLOW-CONDITIONAL')
         self.assertFalse(final['bound_artifact_validation']['basis_closure']['closure']['unconditional'])
 
     def test_closure_receipt_drift_prevents_acceptance(self):
-        self.unconditional();run=self.prepared();self.cli('launch',run);self.terminal(run)
+        self.unconditional();run=self.prepared();self.launch(run);self.terminal(run)
         p=run/'workflow/b2lean/report.json';data=json.loads(p.read_text());data['closure']['unconditional']=False
         p.write_text(json.dumps(data));self.cli('finish',run,ok=False)
 
     def test_terminal_cleanup_is_idempotent_and_keeps_evidence(self):
         for mode in ('conditional','unconditional'):
             self.config['formalization']=mode;self.save_config()
-            run=self.prepared();self.cli('launch',run);self.terminal(run)
+            run=self.prepared();self.launch(run);self.terminal(run)
             w=run/'workflow';(w/'Proof.lean').write_text('Synthetic proof source')
             (w/'dead.olean').write_text('disposable');(w/'.DS_Store').write_text('disposable')
             (w/'keep.olean').write_text('evidence');(w/'binding.json').write_text('{"artifact":"keep.olean"}')
@@ -78,7 +78,7 @@ class ModeAndCleanupTests(Fixture):
             self.assertEqual(self.cli('cleanup',run)['status'],'CLEANED')
 
     def test_cleanup_refuses_active_paused_and_modified_job(self):
-        run=self.prepared();self.cli('launch',run);self.cli('cleanup',run,ok=False)
+        run=self.prepared();self.launch(run);self.cli('cleanup',run,ok=False)
         self.terminal(run)
         (run/'workflow/runtime/nl0/scripts/fault_control.py').write_text('def pending(root):return [{}]\n')
         self.cli('cleanup',run,ok=False)
@@ -87,7 +87,7 @@ class ModeAndCleanupTests(Fixture):
         self.terminal(run);self.cli('cleanup',run,ok=False)
 
     def test_cancelled_run_can_clean_without_claiming_success(self):
-        self.unconditional();run=self.prepared();self.cli('launch',run);self.cli('cancel',run)
+        self.unconditional();run=self.prepared();self.launch(run);self.cli('cancel',run)
         self.terminal(run,'CANCELLED')
         self.assertEqual(self.cli('finish',run)['status'],'CANCELLED')
         self.assertEqual(self.cli('cleanup',run)['status'],'CLEANED')

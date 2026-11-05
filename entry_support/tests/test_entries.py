@@ -16,6 +16,7 @@ sys.path.insert(0,str(REPO/'benchmark_cond/Yui/tests'))
 from support import Fixture
 sys.path.insert(0,str(REPO/'entry_support'))
 from exercise_entry import Entry,target_section
+import exercise_entry
 from common import digest,terminal_ready
 
 
@@ -105,35 +106,67 @@ class ExerciseEntries(Fixture):
                 with self.subTest(filename=filename),self.assertRaises(ValueError):self.entry.prepare(run)
             finally:p.write_bytes(raw)
 
+    def test_unregistered_or_wrong_chat_cannot_dispatch(self):
+        run = self.started()
+        with self.assertRaisesRegex(ValueError, '--heartbeat-id'):
+            self.entry.launch(run)
+        with patch.dict(os.environ, {'CODEX_THREAD_ID':'foreign-owner'}), self.assertRaisesRegex(ValueError, 'different owner'):
+            self.entry.launch(run, heartbeat_id='fixture-heartbeat')
+        self.assertEqual([call[0] for call in self.runtime_calls()], ['prepare'])
+        self.assertFalse((run/'dispatch-attempt.json').exists())
+        self.assertFalse((run/'OWNER_MONITOR_STATE.json').exists())
+
     def test_duplicate_begin_prepare_and_launch_preserve_first_attempt(self):
         run=Path(self.entry.begin('fixed')['run']);self.source_review(run);self.entry.prepare(run)
         with self.assertRaises(FileExistsError):self.entry.begin('fixed')
         with self.assertRaises(ValueError):self.entry.prepare(run)
-        self.entry.launch(run)
-        with self.assertRaises(ValueError):self.entry.launch(run)
+        handoff = self.entry.launch(run, heartbeat_id='fixture-heartbeat')['owner_observation']
+        state = json.loads((run/'OWNER_MONITOR_STATE.json').read_text())
+        self.assertEqual(state['automation_id'], 'fixture-heartbeat')
+        self.assertEqual(state['target_thread_id'], 'fixture-owner')
+        self.assertEqual(state['runs'], [str(run/'workflow')])
+        self.assertEqual(state['observe_command'][-3:], [str(self.entry_root/'run_test.py'), 'observe', str(run)])
+        self.assertEqual(handoff['notifications'], 'every_wake')
+        self.assertEqual(handoff['foreground'], 'end_turn_after_handoff')
+        with self.assertRaises(ValueError):self.entry.launch(run, heartbeat_id='fixture-heartbeat')
         self.assertEqual([r[0] for r in self.runtime_calls()],['prepare','execute'])
+
+    def test_interrupted_before_dispatch_reuses_only_the_same_heartbeat(self):
+        run = self.started()
+        write = exercise_entry.write
+        def interrupted(path, value, **options):
+            if path.name == 'dispatch-attempt.json':
+                raise OSError('Synthetic interruption before dispatch')
+            return write(path, value, **options)
+        with patch.object(exercise_entry, 'write', side_effect=interrupted), self.assertRaises(OSError):
+            self.entry.launch(run, heartbeat_id='original')
+        with self.assertRaisesRegex(ValueError, 'different heartbeat'):
+            self.entry.launch(run, heartbeat_id='other')
+        self.assertFalse((run/'dispatch-attempt.json').exists())
+        self.entry.launch(run, heartbeat_id='original')
+        self.assertEqual([args[0] for args in self.runtime_calls()], ['prepare','execute'])
 
     def test_foreign_run_symlink_and_changed_prepared_input_rejected(self):
         run=self.started();alias=run.parent/'alias';alias.symlink_to(run,target_is_directory=True)
         with self.assertRaises(ValueError):self.entry.owned(alias)
         (run/'workflow/inputs/problem.md').write_text('different')
-        with self.assertRaises(ValueError):self.entry.launch(run)
+        with self.assertRaises(ValueError):self.entry.launch(run, heartbeat_id='fixture-heartbeat')
 
     def test_actual_final_unconditional_scope_is_required_and_reported(self):
-        run=self.started();self.entry.launch(run);self.terminal(run)
+        run=self.started();self.entry.launch(run, heartbeat_id='fixture-heartbeat');self.terminal(run)
         final=self.entry.finish(run)
         self.assertEqual(final['validation']['basis_closure']['achieved_scope'],'UNCONDITIONAL_LEAN')
         self.assertTrue((run/'FINAL_REPORT.zh.md').exists())
         with self.assertRaises(ValueError):self.entry.finish(run)
 
     def test_conditional_intermediate_cannot_close_unconditional_goal(self):
-        run=self.started();self.entry.launch(run);self.terminal(run)
+        run=self.started();self.entry.launch(run, heartbeat_id='fixture-heartbeat');self.terminal(run)
         (run/'workflow/b2lean/report.json').unlink()
         with self.assertRaises(ValueError):self.entry.finish(run)
         self.assertFalse((run/'FINAL_OUTCOME.json').exists())
 
     def test_draft_only_acceptance_cannot_close_unconditional_full_goal(self):
-        run=self.started();self.entry.launch(run);self.terminal(run,'DRAFT-AUDIT-PASSED')
+        run=self.started();self.entry.launch(run, heartbeat_id='fixture-heartbeat');self.terminal(run,'DRAFT-AUDIT-PASSED')
         with self.assertRaises(ValueError):self.entry.finish(run)
 
     def test_malformed_configuration_never_dispatches(self):
@@ -147,7 +180,7 @@ class ExerciseEntries(Fixture):
 
     def test_unconditional_goal_drift_and_foreign_receipt_fail(self):
         for changed in ('goal','receipt'):
-            run=self.started();self.entry.launch(run);self.terminal(run)
+            run=self.started();self.entry.launch(run, heartbeat_id='fixture-heartbeat');self.terminal(run)
             p=run/'workflow/case-result.json';c=json.loads(p.read_text())
             if changed=='goal':c['result']['formalization_goal']='conditional'
             else:c['result']['audit_b']['receipt_path']=str(self.base/'foreign.json')
@@ -155,14 +188,14 @@ class ExerciseEntries(Fixture):
             with self.subTest(changed=changed),self.assertRaises(ValueError):self.entry.finish(run)
 
     def test_paused_and_unverified_exit_cannot_finish(self):
-        run=self.started();self.entry.launch(run);self.terminal(run)
+        run=self.started();self.entry.launch(run, heartbeat_id='fixture-heartbeat');self.terminal(run)
         for filename in ('paused.json','still-live.json'):
             p=run/'workflow'/filename;p.write_text('{}')
             with self.subTest(filename=filename),self.assertRaises(ValueError):self.entry.finish(run)
             p.unlink()
 
     def test_cleanup_preserves_bound_compilation_evidence_and_proof(self):
-        run=self.started();self.entry.launch(run);self.terminal(run);self.entry.finish(run)
+        run=self.started();self.entry.launch(run, heartbeat_id='fixture-heartbeat');self.terminal(run);self.entry.finish(run)
         w=run/'workflow';(w/'dead.olean').write_text('unneeded');(w/'keep.olean').write_text('bound evidence')
         (w/'reference.json').write_text('{"path":"keep.olean","sha256":"synthetic"}')
         (w/'__pycache__').mkdir();(w/'__pycache__/dead.pyc').write_text('cache')

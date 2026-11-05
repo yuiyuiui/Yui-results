@@ -63,7 +63,7 @@ class ConfigurationTests(Fixture):
                lambda d:d['limits'].update(native_seconds=180.0),
                lambda d:d['monitor'].update(interval_seconds=1),lambda d:d['monitor'].update(interval_seconds=600.0),
                lambda d:d['monitor'].update(foreground='poll'),
-               lambda d:d['monitor'].update(notifications='every_wake')]
+               lambda d:d['monitor'].update(notifications='meaningful_changes_only')]
         for change in cases:
             with self.subTest(change=cases.index(change)):self.reject(change)
 

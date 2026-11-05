@@ -20,9 +20,10 @@ import uuid
 
 from benchmark_config import ROOT, load_config, local_path
 from skill_check import require_skill
+from owner_monitor import record_monitor
 
 STARTUP_FILES = ('AGENTS.md', 'README.md', 'settings.json', 'benchmark_config.py',
-                 'skill_check.py', 'prepare_yui.py', 'resource_cleanup.py')
+                 'skill_check.py', 'prepare_yui.py', 'resource_cleanup.py', 'owner_monitor.py')
 RECORD = 'BENCHMARK_RUN.json'
 SCHEMA = 'yui-benchmark-run-1'
 
@@ -446,7 +447,7 @@ def frozen_entry(run):
     return entry
 
 
-def launch(value, *, codex=None):
+def launch(value, *, codex=None, heartbeat_id=None):
     run, record = load_run(value)
     if record['status'] != 'JOB_PREPARED':
         raise ValueError('Launch exactly once from JOB_PREPARED; do not restart or resample')
@@ -455,6 +456,7 @@ def launch(value, *, codex=None):
     if sha256(run/'workflow/job.json') != record['job_sha256']:
         raise ValueError('Prepared job changed before dispatch')
     command = [sys.executable, '-B', str(frozen_entry(run)), 'execute', str(run/'workflow'), '--detach']
+    monitor = record_monitor(heartbeat_id, run, ROOT/'prepare_yui.py', record['configuration']['monitor'], write=write)
     write(run/'dispatch-attempt.json', {'argv': command, 'started_at_utc': utc()}, exclusive=True)
     update(run, record, 'DISPATCHING', launch_started_at_utc=utc(), model_started='POSSIBLE_AFTER_DISPATCH')
     try:
@@ -468,6 +470,7 @@ def launch(value, *, codex=None):
     except Exception as error:
         fail(run, record, 'DISPATCH_ERROR', error)
         raise
+    value['owner_observation'] = {**value.get('owner_observation', {}), **monitor}
     return value
 
 
@@ -635,6 +638,8 @@ def main(argv=None):
     for command in ('check', 'begin', 'freeze', 'prepare', 'launch'):
         p = commands.add_parser(command)
         p.add_argument('--codex', type=Path)
+        if command == 'launch':
+            p.add_argument('--heartbeat-id', help='Host heartbeat ID returned to this owner')
         if command == 'begin':
             p.add_argument('--run-id')
         elif command != 'check':
@@ -649,7 +654,9 @@ def main(argv=None):
                       'bindings': bound, 'environment': environment, 'model_started': False}
         elif args.command == 'begin':
             result = begin(codex=args.codex, run_id=args.run_id)
-        elif args.command in {'freeze', 'prepare', 'launch'}:
+        elif args.command == 'launch':
+            result = launch(args.run, codex=args.codex, heartbeat_id=args.heartbeat_id)
+        elif args.command in {'freeze', 'prepare'}:
             result = globals()[args.command](args.run, codex=args.codex)
         elif args.command == 'finish':
             result = finish(args.run)
