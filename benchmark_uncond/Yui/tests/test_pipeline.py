@@ -435,6 +435,13 @@ class PipelineTests(Fixture):
                'cases':[{'phase':'FINISHED','terminal_record_present':True,'process_exit_verified':True,
                          'paused_errors':[],'live_owned_process_count':0,'registered_groups_still_present':[]}]}
         self.assertTrue(prepare_yui.terminal_ready(valid))
+        cancelled = {**valid, 'cases': [{**valid['cases'][0], 'recorded_result':'CANCELLED',
+                     'phase':'PAUSED_ERROR','counts':{'PAUSED_ERROR':1,'REPAIR_WAIT':4}}]}
+        self.assertTrue(prepare_yui.terminal_ready(cancelled))
+        for current in ({'paused_errors':[{'incident':'active'}]}, {'live_owned_process_count':1},
+                        {'registered_groups_still_present':[42]}, {'terminal_record_present':False},
+                        {'recorded_result':'RUNNING'}, {'recorded_result':'INPUT_CONFLICT'}):
+            self.assertFalse(prepare_yui.terminal_ready({**cancelled,'cases':[{**cancelled['cases'][0],**current}]}))
         for change in [dict(all_terminal=False),dict(all_process_exits_verified=False),
                        dict(process_inspection_error='unavailable'),dict(cases=[]),dict(cases=None),dict(cases=[None])]:
             with self.subTest(change=change):self.assertFalse(prepare_yui.terminal_ready({**valid,**change}))

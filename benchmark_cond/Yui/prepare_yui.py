@@ -16,6 +16,7 @@ import re
 import shutil
 import subprocess
 import sys
+from resource_cleanup import TERMINAL_OUTCOMES
 import uuid
 
 from benchmark_config import ROOT, load_config, local_path
@@ -502,12 +503,20 @@ def terminal_ready(snapshot):
     cases = snapshot.get('cases', [])
     if not isinstance(cases, list) or len(cases) != 1 or not isinstance(cases[0], dict):
         return False
+    case = cases[0]
+    counts = case.get('counts', {})
+    if not isinstance(counts, dict):
+        return False
+    # A bound terminal result supersedes its last task counts and phase.
+    status = case.get('recorded_result')
+    if status is not None and (not isinstance(status, str) or status not in TERMINAL_OUTCOMES):
+        return False
+    if status is None and (case.get('phase') == 'PAUSED_ERROR' or counts.get('PAUSED_ERROR')):
+        return False
     return (snapshot.get('all_terminal') is True and snapshot.get('all_process_exits_verified') is True
             and snapshot.get('process_inspection_error') is None and len(cases) == 1
             and cases[0].get('terminal_record_present') is True
             and cases[0].get('process_exit_verified') is True and cases[0].get('paused_errors') == []
-            and cases[0].get('phase') != 'PAUSED_ERROR'
-            and not (cases[0].get('counts') or {}).get('PAUSED_ERROR')
             and type(cases[0].get('live_owned_process_count')) is int and cases[0].get('live_owned_process_count') == 0
             and cases[0].get('registered_groups_still_present') == [])
 
@@ -568,6 +577,11 @@ def finish(value):
     case = read(owned_file(run, 'workflow/case-result.json'))
     if case.get('job') != {'path': str(workflow/'job.json'), 'sha256': sha256(workflow/'job.json')}:
         raise ValueError('Terminal result is not bound to this job')
+    observed = snapshot['cases'][0].get('recorded_result')
+    if case['result']['status'] not in TERMINAL_OUTCOMES:
+        raise ValueError('Nonterminal case result cannot be finalized')
+    if observed is not None and observed != case['result']['status']:
+        raise ValueError('Terminal observation disagrees with the bound case result')
     validation = validate_terminal(run)
     result = case['result']
     end = datetime.fromtimestamp((workflow/'case-result.json').stat().st_mtime, timezone.utc)

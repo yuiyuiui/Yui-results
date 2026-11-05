@@ -249,6 +249,11 @@ print(json.dumps(select(prep/'problem.md',[{'id':'complete-target','label':'Comp
             raise ValueError('Retained errors or processes remain')
         w=run/'workflow';case=json.loads(local(w,'case-result.json').read_text())
         if case.get('job')!={'path':str(w/'job.json'),'sha256':digest(w/'job.json')} or digest(w/'job.json')!=r['job_sha256']:raise ValueError('Unbound final result')
+        from resource_cleanup import TERMINAL_OUTCOMES
+        if case['result']['status'] not in TERMINAL_OUTCOMES:
+            raise ValueError('Nonterminal case result cannot be finalized')
+        if row.get('recorded_result') is not None and row['recorded_result']!=case['result']['status']:
+            raise ValueError('Terminal observation disagrees with the bound case result')
         validation=terminal_check(self.frozen(run,r),w,r['configuration']['formalization'])
         result=case['result'];end=datetime.fromtimestamp((w/'case-result.json').stat().st_mtime,timezone.utc)
         final={'schema':'yui-exercise-final-1','run':str(run),'status':result['status'],'configuration':r['configuration'],

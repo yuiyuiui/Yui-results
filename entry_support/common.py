@@ -4,6 +4,7 @@ import hashlib
 import json
 import subprocess
 import sys
+from resource_cleanup import TERMINAL_OUTCOMES
 
 
 def digest(path):return hashlib.sha256(Path(path).read_bytes()).hexdigest()
@@ -124,9 +125,15 @@ def terminal_ready(snapshot):
     if not isinstance(cases,list) or len(cases)!=1 or not isinstance(cases[0],dict):return False
     case=cases[0]
     if not isinstance(case.get('counts'),dict):return False
+    # The terminal result outlives the last execution-state projection. Older
+    # observers without a result status still need the conservative phase check.
+    status = case.get('recorded_result')
+    if status is not None and (not isinstance(status,str) or status not in TERMINAL_OUTCOMES):
+        return False
+    if status is None and (case.get('phase')=='PAUSED_ERROR' or case['counts'].get('PAUSED_ERROR')):
+        return False
     return (snapshot.get('all_terminal') is True and snapshot.get('all_process_exits_verified') is True
         and snapshot.get('process_inspection_error') is None and case.get('terminal_record_present') is True
-        and case.get('process_exit_verified') is True and case.get('phase')!='PAUSED_ERROR'
-        and not (case.get('counts') or {}).get('PAUSED_ERROR') and case.get('paused_errors')==[]
+        and case.get('process_exit_verified') is True and case.get('paused_errors')==[]
         and type(case.get('live_owned_process_count')) is int and case['live_owned_process_count']==0
         and case.get('registered_groups_still_present')==[])

@@ -9,6 +9,10 @@ import sys
 import time
 
 
+TERMINAL_OUTCOMES = frozenset({'WORKFLOW-PASSED','WORKFLOW-CONDITIONAL','DRAFT-AUDIT-PASSED',
+    'DRAFT-AUDIT-CONDITIONAL','AUDIT-B-PASSED','AUDIT-B-CONDITIONAL','CANCELLED','STOPPED_BY_USER','DIFFERENT_RESULT_DELIVERED'})
+
+
 def stage_retains_workspace(stage,workspace):
     result=json.loads(stage.read_text())
     retention=result.get('workspace_retention',{})
@@ -38,8 +42,7 @@ def clean_workflow(workflow,runtime,*,grace=2):
     if not 0<=grace<=30:raise ValueError('Cleanup grace must be between 0 and 30 seconds')
     if not (workflow/'case-result.json').is_file():raise ValueError('No terminal case result; keep active resources')
     result=json.loads((workflow/'case-result.json').read_text())
-    if result.get('result',{}).get('status') not in {'WORKFLOW-PASSED','WORKFLOW-CONDITIONAL','DRAFT-AUDIT-PASSED',
-            'DRAFT-AUDIT-CONDITIONAL','AUDIT-B-PASSED','AUDIT-B-CONDITIONAL','CANCELLED','STOPPED_BY_USER','DIFFERENT_RESULT_DELIVERED'}:
+    if result.get('result',{}).get('status') not in TERMINAL_OUTCOMES:
         raise ValueError('Unfinished/faulted workflow cannot authorize cleanup')
     sys.path[:0]=[str(runtime/'nl0/scripts'),str(runtime/'nl02lean/scripts')]
     owned=importlib.import_module('cleanup');faults=importlib.import_module('fault_control')

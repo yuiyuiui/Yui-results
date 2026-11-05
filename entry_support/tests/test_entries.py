@@ -287,6 +287,34 @@ class ExerciseEntries(Fixture):
             with self.subTest(filename=filename),self.assertRaises(ValueError):self.entry.finish(run)
             p.unlink()
 
+    def test_pause_cancel_exit_and_close_retains_history_without_acceptance(self):
+        run=self.started()
+        self.entry.launch(run)
+        (run/'workflow/paused.json').write_text('{}')
+        with self.assertRaises(ValueError):
+            self.entry.finish(run)
+        self.entry.action(run,'cancel')
+        self.terminal(run,'CANCELLED')
+        (run/'workflow/paused.json').unlink()
+        snapshot=self.entry.action(run,'observe')
+        snapshot['cases'][0].update(recorded_result='CANCELLED',phase='INTERFACE_AUTHORING',
+                                   counts={'PAUSED_ERROR':1,'LOCAL_CHECKED':6})
+        mismatched=copy.deepcopy(snapshot)
+        mismatched['cases'][0]['recorded_result']='WORKFLOW-PASSED'
+        with patch.object(self.entry,'action',return_value=mismatched),self.assertRaisesRegex(ValueError,'disagrees'):
+            self.entry.finish(run)
+        with patch.object(self.entry,'action',return_value=snapshot):
+            self.entry.finish(run)
+        outcome=run/'FINAL_OUTCOME.json'
+        original=outcome.read_bytes()
+        result=json.loads(original)
+        self.assertEqual(result['status'],'CANCELLED')
+        self.assertEqual(result['process_exit']['cases'][0]['counts']['PAUSED_ERROR'],1)
+        self.assertEqual(self.entry.cleanup(run)['status'],'CLEANED')
+        with self.assertRaisesRegex(ValueError,'existing final report'):
+            self.entry.finish(run)
+        self.assertEqual(outcome.read_bytes(),original)
+
     def test_cleanup_preserves_bound_compilation_evidence_and_proof(self):
         run=self.started();self.entry.launch(run, heartbeat_id='fixture-heartbeat');self.terminal(run);self.entry.finish(run)
         w=run/'workflow';(w/'dead.olean').write_text('unneeded');(w/'keep.olean').write_text('bound evidence')
@@ -319,6 +347,19 @@ class SnapshotTests(unittest.TestCase):
             'cases':[{'terminal_record_present':True,'process_exit_verified':True,'phase':'FINISHED',
                 'counts':{},'paused_errors':[],'live_owned_process_count':0,'registered_groups_still_present':[]}]}
         self.assertTrue(terminal_ready(base))
+        cancelled=copy.deepcopy(base)
+        cancelled['cases'][0].update(recorded_result='CANCELLED',phase='INTERFACE_AUTHORING',
+            counts={'PAUSED_ERROR':1,'REPAIR_WAIT':4,'LOCAL_CHECKED':6})
+        self.assertTrue(terminal_ready(cancelled))
+        cancelled['cases'][0]['phase']='PAUSED_ERROR'  # last recorded phase before cancellation
+        self.assertTrue(terminal_ready(cancelled))
+        for key,value in [('paused_errors',[{'incident':'pending'}]),('process_exit_verified',False),
+                          ('live_owned_process_count',1),('registered_groups_still_present',[99]),
+                          ('terminal_record_present',False),('recorded_result','PAUSED_ERROR'),
+                          ('recorded_result','RUNNING'),('recorded_result','INPUT_CONFLICT')]:
+            with self.subTest(key=key):
+                changed=copy.deepcopy(cancelled);changed['cases'][0][key]=value
+                self.assertFalse(terminal_ready(changed))
         for key,value in [('phase','PAUSED_ERROR'),('paused_errors',[1]),('live_owned_process_count',False),('registered_groups_still_present',[2])]:
             row=copy.deepcopy(base);row['cases'][0][key]=value
             self.assertFalse(terminal_ready(row))
