@@ -13,7 +13,7 @@ import uuid
 
 from common import digest,local,write,json_call,runtime_call,support_bindings,CAPABILITY_CHECK,terminal_check,terminal_ready
 from skill_check import require_skill
-from owner_monitor import record_monitor
+from owner_monitor import record_monitor,validate_monitor
 
 
 def utc():return datetime.now(timezone.utc).isoformat()
@@ -59,10 +59,7 @@ class Entry:
             if set(p)!={'id','reasoning_effort','speed','automatic_fallback'} or not all(isinstance(p[k],str) and p[k] for k in ('id','reasoning_effort','speed')) or p['automatic_fallback'] is not False:
                 raise ValueError('Use complete explicit profiles without fallback')
         if c['limits']!={'case_seconds':None,'stage_seconds':None,'tokens':None,'model_calls':None,'native_seconds':180}:raise ValueError('Keep the configured unlimited total and 180-second native limits')
-        monitor = c['monitor']
-        if (not isinstance(monitor, dict) or type(monitor.get('interval_seconds')) is not int or
-                monitor != dict(interval_seconds=600, foreground='end_turn_after_handoff', notifications='every_wake')):
-            raise ValueError('Report at every ten-minute heartbeat and end each foreground turn')
+        validate_monitor(c['monitor'])
         target_section(local(self.root,'problem.md').read_text(),c['target_heading'])
         return c
 
@@ -282,7 +279,7 @@ print(json.dumps(select(prep/'problem.md',[{'id':'complete-target','label':'Comp
 def main(root,argv=None):
     parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('command',choices=['check','begin','prepare','launch','observe','cancel','finish','cleanup'])
     parser.add_argument('run',type=Path,nargs='?');parser.add_argument('--codex',type=Path);parser.add_argument('--run-id')
-    parser.add_argument('--heartbeat-id', help='Host heartbeat ID returned to this owner for launch')
+    parser.add_argument('--heartbeat-id', help='Optional existing permitted host heartbeat ID; omit for in-chat waiting')
     args=parser.parse_args(argv);entry=Entry(root)
     try:
         if args.command=='check':result=entry.check(args.codex)

@@ -270,11 +270,24 @@ class PipelineTests(Fixture):
         self.assertEqual((run/'workflow/sentinel').read_text(),'keep')
         self.assertEqual(self.runtime_calls(),[])
 
-    def test_launch_requires_a_heartbeat_before_any_dispatch_attempt(self):
-        run = self.prepared()
-        error = self.cli('launch', run, ok=False)['error']
-        self.assertIn('--heartbeat-id', error)
-        self.assertEqual([call[0] for call in self.runtime_calls()], ['prepare'])
+    def test_owning_chat_launches_and_observes_with_no_scheduler(self):
+        run=self.prepared();handoff=self.cli('launch',run)['owner_observation']
+        state=json.loads((run/'OWNER_MONITOR_STATE.json').read_text())
+        for row in (handoff,state):
+            self.assertEqual(row['registration'],'OWNER_CHAT_WAIT')
+            self.assertEqual(row['foreground'],'wait_in_owner_chat')
+            self.assertEqual(row['interval_seconds'],600)
+            self.assertEqual(row['target_thread_id'],'fixture-owner')
+            self.assertIsNone(row['automation_id']);self.assertIsNone(row['host_tool'])
+        self.assertEqual(self.cli('observe',run)['cases'][0]['phase'],'RUNNING')
+        self.cli('launch',run,ok=False)
+        self.assertEqual([r[0] for r in self.runtime_calls()],['prepare','execute','observe'])
+
+    def test_empty_heartbeat_id_cannot_claim_host_monitoring(self):
+        run=self.prepared()
+        error=self.cli('launch',run,'--heartbeat-id','   ',ok=False)['error']
+        self.assertIn('--heartbeat-id',error)
+        self.assertEqual([r[0] for r in self.runtime_calls()],['prepare'])
         self.assertFalse((run/'dispatch-attempt.json').exists())
 
     def test_launch_is_one_detached_call_and_cannot_be_repeated(self):

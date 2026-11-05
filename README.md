@@ -11,9 +11,10 @@ sets them for chats opened there. When using `create_thread`, select
 `model="gpt-6.1-sol"` and `thinking="high"` at creation. Give the task only
 `Execute <path>/README.md`, using the absolute entry path when starting in Yui.
 
-Each entry registers a ten-minute heartbeat in its owning chat before launching
-the detached workers. The owner posts one short Chinese status on every wake,
-including unchanged progress, and ends the turn between checks.
+Each entry launches detached workers and records which chat owns the run.
+That chat verifies the dispatch, waits ten minutes at a time and posts one
+short Chinese status after each observation, including unchanged progress.
+It ends the turn after terminal validation, reporting and cleanup.
 
 ## Benchmark
 

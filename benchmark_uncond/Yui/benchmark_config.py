@@ -5,6 +5,8 @@ import json
 from pathlib import Path
 import re
 
+from owner_monitor import validate_monitor
+
 ROOT = Path(__file__).resolve().parent
 NAME = 'Yui'
 SKILL = 'rigorous-proof'
@@ -80,9 +82,7 @@ def load_config(root=ROOT):
         raise ValueError('Use the same source-only full-paper preparation in every run')
     if type(prep['render_dpi']) is not int or not 72 <= prep['render_dpi'] <= 300:
         raise ValueError('PDF rendering DPI must be an integer from 72 to 300')
-    if not isinstance(config['monitor'], dict) or type(config['monitor'].get('interval_seconds')) is not int or config['monitor'] != dict(interval_seconds=600, foreground='end_turn_after_handoff',
-                                 notifications='every_wake'):
-        raise ValueError('Keep the bounded ten-minute host monitoring contract')
+    validate_monitor(config['monitor'])
     if config['reuse_previous_results'] is not False:
         raise ValueError('Previous benchmark results are not construction inputs')
     if not isinstance(config['source_policy'], str) or not config['source_policy'].strip():

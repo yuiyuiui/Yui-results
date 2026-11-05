@@ -6,6 +6,8 @@ support, not a proof source or a separate execution entry.
 
 - `exercise_entry.py`: source readback, preparation, one dispatch, observation,
   existing-evidence validation and cleanup for one problem.
+- `owner_monitor.py` binds a single dispatch and its ten-minute observations to
+  the chat that prepared the run.
 - `common.py` and `skill_check.py`: paths, hashes, exact installed-skill discovery,
   runtime capabilities and final A/B/b2lean validation.
 - `resource_cleanup.py`: terminal-run resource collection. Benchmark entries

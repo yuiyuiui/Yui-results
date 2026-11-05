@@ -639,7 +639,7 @@ def main(argv=None):
         p = commands.add_parser(command)
         p.add_argument('--codex', type=Path)
         if command == 'launch':
-            p.add_argument('--heartbeat-id', help='Host heartbeat ID returned to this owner')
+            p.add_argument('--heartbeat-id', help='Optional existing heartbeat ID on a host that permits this handoff; omit for in-chat waiting')
         if command == 'begin':
             p.add_argument('--run-id')
         elif command != 'check':

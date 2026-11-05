@@ -106,10 +106,74 @@ class ExerciseEntries(Fixture):
                 with self.subTest(filename=filename),self.assertRaises(ValueError):self.entry.prepare(run)
             finally:p.write_bytes(raw)
 
-    def test_unregistered_or_wrong_chat_cannot_dispatch(self):
+    def test_owning_chat_can_dispatch_without_a_scheduler_then_observe_without_relaunch(self):
+        run=self.started('conditional')
+        result=self.entry.launch(run)
+        self.assertEqual(result['status'],'DISPATCHED')
+        handoff=result['owner_observation']
+        receipt=json.loads((run/'OWNER_MONITOR_STATE.json').read_text())
+        for row in (handoff,receipt):
+            self.assertEqual(row['registration'],'OWNER_CHAT_WAIT')
+            self.assertEqual(row['foreground'],'wait_in_owner_chat')
+            self.assertEqual(row['interval_seconds'],600)
+            self.assertEqual(row['notifications'],'every_wake')
+            self.assertEqual(row['target_thread_id'],'fixture-owner')
+            self.assertIsNone(row['automation_id'])
+            self.assertIsNone(row['host_tool'])
+            self.assertIsNone(row['host_kind'])
+            self.assertEqual(row['scheduler'],'owner_chat_wait')
+            self.assertEqual(row['observe_command'][-3:],[str(self.entry_root/'run_test.py'),'observe',str(run)])
+        self.assertEqual(self.entry.action(run,'observe')['cases'][0]['phase'],'RUNNING')
+        with self.assertRaises(ValueError):self.entry.launch(run)
+        self.assertEqual([r[0] for r in self.runtime_calls()],['prepare','execute','observe'])
+        self.terminal(run)
+        self.assertEqual(self.entry.finish(run)['status'], 'WORKFLOW-PASSED')
+        self.assertEqual(self.entry.cleanup(run)['status'], 'CLEANED')
+        self.assertTrue((run/'FINAL_REPORT.zh.md').is_file())
+        self.assertEqual([r[0] for r in self.runtime_calls()].count('execute'), 1)
+
+    def test_interrupted_in_chat_handoff_can_resume_only_the_original_owner_and_mode(self):
+        run=self.started()
+        write=exercise_entry.write
+        def interrupted(path,value,**options):
+            if path.name=='dispatch-attempt.json':raise OSError('before dispatch')
+            return write(path,value,**options)
+        with patch.object(exercise_entry,'write',interrupted),self.assertRaises(OSError):
+            self.entry.launch(run)
+        with self.assertRaisesRegex(ValueError,'different'):self.entry.launch(run,heartbeat_id='other')
+        self.assertFalse((run/'dispatch-attempt.json').exists())
+        self.assertEqual(self.entry.launch(run)['owner_observation']['registration'],'OWNER_CHAT_WAIT')
+        self.assertEqual([r[0] for r in self.runtime_calls()],['prepare','execute'])
+
+    def test_legacy_schedule_policy_still_requires_its_recorded_id(self):
+        path = self.entry_root/'settings.json'
+        settings = json.loads(path.read_text())
+        settings['monitor']['foreground'] = 'end_turn_after_handoff'
+        path.write_text(json.dumps(settings))
         run = self.started()
         with self.assertRaisesRegex(ValueError, '--heartbeat-id'):
             self.entry.launch(run)
+        self.assertFalse((run/'dispatch-attempt.json').exists())
+        handoff = self.entry.launch(run, heartbeat_id='existing-id')['owner_observation']
+        self.assertEqual(handoff['automation_id'], 'existing-id')
+        self.assertEqual(handoff['foreground'], 'end_turn_after_handoff')
+        self.assertEqual([args[0] for args in self.runtime_calls()], ['prepare', 'execute'])
+
+    def test_in_chat_monitor_requires_the_prepared_owner_record(self):
+        run = self.started()
+        (run/'workflow/owner-context.json').unlink()
+        with self.assertRaisesRegex(ValueError, 'Missing prepared workflow owner'):
+            self.entry.launch(run)
+        self.assertFalse((run/'OWNER_MONITOR_STATE.json').exists())
+        self.assertEqual([args[0] for args in self.runtime_calls()], ['prepare'])
+
+    def test_unregistered_or_wrong_chat_cannot_dispatch(self):
+        run = self.started()
+        with patch.dict(os.environ,{'CODEX_THREAD_ID':'','YUI_OWNER_THREAD_ID':''}),self.assertRaisesRegex(ValueError,'owning chat'):
+            self.entry.launch(run)
+        with patch.dict(os.environ,{'CODEX_THREAD_ID':'foreign-owner'}),self.assertRaisesRegex(ValueError,'different owner'):
+            self.entry.launch(run)
+        with self.assertRaisesRegex(ValueError,'--heartbeat-id'):self.entry.launch(run,heartbeat_id='   ')
         with patch.dict(os.environ, {'CODEX_THREAD_ID':'foreign-owner'}), self.assertRaisesRegex(ValueError, 'different owner'):
             self.entry.launch(run, heartbeat_id='fixture-heartbeat')
         self.assertEqual([call[0] for call in self.runtime_calls()], ['prepare'])

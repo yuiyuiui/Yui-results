@@ -66,7 +66,7 @@ elif cmd=='execute':
  if mode=='execute_exit':print('synthetic launch failure after possible dispatch',file=sys.stderr);raise SystemExit(9)
  controller={'pid':123456,'pgid':123456,'started':'synthetic identity'}
  if mode=='missing_identity':controller.pop('started')
- print(json.dumps({'status':'DISPATCHED','runs':[str(w)],'controller':controller,'owner_observation':{'registration':'HOST_REGISTRATION_REQUIRED','notifications':'meaningful_changes_only'}}))
+ print(json.dumps({'status':'DISPATCHED','runs':[str(w)],'controller':controller,'owner_observation':{'registration':'HOST_REGISTRATION_REQUIRED','notifications':'meaningful_changes_only','scheduler':'host_heartbeat','host_tool':'automation_update','host_kind':'heartbeat'}}))
 elif cmd in ('observe','cancel'):
  w=Path(a[1])
  if cmd=='cancel':write(w/'cancel-request.json',{'status':'CANCEL_REQUESTED'});print(json.dumps({'status':'CANCEL_REQUESTED'}))

@@ -19,7 +19,13 @@ class EntryLayout(unittest.TestCase):
                 text=path.read_text();self.assertIn('single execution entry',text)
                 self.assertIn('CLEANUP.json',text);self.assertIn('FINAL_OUTCOME.json',text)
                 self.assertIn('settings.json',text)
-                self.assertIn('--heartbeat-id', text)
+                script = 'run_test.py' if path in exercises else 'prepare_yui.py'
+                self.assertIn(f'python3 -B {script} launch RUN\n', text)
+                self.assertIn('duration_ms=600000', text)
+                self.assertIn('OWNER_CHAT_WAIT', text)
+                self.assertIn('even when progress is', text)
+                self.assertNotIn('end the turn before beginning', text)
+                self.assertNotIn('launch RUN --heartbeat-id', text)
         pages=[ROOT/'README.md',ROOT/'benchmark_cond/README.md',ROOT/'benchmark_uncond/README.md',
                ROOT/'benchmark_cond/pure-model-result/README.md',ROOT/'benchmark_cond/pure-model-result/REPRODUCE.md',*exercises,*benchmarks]
         for path in pages:
@@ -44,7 +50,7 @@ class EntryLayout(unittest.TestCase):
                         self.assertEqual((project['model'], project['model_reasoning_effort'], worker['speed']),
                                          (worker['id'], worker['reasoning_effort'], 'standard'))
                     self.assertEqual(settings['monitor'], {'interval_seconds':600,
-                        'foreground':'end_turn_after_handoff', 'notifications':'every_wake'})
+                        'foreground':'wait_in_owner_chat', 'notifications':'every_wake'})
 
     def test_live_commands_use_current_paths_and_unconditional_has_no_bare_arm(self):
         for path in [ROOT/'README.md',ROOT/'benchmark_cond/pure-model-result/REPRODUCE.md',ROOT/'benchmark_cond/pure-model-result/prompt.py']:

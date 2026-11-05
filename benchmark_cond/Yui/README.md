@@ -18,9 +18,10 @@ creation. Both the trusted [Yui-results project](../../.codex/config.toml) and
 the paired Yui checkout select Standard. Send only
 `Execute <path>/README.md`, using the absolute entry path when starting in Yui.
 
-In the owning task, confirm your selected profile and the availability of a
-permitted ten-minute heartbeat in this same chat. If either prerequisite fails,
-report the reason in Chinese and end the turn before beginning the run.
+Confirm the selected model profile in the owning chat. Start this single run
+with the steps below. Its ten-minute reports use a timed wait in this same
+chat while the detached workers run. No host automation or schedule ID is a
+prerequisite for `begin`, `prepare` or `launch`.
 
 ## Formalization goal
 
@@ -71,7 +72,7 @@ Every current top-level item has one Yui-benchmark consumer:
 | `benchmark_config.py` | Strict settings and local-path validation, stages 1–4 |
 | `skill_check.py` | Exact registered Yui discovery; no thread/model dispatch, stage 1 |
 | `prepare_yui.py` | Source/run preparation and guarded calls to Yui, stages 1–7 |
-| `owner_monitor.py` | Record the owning chat and host heartbeat before dispatch |
+| `owner_monitor.py` | Record the owner, run and monitoring mode before dispatch |
 | `tests/` | Synthetic software tests for these stages; no proof fixtures or model calls, stage 1 |
 | `results/` | Per-run inputs, bound runtime, proof/review evidence, monitoring and final reports, stages 2–7; old runs are read-only archives |
 
@@ -217,46 +218,42 @@ changes make preparation stale and block launch. Do not repair that by rewriting
 old bindings. A failed submitted preparation remains a failed attempt; report it
 instead of automatically making a replacement run.
 
-## 4. Register the heartbeat and dispatch once
+## 4. Dispatch once and report in this chat
 
-After preparation, register **one active host heartbeat every 10 minutes
-(600 seconds) in this same chat** with `automation_update`. Reuse a matching
-heartbeat for this chat and run, updating its cadence, wake instruction and
-notification settings if necessary. Include this README's absolute path and
-the exact `RUN/workflow` path. Substitute the absolute script and run paths
-in the wake instruction below.
-
-> Run `python3 -B prepare_yui.py observe RUN` once. Post a short status in Chinese with
-> the phase, available completion counts and any fault or decision. **Report
-> even when progress is unchanged.** For a running or paused case, end this
-> turn after posting. At termination, follow the README to validate, report,
-> clean up and remove the heartbeat.
-
-Use the host-returned heartbeat ID as `HEARTBEAT_ID`. If registration fails,
-report the prepared run and the error, leave the workers undispatched and end
-the turn. Do not switch to foreground sleeping or polling.
+Use the same chat that prepared the job. Run each command once, replacing
+`RUN` with the absolute path returned by `begin`.
 
 ```sh
-python3 -B prepare_yui.py launch RUN --heartbeat-id "$HEARTBEAT_ID"
+python3 -B prepare_yui.py launch RUN
 python3 -B prepare_yui.py observe RUN
 ```
 
-`launch` saves the ID, owning chat and workflow map in
-`RUN/OWNER_MONITOR_STATE.json` before dispatching once with `--detach`. Verify
-the controller PID, start time and process group in the initial observation.
-Post the initial status and **end the foreground turn**. The background workers
-continue until the next heartbeat wakes this chat.
+`launch` records the actual owner chat and workflow in
+`RUN/OWNER_MONITOR_STATE.json` with `registration: OWNER_CHAT_WAIT`, then
+dispatches the workers with `--detach`. Check the dispatch receipt and the
+controller PID, start time and process group in the first observation. Post
+the initial phase in Chinese. If the launch result is ambiguous, use the same
+run's observation and dispatch records to establish what started. Do not
+issue a second launch.
 
-If dispatch is ambiguous, observe the existing workflow once and report what
-is known. Keep its heartbeat for live or unconfirmed work. If dispatch failed
-and no owned work started, delete the idle heartbeat by its host-returned ID
-and end the turn. Never repeat an ambiguous launch.
+**Wait ten minutes in this turn** while the workers run. In Codex use the
+interruptible `clock.sleep` tool with `duration_ms=600000`. At each timed wake,
+run `python3 -B prepare_yui.py observe RUN` once. Post a short Chinese status with
+the phase, available counts and any fault or decision, even when progress is
+unchanged. Repeat the timed wait until the case terminates. An incoming user
+message can interrupt the wait. Respect cancellation or a requested decision
+and continue only the authorized observation. Keep this turn open between
+checks. Do not create a job-specific automation or background observer.
+
+Previously dispatched runs keep their recorded owner and mode. The optional
+`--heartbeat-id` argument is for a permitted schedule that already has an
+actual host-issued ID. A fresh run on this host uses the plain launch above.
 
 ## 5. Observe and handle actual faults within Yui's boundaries
 
 On each wake run only the bounded observation above. Read bounded new fault
 metadata when needed. Do not inspect unfinished proofs to guide workers, send
-hints, read another run, repeat foreground waits, restart live work or resample
+hints, read another run, poll between timed observations, restart live work or resample
 mathematical failures.
 
 `PAUSED_ERROR` is nonterminal. Keep its monitor and evidence. Report the actual
@@ -319,7 +316,7 @@ metadata. If a reporting utility fails, retain its diagnostic and label any
 fallback derived from existing records; do not launch another experiment.
 
 After preserving the machine and Chinese human reports, complete stage 8.
-Retain the heartbeat while an authorized recovery is pending.
+Keep the owner monitoring this run while authorized recovery is pending.
 
 ## 7. Result layout and historical records
 
@@ -340,7 +337,7 @@ results/<new-run-id>/
   workflow/                  Actual Yui job, inputs, runtime, proofs and reviews
   dispatch-attempt.json      One dispatch attempt and result/error logs
   dispatch-result.json
-  OWNER_MONITOR_STATE.json   Actual host schedule ID and this workflow map
+  OWNER_MONITOR_STATE.json   Owning chat, observation mode and exact workflow path
   OWNER_MONITOR_LOG.jsonl    Bounded owner observations
   FINAL_OUTCOME.json         Bound terminal validation, health and accounting
   FINAL_REPORT.zh.md         Chinese final report
@@ -384,7 +381,8 @@ Preserve compiled artifacts referenced by evidence, shared Lean/mathlib, other
 runs and symlink targets. The helper writes CLEANUP.json. Unknown ownership or
 unconfirmed exit must leave diagnostics and report CLEANUP_BLOCKED, not claim
 a clean disk/memory state. The final Chinese report must state cleanup status.
-Once the run is terminal, owned processes have exited, and final reporting and
-cleanup are complete, delete its heartbeat by its saved ID and record the
-deletion in `RUN/OWNER_MONITOR_STATE.json`. Post the final Chinese status and
-end the turn.
+Once the run is terminal, owned processes have exited, and the reports and
+cleanup are complete, set `status` to `COMPLETED` in
+`RUN/OWNER_MONITOR_STATE.json`. Preserve the owner, run and mode. For an older
+run with a permitted host schedule, close it by its saved ID and record the
+outcome. Post the final Chinese status and end the turn.
