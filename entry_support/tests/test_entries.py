@@ -47,7 +47,9 @@ class ExerciseEntries(Fixture):
 
     def test_checked_in_six_entries_have_pinned_source_and_exact_goals(self):
         for family,mode in [('test_cond','conditional'),('test_uncond','unconditional')]:
-            for root in sorted((REPO/family).iterdir()):
+            roots=sorted(p for p in (REPO/family).iterdir() if p.is_dir())
+            self.assertEqual(len(roots),3)
+            for root in roots:
                 with self.subTest(root=root):
                     c=Entry(root).config();self.assertEqual(c['formalization'],mode);self.assertEqual(c['track'],'full')
                     self.assertEqual(c['input_sha256'],digest(root/'problem.md'))
@@ -57,6 +59,14 @@ class ExerciseEntries(Fixture):
                     for command in ('begin','prepare','launch','observe','finish','cleanup'):
                         self.assertIn('run_test.py '+command,readme)
                     self.assertIn('CLEANUP.json',readme)
+
+    def test_hidden_finder_files_do_not_become_exercise_entries(self):
+        checkout=self.base/'finder-checkout'
+        for family in ('test_cond','test_uncond'):
+            shutil.copytree(REPO/family,checkout/family,ignore=shutil.ignore_patterns('rigorous-proof','__pycache__'))
+            (checkout/family/'.DS_Store').write_bytes(b'Synthetic Finder metadata')
+        with patch.object(sys.modules[__name__],'REPO',checkout):
+            self.test_checked_in_six_entries_have_pinned_source_and_exact_goals()
 
     def test_unconditional_begin_freezes_only_current_source_without_dispatch(self):
         run=Path(self.entry.begin()['run']);r=json.loads((run/'TEST_RUN.json').read_text())
