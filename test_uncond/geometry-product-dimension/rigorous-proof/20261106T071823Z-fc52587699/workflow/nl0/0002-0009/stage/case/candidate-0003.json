@@ -1,0 +1,4547 @@
+{
+  "spec": {
+    "format_version": 2,
+    "case_id": "preparation",
+    "full_target": "Here dimension means **Hausdorff dimension**. As approved by the user on\n2026-10-23, assume explicitly that \\(E\\) is nonempty. With the convention\n\\(\\dim_H\\varnothing=0\\), the printed equality would otherwise fail for\nthe empty set. This is a disclosed addition to the printed exercise.\n\nLet \\(n\\geq0\\) be an integer, let \\(E\\subset\\mathbb R^n\\) be a nonempty\ncompact set, and put \\(I=[0,1]\\). Identify \\(\\mathbb R^n\\times\\mathbb R\\)\nwith \\(\\mathbb R^{n+1}\\) and use its Euclidean metric. Prove\n\n\\[\n\\dim_H(E\\times[0,1])=\\dim_H E+1.\n\\]\n\nThe zero-dimensional ambient space \\(\\mathbb R^0\\) is included. A later\nformalization using a different product norm must justify the metric change.",
+    "conclusion": "dimH(Feuc)=dimH(E)+1, with Feuc in Euclidean Wn and E in Euclidean Vn.",
+    "parameters": [
+      {
+        "symbol": "n",
+        "type": "natural number (including zero)"
+      },
+      {
+        "symbol": "E",
+        "type": "subset of Euclidean ℝ^n"
+      }
+    ],
+    "hypotheses": [
+      {
+        "id": "H001",
+        "statement": "E is nonempty.",
+        "origin": "problem.md:16–23, explicitly approved nonemptiness; target-selection.json/targets/0"
+      },
+      {
+        "id": "H002",
+        "statement": "E is compact in Euclidean ℝ^n.",
+        "origin": "problem.md:21–23; target-selection.json/targets/0"
+      }
+    ],
+    "definitions": [
+      {
+        "id": "D001",
+        "symbol": "I",
+        "type": "subset of ℝ",
+        "definition": "I=[0,1]={t∈ℝ : 0≤t and t≤1}.",
+        "depends_on": [],
+        "requires": [],
+        "binders": [
+          {
+            "symbol": "t",
+            "type": "ℝ"
+          }
+        ],
+        "objects": [
+          "t"
+        ]
+      },
+      {
+        "id": "D002",
+        "symbol": "ediam",
+        "type": "extended diameter, for subsets of a pseudo extended metric space",
+        "definition": "For a pseudo extended metric space Z and B⊆Z, ediam(B)=sup{edist(x,y): x∈B, y∈B} in [0,∞], with sup ∅=0.",
+        "depends_on": [],
+        "requires": [],
+        "binders": [
+          {
+            "symbol": "Z",
+            "type": "pseudo extended metric space"
+          },
+          {
+            "symbol": "B",
+            "type": "subset of Z"
+          },
+          {
+            "symbol": "x",
+            "type": "Z"
+          },
+          {
+            "symbol": "y",
+            "type": "Z"
+          }
+        ],
+        "objects": [
+          "Z",
+          "B",
+          "x",
+          "y"
+        ]
+      },
+      {
+        "id": "D003",
+        "symbol": "diam",
+        "type": "real diameter notation for subsets of a metric space",
+        "definition": "For a metric space Z and B⊆Z, diam(B)=(ediam(B)).toReal, where toReal agrees with finite nonnegative reals and sends ∞ to 0. Only finite-extended-diameter sets are assigned real diameters in our covering arguments. Empty sets and singletons have diameter zero.",
+        "depends_on": [
+          "D002"
+        ],
+        "requires": [],
+        "binders": [
+          {
+            "symbol": "Z",
+            "type": "metric space"
+          },
+          {
+            "symbol": "B",
+            "type": "subset of Z"
+          }
+        ],
+        "objects": [
+          "ediam",
+          "Z",
+          "B"
+        ]
+      },
+      {
+        "id": "D004",
+        "symbol": "C",
+        "type": "extended nonnegative content C_p(r,B), also denoted YuiContent p r B",
+        "definition": "For a metric (or extended metric) space Z, real p, r∈[0,∞], B⊆Z, define C_p(r,B)=inf_{U:ℕ→Set Z} inf_{B⊆⋃i U_i} inf_{∀i ediam(U_i)≤r} ∑_{i≥0} sup_{h:U_i≠∅}(ediam(U_i))^p. Empty infima are ∞ and empty suprema are 0. Thus empty cover members cost zero, also at p=0. This is exactly YuiContent in basis-registry.json/lean_header. For a real scale δ≥0, C_p(δ,B) means C_p(ofReal δ,B); nonnegative real finite costs are embedded in [0,∞]. Throughout, a δ-cover means a family covering the set with ediam of every member ≤ofReal δ; the finite-scale real-diameter notation never admits an unbounded member through toReal(∞)=0.",
+        "depends_on": [
+          "D002"
+        ],
+        "requires": [],
+        "binders": [
+          {
+            "symbol": "Z",
+            "type": "extended metric space"
+          },
+          {
+            "symbol": "p",
+            "type": "ℝ"
+          },
+          {
+            "symbol": "r",
+            "type": "[0,∞]"
+          },
+          {
+            "symbol": "B",
+            "type": "subset of Z"
+          },
+          {
+            "symbol": "U",
+            "type": "ℕ→Set Z"
+          },
+          {
+            "symbol": "δ",
+            "type": "nonnegative real"
+          }
+        ],
+        "objects": [
+          "ediam",
+          "Z",
+          "p",
+          "r",
+          "B",
+          "U",
+          "δ"
+        ]
+      },
+      {
+        "id": "D005",
+        "symbol": "μH",
+        "type": "unnormalized diameter-power Hausdorff measure μH[p] on Borel extended metric spaces",
+        "definition": "μH[p] is the native unnormalized Hausdorff measure, MeasureTheory.Measure.hausdorffMeasure p = Measure.mkMetric (r↦r^p). Its underlying outer measure is obtained from the metric outer measure construction: at each positive scale infimize the sums of diameter powers of countable covers, empty members costing zero, then take the supremum as the scale tends to zero. Evaluation μH[p](B) is the outer-measure value on any B⊆Z, with no measurability assumption on B. Explicitly, μH[p](B)=sup_{r∈[0,∞],r>0} C_p(r,B), including all extended positive scales.",
+        "depends_on": [
+          "D002",
+          "D004"
+        ],
+        "requires": [],
+        "binders": [
+          {
+            "symbol": "Z",
+            "type": "extended metric space with its Borel measurable structure"
+          },
+          {
+            "symbol": "p",
+            "type": "ℝ"
+          },
+          {
+            "symbol": "B",
+            "type": "subset of Z"
+          },
+          {
+            "symbol": "r",
+            "type": "[0,∞]"
+          }
+        ],
+        "objects": [
+          "ediam",
+          "C",
+          "Z",
+          "p",
+          "B",
+          "r"
+        ]
+      },
+      {
+        "id": "D006",
+        "symbol": "dimH",
+        "type": "Hausdorff dimension, valued in [0,∞]",
+        "definition": "For an extended metric space Z and B⊆Z, dimH(B)=sup{a∈[0,∞): μH[a](B)=∞}, evaluated in [0,∞] using the Borel measurable structure. The supremum of an empty set of exponents is 0. This is the native Hausdorff dimension with the original critical-exponent convention; the equality of the native measure and the original positive-exponent covering normalization is established in the proof.",
+        "depends_on": [
+          "D005"
+        ],
+        "requires": [],
+        "binders": [
+          {
+            "symbol": "Z",
+            "type": "extended metric space"
+          },
+          {
+            "symbol": "B",
+            "type": "subset of Z"
+          },
+          {
+            "symbol": "a",
+            "type": "nonnegative real"
+          }
+        ],
+        "objects": [
+          "μH",
+          "Z",
+          "B",
+          "a"
+        ]
+      },
+      {
+        "id": "D007",
+        "symbol": "maxProd",
+        "type": "metric product constructor",
+        "definition": "For metric spaces Z,Y, maxProd(Z,Y) is Z×Y with distance between (x,t),(y,u) equal to max(dist_Z(x,y),dist_Y(t,u)). For real normed spaces this is the standard max norm on the product. Products in auxiliary propositions use this metric unless explicitly Euclidean.",
+        "depends_on": [],
+        "requires": [],
+        "binders": [
+          {
+            "symbol": "Z",
+            "type": "metric space"
+          },
+          {
+            "symbol": "Y",
+            "type": "metric space"
+          },
+          {
+            "symbol": "x",
+            "type": "Z"
+          },
+          {
+            "symbol": "y",
+            "type": "Z"
+          },
+          {
+            "symbol": "t",
+            "type": "Y"
+          },
+          {
+            "symbol": "u",
+            "type": "Y"
+          }
+        ],
+        "objects": [
+          "Z",
+          "Y",
+          "x",
+          "y",
+          "t",
+          "u"
+        ]
+      },
+      {
+        "id": "D008",
+        "symbol": "volume",
+        "type": "Lebesgue measure on ℝ, with its Borel measurable structure",
+        "definition": "volume is Lebesgue measure on ℝ, whose values on arbitrary subsets mean its outer-measure values. For a measurable space Z, measure ν and B⊆Z, ν|B denotes the restricted measure; on measurable S it has value ν(S∩B).",
+        "depends_on": [],
+        "requires": [],
+        "binders": [
+          {
+            "symbol": "Z",
+            "type": "measurable space"
+          },
+          {
+            "symbol": "ν",
+            "type": "measure on Z"
+          },
+          {
+            "symbol": "B",
+            "type": "subset of Z"
+          },
+          {
+            "symbol": "S",
+            "type": "measurable subset of Z"
+          }
+        ],
+        "objects": [
+          "Z",
+          "ν",
+          "B",
+          "S"
+        ]
+      },
+      {
+        "id": "D009",
+        "symbol": "indicator",
+        "type": "extended nonnegative indicator function",
+        "definition": "For B⊆Z, indicator(B)(t)=1 when t∈B and 0 otherwise; w indicator(B) is the function equal to w on B and 0 off B, for w∈[0,∞], including w=∞.",
+        "depends_on": [],
+        "requires": [],
+        "binders": [
+          {
+            "symbol": "Z",
+            "type": "type"
+          },
+          {
+            "symbol": "B",
+            "type": "subset of Z"
+          },
+          {
+            "symbol": "t",
+            "type": "Z"
+          },
+          {
+            "symbol": "w",
+            "type": "[0,∞]"
+          }
+        ],
+        "objects": [
+          "Z",
+          "B",
+          "t",
+          "w"
+        ]
+      },
+      {
+        "id": "D010",
+        "symbol": "lintegral",
+        "type": "nonnegative Lebesgue integral",
+        "definition": "For a measure ν on a measurable space Z and f:Z→[0,∞], lintegral_ν(f)=∫⁻ f dν is the supremum of integrals of nonnegative measurable simple functions bounded pointwise by f. The integral of a simple function is the finite sum of its distinct nonzero values times the measure of the corresponding fibers. ∫⁻_B f dν means lintegral_{ν|B}(f).",
+        "depends_on": [
+          "D008"
+        ],
+        "requires": [],
+        "binders": [
+          {
+            "symbol": "Z",
+            "type": "measurable space"
+          },
+          {
+            "symbol": "ν",
+            "type": "measure on Z"
+          },
+          {
+            "symbol": "f",
+            "type": "Z→[0,∞]"
+          },
+          {
+            "symbol": "B",
+            "type": "subset of Z"
+          }
+        ],
+        "objects": [
+          "volume",
+          "Z",
+          "ν",
+          "f",
+          "B"
+        ]
+      },
+      {
+        "id": "D011",
+        "symbol": "finrank",
+        "type": "finite real vector-space dimension",
+        "definition": "For a finite dimensional real vector space Z, finrank(Z)=Module.finrank ℝ Z is the natural-number cardinality of any finite basis. Natural values are embedded into [0,∞] in dimension inequalities.",
+        "depends_on": [],
+        "requires": [],
+        "binders": [
+          {
+            "symbol": "Z",
+            "type": "finite dimensional real vector space"
+          }
+        ],
+        "objects": [
+          "Z"
+        ]
+      },
+      {
+        "id": "D012",
+        "symbol": "closedBall",
+        "type": "closed metric ball",
+        "definition": "For a metric space Z, center u∈Z and radius a∈ℝ, closedBall(u,a)={x∈Z: dist(x,u)≤a}.",
+        "depends_on": [],
+        "requires": [],
+        "binders": [
+          {
+            "symbol": "Z",
+            "type": "metric space"
+          },
+          {
+            "symbol": "u",
+            "type": "Z"
+          },
+          {
+            "symbol": "a",
+            "type": "ℝ"
+          },
+          {
+            "symbol": "x",
+            "type": "Z"
+          }
+        ],
+        "objects": [
+          "Z",
+          "u",
+          "a",
+          "x"
+        ]
+      },
+      {
+        "id": "D013",
+        "symbol": "Vn",
+        "type": "Euclidean real normed space",
+        "definition": "Vn=EuclideanSpace ℝ (Fin n), identified with ℝ^n with its Euclidean norm and Borel structure. Fin n={0,...,n−1}; for n=0 it is empty and Vn consists of the zero tuple.",
+        "depends_on": [],
+        "requires": [],
+        "binders": [],
+        "objects": [
+          "n"
+        ]
+      },
+      {
+        "id": "D014",
+        "symbol": "Wn",
+        "type": "Euclidean real normed space",
+        "definition": "Wn=EuclideanSpace ℝ (Fin(n+1)), with its Euclidean norm and Borel structure.",
+        "depends_on": [],
+        "requires": [],
+        "binders": [],
+        "objects": [
+          "n"
+        ]
+      },
+      {
+        "id": "D015",
+        "symbol": "T",
+        "type": "coordinate map Vn×ℝ→Wn",
+        "definition": "T(x,t) has coordinates T(x,t)(i.castSucc)=x(i) for i∈Fin n and T(x,t)(Fin.last n)=t, where i.castSucc retains the index i<n in Fin(n+1) and Fin.last n is its last index n. This defines a total map without presupposing linearity or invertibility.",
+        "depends_on": [
+          "D013",
+          "D014"
+        ],
+        "requires": [],
+        "binders": [
+          {
+            "symbol": "x",
+            "type": "Vn"
+          },
+          {
+            "symbol": "t",
+            "type": "ℝ"
+          },
+          {
+            "symbol": "i",
+            "type": "Fin n"
+          }
+        ],
+        "objects": [
+          "n",
+          "Vn",
+          "Wn",
+          "x",
+          "t",
+          "i"
+        ]
+      },
+      {
+        "id": "D016",
+        "symbol": "Fmax",
+        "type": "subset of maxProd(Vn,ℝ)",
+        "definition": "Fmax=E×I in maxProd(Vn,ℝ).",
+        "depends_on": [
+          "D001",
+          "D007",
+          "D013"
+        ],
+        "requires": [],
+        "binders": [],
+        "objects": [
+          "E",
+          "I",
+          "maxProd",
+          "Vn"
+        ]
+      },
+      {
+        "id": "D017",
+        "symbol": "Feuc",
+        "type": "subset of Wn",
+        "definition": "Feuc={z∈Wn : (i↦z(i.castSucc))∈E and z(Fin.last n)∈I}. This is exactly the Euclidean product subset E×[0,1] in the original target.",
+        "depends_on": [
+          "D001",
+          "D013",
+          "D014"
+        ],
+        "requires": [],
+        "binders": [
+          {
+            "symbol": "z",
+            "type": "Wn"
+          },
+          {
+            "symbol": "i",
+            "type": "Fin n"
+          }
+        ],
+        "objects": [
+          "n",
+          "E",
+          "Wn",
+          "I",
+          "z",
+          "i"
+        ]
+      },
+      {
+        "id": "D018",
+        "symbol": "Hscale",
+        "type": "original unnormalized positive-exponent Hausdorff content H^p_δ(A), valued in [0,∞]",
+        "definition": "For a metric space Z, A⊆Z, real p>0 and finite real δ>0, Hscale(p,δ,A), also written H^p_δ(A), is inf{∑_{i≥0}(diam U_i)^p : A⊆⋃_{i≥0}U_i, and diam U_i≤δ for all i}. Here admissible members U_i are bounded subsets of Z; their ordinary diameter is sup{dist(x,y): x,y∈U_i} in [0,∞), with diameter of ∅ equal to zero. Equivalently the memberwise admissibility condition is dist(x,y)≤δ for every x,y in each U_i. Covers are countable, represented by ℕ-indexed families, with finite covers padded by ∅, and each empty member contributes zero. No measurability, openness, or intersection-with-A restriction is imposed on cover members. All sums and infima are taken in [0,∞], and an infimum over no admissible cover is ∞. In Euclidean Z this is precisely the original formula and conventions of problem.md:34–43; the same formula defines its metric-space extension. The cutoff is ≤δ, and there is no multiplicative dimensional normalization.",
+        "depends_on": [
+          "D003"
+        ],
+        "requires": [],
+        "binders": [
+          {
+            "symbol": "Z",
+            "type": "metric space"
+          },
+          {
+            "symbol": "A",
+            "type": "subset of Z"
+          },
+          {
+            "symbol": "p",
+            "type": "positive real"
+          },
+          {
+            "symbol": "δ",
+            "type": "positive real"
+          },
+          {
+            "symbol": "U",
+            "type": "ℕ→Set Z"
+          },
+          {
+            "symbol": "x",
+            "type": "Z"
+          },
+          {
+            "symbol": "y",
+            "type": "Z"
+          }
+        ],
+        "objects": [
+          "Z",
+          "A",
+          "p",
+          "δ",
+          "U",
+          "x",
+          "y",
+          "diam"
+        ]
+      },
+      {
+        "id": "D019",
+        "symbol": "Hmeasure",
+        "type": "original unnormalized positive-exponent Hausdorff measure H^p(A), valued in [0,∞]",
+        "definition": "For a metric space Z, A⊆Z and real p>0, Hmeasure(p,A), also written H^p(A), is sup_{δ∈ℝ, δ>0} Hscale(p,δ,A). This is the original H^p(A)=sup_{δ>0} H^p_δ(A) of problem.md:34–43, using exactly D018's countable covers, empty-member costs and cutoff convention. It has no multiplicative normalization and is defined on every subset A, without a measurability requirement. On general metric spaces we use this same formula as the extension of the supplied Euclidean definition.",
+        "depends_on": [
+          "D018"
+        ],
+        "requires": [],
+        "binders": [
+          {
+            "symbol": "Z",
+            "type": "metric space"
+          },
+          {
+            "symbol": "A",
+            "type": "subset of Z"
+          },
+          {
+            "symbol": "p",
+            "type": "positive real"
+          },
+          {
+            "symbol": "δ",
+            "type": "positive real"
+          }
+        ],
+        "objects": [
+          "Z",
+          "A",
+          "p",
+          "δ",
+          "Hscale"
+        ]
+      }
+    ],
+    "logic": {
+      "classical": true,
+      "rules": [
+        "direct",
+        "forall_introduction",
+        "implication_introduction",
+        "case_elimination",
+        "exists_elimination",
+        "contradiction_classical"
+      ],
+      "calculations": [
+        "equality",
+        "definitions",
+        "finite_algebra",
+        "finite_order",
+        "finite_sums"
+      ],
+      "primitives": [
+        {
+          "symbol": "0",
+          "type": "typed numeral",
+          "meaning": "Zero of the explicitly specified mathematical type."
+        },
+        {
+          "symbol": "1",
+          "type": "typed numeral",
+          "meaning": "One of the explicitly specified mathematical type."
+        },
+        {
+          "symbol": "2",
+          "type": "typed numeral",
+          "meaning": "Two of the explicitly specified mathematical type, including an exponent two."
+        },
+        {
+          "symbol": "ℕ",
+          "type": "number system",
+          "meaning": "The natural numbers with their usual arithmetic."
+        },
+        {
+          "symbol": "ℤ",
+          "type": "number system",
+          "meaning": "The integers with their usual arithmetic."
+        },
+        {
+          "symbol": "ℚ",
+          "type": "number system",
+          "meaning": "The rational numbers with their usual ordered-field operations."
+        },
+        {
+          "symbol": "ℝ",
+          "type": "number system",
+          "meaning": "The real numbers with their usual ordered-field structure."
+        },
+        {
+          "symbol": "ℂ",
+          "type": "number system",
+          "meaning": "The complex numbers with their usual field structure."
+        },
+        {
+          "symbol": "∅",
+          "type": "typed set notation",
+          "meaning": "The empty set in the explicitly specified ambient type."
+        },
+        {
+          "symbol": "∞",
+          "type": "typed order notation",
+          "meaning": "The top element in an explicitly specified extended ordered codomain."
+        }
+      ]
+    },
+    "pins": {
+      "lean_version": "4.32.2",
+      "mathlib_commit": "905b95818eb32af7874a58b427f50c1711a5e96c",
+      "mathlib_root": "/Users/syyui/formalization-tools/lean-mathlib-v4.32.2/mathlib"
+    },
+    "inputs": [
+      {
+        "path": "inputs/baseline.json",
+        "sha256": "14e8278d6414f8746ac503b98b953170ffdf3cad09b75578b92e17848d27e580"
+      },
+      {
+        "path": "inputs/basis-evidence-000.txt",
+        "sha256": "56242fc597019e658c0e8792098ddb686d913156e0d831a14366d114cbf743f0"
+      },
+      {
+        "path": "inputs/basis-proof.md",
+        "sha256": "b09e25caf4c27520c3619b1960c0017feea9dabd57fcc48bf86eeab5e0dd0b7f"
+      },
+      {
+        "path": "inputs/basis-registry.json",
+        "sha256": "e82ae4d221d265c0752c2fa86c947f16da431518768d869f00306484cf290f26"
+      },
+      {
+        "path": "inputs/problem.md",
+        "sha256": "56242fc597019e658c0e8792098ddb686d913156e0d831a14366d114cbf743f0"
+      },
+      {
+        "path": "inputs/proof-context.json",
+        "sha256": "61fc67bef3f1bd8a2fec673708cbb338779070cae3661ddc88c70bfc054127fc"
+      },
+      {
+        "path": "inputs/repair-obligations.json",
+        "sha256": "5bc6fb486ebcf0cb2bb545380df22175c9fa61ad0a5285199f658f6a5e86e76b"
+      },
+      {
+        "path": "inputs/target-selection.json",
+        "sha256": "093040cf0f2ac14cf6518a1b8766f49aa32766c44f3a8700342aeac6b29c693a"
+      }
+    ]
+  },
+  "graph": {
+    "format_version": 2,
+    "case_id": "preparation",
+    "spec_sha256": "96840e26f3fcb8fea8003b873bbeeb9001e081ea8ddfdb51aed84af1931d4536",
+    "propositions": [
+      {
+        "id": "H001",
+        "kind": "hypothesis",
+        "definitions": [],
+        "binders": [],
+        "objects": [
+          "E"
+        ],
+        "statement": "E is nonempty."
+      },
+      {
+        "id": "H002",
+        "kind": "hypothesis",
+        "definitions": [
+          "D013"
+        ],
+        "binders": [],
+        "objects": [
+          "E",
+          "Vn",
+          "n"
+        ],
+        "statement": "E is compact in Euclidean ℝ^n."
+      },
+      {
+        "id": "M001",
+        "kind": "mathlib",
+        "statement": "For every extended metric space Z with measurable structure equal to its Borel structure, every p∈ℝ and B⊆Z, μH[p](B)=sup_{r∈[0,∞], r>0} C_p(r,B). The content is exactly the nested infimum over ℕ-indexed covers of extended diameter ≤r and the sum of the nonempty-member supremum of (ediam U_i)^p.",
+        "definitions": [
+          "D002",
+          "D004",
+          "D005"
+        ],
+        "binders": [
+          {
+            "symbol": "Z",
+            "type": "extended metric space with Borel measurable structure"
+          },
+          {
+            "symbol": "B",
+            "type": "subset of Z"
+          },
+          {
+            "symbol": "p",
+            "type": "ℝ"
+          },
+          {
+            "symbol": "r",
+            "type": "[0,∞]"
+          }
+        ],
+        "objects": [
+          "Z",
+          "B",
+          "p",
+          "r",
+          "μH",
+          "C",
+          "ediam"
+        ],
+        "source": {
+          "declaration": "MeasureTheory.Measure.hausdorffMeasure_apply",
+          "hypotheses": [
+            "Z is an extended metric space with measurable structure equal to its Borel structure."
+          ],
+          "statement": "For every extended metric space Z with measurable structure equal to its Borel structure, every p∈ℝ and B⊆Z, μH[p](B)=sup_{r∈[0,∞], r>0} C_p(r,B). The content is exactly the nested infimum over ℕ-indexed covers of extended diameter ≤r and the sum of the nonempty-member supremum of (ediam U_i)^p.",
+          "module": "Mathlib.MeasureTheory.Measure.Hausdorff",
+          "signature": "@MeasureTheory.Measure.hausdorffMeasure_apply : ∀ {X : Type u_2} [inst : EMetricSpace.{u_2} X] [inst_1 : MeasurableSpace.{u_2} X] [inst_2 : BorelSpace.{u_2} X] (d : ℝ)\n  (s : Set.{u_2} X),\n  Eq.{1} ((MeasureTheory.Measure.hausdorffMeasure.{u_2} d) s)\n    (⨆ r,\n      ⨆ (_ : LT.lt.{0} 0 r),\n        ⨅ t,\n          ⨅ (_ : s ⊆ ⋃ n, t n),\n            ⨅ (_ : ∀ (n : ℕ), LE.le.{0} (Metric.ediam.{u_2} (t n)) r),\n              ∑' (n : ℕ), ⨆ (_ : Set.Nonempty.{u_2} (t n)), HPow.hPow.{0, 0, 0} (Metric.ediam.{u_2} (t n)) d)",
+          "declaration_kind": "theorem",
+          "mathlib_commit": "905b95818eb32af7874a58b427f50c1711a5e96c",
+          "source_path": "Mathlib/MeasureTheory/Measure/Hausdorff.lean",
+          "source_sha256": "e9595bc1e1cd2977ba420d9506745e59fdba9cfd75e7445b869b3128ae197d51",
+          "evidence": [
+            {
+              "path": "library/M001-0003/library-sources.json",
+              "sha256": "5f0e4ae45c11331ad09ad1c059f452e5bca341dbb46b89d3c95eed9e4f967899"
+            }
+          ]
+        }
+      },
+      {
+        "id": "M002",
+        "kind": "mathlib",
+        "statement": "For every extended metric space Z with its Borel measurable structure, every B⊆Z and nonnegative real a, a<dimH(B) implies μH[a](B)=∞.",
+        "definitions": [
+          "D005",
+          "D006"
+        ],
+        "binders": [
+          {
+            "symbol": "Z",
+            "type": "extended metric space with Borel measurable structure"
+          },
+          {
+            "symbol": "B",
+            "type": "subset of Z"
+          },
+          {
+            "symbol": "a",
+            "type": "nonnegative real"
+          }
+        ],
+        "objects": [
+          "Z",
+          "B",
+          "a",
+          "μH",
+          "dimH"
+        ],
+        "source": {
+          "declaration": "hausdorffMeasure_of_lt_dimH",
+          "hypotheses": [
+            "Z is an extended metric space with its Borel measurable structure.",
+            "a is a nonnegative real.",
+            "a<dimH(B)."
+          ],
+          "statement": "For every extended metric space Z with its Borel measurable structure, every B⊆Z and nonnegative real a, a<dimH(B) implies μH[a](B)=∞.",
+          "module": "Mathlib.Topology.MetricSpace.HausdorffDimension",
+          "signature": "@hausdorffMeasure_of_lt_dimH : ∀ {X : Type u_2} [inst : EMetricSpace.{u_2} X] [inst_1 : MeasurableSpace.{u_2} X] [inst_2 : BorelSpace.{u_2} X]\n  {s : Set.{u_2} X} {d : NNReal},\n  LT.lt.{0} (↑d) (dimH.{u_2} s) → Eq.{1} ((MeasureTheory.Measure.hausdorffMeasure.{u_2} ↑d) s) Top.top.{0}",
+          "declaration_kind": "theorem",
+          "mathlib_commit": "905b95818eb32af7874a58b427f50c1711a5e96c",
+          "source_path": "Mathlib/Topology/MetricSpace/HausdorffDimension.lean",
+          "source_sha256": "fdc61e7f179044cd714058f209b100e51b6f8af69aff295e3ee629ed45dcee31",
+          "evidence": [
+            {
+              "path": "library/M002-0002/library-sources.json",
+              "sha256": "76590fad58600dd38ee4121eeed14b9b300727472b76126c810085b223ffd4ab"
+            }
+          ]
+        }
+      },
+      {
+        "id": "M003",
+        "kind": "mathlib",
+        "statement": "For every extended metric space Z with its Borel measurable structure, every B⊆Z and nonnegative real a, dimH(B)<a implies μH[a](B)=0.",
+        "definitions": [
+          "D005",
+          "D006"
+        ],
+        "binders": [
+          {
+            "symbol": "Z",
+            "type": "extended metric space with Borel measurable structure"
+          },
+          {
+            "symbol": "B",
+            "type": "subset of Z"
+          },
+          {
+            "symbol": "a",
+            "type": "nonnegative real"
+          }
+        ],
+        "objects": [
+          "Z",
+          "B",
+          "a",
+          "μH",
+          "dimH"
+        ],
+        "source": {
+          "declaration": "hausdorffMeasure_of_dimH_lt",
+          "hypotheses": [
+            "Z is an extended metric space with its Borel measurable structure.",
+            "a is a nonnegative real.",
+            "dimH(B)<a."
+          ],
+          "statement": "For every extended metric space Z with its Borel measurable structure, every B⊆Z and nonnegative real a, dimH(B)<a implies μH[a](B)=0.",
+          "module": "Mathlib.Topology.MetricSpace.HausdorffDimension",
+          "signature": "@hausdorffMeasure_of_dimH_lt : ∀ {X : Type u_2} [inst : EMetricSpace.{u_2} X] [inst_1 : MeasurableSpace.{u_2} X] [inst_2 : BorelSpace.{u_2} X]\n  {s : Set.{u_2} X} {d : NNReal},\n  LT.lt.{0} (dimH.{u_2} s) ↑d → Eq.{1} ((MeasureTheory.Measure.hausdorffMeasure.{u_2} ↑d) s) 0",
+          "declaration_kind": "theorem",
+          "mathlib_commit": "905b95818eb32af7874a58b427f50c1711a5e96c",
+          "source_path": "Mathlib/Topology/MetricSpace/HausdorffDimension.lean",
+          "source_sha256": "fdc61e7f179044cd714058f209b100e51b6f8af69aff295e3ee629ed45dcee31",
+          "evidence": [
+            {
+              "path": "library/M003-0003/library-sources.json",
+              "sha256": "716fdca3b6b3cf954cde8473c49b921c76cd5e02207341546150a9161ae16e7b"
+            }
+          ]
+        }
+      },
+      {
+        "id": "M004",
+        "kind": "mathlib",
+        "statement": "For every extended metric space Z with its Borel measurable structure, every B⊆Z and nonnegative real a, μH[a](B)≠∞ implies dimH(B)≤a.",
+        "definitions": [
+          "D005",
+          "D006"
+        ],
+        "binders": [
+          {
+            "symbol": "Z",
+            "type": "extended metric space with Borel measurable structure"
+          },
+          {
+            "symbol": "B",
+            "type": "subset of Z"
+          },
+          {
+            "symbol": "a",
+            "type": "nonnegative real"
+          }
+        ],
+        "objects": [
+          "Z",
+          "B",
+          "a",
+          "μH",
+          "dimH"
+        ],
+        "source": {
+          "declaration": "dimH_le_of_hausdorffMeasure_ne_top",
+          "hypotheses": [
+            "Z is an extended metric space with its Borel measurable structure.",
+            "a is a nonnegative real.",
+            "μH[a](B)≠∞."
+          ],
+          "statement": "For every extended metric space Z with its Borel measurable structure, every B⊆Z and nonnegative real a, μH[a](B)≠∞ implies dimH(B)≤a.",
+          "module": "Mathlib.Topology.MetricSpace.HausdorffDimension",
+          "signature": "@dimH_le_of_hausdorffMeasure_ne_top : ∀ {X : Type u_2} [inst : EMetricSpace.{u_2} X] [inst_1 : MeasurableSpace.{u_2} X] [inst_2 : BorelSpace.{u_2} X]\n  {s : Set.{u_2} X} {d : NNReal},\n  Ne.{1} ((MeasureTheory.Measure.hausdorffMeasure.{u_2} ↑d) s) Top.top.{0} → LE.le.{0} (dimH.{u_2} s) ↑d",
+          "declaration_kind": "theorem",
+          "mathlib_commit": "905b95818eb32af7874a58b427f50c1711a5e96c",
+          "source_path": "Mathlib/Topology/MetricSpace/HausdorffDimension.lean",
+          "source_sha256": "fdc61e7f179044cd714058f209b100e51b6f8af69aff295e3ee629ed45dcee31",
+          "evidence": [
+            {
+              "path": "library/M004-0005/library-sources.json",
+              "sha256": "830f2b510218e26101d3680731bc5777a9b7259e10b622cd77e83330c0f93ea0"
+            }
+          ]
+        }
+      },
+      {
+        "id": "M005",
+        "kind": "mathlib",
+        "statement": "For every extended metric space Z with its Borel measurable structure, every B⊆Z and nonnegative real a, μH[a](B)=∞ implies a≤dimH(B).",
+        "definitions": [
+          "D005",
+          "D006"
+        ],
+        "binders": [
+          {
+            "symbol": "Z",
+            "type": "extended metric space with Borel measurable structure"
+          },
+          {
+            "symbol": "B",
+            "type": "subset of Z"
+          },
+          {
+            "symbol": "a",
+            "type": "nonnegative real"
+          }
+        ],
+        "objects": [
+          "Z",
+          "B",
+          "a",
+          "μH",
+          "dimH"
+        ],
+        "source": {
+          "declaration": "le_dimH_of_hausdorffMeasure_eq_top",
+          "hypotheses": [
+            "Z is an extended metric space with its Borel measurable structure.",
+            "a is a nonnegative real.",
+            "μH[a](B)=∞."
+          ],
+          "statement": "For every extended metric space Z with its Borel measurable structure, every B⊆Z and nonnegative real a, μH[a](B)=∞ implies a≤dimH(B).",
+          "module": "Mathlib.Topology.MetricSpace.HausdorffDimension",
+          "signature": "@le_dimH_of_hausdorffMeasure_eq_top : ∀ {X : Type u_2} [inst : EMetricSpace.{u_2} X] [inst_1 : MeasurableSpace.{u_2} X] [inst_2 : BorelSpace.{u_2} X]\n  {s : Set.{u_2} X} {d : NNReal},\n  Eq.{1} ((MeasureTheory.Measure.hausdorffMeasure.{u_2} ↑d) s) Top.top.{0} → LE.le.{0} (↑d) (dimH.{u_2} s)",
+          "declaration_kind": "theorem",
+          "mathlib_commit": "905b95818eb32af7874a58b427f50c1711a5e96c",
+          "source_path": "Mathlib/Topology/MetricSpace/HausdorffDimension.lean",
+          "source_sha256": "fdc61e7f179044cd714058f209b100e51b6f8af69aff295e3ee629ed45dcee31",
+          "evidence": [
+            {
+              "path": "library/M005-0006/library-sources.json",
+              "sha256": "f56ea3021214a4cff2a11cb6458ba30b8f5250f90de0aa2ba407f70052618c37"
+            }
+          ]
+        }
+      },
+      {
+        "id": "M006",
+        "kind": "mathlib",
+        "statement": "For every extended metric space Z and subsets B,Q⊆Z, B⊆Q implies dimH(B)≤dimH(Q).",
+        "definitions": [
+          "D006"
+        ],
+        "binders": [
+          {
+            "symbol": "Z",
+            "type": "extended metric space"
+          },
+          {
+            "symbol": "B",
+            "type": "subset of Z"
+          },
+          {
+            "symbol": "Q",
+            "type": "subset of Z"
+          }
+        ],
+        "objects": [
+          "Z",
+          "B",
+          "Q",
+          "dimH"
+        ],
+        "source": {
+          "declaration": "dimH_mono",
+          "hypotheses": [
+            "Z is an extended metric space.",
+            "B⊆Q."
+          ],
+          "statement": "For every extended metric space Z and subsets B,Q⊆Z, B⊆Q implies dimH(B)≤dimH(Q).",
+          "module": "Mathlib.Topology.MetricSpace.HausdorffDimension",
+          "signature": "@dimH_mono : ∀ {X : Type u_2} [inst : EMetricSpace.{u_2} X] {s t : Set.{u_2} X}, s ⊆ t → LE.le.{0} (dimH.{u_2} s) (dimH.{u_2} t)",
+          "declaration_kind": "theorem",
+          "mathlib_commit": "905b95818eb32af7874a58b427f50c1711a5e96c",
+          "source_path": "Mathlib/Topology/MetricSpace/HausdorffDimension.lean",
+          "source_sha256": "fdc61e7f179044cd714058f209b100e51b6f8af69aff295e3ee629ed45dcee31",
+          "evidence": [
+            {
+              "path": "library/M006-0007/library-sources.json",
+              "sha256": "f77a3ec79cd5da29972b7f663095e6eb3460f097da4e1663bd3305ce61b538c8"
+            }
+          ]
+        }
+      },
+      {
+        "id": "M007",
+        "kind": "mathlib",
+        "statement": "For extended metric spaces Z,Y, a map f:Z→Y preserving all extended distances is an isometry, and for every B⊆Z such an f satisfies dimH(f '' B)=dimH(B).",
+        "definitions": [
+          "D006"
+        ],
+        "binders": [
+          {
+            "symbol": "Z",
+            "type": "extended metric space"
+          },
+          {
+            "symbol": "Y",
+            "type": "extended metric space"
+          },
+          {
+            "symbol": "f",
+            "type": "Z→Y"
+          },
+          {
+            "symbol": "B",
+            "type": "subset of Z"
+          }
+        ],
+        "objects": [
+          "Z",
+          "Y",
+          "f",
+          "B",
+          "dimH"
+        ],
+        "source": {
+          "declaration": "Isometry.dimH_image",
+          "hypotheses": [
+            "Z,Y are extended metric spaces.",
+            "f is an isometry: edist(f(x),f(y))=edist(x,y) for all x,y∈Z."
+          ],
+          "statement": "For extended metric spaces Z,Y, a map f:Z→Y preserving all extended distances is an isometry, and for every B⊆Z such an f satisfies dimH(f '' B)=dimH(B).",
+          "module": "Mathlib.Topology.MetricSpace.HausdorffDimension",
+          "signature": "@Isometry.dimH_image : ∀ {X : Type u_2} {Y : Type u_3} [inst : EMetricSpace.{u_2} X] [inst_1 : EMetricSpace.{u_3} Y] {f : X → Y},\n  Isometry.{u_2, u_3} f → ∀ (s : Set.{u_2} X), Eq.{1} (dimH.{u_3} (Set.image.{u_2, u_3} f s)) (dimH.{u_2} s)",
+          "declaration_kind": "theorem",
+          "mathlib_commit": "905b95818eb32af7874a58b427f50c1711a5e96c",
+          "source_path": "Mathlib/Topology/MetricSpace/HausdorffDimension.lean",
+          "source_sha256": "fdc61e7f179044cd714058f209b100e51b6f8af69aff295e3ee629ed45dcee31",
+          "evidence": [
+            {
+              "path": "library/M007-0008/library-sources.json",
+              "sha256": "c6c4fa64878218df81bbc1d4adf823733493311d81d25238347f04e64d034363"
+            }
+          ]
+        }
+      },
+      {
+        "id": "M008",
+        "kind": "mathlib",
+        "statement": "For every finite dimensional real normed space V, dimH(univ V)=finrank(V).",
+        "definitions": [
+          "D006",
+          "D011"
+        ],
+        "binders": [
+          {
+            "symbol": "V",
+            "type": "finite dimensional real normed space"
+          }
+        ],
+        "objects": [
+          "V",
+          "dimH",
+          "finrank"
+        ],
+        "source": {
+          "declaration": "Real.dimH_univ_eq_finrank",
+          "hypotheses": [
+            "V is a finite dimensional real normed space."
+          ],
+          "statement": "For every finite dimensional real normed space V, dimH(univ V)=finrank(V).",
+          "module": "Mathlib.Topology.MetricSpace.HausdorffDimension",
+          "signature": "@Real.dimH_univ_eq_finrank : ∀ (E : Type u_4) [inst : NormedAddCommGroup.{u_4} E] [inst_1 : NormedSpace.{0, u_4} ℝ E]\n  [FiniteDimensional.{0, u_4} ℝ E], Eq.{1} (dimH.{u_4} Set.univ.{u_4}) ↑(Module.finrank.{0, u_4} ℝ E)",
+          "declaration_kind": "theorem",
+          "mathlib_commit": "905b95818eb32af7874a58b427f50c1711a5e96c",
+          "source_path": "Mathlib/Topology/MetricSpace/HausdorffDimension.lean",
+          "source_sha256": "fdc61e7f179044cd714058f209b100e51b6f8af69aff295e3ee629ed45dcee31",
+          "evidence": [
+            {
+              "path": "library/M008-0009/library-sources.json",
+              "sha256": "7205824b8b228266a4ddb1419dac5a92f15c55fd01e59df60c2e695a0cee1c5b"
+            }
+          ]
+        }
+      },
+      {
+        "id": "M009",
+        "kind": "mathlib",
+        "statement": "For every finite dimensional real normed space V and B⊆V with nonempty interior, dimH(B)=finrank(V).",
+        "definitions": [
+          "D006",
+          "D011"
+        ],
+        "binders": [
+          {
+            "symbol": "V",
+            "type": "finite dimensional real normed space"
+          },
+          {
+            "symbol": "B",
+            "type": "subset of V"
+          }
+        ],
+        "objects": [
+          "V",
+          "B",
+          "dimH",
+          "finrank"
+        ],
+        "source": {
+          "declaration": "Real.dimH_of_nonempty_interior",
+          "hypotheses": [
+            "V is a finite dimensional real normed space.",
+            "The interior of B is nonempty."
+          ],
+          "statement": "For every finite dimensional real normed space V and B⊆V with nonempty interior, dimH(B)=finrank(V).",
+          "module": "Mathlib.Topology.MetricSpace.HausdorffDimension",
+          "signature": "@Real.dimH_of_nonempty_interior : ∀ {E : Type u_4} [inst : NormedAddCommGroup.{u_4} E] [inst_1 : NormedSpace.{0, u_4} ℝ E]\n  [FiniteDimensional.{0, u_4} ℝ E] {s : Set.{u_4} E},\n  Set.Nonempty.{u_4} (interior.{u_4} s) → Eq.{1} (dimH.{u_4} s) ↑(Module.finrank.{0, u_4} ℝ E)",
+          "declaration_kind": "theorem",
+          "mathlib_commit": "905b95818eb32af7874a58b427f50c1711a5e96c",
+          "source_path": "Mathlib/Topology/MetricSpace/HausdorffDimension.lean",
+          "source_sha256": "fdc61e7f179044cd714058f209b100e51b6f8af69aff295e3ee629ed45dcee31",
+          "evidence": [
+            {
+              "path": "library/M009-0010/library-sources.json",
+              "sha256": "56d7be3982fda074a6ee8dd936bfbb5f9b0c59749fe2b890f3df6600c618bf38"
+            }
+          ]
+        }
+      },
+      {
+        "id": "M010",
+        "kind": "mathlib",
+        "statement": "For every measurable space Z, measure ν on Z, countable index type J and family f:J→Z→[0,∞], if each f_j is ν-almost-everywhere measurable then lintegral_ν(t↦∑_{j∈J}f_j(t))=∑_{j∈J}lintegral_ν(f_j).",
+        "definitions": [
+          "D010"
+        ],
+        "binders": [
+          {
+            "symbol": "Z",
+            "type": "measurable space"
+          },
+          {
+            "symbol": "ν",
+            "type": "measure on Z"
+          },
+          {
+            "symbol": "J",
+            "type": "countable type"
+          },
+          {
+            "symbol": "f",
+            "type": "J→Z→[0,∞]"
+          }
+        ],
+        "objects": [
+          "Z",
+          "ν",
+          "J",
+          "f",
+          "lintegral"
+        ],
+        "source": {
+          "declaration": "MeasureTheory.lintegral_tsum",
+          "hypotheses": [
+            "Z is a measurable space and ν is a measure on it.",
+            "J is countable.",
+            "Every f_j is ν-almost-everywhere measurable."
+          ],
+          "statement": "For every measurable space Z, measure ν on Z, countable index type J and family f:J→Z→[0,∞], if each f_j is ν-almost-everywhere measurable then lintegral_ν(t↦∑_{j∈J}f_j(t))=∑_{j∈J}lintegral_ν(f_j).",
+          "module": "Mathlib.MeasureTheory.Integral.Lebesgue.Add",
+          "signature": "@MeasureTheory.lintegral_tsum : ∀ {α : Type u_1} {β : Type u_2} {m : MeasurableSpace.{u_1} α} {μ : MeasureTheory.Measure.{u_1} α}\n  [Countable.{u_2 + 1} β] {f : β → α → ENNReal},\n  (∀ (i : β), AEMeasurable.{u_1, 0} (f i) μ) →\n    Eq.{1} (∫⁻ (a : α), ∑' (i : β), f i a ∂μ) (∑' (i : β), ∫⁻ (a : α), f i a ∂μ)",
+          "declaration_kind": "theorem",
+          "mathlib_commit": "905b95818eb32af7874a58b427f50c1711a5e96c",
+          "source_path": "Mathlib/MeasureTheory/Integral/Lebesgue/Add.lean",
+          "source_sha256": "14da3dd3c2692219eec43e91c6b22bb02d5db7f00e03c789661c72dffecf7b4a",
+          "evidence": [
+            {
+              "path": "library/M010-0011/library-sources.json",
+              "sha256": "4bad7564412de9ba7d283a77407c53746268885cd64519c7f572c79465df912f"
+            }
+          ]
+        }
+      },
+      {
+        "id": "M011",
+        "kind": "mathlib",
+        "statement": "For every measurable space Z, measure ν on it, measurable B⊆Z and c∈[0,∞], lintegral_ν(c indicator(B))=c ν(B).",
+        "definitions": [
+          "D009",
+          "D010"
+        ],
+        "binders": [
+          {
+            "symbol": "Z",
+            "type": "measurable space"
+          },
+          {
+            "symbol": "ν",
+            "type": "measure on Z"
+          },
+          {
+            "symbol": "B",
+            "type": "subset of Z"
+          },
+          {
+            "symbol": "c",
+            "type": "[0,∞]"
+          }
+        ],
+        "objects": [
+          "Z",
+          "ν",
+          "B",
+          "c",
+          "lintegral",
+          "indicator"
+        ],
+        "source": {
+          "declaration": "MeasureTheory.lintegral_indicator_const",
+          "hypotheses": [
+            "Z is a measurable space and ν is a measure on it.",
+            "B is measurable."
+          ],
+          "statement": "For every measurable space Z, measure ν on it, measurable B⊆Z and c∈[0,∞], lintegral_ν(c indicator(B))=c ν(B).",
+          "module": "Mathlib.MeasureTheory.Integral.Lebesgue.Basic",
+          "signature": "@MeasureTheory.lintegral_indicator_const : ∀ {α : Type u_1} {m : MeasurableSpace.{u_1} α} {μ : MeasureTheory.Measure.{u_1} α} {s : Set.{u_1} α},\n  MeasurableSet.{u_1} s →\n    ∀ (c : ENNReal), Eq.{1} (∫⁻ (a : α), Set.indicator.{u_1, 0} s (fun x => c) a ∂μ) (HMul.hMul.{0, 0, 0} c (μ s))",
+          "declaration_kind": "theorem",
+          "mathlib_commit": "905b95818eb32af7874a58b427f50c1711a5e96c",
+          "source_path": "Mathlib/MeasureTheory/Integral/Lebesgue/Basic.lean",
+          "source_sha256": "b9a0715c48d4021f3e6bec2acdc6e5694d7fe4be082e4e0d17de04280a011559",
+          "evidence": [
+            {
+              "path": "library/M011-0012/library-sources.json",
+              "sha256": "d94f0a9419c707dcfef7846102695b5dca222c8bb61226e3d223d92565e97ee1"
+            }
+          ]
+        }
+      },
+      {
+        "id": "M012",
+        "kind": "mathlib",
+        "statement": "For every measurable space Z, measure ν on it and functions f,g:Z→[0,∞], pointwise f≤g implies lintegral_ν(f)≤lintegral_ν(g). No measurability of f or g is required.",
+        "definitions": [
+          "D010"
+        ],
+        "binders": [
+          {
+            "symbol": "Z",
+            "type": "measurable space"
+          },
+          {
+            "symbol": "ν",
+            "type": "measure on Z"
+          },
+          {
+            "symbol": "f",
+            "type": "Z→[0,∞]"
+          },
+          {
+            "symbol": "g",
+            "type": "Z→[0,∞]"
+          }
+        ],
+        "objects": [
+          "Z",
+          "ν",
+          "f",
+          "g",
+          "lintegral"
+        ],
+        "source": {
+          "declaration": "MeasureTheory.lintegral_mono",
+          "hypotheses": [
+            "Z is a measurable space and ν is a measure on it.",
+            "f≤g pointwise."
+          ],
+          "statement": "For every measurable space Z, measure ν on it and functions f,g:Z→[0,∞], pointwise f≤g implies lintegral_ν(f)≤lintegral_ν(g). No measurability of f or g is required.",
+          "module": "Mathlib.MeasureTheory.Integral.Lebesgue.Basic",
+          "signature": "@MeasureTheory.lintegral_mono : ∀ {α : Type u_1} {m : MeasurableSpace.{u_1} α} {μ : MeasureTheory.Measure.{u_1} α} ⦃f g : α → ENNReal⦄,\n  LE.le.{u_1} f g → LE.le.{0} (∫⁻ (a : α), f a ∂μ) (∫⁻ (a : α), g a ∂μ)",
+          "declaration_kind": "theorem",
+          "mathlib_commit": "905b95818eb32af7874a58b427f50c1711a5e96c",
+          "source_path": "Mathlib/MeasureTheory/Integral/Lebesgue/Basic.lean",
+          "source_sha256": "b9a0715c48d4021f3e6bec2acdc6e5694d7fe4be082e4e0d17de04280a011559",
+          "evidence": [
+            {
+              "path": "library/M012-0013/library-sources.json",
+              "sha256": "0f615ca091ef2d767700b5278edf9e2804e879b68454d5a13ac702f5c574703b"
+            }
+          ]
+        }
+      },
+      {
+        "id": "M013",
+        "kind": "mathlib",
+        "statement": "For every measurable space Z, measure ν on it, B⊆Z and c∈[0,∞], ∫⁻_B c dν=c ν(B), including c=∞ and without measurability of B.",
+        "definitions": [
+          "D010"
+        ],
+        "binders": [
+          {
+            "symbol": "Z",
+            "type": "measurable space"
+          },
+          {
+            "symbol": "ν",
+            "type": "measure on Z"
+          },
+          {
+            "symbol": "B",
+            "type": "subset of Z"
+          },
+          {
+            "symbol": "c",
+            "type": "[0,∞]"
+          }
+        ],
+        "objects": [
+          "Z",
+          "ν",
+          "B",
+          "c",
+          "lintegral"
+        ],
+        "source": {
+          "declaration": "MeasureTheory.setLIntegral_const",
+          "hypotheses": [
+            "Z is a measurable space and ν is a measure on it."
+          ],
+          "statement": "For every measurable space Z, measure ν on it, B⊆Z and c∈[0,∞], ∫⁻_B c dν=c ν(B), including c=∞ and without measurability of B.",
+          "module": "Mathlib.MeasureTheory.Integral.Lebesgue.Basic",
+          "signature": "@MeasureTheory.setLIntegral_const : ∀ {α : Type u_1} {m : MeasurableSpace.{u_1} α} {μ : MeasureTheory.Measure.{u_1} α} (s : Set.{u_1} α) (c : ENNReal),\n  Eq.{1} (∫⁻ (x : α) in s, c ∂μ) (HMul.hMul.{0, 0, 0} c (μ s))",
+          "declaration_kind": "theorem",
+          "mathlib_commit": "905b95818eb32af7874a58b427f50c1711a5e96c",
+          "source_path": "Mathlib/MeasureTheory/Integral/Lebesgue/Basic.lean",
+          "source_sha256": "b9a0715c48d4021f3e6bec2acdc6e5694d7fe4be082e4e0d17de04280a011559",
+          "evidence": [
+            {
+              "path": "library/M013-0014/library-sources.json",
+              "sha256": "a54b0aa0efe9d86977e91ec6b5c31468cc300b527085a3c98bb79a8b366a9f87"
+            }
+          ]
+        }
+      },
+      {
+        "id": "M014",
+        "kind": "mathlib",
+        "statement": "For every a,b∈ℝ, volume([a,b])=ofReal(b−a), also when a≥b.",
+        "definitions": [
+          "D008"
+        ],
+        "binders": [
+          {
+            "symbol": "a",
+            "type": "ℝ"
+          },
+          {
+            "symbol": "b",
+            "type": "ℝ"
+          }
+        ],
+        "objects": [
+          "a",
+          "b",
+          "volume"
+        ],
+        "source": {
+          "declaration": "Real.volume_Icc",
+          "hypotheses": [],
+          "statement": "For every a,b∈ℝ, volume([a,b])=ofReal(b−a), also when a≥b.",
+          "module": "Mathlib.MeasureTheory.Measure.Lebesgue.Basic",
+          "signature": "@Real.volume_Icc : ∀ {a b : ℝ}, Eq.{1} (MeasureTheory.volume.{0} (Set.Icc.{0} a b)) (ENNReal.ofReal (HSub.hSub.{0, 0, 0} b a))",
+          "declaration_kind": "theorem",
+          "mathlib_commit": "905b95818eb32af7874a58b427f50c1711a5e96c",
+          "source_path": "Mathlib/MeasureTheory/Measure/Lebesgue/Basic.lean",
+          "source_sha256": "72101050c59e99875b25c8cde0cebbcac53c99f569a4c5ab2d43a533d1f5fb8b",
+          "evidence": [
+            {
+              "path": "library/M014-0015/library-sources.json",
+              "sha256": "2fb4752ffa0f3aa3d844a4ca5f794f1acb81738166ae094dae43e3857b4b8b94"
+            }
+          ]
+        }
+      },
+      {
+        "id": "M015",
+        "kind": "mathlib",
+        "statement": "For every a,b∈ℝ, volume((a,b))=ofReal(b−a), also when a≥b.",
+        "definitions": [
+          "D008"
+        ],
+        "binders": [
+          {
+            "symbol": "a",
+            "type": "ℝ"
+          },
+          {
+            "symbol": "b",
+            "type": "ℝ"
+          }
+        ],
+        "objects": [
+          "a",
+          "b",
+          "volume"
+        ],
+        "source": {
+          "declaration": "Real.volume_Ioo",
+          "hypotheses": [],
+          "statement": "For every a,b∈ℝ, volume((a,b))=ofReal(b−a), also when a≥b.",
+          "module": "Mathlib.MeasureTheory.Measure.Lebesgue.Basic",
+          "signature": "@Real.volume_Ioo : ∀ {a b : ℝ}, Eq.{1} (MeasureTheory.volume.{0} (Set.Ioo.{0} a b)) (ENNReal.ofReal (HSub.hSub.{0, 0, 0} b a))",
+          "declaration_kind": "theorem",
+          "mathlib_commit": "905b95818eb32af7874a58b427f50c1711a5e96c",
+          "source_path": "Mathlib/MeasureTheory/Measure/Lebesgue/Basic.lean",
+          "source_sha256": "72101050c59e99875b25c8cde0cebbcac53c99f569a4c5ab2d43a533d1f5fb8b",
+          "evidence": [
+            {
+              "path": "library/M015-0016/library-sources.json",
+              "sha256": "67ba9f5c1689fcbe67783e8a6e043e465894e5eddf62cbb360758ba93384c547"
+            }
+          ]
+        }
+      },
+      {
+        "id": "M016",
+        "kind": "mathlib",
+        "statement": "For pseudo extended metric spaces Z,Y, a nonnegative real K, and a map f:Z→Y satisfying edist(f(x),f(y))≤K edist(x,y) for every x,y∈Z, every B⊆Z satisfies ediam(f '' B)≤K ediam(B).",
+        "definitions": [
+          "D002"
+        ],
+        "binders": [
+          {
+            "symbol": "Z",
+            "type": "pseudo extended metric space"
+          },
+          {
+            "symbol": "Y",
+            "type": "pseudo extended metric space"
+          },
+          {
+            "symbol": "K",
+            "type": "nonnegative real"
+          },
+          {
+            "symbol": "f",
+            "type": "Z→Y"
+          },
+          {
+            "symbol": "B",
+            "type": "subset of Z"
+          }
+        ],
+        "objects": [
+          "Z",
+          "Y",
+          "K",
+          "f",
+          "B",
+          "ediam"
+        ],
+        "source": {
+          "declaration": "LipschitzWith.ediam_image_le",
+          "hypotheses": [
+            "Z,Y are pseudo extended metric spaces.",
+            "K is a nonnegative real.",
+            "f is K-Lipschitz in extended distance."
+          ],
+          "statement": "For pseudo extended metric spaces Z,Y, a nonnegative real K, and a map f:Z→Y satisfying edist(f(x),f(y))≤K edist(x,y) for every x,y∈Z, every B⊆Z satisfies ediam(f '' B)≤K ediam(B).",
+          "module": "Mathlib.Topology.EMetricSpace.Lipschitz",
+          "signature": "@LipschitzWith.ediam_image_le : ∀ {α : Type u} {β : Type v} [inst : PseudoEMetricSpace.{u} α] [inst_1 : PseudoEMetricSpace.{v} β] {K : NNReal}\n  {f : α → β},\n  LipschitzWith.{u, v} K f →\n    ∀ (s : Set.{u} α),\n      LE.le.{0} (Metric.ediam.{v} (Set.image.{u, v} f s)) (HMul.hMul.{0, 0, 0} (↑K) (Metric.ediam.{u} s))",
+          "declaration_kind": "theorem",
+          "mathlib_commit": "905b95818eb32af7874a58b427f50c1711a5e96c",
+          "source_path": "Mathlib/Topology/EMetricSpace/Lipschitz.lean",
+          "source_sha256": "f94ad482bdf55f9150f7a0c83c1bf04503493ff9c8ec82badf04c9b48a731d5f",
+          "evidence": [
+            {
+              "path": "library/M016-0017/library-sources.json",
+              "sha256": "baeefff22f3dd8a4d83e0dde8bfba7640acd5555f88ce6ea26d52b36661f404e"
+            }
+          ]
+        }
+      },
+      {
+        "id": "E001",
+        "kind": "external",
+        "statement": "For finite dimensional real normed spaces V,W, every real linear equivalence e:V≃ₗ[ℝ]W preserves Hausdorff dimension of images of all subsets.",
+        "definitions": [
+          "D006"
+        ],
+        "binders": [
+          {
+            "symbol": "V",
+            "type": "finite dimensional real normed space"
+          },
+          {
+            "symbol": "W",
+            "type": "finite dimensional real normed space"
+          },
+          {
+            "symbol": "e",
+            "type": "real linear equivalence V≃ₗ[ℝ]W"
+          },
+          {
+            "symbol": "A",
+            "type": "subset of V"
+          }
+        ],
+        "objects": [
+          "V",
+          "W",
+          "e",
+          "A",
+          "dimH"
+        ],
+        "source": {
+          "hypotheses": [
+            "V and W are finite dimensional real normed spaces.",
+            "e is a real linear equivalence V≃ₗ[ℝ]W."
+          ],
+          "author": "Prepared Yui basis adapter B008, using the pinned Mathlib contributors' results",
+          "title": "Finite-dimensional real linear-equivalence invariance of Hausdorff dimension",
+          "version": "Frozen basis-registry.json B008; Mathlib commit 905b95818eb32af7874a58b427f50c1711a5e96c",
+          "identifier": "basis-registry.json#/dependencies/7 (B008), provisional port E001",
+          "locator": "basis-registry.json /dependencies/7/lean: proof intro V W _ _ _ _ _ _ e A; exact e.toContinuousLinearEquiv.dimH_image A. Pinned Mathlib/Topology/Algebra/Module/FiniteDimension.lean:365–383; Mathlib/Topology/MetricSpace/HausdorffDimension.lean:412–420.",
+          "notation_map": "The source type uses dimH for D006, real scalar field ℝ and e '' A for the set image. The native coercion of e.toContinuousLinearEquiv is exactly e, so the image subset is unchanged. The E001 proposition is the exact provisional registry statement.",
+          "errata": "This is a frozen prepared adapter, not a literature citation. Comparison with the supplied complete type/proof and the pinned source definitions found no statement change; no external edition or erratum is invoked.",
+          "source_kind": "prepared-basis-adapter",
+          "origin": "Authorized versioned 2basis proof handoff B008, compatibility adapted, port E001; not an internal class-3 derivation or a class-4 literature assumption.",
+          "retrieved_at": "2026-11-06",
+          "source_statement": "∀ (V W : Type) [NormedAddCommGroup V] [NormedSpace ℝ V] [FiniteDimensional ℝ V] [NormedAddCommGroup W] [NormedSpace ℝ W] [FiniteDimensional ℝ W] (e : V ≃ₗ[ℝ] W) (A : Set V), dimH (e '' A) = dimH A",
+          "context": "V,W carry NormedAddCommGroup, NormedSpace ℝ and FiniteDimensional ℝ structures. LinearEquiv.toContinuousLinearEquiv uses continuity of linear maps in finite dimensions for both directions, retaining exactly the underlying map e. ContinuousLinearEquiv.dimH_image then proves image-dimension equality for every subset. These are the complete adapter conditions; no compactness, nonemptiness or subset measurability is required.",
+          "qualification": "A prepared real finite-dimensional adapter with its complete closed Lean type and proof retained in the frozen registry. Its general linear-equivalence invariance is obtained from the actual pinned continuous-linear-equivalence theorem, whose signature was probed as M017 and whose defining context was read. This source is retained by the authorized E001 port for later basis discharge. Native checks alone are not mathematical acceptance.",
+          "version_check": "2026-11-06: read frozen B008 statement/type/proof, inspected pinned LinearEquiv.toContinuousLinearEquiv and the full ContinuousLinearEquiv.dimH_image signature and source. Both concern the same underlying real linear map and arbitrary subset. The comparison supports exactly the provisional E001 statement; the full original-target/basis review remains Audit A's task.",
+          "evidence": [
+            {
+              "path": "inputs/basis-registry.json",
+              "sha256": "e82ae4d221d265c0752c2fa86c947f16da431518768d869f00306484cf290f26"
+            },
+            {
+              "path": "library/M017-0018/library-sources.json",
+              "sha256": "5fc129421f9c69a131e642b9021f802461e6b3d711fa0702ba0791afa8e7f1ad"
+            }
+          ],
+          "primary_evidence": [
+            {
+              "path": "inputs/basis-registry.json",
+              "sha256": "e82ae4d221d265c0752c2fa86c947f16da431518768d869f00306484cf290f26"
+            },
+            {
+              "path": "library/M017-0018/library-sources.json",
+              "sha256": "5fc129421f9c69a131e642b9021f802461e6b3d711fa0702ba0791afa8e7f1ad"
+            }
+          ],
+          "statement": "For finite dimensional real normed spaces V,W, every real linear equivalence e:V≃ₗ[ℝ]W preserves Hausdorff dimension of images of all subsets."
+        }
+      },
+      {
+        "id": "N001",
+        "kind": "internal",
+        "statement": "For every metric space X with its Borel structure, A⊆X and real p>0, at each finite positive real scale δ, C_p(δ,A) is exactly the infimum of ∑_i diam(U_i)^p over countable δ-covers of A, with empty members costing zero. Each cover bounds content above. It is antitone in δ; μH[p](A)=sup_{δ∈ℝ,δ>0} C_p(δ,A). Moreover μH[p](A)=0 iff for every δ>0 and ε>0 an admissible ℕ-indexed cover has cost <ε. Suprema along scales decreasing to zero give the same measure. These agree exactly with the original H^p_δ and H^p, without a normalization factor. Countable subfamilies and pairs (i,j) with j<N_i may be enumerated by ℕ and padded by empty sets without changing coverage or nonnegative cost.",
+        "definitions": [
+          "D002",
+          "D003",
+          "D004",
+          "D005",
+          "D018",
+          "D019"
+        ],
+        "binders": [
+          {
+            "symbol": "X",
+            "type": "metric space"
+          },
+          {
+            "symbol": "A",
+            "type": "subset of X"
+          },
+          {
+            "symbol": "p",
+            "type": "ℝ"
+          },
+          {
+            "symbol": "δ",
+            "type": "positive real"
+          },
+          {
+            "symbol": "ε",
+            "type": "positive real"
+          },
+          {
+            "symbol": "U",
+            "type": "ℕ→Set X"
+          },
+          {
+            "symbol": "N",
+            "type": "ℕ→ℕ"
+          }
+        ],
+        "objects": [
+          "X",
+          "A",
+          "p",
+          "δ",
+          "ε",
+          "U",
+          "N",
+          "ediam",
+          "diam",
+          "C",
+          "μH",
+          "Hscale",
+          "Hmeasure"
+        ],
+        "origin": "basis-proof.md:8–11 and conventions at line 4; internal class 3 B010"
+      },
+      {
+        "id": "N002",
+        "kind": "internal",
+        "statement": "For every metric space X, A⊆X and real q>0, if μH[q](A)=0 then μH[q+1](A×I)=0 in maxProd(X,ℝ). Under the same premise μH[q](A)=0, more precisely, for every 0<r≤1 and ε>0 there is a countable cover of A×I of diameter at most 2r and total (q+1)-cost <2^(q+2)ε (hence also ≤ that bound). The constant depends only on q.",
+        "definitions": [
+          "D001",
+          "D003",
+          "D005",
+          "D007"
+        ],
+        "binders": [
+          {
+            "symbol": "X",
+            "type": "metric space"
+          },
+          {
+            "symbol": "A",
+            "type": "subset of X"
+          },
+          {
+            "symbol": "q",
+            "type": "ℝ"
+          },
+          {
+            "symbol": "r",
+            "type": "ℝ"
+          },
+          {
+            "symbol": "ε",
+            "type": "ℝ"
+          }
+        ],
+        "objects": [
+          "X",
+          "A",
+          "q",
+          "r",
+          "ε",
+          "I",
+          "diam",
+          "μH",
+          "maxProd"
+        ],
+        "origin": "basis-proof.md:13–29; internal class 3 B011"
+      },
+      {
+        "id": "N003",
+        "kind": "internal",
+        "statement": "For every metric space X with its Borel structure, A⊆X, real s>0 and finite real δ>0, C_s(δ,A)≤C_{s+1}(δ,A×I) in maxProd(X,ℝ); consequently μH[s](A)≤μH[s+1](A×I). These inequalities hold in [0,∞] even when C_s(δ,A)=∞ and without any measurability, compactness or nonemptiness assumption on A or the cover members.",
+        "definitions": [
+          "D001",
+          "D004",
+          "D005",
+          "D007"
+        ],
+        "binders": [
+          {
+            "symbol": "X",
+            "type": "metric space"
+          },
+          {
+            "symbol": "A",
+            "type": "subset of X"
+          },
+          {
+            "symbol": "s",
+            "type": "ℝ"
+          },
+          {
+            "symbol": "δ",
+            "type": "ℝ"
+          }
+        ],
+        "objects": [
+          "X",
+          "A",
+          "s",
+          "δ",
+          "C",
+          "μH",
+          "I",
+          "maxProd"
+        ],
+        "origin": "basis-proof.md:31–56; internal class 3 B012"
+      },
+      {
+        "id": "N004",
+        "kind": "internal",
+        "statement": "For every finite dimensional real normed space V and A⊆V, 0≤dimH(A)≤finrank(V)<∞. In particular dimH(A) is a finite nonnegative real viewed in [0,∞], including when finrank(V)=0.",
+        "definitions": [
+          "D006",
+          "D011"
+        ],
+        "binders": [
+          {
+            "symbol": "V",
+            "type": "finite dimensional real normed space"
+          },
+          {
+            "symbol": "A",
+            "type": "subset of V"
+          }
+        ],
+        "objects": [
+          "V",
+          "A",
+          "dimH",
+          "finrank"
+        ],
+        "origin": "basis-proof.md:59,65; derive B004 from its native sources"
+      },
+      {
+        "id": "N005",
+        "kind": "internal",
+        "statement": "dimH(I)=1 in ℝ.",
+        "definitions": [
+          "D001",
+          "D006"
+        ],
+        "binders": [],
+        "objects": [
+          "I",
+          "dimH"
+        ],
+        "origin": "basis-proof.md:63–65; derive B005 from its native nonempty-interior source"
+      },
+      {
+        "id": "N006",
+        "kind": "internal",
+        "statement": "For every finite dimensional real normed space V and every nonempty compact A⊆V, dimH(A×I)=dimH(A)+1 in [0,∞], with A×I in maxProd(V,ℝ). This includes finrank(V)=0.",
+        "definitions": [
+          "D001",
+          "D006",
+          "D007",
+          "D011"
+        ],
+        "binders": [
+          {
+            "symbol": "V",
+            "type": "finite dimensional real normed space"
+          },
+          {
+            "symbol": "A",
+            "type": "subset of V"
+          }
+        ],
+        "objects": [
+          "V",
+          "A",
+          "I",
+          "dimH",
+          "maxProd",
+          "finrank"
+        ],
+        "origin": "basis-proof.md:58–65; internal class 3 B013"
+      },
+      {
+        "id": "N007",
+        "kind": "internal",
+        "statement": "For the original natural n, the coordinate map T:maxProd(Vn,ℝ)→Wn is a real linear equivalence with inverse z↦((i↦z(i.castSucc)),z(Fin.last n)). It maps Fmax exactly onto Feuc, and dimH(Feuc)=dimH(Fmax). For all x,y∈Vn and t,u∈ℝ, setting a=||x−y||₂ and b=|t−u| gives domain distance max(a,b) and target distance sqrt(a²+b²), with max(a,b)≤sqrt(a²+b²)≤sqrt(2)max(a,b). The constants are independent of n,E and points, and all assertions include n=0.",
+        "definitions": [
+          "D006",
+          "D007",
+          "D013",
+          "D014",
+          "D015",
+          "D016",
+          "D017"
+        ],
+        "binders": [
+          {
+            "symbol": "z",
+            "type": "Wn"
+          },
+          {
+            "symbol": "i",
+            "type": "Fin n"
+          },
+          {
+            "symbol": "x",
+            "type": "Vn"
+          },
+          {
+            "symbol": "y",
+            "type": "Vn"
+          },
+          {
+            "symbol": "t",
+            "type": "ℝ"
+          },
+          {
+            "symbol": "u",
+            "type": "ℝ"
+          },
+          {
+            "symbol": "a",
+            "type": "nonnegative real"
+          },
+          {
+            "symbol": "b",
+            "type": "nonnegative real"
+          }
+        ],
+        "objects": [
+          "n",
+          "E",
+          "T",
+          "Vn",
+          "Wn",
+          "Fmax",
+          "Feuc",
+          "dimH",
+          "maxProd",
+          "z",
+          "i",
+          "x",
+          "y",
+          "t",
+          "u",
+          "a",
+          "b"
+        ],
+        "origin": "basis-proof.md:67–79; internal class 3 B014, using exactly prepared E001=B008"
+      },
+      {
+        "id": "P",
+        "kind": "target",
+        "definitions": [
+          "D006",
+          "D013",
+          "D014",
+          "D017"
+        ],
+        "binders": [],
+        "objects": [
+          "dimH",
+          "Feuc",
+          "E",
+          "Wn",
+          "Vn"
+        ],
+        "statement": "dimH(Feuc)=dimH(E)+1, with Feuc in Euclidean Wn and E in Euclidean Vn."
+      }
+    ],
+    "inferences": [
+      {
+        "id": "R001",
+        "inputs": [
+          "M001"
+        ],
+        "output": "N001",
+        "definitions": [
+          "D002",
+          "D003",
+          "D004",
+          "D005",
+          "D018",
+          "D019"
+        ],
+        "rules": [
+          "direct",
+          "forall_introduction",
+          "implication_introduction"
+        ],
+        "locals": [
+          {
+            "symbol": "X",
+            "type": "metric space with its Borel measurable structure",
+            "scope": "R001/argument",
+            "start": "S001",
+            "end": "S004",
+            "kind": "arbitrary",
+            "declaration": "Fix an arbitrary metric space X and equip it with its Borel structure.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "A",
+            "type": "subset of X",
+            "scope": "R001/argument",
+            "start": "S001",
+            "end": "S004",
+            "kind": "arbitrary",
+            "declaration": "Fix any A⊆X.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "X"
+            ]
+          },
+          {
+            "symbol": "p",
+            "type": "ℝ",
+            "scope": "R001/argument",
+            "start": "S001",
+            "end": "S004",
+            "kind": "arbitrary",
+            "declaration": "Fix a real exponent p, and temporarily assume L1: p>0.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          }
+        ],
+        "argument": [
+          {
+            "id": "S001",
+            "text": "Fix an arbitrary metric space X with its Borel structure, a subset A and a real p. Temporarily assume L1: p>0. M001 applies to this metric space viewed as an extended metric space; its inner nested infima and empty-member supremum are exactly D004. Hence μH[p](A)=sup_{r∈[0,∞],r>0} C_p(r,A).",
+            "uses": [
+              "M001"
+            ],
+            "uses_local": [],
+            "objects": [
+              "X",
+              "A",
+              "p",
+              "C",
+              "μH",
+              "ediam"
+            ],
+            "produces": [
+              {
+                "id": "F001",
+                "statement": "μH[p](A)=sup_{r∈[0,∞],r>0} C_p(r,A).",
+                "binders": [
+                  {
+                    "symbol": "r",
+                    "type": "[0,∞]"
+                  }
+                ],
+                "objects": [
+                  "X",
+                  "A",
+                  "p",
+                  "C",
+                  "μH",
+                  "r"
+                ],
+                "assumptions": [
+                  "L1"
+                ]
+              }
+            ],
+            "introduces": [
+              "L1"
+            ],
+            "discharges": []
+          },
+          {
+            "id": "S002",
+            "text": "Any admissible cover bounds the defining infimum from above. For positive scales δ₁≤δ₂, every δ₁-cover is a δ₂-cover, so C_p(δ₂,A)≤C_p(δ₁,A), also when a family of covers is empty. Finite positive real scales are cofinal towards zero among positive extended scales: below a finite r>0 take its real value or half that value, and below r=∞ take 1. Thus every content appearing in F001 is bounded by one at a finite positive scale, while every finite positive scale already occurs there. It follows that μH[p](A)=sup_{δ∈ℝ,δ>0} C_p(δ,A). The same antitonicity shows that for every real sequence δ_k>0 tending to zero, the supremum of its contents equals this supremum: below any fixed δ>0 one eventually has δ_k≤δ.",
+            "uses": [],
+            "uses_local": [
+              "F001"
+            ],
+            "objects": [
+              "X",
+              "A",
+              "p",
+              "C",
+              "μH"
+            ],
+            "produces": [
+              {
+                "id": "F002",
+                "statement": "For every δ>0, an admissible δ-cover bounds C_p(δ,A) above; for 0<δ₁≤δ₂, C_p(δ₂,A)≤C_p(δ₁,A). Also μH[p](A)=sup_{δ∈ℝ,δ>0} C_p(δ,A), and any positive real sequence tending to zero has the same supremum of contents.",
+                "binders": [
+                  {
+                    "symbol": "δ",
+                    "type": "ℝ"
+                  },
+                  {
+                    "symbol": "δ₁",
+                    "type": "ℝ"
+                  },
+                  {
+                    "symbol": "δ₂",
+                    "type": "ℝ"
+                  }
+                ],
+                "objects": [
+                  "X",
+                  "A",
+                  "p",
+                  "C",
+                  "μH",
+                  "δ",
+                  "δ₁",
+                  "δ₂"
+                ],
+                "assumptions": [
+                  "L1"
+                ]
+              }
+            ],
+            "introduces": [],
+            "discharges": []
+          },
+          {
+            "id": "S003",
+            "text": "For the forward small-cover assertion temporarily suppose L2: μH[p](A)=0. By F002, every finite-scale content is zero. At a fixed positive δ and ε, if no admissible cost were <ε then every admissible cost would be ≥ε and its infimum would be ≥ε; if there were no admissible family the infimum would be ∞. Both contradict zero content. Thus there is a cover of cost <ε for every δ>0, ε>0. Discharge L2 into this implication. Conversely temporarily suppose L3: such covers exist for all δ>0 and ε>0. Each content is then ≤ε for every ε>0, and is nonnegative, so is zero by order density in [0,∞]. F002 gives μH[p](A)=0. Discharge L3. This establishes both directions without assuming a minimizer of an infimum.",
+            "uses": [],
+            "uses_local": [
+              "F002"
+            ],
+            "objects": [
+              "X",
+              "A",
+              "p",
+              "C",
+              "μH"
+            ],
+            "produces": [
+              {
+                "id": "F003",
+                "statement": "μH[p](A)=0 iff for every finite δ>0 and ε>0 an admissible ℕ-indexed δ-cover of A has total p-cost <ε.",
+                "binders": [
+                  {
+                    "symbol": "δ",
+                    "type": "ℝ"
+                  },
+                  {
+                    "symbol": "ε",
+                    "type": "ℝ"
+                  }
+                ],
+                "objects": [
+                  "X",
+                  "A",
+                  "p",
+                  "C",
+                  "μH",
+                  "δ",
+                  "ε"
+                ],
+                "assumptions": [
+                  "L1"
+                ]
+              }
+            ],
+            "introduces": [
+              "L2",
+              "L3"
+            ],
+            "discharges": [
+              "L2",
+              "L3"
+            ]
+          },
+          {
+            "id": "S004",
+            "text": "Compare with the shared original definitions D018 and D019, namely Hscale(p,δ,A)=H^p_δ(A) and Hmeasure(p,A)=H^p(A). For any fixed finite δ>0, the D004 condition ediam(U_i)≤ofReal δ is equivalent to dist(x,y)≤δ for every pair of points in U_i, by the definition of ediam as their supremum. This is exactly the D018 admissibility condition and forces each member to be bounded; conversely each D018 member of ordinary diameter ≤δ meets that extended-diameter bound. The two classes of covers therefore coincide, including empty members and empty families. On each member at this scale, finite ediam is the embedding of the ordinary supremum diameter, which also equals D003's diam; no unbounded member is admitted through toReal(∞)=0. Since p>0, zero diameter has p-power zero; the nonempty-member supremum in D004 equals the embedded diameter power on a nonempty member and is zero on an empty member, as required by D018. The same ℕ-indexed sums and infima consequently give C_p(δ,A)=Hscale(p,δ,A)=H^p_δ(A). Taking suprema over all positive finite real δ in F002 and D019 gives μH[p](A)=Hmeasure(p,A)=H^p(A). Both definitions use the cutoff ≤δ, arbitrary countable covers and no multiplicative normalization, so this comparison introduces no factor or cover restriction. Any countable subfamily, or the pairs (i,j) with i∈ℕ and 0≤j<N_i for a natural-number family N, has a countable index set: it is a subset of ℕ or ℕ×ℕ. Inject it into ℕ, place each set at its assigned index, and use ∅ elsewhere. The union is unchanged and each nonzero cost occurs once; the sum, defined as the supremum of finite subsums, is unchanged. These conclusions, F002 and F003 hold for all the arbitrary objects. Discharge L1 into p>0 and universally quantify to obtain every clause of the asserted output.",
+            "uses": [],
+            "uses_local": [
+              "F002",
+              "F003"
+            ],
+            "objects": [
+              "X",
+              "A",
+              "p",
+              "ediam",
+              "diam",
+              "C",
+              "μH",
+              "Hscale",
+              "Hmeasure"
+            ],
+            "produces": [],
+            "introduces": [],
+            "discharges": [
+              "L1"
+            ]
+          }
+        ],
+        "applications": [
+          {
+            "input": "M001",
+            "at": "S001",
+            "bindings": "Set Z=X, B=A and the real exponent to p; identify C with the exact nested infimum in D004.",
+            "hypothesis_checks": [
+              "X is a metric space, hence an extended metric space, and its selected measurable structure is its Borel structure."
+            ]
+          }
+        ]
+      },
+      {
+        "id": "R002",
+        "inputs": [
+          "N001"
+        ],
+        "output": "N002",
+        "definitions": [
+          "D001",
+          "D002",
+          "D003",
+          "D004",
+          "D005",
+          "D007",
+          "D012"
+        ],
+        "rules": [
+          "direct",
+          "forall_introduction",
+          "implication_introduction",
+          "exists_elimination"
+        ],
+        "locals": [
+          {
+            "symbol": "X",
+            "type": "metric space with its Borel structure",
+            "scope": "R002/argument",
+            "start": "S001",
+            "end": "S006",
+            "kind": "arbitrary",
+            "declaration": "Fix an arbitrary metric space X.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "A",
+            "type": "subset of X",
+            "scope": "R002/argument",
+            "start": "S001",
+            "end": "S006",
+            "kind": "arbitrary",
+            "declaration": "Fix A⊆X.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "X"
+            ]
+          },
+          {
+            "symbol": "q",
+            "type": "ℝ",
+            "scope": "R002/argument",
+            "start": "S001",
+            "end": "S006",
+            "kind": "arbitrary",
+            "declaration": "Fix real q and temporarily assume L1: q>0 and μH[q](A)=0.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "A",
+              "μH"
+            ]
+          },
+          {
+            "symbol": "r",
+            "type": "ℝ",
+            "scope": "R002/argument",
+            "start": "S001",
+            "end": "S005",
+            "kind": "arbitrary",
+            "declaration": "Fix real r and temporarily assume as part of L2 that 0<r≤1.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "ε",
+            "type": "ℝ",
+            "scope": "R002/argument",
+            "start": "S001",
+            "end": "S005",
+            "kind": "arbitrary",
+            "declaration": "Fix real ε and temporarily assume as part of L2 that ε>0.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "U",
+            "type": "ℕ→Set X",
+            "scope": "R002/argument",
+            "start": "S002",
+            "end": "S005",
+            "kind": "witness",
+            "declaration": "Choose an r/2-cover U of A with q-cost <ε/2 supplied by F001.",
+            "from_inputs": [],
+            "from_local": [
+              "F001"
+            ],
+            "objects": [
+              "X",
+              "A",
+              "r",
+              "q",
+              "ε"
+            ]
+          },
+          {
+            "symbol": "d",
+            "type": "ℕ→ℝ",
+            "scope": "R002/argument",
+            "start": "S002",
+            "end": "S005",
+            "kind": "definition",
+            "declaration": "Put d_i=diam(U_i); empty members have d_i=0.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "U",
+              "diam"
+            ]
+          },
+          {
+            "symbol": "a",
+            "type": "ℕ→ℝ",
+            "scope": "R002/argument",
+            "start": "S003",
+            "end": "S005",
+            "kind": "witness",
+            "declaration": "Choose the positive radii a_i satisfying F002 for all natural i.",
+            "from_inputs": [],
+            "from_local": [
+              "F002"
+            ],
+            "objects": [
+              "d",
+              "r",
+              "q",
+              "ε"
+            ]
+          },
+          {
+            "symbol": "u",
+            "type": "family of points of X indexed by {i∈ℕ:U_i≠∅}",
+            "scope": "R002/argument",
+            "start": "S004",
+            "end": "S005",
+            "kind": "witness",
+            "declaration": "Choose u_i∈U_i for every nonempty U_i as in F003.",
+            "from_inputs": [],
+            "from_local": [
+              "F003"
+            ],
+            "objects": [
+              "X",
+              "U"
+            ]
+          },
+          {
+            "symbol": "K",
+            "type": "ℕ→Set X",
+            "scope": "R002/argument",
+            "start": "S004",
+            "end": "S005",
+            "kind": "definition",
+            "declaration": "Set K_i=closedBall(u_i,a_i) when U_i≠∅ and K_i=∅ otherwise.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "X",
+              "U",
+              "u",
+              "a",
+              "closedBall"
+            ]
+          },
+          {
+            "symbol": "N",
+            "type": "ℕ→ℕ",
+            "scope": "R002/argument",
+            "start": "S004",
+            "end": "S005",
+            "kind": "definition",
+            "declaration": "Set N_i=ceil(1/a_i).",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "a"
+            ]
+          },
+          {
+            "symbol": "blocks",
+            "type": "family of subsets of maxProd(X,ℝ) indexed by pairs (i,j), i∈ℕ, 0≤j<N_i",
+            "scope": "R002/argument",
+            "start": "S004",
+            "end": "S005",
+            "kind": "definition",
+            "declaration": "Set blocks_{i,j}=K_i×[j/N_i,(j+1)/N_i].",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "K",
+              "N",
+              "maxProd",
+              "X"
+            ]
+          },
+          {
+            "symbol": "Δ",
+            "type": "ℝ",
+            "scope": "R002/argument",
+            "start": "S006",
+            "end": "S006",
+            "kind": "arbitrary",
+            "declaration": "For the final small-cover test fix any target scale Δ>0.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "τ",
+            "type": "ℝ",
+            "scope": "R002/argument",
+            "start": "S006",
+            "end": "S006",
+            "kind": "arbitrary",
+            "declaration": "Fix any cost tolerance τ>0.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "rTarget",
+            "type": "ℝ",
+            "scope": "R002/argument",
+            "start": "S006",
+            "end": "S006",
+            "kind": "definition",
+            "declaration": "Set rTarget=min(1,Δ/2).",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "Δ"
+            ]
+          },
+          {
+            "symbol": "εTarget",
+            "type": "ℝ",
+            "scope": "R002/argument",
+            "start": "S006",
+            "end": "S006",
+            "kind": "definition",
+            "declaration": "Set εTarget=τ/(2·2^(q+2)).",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "τ",
+              "q"
+            ]
+          }
+        ],
+        "argument": [
+          {
+            "id": "S001",
+            "text": "Fix X,A,q and temporarily assume L1: q>0 and μH[q](A)=0. Fix arbitrary r,ε under L2: 0<r≤1 and ε>0. By N001 at scale r/2 and tolerance ε/2 there exists an ℕ-indexed r/2-cover of A of q-cost <ε/2.",
+            "uses": [
+              "N001"
+            ],
+            "uses_local": [],
+            "objects": [
+              "X",
+              "A",
+              "q",
+              "r",
+              "ε",
+              "μH",
+              "C"
+            ],
+            "produces": [
+              {
+                "id": "F001",
+                "statement": "There exists an ℕ-indexed cover U of A with ediam(U_i)≤r/2 for every i and ∑_i diam(U_i)^q<ε/2, empty members costing zero.",
+                "binders": [
+                  {
+                    "symbol": "U",
+                    "type": "ℕ→Set X"
+                  }
+                ],
+                "objects": [
+                  "X",
+                  "A",
+                  "q",
+                  "r",
+                  "ε",
+                  "ediam",
+                  "diam",
+                  "U"
+                ],
+                "assumptions": [
+                  "L1",
+                  "L2"
+                ]
+              }
+            ],
+            "introduces": [
+              "L1",
+              "L2"
+            ],
+            "discharges": []
+          },
+          {
+            "id": "S002",
+            "text": "Choose U as in F001 and put d_i=diam(U_i). All diameters are finite and 0≤d_i≤r/2; empty members have diameter zero. For each i, continuity from the right of x↦x^q on [0,∞) (q>0) and d_i<r allow a_i∈(d_i,r) with a_i^q<d_i^q+ε·2^(−i−2). At d_i=0 the same assertion follows from x^q→0 as x↓0. Countable choice gives a single family of such radii; in particular each satisfies d_i<a_i≤r.",
+            "uses": [],
+            "uses_local": [
+              "F001"
+            ],
+            "objects": [
+              "X",
+              "A",
+              "q",
+              "r",
+              "ε",
+              "U",
+              "d",
+              "diam"
+            ],
+            "produces": [
+              {
+                "id": "F002",
+                "statement": "There exists a real family a with for every i∈ℕ, 0≤d_i<a_i≤r and a_i^q<d_i^q+ε·2^(−i−2).",
+                "binders": [
+                  {
+                    "symbol": "a",
+                    "type": "ℕ→ℝ"
+                  }
+                ],
+                "objects": [
+                  "d",
+                  "q",
+                  "r",
+                  "ε",
+                  "a"
+                ],
+                "assumptions": [
+                  "L1",
+                  "L2"
+                ]
+              }
+            ],
+            "introduces": [],
+            "discharges": []
+          },
+          {
+            "id": "S003",
+            "text": "Choose a as in F002. Taking finite subsums and then their supremum yields ∑_i a_i^q≤∑_i d_i^q+ε∑_i2^(−i−2)=∑_i d_i^q+ε/2<ε. The geometric sum is 1/2; it follows by summing the finite geometric series and taking its increasing limit. The strict final inequality comes from F001, not from summing strictly termwise inequalities. For each nonempty U_i there exists a point in U_i by the meaning of nonempty, so countable choice provides a family of centers on precisely those indices.",
+            "uses": [],
+            "uses_local": [
+              "F001",
+              "F002"
+            ],
+            "objects": [
+              "X",
+              "U",
+              "d",
+              "a",
+              "q",
+              "r",
+              "ε"
+            ],
+            "produces": [
+              {
+                "id": "F003",
+                "statement": "∑_i a_i^q<ε, and there exists a family u_i∈U_i for all i with U_i≠∅.",
+                "binders": [
+                  {
+                    "symbol": "u",
+                    "type": "family on nonempty indices of U with values in X"
+                  }
+                ],
+                "objects": [
+                  "X",
+                  "U",
+                  "a",
+                  "q",
+                  "ε",
+                  "u"
+                ],
+                "assumptions": [
+                  "L1",
+                  "L2"
+                ]
+              }
+            ],
+            "introduces": [],
+            "discharges": []
+          },
+          {
+            "id": "S004",
+            "text": "Choose the family u from F003. For nonempty U_i put K_i=closedBall(u_i,a_i); put K_i=∅ for empty U_i. Distances within U_i are ≤d_i<a_i, hence U_i⊆K_i. The triangle inequality gives diam(K_i)≤2a_i; this does not require a ball of positive actual diameter and works for a singleton X. Define N_i=ceil(1/a_i), positive because a_i>0. The N_i closed intervals [j/N_i,(j+1)/N_i], 0≤j<N_i, cover I and have diameter 1/N_i≤a_i. Since a_i≤r≤1, N_i≤1/a_i+1≤2/a_i. Define blocks_{i,j}=K_i times those intervals. They cover A×I and in maxProd(X,ℝ) each has diameter ≤2a_i≤2r, by the maximum formula for distances. There are countably many blocks, and N001 permits reindexing them by ℕ with empty padding.",
+            "uses": [
+              "N001"
+            ],
+            "uses_local": [
+              "F001",
+              "F002",
+              "F003"
+            ],
+            "objects": [
+              "X",
+              "A",
+              "U",
+              "d",
+              "a",
+              "u",
+              "K",
+              "N",
+              "blocks",
+              "q",
+              "r",
+              "ε",
+              "I",
+              "diam",
+              "maxProd",
+              "closedBall"
+            ],
+            "produces": [
+              {
+                "id": "F004",
+                "statement": "blocks is a countable cover of A×I with diam(blocks_{i,j})≤2a_i≤2r, and 1≤N_i≤2/a_i for every i.",
+                "binders": [],
+                "objects": [
+                  "X",
+                  "A",
+                  "I",
+                  "blocks",
+                  "a",
+                  "r",
+                  "N",
+                  "diam"
+                ],
+                "assumptions": [
+                  "L1",
+                  "L2"
+                ]
+              }
+            ],
+            "introduces": [],
+            "discharges": []
+          },
+          {
+            "id": "S005",
+            "text": "By F004, q+1>0 and the nonnegative real-power laws,\n∑_i∑_{j<N_i} diam(blocks_{i,j})^(q+1)\n ≤∑_i N_i(2a_i)^(q+1)\n ≤2^(q+2)∑_i a_i^q\n <2^(q+2)ε.\nThe second inequality follows termwise from N_i≤2/a_i and a_i>0, since (2/a_i)(2a_i)^(q+1)=2^(q+2)a_i^q. Empty original indices have K_i=∅ and cost zero. All inequalities of infinite nonnegative sums follow from finite subsums, so remain valid without a preliminary summability assumption. This gives the quantitative cover for the arbitrary r,ε. Discharge L2 and universally quantify them; the resulting quantitative statement is F005.",
+            "uses": [],
+            "uses_local": [
+              "F002",
+              "F003",
+              "F004"
+            ],
+            "objects": [
+              "X",
+              "A",
+              "q",
+              "r",
+              "ε",
+              "a",
+              "K",
+              "N",
+              "blocks",
+              "I",
+              "diam"
+            ],
+            "produces": [
+              {
+                "id": "F005",
+                "statement": "For every real r0,ε0 with 0<r0≤1 and ε0>0, A×I in maxProd(X,ℝ) has a countable 2r0-cover of (q+1)-cost <2^(q+2)ε0. The constant depends only on q.",
+                "binders": [
+                  {
+                    "symbol": "r0",
+                    "type": "ℝ"
+                  },
+                  {
+                    "symbol": "ε0",
+                    "type": "ℝ"
+                  }
+                ],
+                "objects": [
+                  "X",
+                  "A",
+                  "q",
+                  "I",
+                  "maxProd",
+                  "diam",
+                  "r0",
+                  "ε0"
+                ],
+                "assumptions": [
+                  "L1"
+                ]
+              }
+            ],
+            "introduces": [],
+            "discharges": [
+              "L2"
+            ]
+          },
+          {
+            "id": "S006",
+            "text": "For any positive target scale Δ and tolerance τ, set rTarget=min(1,Δ/2)>0 and εTarget=τ/(2·2^(q+2))>0. F005 gives a cover of diameter ≤2rTarget≤Δ and cost <2^(q+2)εTarget=τ/2<τ. N001, now in maxProd(X,ℝ) with its Borel structure and positive exponent q+1, yields μH[q+1](A×I)=0. This and F005 are the two clauses of the asserted output. Discharge L1 and quantify X,A,q; Δ,τ were arbitrary small-cover test values, not new hypotheses.",
+            "uses": [
+              "N001"
+            ],
+            "uses_local": [
+              "F005"
+            ],
+            "objects": [
+              "X",
+              "A",
+              "q",
+              "Δ",
+              "τ",
+              "rTarget",
+              "εTarget",
+              "I",
+              "μH",
+              "maxProd"
+            ],
+            "produces": [],
+            "introduces": [],
+            "discharges": [
+              "L1"
+            ]
+          }
+        ],
+        "applications": []
+      },
+      {
+        "id": "R003",
+        "inputs": [
+          "N001",
+          "M016",
+          "M010",
+          "M011",
+          "M012",
+          "M013",
+          "M014",
+          "M015"
+        ],
+        "output": "N003",
+        "definitions": [
+          "D001",
+          "D002",
+          "D003",
+          "D004",
+          "D005",
+          "D007",
+          "D008",
+          "D009",
+          "D010"
+        ],
+        "rules": [
+          "direct",
+          "forall_introduction",
+          "implication_introduction",
+          "case_elimination"
+        ],
+        "locals": [
+          {
+            "symbol": "X",
+            "type": "metric space with its Borel structure",
+            "scope": "R003/argument",
+            "start": "S001",
+            "end": "S008",
+            "kind": "arbitrary",
+            "declaration": "Fix an arbitrary metric space X with its Borel structure.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "A",
+            "type": "subset of X",
+            "scope": "R003/argument",
+            "start": "S001",
+            "end": "S008",
+            "kind": "arbitrary",
+            "declaration": "Fix any subset A⊆X.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "X"
+            ]
+          },
+          {
+            "symbol": "s",
+            "type": "ℝ",
+            "scope": "R003/argument",
+            "start": "S001",
+            "end": "S008",
+            "kind": "arbitrary",
+            "declaration": "Fix a real exponent s.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "δ",
+            "type": "ℝ",
+            "scope": "R003/argument",
+            "start": "S001",
+            "end": "S008",
+            "kind": "arbitrary",
+            "declaration": "Fix a real finite scale δ and temporarily assume L1: s>0 and δ>0.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "U",
+            "type": "ℕ→Set(maxProd(X,ℝ))",
+            "scope": "R003/argument",
+            "start": "S001",
+            "end": "S007",
+            "kind": "arbitrary",
+            "declaration": "Fix any family U; temporarily assume L2: U covers A×I and each ediam(U_i)≤δ.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "X",
+              "maxProd",
+              "A",
+              "I",
+              "ediam",
+              "δ"
+            ]
+          },
+          {
+            "symbol": "cost",
+            "type": "[0,∞]",
+            "scope": "R003/argument",
+            "start": "S001",
+            "end": "S007",
+            "kind": "definition",
+            "declaration": "Set cost=∑_i diam(U_i)^(s+1), with empty summands zero.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "U",
+              "s",
+              "diam"
+            ]
+          },
+          {
+            "symbol": "c",
+            "type": "[0,∞]",
+            "scope": "R003/argument",
+            "start": "S001",
+            "end": "S007",
+            "kind": "definition",
+            "declaration": "Set c=C_s(δ,A), without a finiteness assumption.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "C",
+              "s",
+              "δ",
+              "A"
+            ]
+          },
+          {
+            "symbol": "px",
+            "type": "maxProd(X,ℝ)→X",
+            "scope": "R003/argument",
+            "start": "S001",
+            "end": "S002",
+            "kind": "definition",
+            "declaration": "Set px(x,t)=x.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "maxProd",
+              "X"
+            ]
+          },
+          {
+            "symbol": "pt",
+            "type": "maxProd(X,ℝ)→ℝ",
+            "scope": "R003/argument",
+            "start": "S001",
+            "end": "S002",
+            "kind": "definition",
+            "declaration": "Set pt(x,t)=t.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "maxProd",
+              "X"
+            ]
+          },
+          {
+            "symbol": "ρ",
+            "type": "ℕ→ℝ",
+            "scope": "R003/argument",
+            "start": "S002",
+            "end": "S007",
+            "kind": "definition",
+            "declaration": "Set ρ_i=diam(U_i), equal to zero when U_i is empty.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "U",
+              "diam"
+            ]
+          },
+          {
+            "symbol": "Ax",
+            "type": "ℕ→Set X",
+            "scope": "R003/argument",
+            "start": "S002",
+            "end": "S006",
+            "kind": "definition",
+            "declaration": "Set Ax_i=px '' U_i.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "X",
+              "px",
+              "U"
+            ]
+          },
+          {
+            "symbol": "Bt",
+            "type": "ℕ→Set ℝ",
+            "scope": "R003/argument",
+            "start": "S002",
+            "end": "S006",
+            "kind": "definition",
+            "declaration": "Set Bt_i=pt '' U_i.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "pt",
+              "U"
+            ]
+          },
+          {
+            "symbol": "ε",
+            "type": "ℝ",
+            "scope": "R003/argument",
+            "start": "S003",
+            "end": "S006",
+            "kind": "arbitrary",
+            "declaration": "Fix arbitrary ε under L3: ε>0.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "η",
+            "type": "ℕ→ℝ",
+            "scope": "R003/argument",
+            "start": "S003",
+            "end": "S006",
+            "kind": "definition",
+            "declaration": "Set η_i=ε·2^(−i−1)/(1+ρ_i^s).",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "ε",
+              "ρ",
+              "s"
+            ]
+          },
+          {
+            "symbol": "J",
+            "type": "ℕ→Set ℝ",
+            "scope": "R003/argument",
+            "start": "S003",
+            "end": "S006",
+            "kind": "definition",
+            "declaration": "For nonempty U_i set J_i=(inf Bt_i−η_i/2,sup Bt_i+η_i/2); for empty U_i set J_i=∅.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "Bt",
+              "η",
+              "U"
+            ]
+          },
+          {
+            "symbol": "Ws",
+            "type": "ℝ→ℕ→Set X",
+            "scope": "R003/argument",
+            "start": "S004",
+            "end": "S004",
+            "kind": "definition",
+            "declaration": "Set Ws_i(t)=Ax_i if t∈J_i and ∅ otherwise.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "X",
+              "Ax",
+              "J"
+            ]
+          },
+          {
+            "symbol": "g",
+            "type": "ℕ→ℝ→[0,∞]",
+            "scope": "R003/argument",
+            "start": "S004",
+            "end": "S006",
+            "kind": "definition",
+            "declaration": "Set g_i(t)=ρ_i^s indicator(J_i∩I)(t).",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "ρ",
+              "s",
+              "indicator",
+              "J",
+              "I"
+            ]
+          }
+        ],
+        "argument": [
+          {
+            "id": "S001",
+            "text": "Fix X,A,s,δ and temporarily assume L1: s>0 and δ>0. Put the product A×I in maxProd(X,ℝ). Fix an arbitrary ℕ-indexed family U under L2: it covers A×I and ediam(U_i)≤δ for every i. Let cost=∑_i diam(U_i)^(s+1), with empty terms zero, and c=C_s(δ,A). The cover diameters are finite, but c and cost may be infinite. Define px(x,t)=x and pt(x,t)=t. The distance in either coordinate is at most the maximum of the two coordinate distances, so both projections are 1-Lipschitz in extended distance.",
+            "uses": [],
+            "uses_local": [],
+            "objects": [
+              "X",
+              "A",
+              "s",
+              "δ",
+              "U",
+              "cost",
+              "c",
+              "px",
+              "pt",
+              "C",
+              "ediam",
+              "diam",
+              "I",
+              "maxProd"
+            ],
+            "produces": [
+              {
+                "id": "F001",
+                "statement": "Both coordinate projections px and pt are 1-Lipschitz for the max product.",
+                "binders": [],
+                "objects": [
+                  "px",
+                  "pt",
+                  "X",
+                  "maxProd"
+                ],
+                "assumptions": [
+                  "L1",
+                  "L2"
+                ]
+              }
+            ],
+            "introduces": [
+              "L1",
+              "L2"
+            ],
+            "discharges": []
+          },
+          {
+            "id": "S002",
+            "text": "Define ρ_i=diam(U_i), Ax_i=px '' U_i and Bt_i=pt '' U_i. Applying M016 to each projection, justified by F001, gives ediam(Ax_i)≤ediam(U_i) and ediam(Bt_i)≤ediam(U_i); thus diam(Ax_i),diam(Bt_i)≤ρ_i≤δ. Empty U_i gives empty projections and ρ_i=0. For any nonempty index the set Bt_i is nonempty and bounded: a point b₀∈Bt_i exists, and |b−b₀|≤ρ_i for every b∈Bt_i. Its real infimum and supremum therefore bound all its points. Taking suprema in b−b'≤ρ_i gives sup Bt_i−inf Bt_i≤ρ_i. This uses only completeness of ℝ for nonempty bounded sets, not measurability of a projection.",
+            "uses": [
+              "M016"
+            ],
+            "uses_local": [
+              "F001"
+            ],
+            "objects": [
+              "X",
+              "U",
+              "ρ",
+              "Ax",
+              "Bt",
+              "px",
+              "pt",
+              "δ",
+              "diam",
+              "ediam"
+            ],
+            "produces": [
+              {
+                "id": "F002",
+                "statement": "For every i, 0≤ρ_i≤δ and ediam(Ax_i),ediam(Bt_i)≤ofReal ρ_i. For nonempty U_i, Bt_i is nonempty and bounded with all its points between inf Bt_i and sup Bt_i and sup Bt_i−inf Bt_i≤ρ_i; for empty U_i both projections are empty and ρ_i=0.",
+                "binders": [],
+                "objects": [
+                  "U",
+                  "ρ",
+                  "Ax",
+                  "Bt",
+                  "δ",
+                  "ediam"
+                ],
+                "assumptions": [
+                  "L1",
+                  "L2"
+                ]
+              }
+            ],
+            "introduces": [],
+            "discharges": []
+          },
+          {
+            "id": "S003",
+            "text": "Fix arbitrary ε under L3: ε>0, and define η_i=ε·2^(−i−1)/(1+ρ_i^s)>0. For a nonempty U_i define J_i=(inf Bt_i−η_i/2,sup Bt_i+η_i/2); for an empty U_i define J_i=∅. F002 shows Bt_i⊆J_i, including when Bt_i is a singleton, and the interval's length is at most ρ_i+η_i. These intervals and ∅ are Borel sets. No U_i or projection is required to be measurable.",
+            "uses": [],
+            "uses_local": [
+              "F002"
+            ],
+            "objects": [
+              "U",
+              "ρ",
+              "Bt",
+              "s",
+              "ε",
+              "η",
+              "J"
+            ],
+            "produces": [
+              {
+                "id": "F003",
+                "statement": "For every i, J_i is Borel, Bt_i⊆J_i and, if U_i is nonempty, the open interval J_i has length at most ρ_i+η_i; if U_i is empty, J_i=∅. Each η_i is positive.",
+                "binders": [],
+                "objects": [
+                  "U",
+                  "Bt",
+                  "J",
+                  "ρ",
+                  "η"
+                ],
+                "assumptions": [
+                  "L1",
+                  "L2",
+                  "L3"
+                ]
+              }
+            ],
+            "introduces": [
+              "L3"
+            ],
+            "discharges": []
+          },
+          {
+            "id": "S004",
+            "text": "For each t∈I define Ws_i(t)=Ax_i if t∈J_i and ∅ otherwise. For every x∈A the covering property supplies an index i with (x,t)∈U_i, whence x∈Ax_i and t∈Bt_i⊆J_i. Thus this is a δ-cover of A. Its s-cost is ≤∑_iρ_i^s indicator(J_i)(t), using F002 and s>0 also at zero diameters. N001 therefore gives c≤∑_iρ_i^s indicator(J_i)(t) for t∈I. Define the zero-extended summands g_i(t)=ρ_i^s indicator(J_i∩I)(t). Then c indicator(I)(t)≤∑_i g_i(t) for all real t: the preceding inequality holds on I and both sides vanish off I. Each g_i is measurable, since J_i∩I is Borel and its finite weight ρ_i^s is constant.",
+            "uses": [
+              "N001"
+            ],
+            "uses_local": [
+              "F002",
+              "F003"
+            ],
+            "objects": [
+              "X",
+              "A",
+              "U",
+              "Ax",
+              "J",
+              "Ws",
+              "g",
+              "ρ",
+              "s",
+              "δ",
+              "c",
+              "C",
+              "I",
+              "indicator",
+              "Bt"
+            ],
+            "produces": [
+              {
+                "id": "F004",
+                "statement": "For every t∈ℝ, c indicator(I)(t)≤∑_i g_i(t), where g_i(t)=ρ_i^s indicator(J_i∩I)(t); each g_i is Borel measurable and c=C_s(δ,A).",
+                "binders": [
+                  {
+                    "symbol": "t",
+                    "type": "ℝ"
+                  }
+                ],
+                "objects": [
+                  "c",
+                  "g",
+                  "ρ",
+                  "s",
+                  "J",
+                  "I",
+                  "indicator",
+                  "C",
+                  "δ",
+                  "A",
+                  "t"
+                ],
+                "assumptions": [
+                  "L1",
+                  "L2",
+                  "L3"
+                ]
+              }
+            ],
+            "introduces": [],
+            "discharges": []
+          },
+          {
+            "id": "S005",
+            "text": "We may compute the integral over I or equivalently the integral of the zero extension over ℝ. M014 with endpoints 0,1 gives volume(I)=1. M013 with ν=volume, set I and constant c gives ∫⁻_I c dvolume=c·1=c even for c=∞. M011 for the measurable set I computes the integral of c indicator(I) to the same value. Apply M012 to the pointwise inequality F004, M010 to the ℕ-indexed measurable functions g_i, and M011 to each Borel set J_i∩I with constant ρ_i^s. We obtain\n c≤∫⁻ (∑_i g_i) dvolume\n   =∑_i ∫⁻ g_i dvolume\n   =∑_i ρ_i^s volume(J_i∩I).\nEvery use is a nonnegative integral, so no finite-integral or absolute-summability condition is imposed.",
+            "uses": [
+              "M014",
+              "M013",
+              "M011",
+              "M012",
+              "M010"
+            ],
+            "uses_local": [
+              "F003",
+              "F004"
+            ],
+            "objects": [
+              "s",
+              "c",
+              "ρ",
+              "J",
+              "g",
+              "I",
+              "volume",
+              "lintegral",
+              "indicator"
+            ],
+            "produces": [
+              {
+                "id": "F005",
+                "statement": "c≤∑_i ρ_i^s volume(J_i∩I), with c possibly ∞.",
+                "binders": [],
+                "objects": [
+                  "c",
+                  "ρ",
+                  "s",
+                  "volume",
+                  "J",
+                  "I"
+                ],
+                "assumptions": [
+                  "L1",
+                  "L2",
+                  "L3"
+                ]
+              }
+            ],
+            "introduces": [],
+            "discharges": []
+          },
+          {
+            "id": "S006",
+            "text": "By measure monotonicity volume(J_i∩I)≤volume(J_i). For each nonempty index M015 gives volume(J_i)=ofReal(sup Bt_i−inf Bt_i+η_i)≤ofReal(ρ_i+η_i), using F003; at empty indices volume(J_i)=0. Thus\n c≤∑_i ρ_i^s volume(J_i∩I)\n  ≤∑_i ρ_i^s(ρ_i+η_i)\n  =∑_iρ_i^(s+1)+∑_iη_iρ_i^s\n  ≤cost+ε.\nHere the power identity also holds at ρ_i=0 since s>0. The error is termwise bounded by ε·2^(−i−1), since η_iρ_i^s=ε·2^(−i−1)ρ_i^s/(1+ρ_i^s)≤ε·2^(−i−1). Its sum is ≤ε, because ∑_{i≥0}2^(−i−1)=1, as follows from finite geometric sums and their increasing limit. Splitting and comparing nonnegative sums is justified by taking suprema of finite subsums, including infinite totals. The first main sum is cost by its definition. Discharge L3 and quantify the arbitrary ε to get F006.",
+            "uses": [
+              "M015"
+            ],
+            "uses_local": [
+              "F002",
+              "F003",
+              "F005"
+            ],
+            "objects": [
+              "U",
+              "ρ",
+              "s",
+              "ε",
+              "η",
+              "J",
+              "c",
+              "cost",
+              "volume",
+              "I",
+              "Bt"
+            ],
+            "produces": [
+              {
+                "id": "F006",
+                "statement": "For every ε0>0, c≤cost+ε0 in [0,∞].",
+                "binders": [
+                  {
+                    "symbol": "ε0",
+                    "type": "positive real"
+                  }
+                ],
+                "objects": [
+                  "c",
+                  "cost",
+                  "ε0"
+                ],
+                "assumptions": [
+                  "L1",
+                  "L2"
+                ]
+              }
+            ],
+            "introduces": [],
+            "discharges": [
+              "L3"
+            ]
+          },
+          {
+            "id": "S007",
+            "text": "F006 implies c≤cost. If cost=∞ this is immediate. If cost<∞ but c>cost, order density permits a finite positive ε with cost+ε<c (also when c=∞), contradicting F006. This argument needs no finiteness of c. Since U was arbitrary, discharge L2 and quantify U: every admissible δ-cover of A×I has (s+1)-cost at least C_s(δ,A).",
+            "uses": [],
+            "uses_local": [
+              "F006"
+            ],
+            "objects": [
+              "X",
+              "A",
+              "U",
+              "s",
+              "δ",
+              "c",
+              "cost",
+              "C",
+              "I",
+              "diam"
+            ],
+            "produces": [
+              {
+                "id": "F007",
+                "statement": "Every ℕ-indexed δ-cover Vcover of A×I in maxProd(X,ℝ) satisfies C_s(δ,A)≤∑_i diam(Vcover_i)^(s+1), with empty terms zero.",
+                "binders": [
+                  {
+                    "symbol": "Vcover",
+                    "type": "ℕ→Set(maxProd(X,ℝ))"
+                  }
+                ],
+                "objects": [
+                  "X",
+                  "A",
+                  "s",
+                  "δ",
+                  "C",
+                  "I",
+                  "diam",
+                  "maxProd",
+                  "Vcover"
+                ],
+                "assumptions": [
+                  "L1"
+                ]
+              }
+            ],
+            "introduces": [],
+            "discharges": [
+              "L2"
+            ]
+          },
+          {
+            "id": "S008",
+            "text": "Infimizing the bound F007 over the admissible families gives C_s(δ,A)≤C_{s+1}(δ,A×I), using the ordinary-cost identification N001. If there is no admissible family the right side is ∞ and the same inequality holds. Thus the bound holds for every finite δ>0; take suprema over these scales and apply N001 at the positive exponents s and s+1 to obtain μH[s](A)≤μH[s+1](A×I). Discharge L1 and quantify the arbitrary X,A,s,δ. This proves both clauses of the asserted output, without adding any measurability or compactness premise.",
+            "uses": [
+              "N001"
+            ],
+            "uses_local": [
+              "F007"
+            ],
+            "objects": [
+              "X",
+              "A",
+              "s",
+              "δ",
+              "C",
+              "μH",
+              "I",
+              "maxProd"
+            ],
+            "produces": [],
+            "introduces": [],
+            "discharges": [
+              "L1"
+            ]
+          }
+        ],
+        "applications": [
+          {
+            "id": "A001",
+            "input": "M016",
+            "at": "S002",
+            "bindings": "Z=maxProd(X,ℝ), Y=X, K=1, f=px, B=U_i for each natural i.",
+            "hypothesis_checks": [
+              "The given metric spaces induce pseudo extended metric structures.",
+              "K=1 is nonnegative.",
+              "F001 proves the projection inequality directly from the maximum formula."
+            ]
+          },
+          {
+            "id": "A002",
+            "input": "M016",
+            "at": "S002",
+            "bindings": "Z=maxProd(X,ℝ), Y=ℝ, K=1, f=pt, B=U_i for each natural i.",
+            "hypothesis_checks": [
+              "The max product and ℝ have their metric-induced pseudo extended metric structures.",
+              "K=1 is nonnegative.",
+              "F001 proves the second coordinate projection inequality."
+            ]
+          },
+          {
+            "id": "A003",
+            "input": "M014",
+            "at": "S005",
+            "bindings": "a=0, b=1; the interval is I.",
+            "hypothesis_checks": []
+          },
+          {
+            "id": "A004",
+            "input": "M013",
+            "at": "S005",
+            "bindings": "Z=ℝ, ν=volume, B=I, constant c=C_s(δ,A), possibly infinite.",
+            "hypothesis_checks": [
+              "ℝ has its Borel structure and volume is Lebesgue measure by D008."
+            ]
+          },
+          {
+            "id": "A005",
+            "input": "M011",
+            "at": "S005",
+            "bindings": "Z=ℝ, ν=volume, B=I, constant c, computing the zero extension of the restricted constant.",
+            "hypothesis_checks": [
+              "D008 supplies the Borel Lebesgue measure.",
+              "I is closed, hence Borel measurable."
+            ]
+          },
+          {
+            "id": "A006",
+            "input": "M012",
+            "at": "S005",
+            "bindings": "Z=ℝ, ν=volume, f=c indicator(I) and the upper function t↦∑_i g_i(t).",
+            "hypothesis_checks": [
+              "The Borel Lebesgue measure is D008.",
+              "F004 proves the inequality on all ℝ, including off I by zero extension."
+            ]
+          },
+          {
+            "id": "A007",
+            "input": "M010",
+            "at": "S005",
+            "bindings": "Z=ℝ, ν=volume, index type ℕ, f_i=g_i=ρ_i^s indicator(J_i∩I).",
+            "hypothesis_checks": [
+              "D008 supplies the measurable space and measure.",
+              "The index type is ℕ, which is countable.",
+              "F004 proves Borel measurability of every g_i, hence volume-a.e. measurability."
+            ]
+          },
+          {
+            "id": "A008",
+            "input": "M011",
+            "at": "S005",
+            "bindings": "Z=ℝ, ν=volume, B=J_i∩I and constant ρ_i^s, for every natural i.",
+            "hypothesis_checks": [
+              "D008 supplies Lebesgue measure on the Borel real line.",
+              "F003 gives J_i Borel, and I is closed; their intersection is Borel."
+            ]
+          },
+          {
+            "id": "A009",
+            "input": "M015",
+            "at": "S006",
+            "bindings": "For each nonempty U_i, set a=inf Bt_i−η_i/2 and b=sup Bt_i+η_i/2; the open interval is J_i. Empty J_i uses measure zero of ∅ instead.",
+            "hypothesis_checks": []
+          }
+        ]
+      },
+      {
+        "id": "R004",
+        "inputs": [
+          "M006",
+          "M008"
+        ],
+        "output": "N004",
+        "definitions": [
+          "D006",
+          "D011"
+        ],
+        "rules": [
+          "direct",
+          "forall_introduction"
+        ],
+        "locals": [
+          {
+            "symbol": "V",
+            "type": "finite dimensional real normed space",
+            "scope": "R004/argument",
+            "start": "S001",
+            "end": "S001",
+            "kind": "arbitrary",
+            "declaration": "Fix any finite dimensional real normed space V.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "A",
+            "type": "subset of V",
+            "scope": "R004/argument",
+            "start": "S001",
+            "end": "S001",
+            "kind": "arbitrary",
+            "declaration": "Fix any A⊆V.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "V"
+            ]
+          }
+        ],
+        "argument": [
+          {
+            "id": "S001",
+            "text": "Fix V and A⊆V. The inclusion A⊆univ V and M006 give dimH(A)≤dimH(univ V). M008 identifies the latter with finrank(V). This is a natural number and hence <∞ when embedded in [0,∞]; nonnegativity follows from the codomain of dimH. Thus 0≤dimH(A)≤finrank(V)<∞, including finrank(V)=0, where the inequalities force dimH(A)=0. Quantify V,A to obtain the asserted output.",
+            "uses": [
+              "M006",
+              "M008"
+            ],
+            "uses_local": [],
+            "objects": [
+              "V",
+              "A",
+              "dimH",
+              "finrank"
+            ],
+            "produces": [],
+            "introduces": [],
+            "discharges": []
+          }
+        ],
+        "applications": [
+          {
+            "id": "A001",
+            "input": "M006",
+            "at": "S001",
+            "bindings": "Z=V, B=A, Q=univ V.",
+            "hypothesis_checks": [
+              "The norm on V supplies its metric and hence extended metric.",
+              "Every point of A is a point of V, so A⊆univ V."
+            ]
+          },
+          {
+            "id": "A002",
+            "input": "M008",
+            "at": "S001",
+            "bindings": "Take the source space to be V.",
+            "hypothesis_checks": [
+              "V is the arbitrary finite dimensional real normed space declared in this inference."
+            ]
+          }
+        ]
+      },
+      {
+        "id": "R005",
+        "inputs": [
+          "M009"
+        ],
+        "output": "N005",
+        "definitions": [
+          "D001",
+          "D006",
+          "D011"
+        ],
+        "rules": [
+          "direct"
+        ],
+        "locals": [],
+        "argument": [
+          {
+            "id": "S001",
+            "text": "The open interval (0,1) is contained in I, so 1/2 belongs to the interior of I: for instance its radius-1/4 open ball lies inside I. Apply M009 to the real normed space ℝ and the set I. The singleton basis {1} spans ℝ over ℝ and is independent, so finrank(ℝ)=1. The result is dimH(I)=1.",
+            "uses": [
+              "M009"
+            ],
+            "uses_local": [],
+            "objects": [
+              "I",
+              "dimH",
+              "finrank"
+            ],
+            "produces": [],
+            "introduces": [],
+            "discharges": []
+          }
+        ],
+        "applications": [
+          {
+            "id": "A001",
+            "input": "M009",
+            "at": "S001",
+            "bindings": "V=ℝ and B=I=[0,1].",
+            "hypothesis_checks": [
+              "ℝ is a real normed space with finite basis {1}, so is finite dimensional.",
+              "The radius-1/4 ball about 1/2 is inside I; hence 1/2 is an interior point."
+            ]
+          }
+        ]
+      },
+      {
+        "id": "R006",
+        "inputs": [
+          "N002",
+          "N003",
+          "N004",
+          "N005",
+          "M002",
+          "M003",
+          "M004",
+          "M005",
+          "M006",
+          "M007"
+        ],
+        "output": "N006",
+        "definitions": [
+          "D001",
+          "D005",
+          "D006",
+          "D007",
+          "D011"
+        ],
+        "rules": [
+          "direct",
+          "forall_introduction",
+          "implication_introduction",
+          "case_elimination",
+          "exists_elimination",
+          "contradiction_classical"
+        ],
+        "locals": [
+          {
+            "symbol": "V",
+            "type": "finite dimensional real normed space with its Borel structure",
+            "scope": "R006/argument",
+            "start": "S001",
+            "end": "S010",
+            "kind": "arbitrary",
+            "declaration": "Fix any finite dimensional real normed space V.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "A",
+            "type": "subset of V",
+            "scope": "R006/argument",
+            "start": "S001",
+            "end": "S010",
+            "kind": "arbitrary",
+            "declaration": "Fix A⊆V and temporarily assume L1: A is nonempty and compact.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "V"
+            ]
+          },
+          {
+            "symbol": "d",
+            "type": "ℝ",
+            "scope": "R006/argument",
+            "start": "S001",
+            "end": "S010",
+            "kind": "definition",
+            "declaration": "Set d=(dimH(A)).toReal.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "A",
+              "dimH"
+            ]
+          },
+          {
+            "symbol": "h",
+            "type": "[0,∞]",
+            "scope": "R006/argument",
+            "start": "S001",
+            "end": "S010",
+            "kind": "definition",
+            "declaration": "Set h=dimH(A×I) in maxProd(V,ℝ).",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "A",
+              "I",
+              "dimH",
+              "maxProd",
+              "V"
+            ]
+          },
+          {
+            "symbol": "q",
+            "type": "ℝ",
+            "scope": "R006/argument",
+            "start": "S002",
+            "end": "S003",
+            "kind": "arbitrary",
+            "declaration": "Fix arbitrary real q under L2: q>d.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "d"
+            ]
+          },
+          {
+            "symbol": "hreal",
+            "type": "ℝ",
+            "scope": "R006/argument",
+            "start": "S004",
+            "end": "S010",
+            "kind": "definition",
+            "declaration": "Set hreal=h.toReal; finiteness of h is first proved in S004.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "h"
+            ]
+          },
+          {
+            "symbol": "qUpper",
+            "type": "ℝ",
+            "scope": "R006/argument",
+            "start": "S004",
+            "end": "S004",
+            "kind": "definition",
+            "declaration": "Under the contradiction branch L3 set qUpper=(d+hreal−1)/2.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "d",
+              "hreal"
+            ]
+          },
+          {
+            "symbol": "s",
+            "type": "ℝ",
+            "scope": "R006/argument",
+            "start": "S005",
+            "end": "S006",
+            "kind": "arbitrary",
+            "declaration": "Under L4: d>0, fix arbitrary real s under L5: 0<s<d.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "d"
+            ]
+          },
+          {
+            "symbol": "sLower",
+            "type": "ℝ",
+            "scope": "R006/argument",
+            "start": "S007",
+            "end": "S007",
+            "kind": "definition",
+            "declaration": "Under L6: hreal<d+1, set sLower=(max(0,hreal−1)+d)/2.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "d",
+              "hreal"
+            ]
+          },
+          {
+            "symbol": "x0",
+            "type": "V",
+            "scope": "R006/argument",
+            "start": "S008",
+            "end": "S009",
+            "kind": "witness",
+            "declaration": "Under the zero-dimension branch choose x0∈A, whose existence was recorded in F001.",
+            "from_inputs": [],
+            "from_local": [
+              "F001"
+            ],
+            "objects": [
+              "V",
+              "A"
+            ]
+          },
+          {
+            "symbol": "j",
+            "type": "ℝ→maxProd(V,ℝ)",
+            "scope": "R006/argument",
+            "start": "S008",
+            "end": "S009",
+            "kind": "definition",
+            "declaration": "Set j(t)=(x0,t).",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "V",
+              "maxProd",
+              "x0"
+            ]
+          }
+        ],
+        "argument": [
+          {
+            "id": "S001",
+            "text": "Fix V,A and assume L1: A is nonempty compact. Put d=(dimH(A)).toReal and h=dimH(A×I) in the max product. N004 gives dimH(A)≤finrank(V)<∞; hence d≥0 and dimH(A) is exactly the finite nonnegative-real embedding of d. Nonemptiness in L1 also gives existence of a point of A. We retain compactness in the conditional theorem, although the following dimension argument only needs the finite ambient bound and nonemptiness.",
+            "uses": [
+              "N004"
+            ],
+            "uses_local": [],
+            "objects": [
+              "V",
+              "A",
+              "d",
+              "h",
+              "I",
+              "dimH",
+              "maxProd",
+              "finrank"
+            ],
+            "produces": [
+              {
+                "id": "F001",
+                "statement": "d≥0, dimH(A)=ofReal d<∞, and there exists x0∈A.",
+                "binders": [
+                  {
+                    "symbol": "x0",
+                    "type": "V"
+                  }
+                ],
+                "objects": [
+                  "V",
+                  "A",
+                  "d",
+                  "dimH",
+                  "x0"
+                ],
+                "assumptions": [
+                  "L1"
+                ]
+              }
+            ],
+            "introduces": [
+              "L1"
+            ],
+            "discharges": []
+          },
+          {
+            "id": "S002",
+            "text": "Fix arbitrary real q under L2: q>d. By F001, q>0 and dimH(A)<q. Equip V with its Borel structure and regard q as a nonnegative real, without changing its real exponent. M003 gives μH[q](A)=0.",
+            "uses": [
+              "M003"
+            ],
+            "uses_local": [
+              "F001"
+            ],
+            "objects": [
+              "V",
+              "A",
+              "d",
+              "q",
+              "μH",
+              "dimH"
+            ],
+            "produces": [
+              {
+                "id": "F002",
+                "statement": "q>0 and μH[q](A)=0.",
+                "binders": [],
+                "objects": [
+                  "q",
+                  "A",
+                  "μH"
+                ],
+                "assumptions": [
+                  "L1",
+                  "L2"
+                ]
+              }
+            ],
+            "introduces": [
+              "L2"
+            ],
+            "discharges": []
+          },
+          {
+            "id": "S003",
+            "text": "N002 at X=V, exponent q and set A gives μH[q+1](A×I)=0. Since 0≠∞, M004 applied in maxProd(V,ℝ), at nonnegative exponent q+1, gives h≤q+1. Discharge L2 and quantify q: this bound holds for every q>d.",
+            "uses": [
+              "N002",
+              "M004"
+            ],
+            "uses_local": [
+              "F001",
+              "F002"
+            ],
+            "objects": [
+              "V",
+              "A",
+              "q",
+              "d",
+              "h",
+              "I",
+              "μH",
+              "dimH",
+              "maxProd"
+            ],
+            "produces": [
+              {
+                "id": "F003",
+                "statement": "For every real q0>d, h≤ofReal(q0+1).",
+                "binders": [
+                  {
+                    "symbol": "q0",
+                    "type": "ℝ"
+                  }
+                ],
+                "objects": [
+                  "d",
+                  "h",
+                  "q0"
+                ],
+                "assumptions": [
+                  "L1"
+                ]
+              }
+            ],
+            "introduces": [],
+            "discharges": [
+              "L2"
+            ]
+          },
+          {
+            "id": "S004",
+            "text": "F003 with q=d+1 gives h≤d+2<∞. Set hreal=h.toReal, so h=ofReal hreal and hreal≥0. Temporarily assume L3: hreal>d+1. The real number qUpper=(d+hreal−1)/2 lies strictly between d and hreal−1. F003 would give hreal≤qUpper+1<hreal, a contradiction. Discharge L3, obtaining hreal≤d+1 and thus h≤ofReal(d+1). This is the limiting upper bound, using no subtraction of infinite extended numbers.",
+            "uses": [],
+            "uses_local": [
+              "F001",
+              "F003"
+            ],
+            "objects": [
+              "d",
+              "h",
+              "hreal",
+              "qUpper"
+            ],
+            "produces": [
+              {
+                "id": "F004",
+                "statement": "h<∞, h=ofReal hreal, hreal≥0 and hreal≤d+1.",
+                "binders": [],
+                "objects": [
+                  "h",
+                  "hreal",
+                  "d"
+                ],
+                "assumptions": [
+                  "L1"
+                ]
+              }
+            ],
+            "introduces": [
+              "L3"
+            ],
+            "discharges": [
+              "L3"
+            ]
+          },
+          {
+            "id": "S005",
+            "text": "First take the branch L4: d>0. Fix arbitrary real s under L5: 0<s<d. In V with its Borel structure, F001 gives s<dimH(A); regard s as a nonnegative real. M002 gives μH[s](A)=∞.",
+            "uses": [
+              "M002"
+            ],
+            "uses_local": [
+              "F001"
+            ],
+            "objects": [
+              "V",
+              "A",
+              "d",
+              "s",
+              "μH",
+              "dimH"
+            ],
+            "produces": [
+              {
+                "id": "F005",
+                "statement": "s>0 and μH[s](A)=∞.",
+                "binders": [],
+                "objects": [
+                  "A",
+                  "s",
+                  "μH"
+                ],
+                "assumptions": [
+                  "L1",
+                  "L4",
+                  "L5"
+                ]
+              }
+            ],
+            "introduces": [
+              "L4",
+              "L5"
+            ],
+            "discharges": []
+          },
+          {
+            "id": "S006",
+            "text": "N003 at X=V, set A and exponent s gives μH[s](A)≤μH[s+1](A×I); hence the latter measure is ∞ by F005. M005 at exponent s+1 in maxProd(V,ℝ) gives s+1≤h. Discharge L5 and universally quantify s to record the full family of lower bounds.",
+            "uses": [
+              "N003",
+              "M005"
+            ],
+            "uses_local": [
+              "F005"
+            ],
+            "objects": [
+              "V",
+              "A",
+              "d",
+              "s",
+              "h",
+              "I",
+              "μH",
+              "dimH",
+              "maxProd"
+            ],
+            "produces": [
+              {
+                "id": "F006",
+                "statement": "For every real s0 with 0<s0<d, ofReal(s0+1)≤h.",
+                "binders": [
+                  {
+                    "symbol": "s0",
+                    "type": "ℝ"
+                  }
+                ],
+                "objects": [
+                  "d",
+                  "h",
+                  "s0"
+                ],
+                "assumptions": [
+                  "L1",
+                  "L4"
+                ]
+              }
+            ],
+            "introduces": [],
+            "discharges": [
+              "L5"
+            ]
+          },
+          {
+            "id": "S007",
+            "text": "Under L4, suppose temporarily L6: hreal<d+1. Since d>0, max(0,hreal−1)<d. Put sLower=(max(0,hreal−1)+d)/2. Then 0<sLower<d and sLower+1>hreal, contradicting F006 and the finite identification in F004. Discharge L6 to obtain d+1≤hreal. Discharge L4 into the implication: if d>0 then ofReal(d+1)≤h. This is the lower limiting step.",
+            "uses": [],
+            "uses_local": [
+              "F004",
+              "F006"
+            ],
+            "objects": [
+              "d",
+              "h",
+              "hreal",
+              "sLower"
+            ],
+            "produces": [
+              {
+                "id": "F007",
+                "statement": "If d>0 then ofReal(d+1)≤h.",
+                "binders": [],
+                "objects": [
+                  "d",
+                  "h"
+                ],
+                "assumptions": [
+                  "L1"
+                ]
+              }
+            ],
+            "introduces": [
+              "L6"
+            ],
+            "discharges": [
+              "L6",
+              "L4"
+            ]
+          },
+          {
+            "id": "S008",
+            "text": "For the other branch assume L7: d=0. By the existence assertion in F001 choose x0∈A. Define j:ℝ→maxProd(V,ℝ) by j(t)=(x0,t). For all real t,u the product distance is max(dist_V(x0,x0),|t−u|)=|t−u|, so j is an isometry. Since x0∈A, j '' I⊆A×I.",
+            "uses": [],
+            "uses_local": [
+              "F001"
+            ],
+            "objects": [
+              "V",
+              "A",
+              "d",
+              "x0",
+              "j",
+              "I",
+              "maxProd"
+            ],
+            "produces": [
+              {
+                "id": "F008",
+                "statement": "j is an isometry from ℝ to maxProd(V,ℝ), and j '' I⊆A×I.",
+                "binders": [],
+                "objects": [
+                  "V",
+                  "A",
+                  "j",
+                  "I",
+                  "maxProd"
+                ],
+                "assumptions": [
+                  "L1",
+                  "L7"
+                ]
+              }
+            ],
+            "introduces": [
+              "L7"
+            ],
+            "discharges": []
+          },
+          {
+            "id": "S009",
+            "text": "M007 applied to j gives dimH(j '' I)=dimH(I). N005 is dimH(I)=1. M006 applied to the inclusion F008 gives dimH(j '' I)≤dimH(A×I)=h. Thus 1≤h; since d=0, ofReal(d+1)≤h. Discharge L7 into that implication. The identity of the private x0 is immaterial to the exported inequality.",
+            "uses": [
+              "M007",
+              "N005",
+              "M006"
+            ],
+            "uses_local": [
+              "F008"
+            ],
+            "objects": [
+              "V",
+              "A",
+              "d",
+              "h",
+              "x0",
+              "j",
+              "I",
+              "dimH",
+              "maxProd"
+            ],
+            "produces": [
+              {
+                "id": "F009",
+                "statement": "If d=0 then ofReal(d+1)≤h.",
+                "binders": [],
+                "objects": [
+                  "d",
+                  "h"
+                ],
+                "assumptions": [
+                  "L1"
+                ]
+              }
+            ],
+            "introduces": [],
+            "discharges": [
+              "L7"
+            ]
+          },
+          {
+            "id": "S010",
+            "text": "By F001, d≥0, so either d>0 or d=0. F007 and F009 give ofReal(d+1)≤h in the respective exhaustive branches. F004 gives the reverse inequality, and F001 identifies dimH(A) with d. Thus dimH(A×I)=dimH(A)+1. If finrank(V)=0 then N004 gives d=0 and the same zero branch applies; no positive-dimensional ball was needed in the upper-cover or slicing arguments. Discharge L1 and quantify V,A to prove the asserted output with precisely its stated nonempty compact premise.",
+            "uses": [
+              "N004"
+            ],
+            "uses_local": [
+              "F001",
+              "F004",
+              "F007",
+              "F009"
+            ],
+            "objects": [
+              "V",
+              "A",
+              "d",
+              "h",
+              "hreal",
+              "I",
+              "dimH",
+              "maxProd",
+              "finrank"
+            ],
+            "produces": [],
+            "introduces": [],
+            "discharges": [
+              "L1"
+            ]
+          }
+        ],
+        "applications": [
+          {
+            "id": "A001",
+            "input": "M003",
+            "at": "S002",
+            "bindings": "Z=V, B=A, a=q as a nonnegative real.",
+            "hypothesis_checks": [
+              "The normed space V is a metric space with its chosen Borel structure.",
+              "F001 and L2 give q>d≥0.",
+              "F001 identifies dimH(A)=d and L2 is q>d."
+            ]
+          },
+          {
+            "id": "A002",
+            "input": "M004",
+            "at": "S003",
+            "bindings": "Z=maxProd(V,ℝ), B=A×I, a=q+1 as a nonnegative real.",
+            "hypothesis_checks": [
+              "The max product is metric and is equipped with its Borel structure.",
+              "F002 gives q>0, so q+1>0.",
+              "N002 applied to F002 gives μH[q+1](A×I)=0, and 0≠∞."
+            ]
+          },
+          {
+            "id": "A003",
+            "input": "M002",
+            "at": "S005",
+            "bindings": "Z=V, B=A, a=s as a nonnegative real.",
+            "hypothesis_checks": [
+              "V is metric with its Borel structure.",
+              "L5 gives s>0.",
+              "F001 gives dimH(A)=d and L5 gives s<d."
+            ]
+          },
+          {
+            "id": "A004",
+            "input": "M005",
+            "at": "S006",
+            "bindings": "Z=maxProd(V,ℝ), B=A×I, a=s+1 as a nonnegative real.",
+            "hypothesis_checks": [
+              "The max product is metric with its Borel structure.",
+              "F005 gives s>0, so s+1>0.",
+              "N003 gives μH[s](A)≤μH[s+1](A×I), and F005 makes the left side ∞."
+            ]
+          },
+          {
+            "id": "A005",
+            "input": "M007",
+            "at": "S009",
+            "bindings": "Z=ℝ, Y=maxProd(V,ℝ), f=j, B=I.",
+            "hypothesis_checks": [
+              "Both ℝ and the max product are metric, hence extended metric spaces.",
+              "F008 proves j preserves every distance by max(0,|t−u|)=|t−u|."
+            ]
+          },
+          {
+            "id": "A006",
+            "input": "M006",
+            "at": "S009",
+            "bindings": "Z=maxProd(V,ℝ), B=j '' I, Q=A×I.",
+            "hypothesis_checks": [
+              "The max product carries its metric-induced extended metric.",
+              "F008 proves this inclusion from x0∈A."
+            ]
+          }
+        ]
+      },
+      {
+        "id": "R007",
+        "inputs": [
+          "E001"
+        ],
+        "output": "N007",
+        "definitions": [
+          "D001",
+          "D006",
+          "D007",
+          "D013",
+          "D014",
+          "D015",
+          "D016",
+          "D017"
+        ],
+        "rules": [
+          "direct",
+          "forall_introduction"
+        ],
+        "locals": [
+          {
+            "symbol": "Tinverse",
+            "type": "Wn→maxProd(Vn,ℝ)",
+            "scope": "R007/argument",
+            "start": "S001",
+            "end": "S004",
+            "kind": "definition",
+            "declaration": "Define Tinverse(z)=((i↦z(i.castSucc)),z(Fin.last n)), interpreting the first tuple in Euclidean Vn.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "n",
+              "Vn",
+              "Wn",
+              "maxProd"
+            ]
+          },
+          {
+            "symbol": "x",
+            "type": "Vn",
+            "scope": "R007/argument",
+            "start": "S004",
+            "end": "S004",
+            "kind": "arbitrary",
+            "declaration": "For the metric comparison fix arbitrary x∈Vn.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "Vn"
+            ]
+          },
+          {
+            "symbol": "y",
+            "type": "Vn",
+            "scope": "R007/argument",
+            "start": "S004",
+            "end": "S004",
+            "kind": "arbitrary",
+            "declaration": "Fix arbitrary y∈Vn.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "Vn"
+            ]
+          },
+          {
+            "symbol": "t",
+            "type": "ℝ",
+            "scope": "R007/argument",
+            "start": "S004",
+            "end": "S004",
+            "kind": "arbitrary",
+            "declaration": "Fix arbitrary real t.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "u",
+            "type": "ℝ",
+            "scope": "R007/argument",
+            "start": "S004",
+            "end": "S004",
+            "kind": "arbitrary",
+            "declaration": "Fix arbitrary real u.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "a",
+            "type": "nonnegative real",
+            "scope": "R007/argument",
+            "start": "S004",
+            "end": "S004",
+            "kind": "definition",
+            "declaration": "Set a=||x−y||₂.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "x",
+              "y"
+            ]
+          },
+          {
+            "symbol": "b",
+            "type": "nonnegative real",
+            "scope": "R007/argument",
+            "start": "S004",
+            "end": "S004",
+            "kind": "definition",
+            "declaration": "Set b=|t−u|.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "t",
+              "u"
+            ]
+          }
+        ],
+        "argument": [
+          {
+            "id": "S001",
+            "text": "Use Vn,Wn and the total coordinate map T from D013–D015. Define Tinverse(z)=((i↦z(i.castSucc)),z(Fin.last n)). Every index of Fin(n+1) is either its last index n or uniquely i.castSucc with i∈Fin n. In these cases substitution proves T(Tinverse(z))=z; substitution on the first n coordinates and the last coordinate proves Tinverse(T(x,t))=(x,t). Addition and real scalar multiplication are coordinatewise, so T is linear and these inverse identities make it a real linear equivalence. For n=0 the first family of coordinate equations is empty and the last one proves the same identities.",
+            "uses": [],
+            "uses_local": [],
+            "objects": [
+              "n",
+              "Vn",
+              "Wn",
+              "T",
+              "Tinverse",
+              "maxProd"
+            ],
+            "produces": [
+              {
+                "id": "F001",
+                "statement": "T:maxProd(Vn,ℝ)→Wn is a real linear equivalence, with inverse Tinverse(z)=((i↦z(i.castSucc)),z(Fin.last n)), including n=0.",
+                "binders": [],
+                "objects": [
+                  "n",
+                  "Vn",
+                  "Wn",
+                  "T",
+                  "Tinverse",
+                  "maxProd"
+                ],
+                "assumptions": []
+              }
+            ],
+            "introduces": [],
+            "discharges": []
+          },
+          {
+            "id": "S002",
+            "text": "Vn has its n standard coordinate vectors as a real basis and Wn has its n+1 standard coordinate vectors; the empty coordinate basis is a basis when n=0. A basis of Vn×ℝ consists of each coordinate basis vector in the first factor with last coordinate zero, together with the vector (0,1). Coordinate expansion gives spanning and comparison of each coordinate gives independence. Thus both maxProd(Vn,ℝ) and Wn are finite dimensional real normed spaces, using the standard max norm on the former. By the definitions of Fmax and Feuc, T '' Fmax=Feuc: T maps a pair in E×I to exactly those first n coordinates and last coordinate, and for any z∈Feuc its explicit inverse belongs to E×I. This identifies the actual subset, rather than merely some linear-equivalent set.",
+            "uses": [],
+            "uses_local": [
+              "F001"
+            ],
+            "objects": [
+              "n",
+              "E",
+              "Vn",
+              "Wn",
+              "T",
+              "Tinverse",
+              "Fmax",
+              "Feuc",
+              "I",
+              "maxProd"
+            ],
+            "produces": [
+              {
+                "id": "F002",
+                "statement": "maxProd(Vn,ℝ) and Wn are finite dimensional real normed spaces, and T '' Fmax=Feuc.",
+                "binders": [],
+                "objects": [
+                  "Vn",
+                  "Wn",
+                  "T",
+                  "Fmax",
+                  "Feuc",
+                  "maxProd"
+                ],
+                "assumptions": []
+              }
+            ],
+            "introduces": [],
+            "discharges": []
+          },
+          {
+            "id": "S003",
+            "text": "Apply the prepared finite-dimensional real linear-equivalence adapter E001 to the source space maxProd(Vn,ℝ), target Wn, equivalence T from F001 and subset Fmax. F002 supplies exactly its finite-dimensional normed-space conditions. It gives dimH(T '' Fmax)=dimH(Fmax), hence dimH(Feuc)=dimH(Fmax) by F002. The selected E001 is precisely B008 from the frozen registry; no class-3 claim is being imported.",
+            "uses": [
+              "E001"
+            ],
+            "uses_local": [
+              "F001",
+              "F002"
+            ],
+            "objects": [
+              "Vn",
+              "Wn",
+              "T",
+              "Fmax",
+              "Feuc",
+              "dimH",
+              "maxProd"
+            ],
+            "produces": [
+              {
+                "id": "F003",
+                "statement": "dimH(Feuc)=dimH(Fmax).",
+                "binders": [],
+                "objects": [
+                  "Feuc",
+                  "Fmax",
+                  "dimH"
+                ],
+                "assumptions": []
+              }
+            ],
+            "introduces": [],
+            "discharges": []
+          },
+          {
+            "id": "S004",
+            "text": "For the explicit metric comparison fix arbitrary x,y∈Vn and real t,u, and write a=||x−y||₂≥0 and b=|t−u|≥0. The domain distance is max(a,b). The sum of squared coordinate differences in Wn splits into its first n coordinates and the last coordinate, so the target distance between T(x,t),T(y,u) is sqrt(a²+b²). Each of a² and b² is at most a²+b², while a²+b²≤2 max(a,b)²; taking nonnegative square roots yields\n max(a,b)≤sqrt(a²+b²)≤sqrt(2) max(a,b).\nThus the coordinate map and its inverse have Lipschitz constants sqrt(2) and 1 respectively. These finite constants are independent of E,n and the points. The formulas hold also at n=0, where a=0. This verifies the metric representation explicitly; F001–F003 supply the equivalence, exact image identification and dimension equality. Together they prove every clause of the asserted output, with the source Vn Euclidean throughout.",
+            "uses": [],
+            "uses_local": [
+              "F001",
+              "F002",
+              "F003"
+            ],
+            "objects": [
+              "n",
+              "E",
+              "Vn",
+              "Wn",
+              "T",
+              "Tinverse",
+              "x",
+              "y",
+              "t",
+              "u",
+              "a",
+              "b",
+              "maxProd",
+              "Fmax",
+              "Feuc",
+              "dimH"
+            ],
+            "produces": [],
+            "introduces": [],
+            "discharges": []
+          }
+        ],
+        "applications": [
+          {
+            "id": "A001",
+            "input": "E001",
+            "at": "S003",
+            "bindings": "In E001 set V=maxProd(Vn,ℝ), W=Wn, e=T (the linear equivalence proved in F001), and take the subset A=Fmax=E×I.",
+            "hypothesis_checks": [
+              "F002 constructs finite coordinate bases for both real normed spaces, with the max norm on the source and Euclidean norm on the target; n=0 is included.",
+              "F001 proves coordinate linearity and both inverse identities for exactly T, with the displayed Tinverse."
+            ]
+          }
+        ]
+      },
+      {
+        "id": "R008",
+        "inputs": [
+          "H001",
+          "H002",
+          "N006",
+          "N007"
+        ],
+        "output": "P",
+        "definitions": [
+          "D001",
+          "D006",
+          "D007",
+          "D013",
+          "D014",
+          "D016",
+          "D017"
+        ],
+        "rules": [
+          "direct"
+        ],
+        "locals": [],
+        "argument": [
+          {
+            "id": "S001",
+            "text": "Apply N006 to V=Vn and A=E. Vn is the Euclidean real normed space with its finite coordinate basis, and the original hypotheses H001,H002 give respectively nonemptiness and compactness. Therefore dimH(Fmax)=dimH(E)+1. N007 gives dimH(Feuc)=dimH(Fmax), with Feuc precisely the original Euclidean product subset in Wn. Substitution yields dimH(Feuc)=dimH(E)+1, the complete selected equality for every natural n including zero, with the original Euclidean metrics and no additional hypotheses.",
+            "uses": [
+              "H001",
+              "H002",
+              "N006",
+              "N007"
+            ],
+            "uses_local": [],
+            "objects": [
+              "n",
+              "E",
+              "Vn",
+              "Wn",
+              "Fmax",
+              "Feuc",
+              "I",
+              "dimH",
+              "maxProd"
+            ],
+            "produces": [],
+            "introduces": [],
+            "discharges": []
+          }
+        ],
+        "applications": []
+      }
+    ]
+  }
+}

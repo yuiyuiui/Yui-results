@@ -1,0 +1,127 @@
+[
+  {
+    "name": "yui_aux_0001",
+    "statement": "∀ i : ℕ, (x ^ i) ((y ^ i) v) = (∏ r ∈ Finset.range i, (((r + 1 : ℕ) : ℂ) * ((lambda.toNat : ℂ) - (r : ℂ)))) • v",
+    "proof": "intro i\ninduction i with\n| zero => simp\n| succ i ih =>\n  have hr := h_T001.2.2.2.2.2 (i + 1) (by omega)\n  rw [pow_succ, Module.End.mul_apply, hr]\n  simp only [Nat.add_sub_cancel, map_smul, ih, smul_smul, Finset.prod_range_succ]\n  congr 1\n  push_cast\n  ring",
+    "dependencies": [],
+    "context_sha256": "cf2a1a5a0bd717540e770308bd760aa2fdaea67088dc03f641bee6dee631afc4",
+    "sha256": "8f4180255cf1eacdc3def60c964c1232a399e1013b219f9142aa90fce30eb182",
+    "check": {
+      "exit_code": 0,
+      "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-d8v3u2iv/output/Auxiliary.lean:85:39: warning: Variable name `instK` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-d8v3u2iv/output/Auxiliary.lean:85:222: warning: Variable name `XM` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-d8v3u2iv/output/Auxiliary.lean:85:248: warning: Variable name `YM` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (p : ℕ) (K : Type u_1) [instK : Field K] (lambda : ℤ) (V : Type u_2) [instV : AddCommGroup V]\n  [instCV : _root_.Module ℂ V] (x y h : Module.End ℂ V) (v : V) (M : Submodule ℤ V) (XM YM : ℕ → Module.End ℤ ↥M),\n  ((lambda = ↑lambda.toNat ∧ lambda.toNat < p ∧ FiniteDimensional ℂ V ∧ Module.finrank ℂ V = lambda.toNat + 1) ∧\n      v ≠ 0 ∧\n        x v = 0 ∧\n          h v = ↑lambda.toNat • v ∧\n            (∀ (i : ℕ), h ((y ^ i) v) = (↑lambda.toNat - 2 * ↑i) • (y ^ i) v) ∧\n              ∀ (i : ℕ), 1 ≤ i → x ((y ^ i) v) = (↑i * (↑lambda.toNat - ↑i + 1)) • (y ^ (i - 1)) v) →\n    ∀ (i : ℕ), (x ^ i) ((y ^ i) v) = (∏ r ∈ Finset.range i, ↑(r + 1) * (↑lambda.toNat - ↑r)) • v\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+      "stderr": "",
+      "wall_seconds": 3.846970667000278,
+      "native_limits": {
+        "timeout_seconds": 180,
+        "max_heartbeats": 20000000
+      },
+      "source_path": "/Users/syyui/projects/Yui-results/test_uncond/lie-module-irreducibility/rigorous-proof/20261106T025824Z-675e32283e/workflow/native-checks/2734de2d98234f3cb0d3c19a1e14afbc.lean",
+      "source_sha256": "e54b9a0297df740006ebb19adef65f37e62b8d5138ced5493112998134713079",
+      "auxiliary_valid": true,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "lean_sha256": "e54b9a0297df740006ebb19adef65f37e62b8d5138ced5493112998134713079",
+      "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+      "context_port": "T002",
+      "candidate": 1
+    }
+  },
+  {
+    "name": "yui_aux_0002",
+    "statement": "∀ i : Fin (lambda.toNat + 1), Reduction.e y v i.val ≠ 0 ∧ h (Reduction.e y v i.val) = ((lambda.toNat : ℂ) - 2 * (i.val : ℂ)) • Reduction.e y v i.val",
+    "proof": "intro i\nhave hp : (∏ r ∈ Finset.range i.val, (((r + 1 : ℕ) : ℂ) * ((lambda.toNat : ℂ) - (r : ℂ)))) ≠ 0 := by\n  apply Finset.prod_ne_zero_iff.mpr\n  intro r hr\n  apply mul_ne_zero\n  · exact_mod_cast (Nat.succ_ne_zero r)\n  · apply sub_ne_zero.mpr\n    have hlt : r < lambda.toNat := by\n      have := Finset.mem_range.mp hr\n      omega\n    exact_mod_cast (Nat.ne_of_gt hlt)\nhave hy : (y ^ i.val) v ≠ 0 := by\n  intro hz\n  have heq := @yui_aux_0001 p K instK lambda V instV instCV x y h v M XM YM h_T001 i.val\n  rw [hz, map_zero] at heq\n  exact (smul_ne_zero hp h_T001.2.1) heq.symm\nconstructor\n· exact smul_ne_zero (inv_ne_zero (by exact_mod_cast Nat.factorial_ne_zero i.val)) hy\n· dsimp [Reduction.e]\n  rw [map_smul, h_T001.2.2.2.2.1 i.val, smul_comm]",
+    "dependencies": [
+      "yui_aux_0001"
+    ],
+    "context_sha256": "cf2a1a5a0bd717540e770308bd760aa2fdaea67088dc03f641bee6dee631afc4",
+    "sha256": "f01335b53f3b678b2c374b707827dea3e736e10108b9f2625269a46549d2552b",
+    "check": {
+      "exit_code": 0,
+      "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-i7k72oes/output/Auxiliary.lean:85:44: warning: Variable name `instK` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-i7k72oes/output/Auxiliary.lean:85:227: warning: Variable name `XM` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-i7k72oes/output/Auxiliary.lean:85:253: warning: Variable name `YM` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (p : ℕ) (K : Type u_1) [instK : Field K] (lambda : ℤ) (V : Type u_2) [instV : AddCommGroup V]\n  [instCV : _root_.Module ℂ V] (x y h : Module.End ℂ V) (v : V) (M : Submodule ℤ V) (XM YM : ℕ → Module.End ℤ ↥M),\n  ((lambda = ↑lambda.toNat ∧ lambda.toNat < p ∧ FiniteDimensional ℂ V ∧ Module.finrank ℂ V = lambda.toNat + 1) ∧\n      v ≠ 0 ∧\n        x v = 0 ∧\n          h v = ↑lambda.toNat • v ∧\n            (∀ (i : ℕ), h ((y ^ i) v) = (↑lambda.toNat - 2 * ↑i) • (y ^ i) v) ∧\n              ∀ (i : ℕ), 1 ≤ i → x ((y ^ i) v) = (↑i * (↑lambda.toNat - ↑i + 1)) • (y ^ (i - 1)) v) →\n    ∀ (i : Fin (lambda.toNat + 1)),\n      Reduction.e y v ↑i ≠ 0 ∧ h (Reduction.e y v ↑i) = (↑lambda.toNat - 2 * ↑↑i) • Reduction.e y v ↑i\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+      "stderr": "",
+      "wall_seconds": 3.4963204999949085,
+      "native_limits": {
+        "timeout_seconds": 180,
+        "max_heartbeats": 20000000
+      },
+      "source_path": "/Users/syyui/projects/Yui-results/test_uncond/lie-module-irreducibility/rigorous-proof/20261106T025824Z-675e32283e/workflow/native-checks/03adf1fc693e4043be07078f847810dc.lean",
+      "source_sha256": "3021018ec39736e2fc5b1216c94fa51bc7f38c1071a309ca112693d6051e8576",
+      "auxiliary_valid": true,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "lean_sha256": "3021018ec39736e2fc5b1216c94fa51bc7f38c1071a309ca112693d6051e8576",
+      "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+      "context_port": "T002",
+      "candidate": 2
+    }
+  },
+  {
+    "name": "yui_aux_0003",
+    "statement": "Function.Injective (fun i : Fin (lambda.toNat + 1) => (lambda.toNat : ℂ) - 2 * (i.val : ℂ))",
+    "proof": "intro i j hij\napply Fin.ext\nhave hm : (2 : ℂ) * (i.val : ℂ) = 2 * (j.val : ℂ) := sub_right_inj.mp hij\nhave heq : (i.val : ℂ) = (j.val : ℂ) := (mul_left_cancel₀ (by norm_num : (2 : ℂ) ≠ 0)) hm\nexact_mod_cast heq",
+    "dependencies": [],
+    "context_sha256": "cf2a1a5a0bd717540e770308bd760aa2fdaea67088dc03f641bee6dee631afc4",
+    "sha256": "a180a9aabc32553093e1178627359ca1037e627028b85a198bf73036bfe5110a",
+    "check": {
+      "exit_code": 0,
+      "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-gid_ekjl/output/Auxiliary.lean:85:44: warning: Variable name `instK` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-gid_ekjl/output/Auxiliary.lean:85:227: warning: Variable name `XM` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-gid_ekjl/output/Auxiliary.lean:85:253: warning: Variable name `YM` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-gid_ekjl/output/Auxiliary.lean:125:39: warning: Variable name `instK` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-gid_ekjl/output/Auxiliary.lean:125:84: warning: Variable name `instV` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-gid_ekjl/output/Auxiliary.lean:125:109: warning: Variable name `instCV` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-gid_ekjl/output/Auxiliary.lean:125:222: warning: Variable name `XM` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-gid_ekjl/output/Auxiliary.lean:125:248: warning: Variable name `YM` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-gid_ekjl/output/Auxiliary.lean:125:274: warning: Variable name `h_T001` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (p : ℕ) (K : Type u_1) [instK : Field K] (lambda : ℤ) (V : Type u_2) [instV : AddCommGroup V]\n  [instCV : _root_.Module ℂ V] (x y h : Module.End ℂ V) (v : V) (M : Submodule ℤ V) (XM YM : ℕ → Module.End ℤ ↥M),\n  ((lambda = ↑lambda.toNat ∧ lambda.toNat < p ∧ FiniteDimensional ℂ V ∧ Module.finrank ℂ V = lambda.toNat + 1) ∧\n      v ≠ 0 ∧\n        x v = 0 ∧\n          h v = ↑lambda.toNat • v ∧\n            (∀ (i : ℕ), h ((y ^ i) v) = (↑lambda.toNat - 2 * ↑i) • (y ^ i) v) ∧\n              ∀ (i : ℕ), 1 ≤ i → x ((y ^ i) v) = (↑i * (↑lambda.toNat - ↑i + 1)) • (y ^ (i - 1)) v) →\n    Function.Injective fun i => ↑lambda.toNat - 2 * ↑↑i\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+      "stderr": "",
+      "wall_seconds": 3.793372250001994,
+      "native_limits": {
+        "timeout_seconds": 180,
+        "max_heartbeats": 20000000
+      },
+      "source_path": "/Users/syyui/projects/Yui-results/test_uncond/lie-module-irreducibility/rigorous-proof/20261106T025824Z-675e32283e/workflow/native-checks/7fd5941c94b7463fa1a82622f1a59a8a.lean",
+      "source_sha256": "2ce8ccf473a2a18bd979d0072e5397d30af68405f41943a13cabc3f713911a69",
+      "auxiliary_valid": true,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "lean_sha256": "2ce8ccf473a2a18bd979d0072e5397d30af68405f41943a13cabc3f713911a69",
+      "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+      "context_port": "T002",
+      "candidate": 4
+    }
+  },
+  {
+    "name": "yui_aux_0004",
+    "statement": "LinearIndependent ℂ (fun i : Fin (lambda.toNat + 1) => Reduction.e y v i.val)",
+    "proof": "classical\nlet μ : Fin (lambda.toNat + 1) → ℂ := fun i => (lambda.toNat : ℂ) - 2 * (i.val : ℂ)\nhave hev := @yui_aux_0002 p K instK lambda V instV instCV x y h v M XM YM h_T001\nhave hinj := @yui_aux_0003 p K instK lambda V instV instCV x y h v M XM YM h_T001\napply Fintype.linearIndependent_iff.mpr\nintro ζ hsum j\nlet q : Polynomial ℂ := ∏ k ∈ Finset.univ.erase j, (Polynomial.X - Polynomial.C (μ k))\nhave heval (i : Fin (lambda.toNat + 1)) : q.eval (μ i) = ∏ k ∈ Finset.univ.erase j, (μ i - μ k) := by\n  simp [q, Polynomial.eval_prod]\nhave hkill (i : Fin (lambda.toNat + 1)) (hij : i ≠ j) : q.eval (μ i) = 0 := by\n  rw [heval]\n  exact Finset.prod_eq_zero_iff.mpr ⟨i, by simp [hij], sub_self _⟩\nhave hsurv : q.eval (μ j) ≠ 0 := by\n  rw [heval]\n  apply Finset.prod_ne_zero_iff.mpr\n  intro k hk\n  apply sub_ne_zero.mpr\n  intro he\n  have hjk : j = k := hinj he\n  exact (Finset.mem_erase.mp hk).1 hjk.symm\nhave ha (i : Fin (lambda.toNat + 1)) : (Polynomial.aeval h q) (Reduction.e y v i.val) = q.eval (μ i) • Reduction.e y v i.val :=\n  Module.End.aeval_apply_of_mem_apply_eq_smul (p := q) (hev i).2\nhave hh := congrArg (fun w : V => (Polynomial.aeval h q) w) hsum\nsimp only [map_sum, map_smul, map_zero, ha] at hh\nhave hs : (∑ i : Fin (lambda.toNat + 1), ζ i • (q.eval (μ i) • Reduction.e y v i.val)) = ζ j • (q.eval (μ j) • Reduction.e y v j.val) := by\n  apply Finset.sum_eq_single j\n  · intro i hi hij\n    rw [hkill i hij, zero_smul, smul_zero]\n  · simp\nrw [hs, smul_smul] at hh\nhave hm : ζ j * q.eval (μ j) = 0 := (smul_eq_zero.mp hh).resolve_right (hev j).1\nexact (mul_eq_zero.mp hm).resolve_right hsurv",
+    "dependencies": [
+      "yui_aux_0002",
+      "yui_aux_0003"
+    ],
+    "context_sha256": "cf2a1a5a0bd717540e770308bd760aa2fdaea67088dc03f641bee6dee631afc4",
+    "sha256": "73051916fb2cf8c4fac60962c200bae9a7e80cf2cc40f1d62117cba7b5eaffb5",
+    "check": {
+      "exit_code": 0,
+      "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-pa5om__k/output/Auxiliary.lean:85:44: warning: Variable name `instK` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-pa5om__k/output/Auxiliary.lean:85:227: warning: Variable name `XM` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-pa5om__k/output/Auxiliary.lean:85:253: warning: Variable name `YM` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-pa5om__k/output/Auxiliary.lean:125:44: warning: Variable name `instK` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-pa5om__k/output/Auxiliary.lean:125:89: warning: Variable name `instV` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-pa5om__k/output/Auxiliary.lean:125:114: warning: Variable name `instCV` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-pa5om__k/output/Auxiliary.lean:125:227: warning: Variable name `XM` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-pa5om__k/output/Auxiliary.lean:125:253: warning: Variable name `YM` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-pa5om__k/output/Auxiliary.lean:125:279: warning: Variable name `h_T001` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (p : ℕ) (K : Type u_1) [instK : Field K] (lambda : ℤ) (V : Type u_2) [instV : AddCommGroup V]\n  [instCV : _root_.Module ℂ V] (x y h : Module.End ℂ V) (v : V) (M : Submodule ℤ V) (XM YM : ℕ → Module.End ℤ ↥M),\n  ((lambda = ↑lambda.toNat ∧ lambda.toNat < p ∧ FiniteDimensional ℂ V ∧ Module.finrank ℂ V = lambda.toNat + 1) ∧\n      v ≠ 0 ∧\n        x v = 0 ∧\n          h v = ↑lambda.toNat • v ∧\n            (∀ (i : ℕ), h ((y ^ i) v) = (↑lambda.toNat - 2 * ↑i) • (y ^ i) v) ∧\n              ∀ (i : ℕ), 1 ≤ i → x ((y ^ i) v) = (↑i * (↑lambda.toNat - ↑i + 1)) • (y ^ (i - 1)) v) →\n    LinearIndependent ℂ fun i => Reduction.e y v ↑i\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+      "stderr": "",
+      "wall_seconds": 4.386939208008698,
+      "native_limits": {
+        "timeout_seconds": 180,
+        "max_heartbeats": 20000000
+      },
+      "source_path": "/Users/syyui/projects/Yui-results/test_uncond/lie-module-irreducibility/rigorous-proof/20261106T025824Z-675e32283e/workflow/native-checks/1b94e49026844e6eaf80e02921f68a14.lean",
+      "source_sha256": "0d02086a457cb1b74264e16de4eb80d517fb8a498e4272a68f49cd9e5fee9501",
+      "auxiliary_valid": true,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "lean_sha256": "0d02086a457cb1b74264e16de4eb80d517fb8a498e4272a68f49cd9e5fee9501",
+      "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+      "context_port": "T002",
+      "candidate": 5
+    }
+  }
+]

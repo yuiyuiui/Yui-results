@@ -1,0 +1,65 @@
+{
+  "proof": "intro t₀ ht₀\nobtain ⟨C, hslab, hsections⟩ := h_T005.1 t₀ ht₀\nobtain ⟨B, hB, hbi, hbound⟩ := yui_aux_0001 n m u q h_T003 h_T005 t₀ ht₀ C hslab.1\nhave hnh : Set.Ioo (t₀-t₀/4) (t₀+t₀/4) ∈ 𝓝 t₀ := Ioo_mem_nhds (by linarith) (by linarith)\nhave hpos : Set.Ioo (t₀-t₀/4) (t₀+t₀/4) ⊆ Set.Ioi (0 : ℝ) := by\n  intro r hr\n  change 0 < r\n  have := hr.1\n  linarith\nhave hinside : Set.Ioo (t₀-t₀/4) (t₀+t₀/4) ⊆ Set.Ioo (t₀/2) (3*t₀/2) := by\n  intro r hr\n  constructor <;> (rcases hr with ⟨hl,hu⟩; linarith)\nhave htI : t₀ ∈ Set.Ioo (t₀/2) (3*t₀/2) := ⟨by linarith, by linarith⟩\nhave hrate : SupportedSection C (fun x => densityRate (ubar u q) x t₀) :=\n  hsections t₀ htI _ (Submodule.subset_span (show (fun x => densityRate (ubar u q) x t₀) ∈ sections (ubar u q) t₀ from Or.inr (Or.inl rfl)))\nrefine ⟨C.indicator (fun _ => B), hnh, hpos, ?_, h_T005.2 t₀ ht₀, hrate.1.aestronglyMeasurable, ?_, hbi, ?_⟩\n· filter_upwards [hnh] with r hr\n  have he : SupportedSection C (fun x => density (ubar u q) x r) :=\n    hsections r (hinside hr) _ (Submodule.subset_span (show (fun x => density (ubar u q) x r) ∈ sections (ubar u q) r from Or.inl rfl))\n  exact he.1.aestronglyMeasurable\n· apply Filter.Eventually.of_forall\n  intro x r hr\n  by_cases hx : x ∈ C\n  · rw [Set.indicator_of_mem hx]\n    exact hbound x hx r ⟨le_of_lt hr.1, le_of_lt hr.2⟩\n  · have hz : densityRate (ubar u q) x r = 0 := (hslab.2.2.2 x r hx (hinside hr)).2.2.2.2\n    rw [hz, norm_zero, Set.indicator_of_notMem hx]\n· apply Filter.Eventually.of_forall\n  intro x r hr\n  exact h_T003.2.2.2.2.1 x r (hpos hr)",
+  "statement": "∀ t₀ : ℝ, 0 < t₀ →\n ∃ b : Space n → ℝ,\n (Set.Ioo (t₀-t₀/4) (t₀+t₀/4)) ∈ 𝓝 t₀ ∧ (Set.Ioo (t₀-t₀/4) (t₀+t₀/4)) ⊆ Set.Ioi (0 : ℝ) ∧\n (∀ᶠ r in 𝓝 t₀, AEStronglyMeasurable (fun x => density (ubar u q) x r) volume) ∧\n Integrable (fun x => density (ubar u q) x t₀) ∧\n AEStronglyMeasurable (fun x => densityRate (ubar u q) x t₀) volume ∧\n (∀ᵐ x ∂volume, ∀ r ∈ (Set.Ioo (t₀-t₀/4) (t₀+t₀/4)), ‖densityRate (ubar u q) x r‖ ≤ b x) ∧\n Integrable b ∧\n (∀ᵐ x ∂volume, ∀ r ∈ (Set.Ioo (t₀-t₀/4) (t₀+t₀/4)), HasDerivAt (fun a => density (ubar u q) x a) (densityRate (ubar u q) x r) r)",
+  "proof_package": {
+    "schema": "yui-local-proof-1",
+    "step": "T006",
+    "context_sha256": "ba42334b231d551dee460a0efd895766a2989a53214d4e15895d13ba13a9a2a2",
+    "helpers": [
+      {
+        "name": "yui_aux_0001",
+        "statement": "∀ (t₀ : ℝ), 0 < t₀ → ∀ C : Set (Space n), IsCompact C → ∃ B : ℝ, 0 ≤ B ∧ Integrable (C.indicator (fun _ => B)) volume ∧ ∀ x ∈ C, ∀ r ∈ Set.Icc (t₀-t₀/4) (t₀+t₀/4), ‖densityRate (ubar u q) x r‖ ≤ B",
+        "proof": "intro t₀ ht C hC\nhave hK : IsCompact (C ×ˢ Set.Icc (t₀-t₀/4) (t₀+t₀/4)) := hC.prod isCompact_Icc\nhave hc : ContinuousOn (fun p : Space n × ℝ => densityRate (ubar u q) p.1 p.2) (C ×ˢ Set.Icc (t₀-t₀/4) (t₀+t₀/4)) := by\n  apply h_T003.2.2.2.1.continuousOn.mono\n  intro p hp\n  change 0 < p.2\n  have hl := hp.2.1\n  linarith\nobtain ⟨B₀, hB₀⟩ := hK.exists_bound_of_continuousOn hc\nrefine ⟨max B₀ 0, le_max_right _ _, ?_, ?_⟩\n· have hi : IntegrableOn (fun _ : Space n => max B₀ 0) C volume := integrableOn_const hC.measure_ne_top\n  exact hi.integrable_indicator hC.measurableSet\n· intro x hx r hr\n  exact (hB₀ (x,r) ⟨hx,hr⟩).trans (le_max_left _ _)",
+        "dependencies": [],
+        "context_sha256": "ba42334b231d551dee460a0efd895766a2989a53214d4e15895d13ba13a9a2a2",
+        "sha256": "0a6654f9c82952ccd380dcb0f49c0b9be892fce387345ee271bb49763c8d4398",
+        "check": {
+          "exit_code": 0,
+          "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-xa7z16t1/output/Auxiliary.lean:126:58: warning: Variable name `h_T005` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (n m : ℕ) (u : Space n × ↑(Set.Ioi 0) → Value m) (q : Value m),\n  (FirstCalculus (ubar u q) ∧\n      SecondCalculus (ubar u q) ∧\n        ContDiffOn ℝ ∞ (fun p => density (ubar u q) p.1 p.2) {p | 0 < p.2} ∧\n          ContDiffOn ℝ ∞ (fun p => densityRate (ubar u q) p.1 p.2) {p | 0 < p.2} ∧\n            (∀ (x : Space n) (t : ℝ),\n                0 < t → HasDerivAt (fun r => density (ubar u q) x r) (densityRate (ubar u q) x t) t) ∧\n              (∀ (j : Fin n) (x : Space n) (t : ℝ),\n                  0 < t →\n                    ∀ (k : Fin m),\n                      (fderiv ℝ (fun y => ubar u q (y, t) k) x) (Pi.single j 1) = spatial (ubar u q) j x t k ∧\n                        (fderiv ℝ (fun y => velocity (ubar u q) y t k) x) (Pi.single j 1) = mixed (ubar u q) j x t k ∧\n                          (fderiv ℝ (fun y => spatial (ubar u q) j y t k) x) (Pi.single j 1) =\n                            spatialSecond (ubar u q) j x t k) ∧\n                (∀ (x : Space n) (t : ↑(Set.Ioi 0)), ubar u q (x, ↑t) = u (x, t)) ∧\n                  ∀ (x : Space n), ∀ t ≤ 0, ubar u q (x, t) = q) →\n    ((∀ (t₀ : ℝ),\n          0 < t₀ →\n            ∃ C,\n              SlabVanishing (ubar u q) q t₀ C ∧\n                ∀ r ∈ Set.Ioo (t₀ / 2) (3 * t₀ / 2),\n                  ∀ h ∈ Submodule.span ℝ (sections (ubar u q) r), SupportedSection C h) ∧\n        ∀ (t : ℝ), 0 < t → Integrable (fun x => density (ubar u q) x t) volume) →\n      ∀ (t₀ : ℝ),\n        0 < t₀ →\n          ∀ (C : Set (Space n)),\n            IsCompact C →\n              ∃ B,\n                0 ≤ B ∧\n                  Integrable (C.indicator fun x => B) volume ∧\n                    ∀ x ∈ C, ∀ r ∈ Set.Icc (t₀ - t₀ / 4) (t₀ + t₀ / 4), ‖densityRate (ubar u q) x r‖ ≤ B\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+          "stderr": "",
+          "wall_seconds": 3.396384791994933,
+          "native_limits": {
+            "timeout_seconds": 180,
+            "max_heartbeats": 20000000
+          },
+          "source_path": "/Users/syyui/projects/Yui-results/test_uncond/wave-map-energy/rigorous-proof/20261105T120332Z-cc987d3921/workflow/native-checks/1f83e329b69e4051938c37b966ca4ac3.lean",
+          "source_sha256": "07d532adb7c6623fb0acadf40df652fc4261a80899a97ce4dba73676bb3a99ba",
+          "auxiliary_valid": true,
+          "axioms": [
+            "Classical.choice",
+            "Quot.sound",
+            "propext"
+          ],
+          "lean_sha256": "07d532adb7c6623fb0acadf40df652fc4261a80899a97ce4dba73676bb3a99ba",
+          "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+          "context_port": "T006",
+          "candidate": 1
+        }
+      }
+    ],
+    "body": "intro t₀ ht₀\nobtain ⟨C, hslab, hsections⟩ := h_T005.1 t₀ ht₀\nobtain ⟨B, hB, hbi, hbound⟩ := yui_aux_0001 n m u q h_T003 h_T005 t₀ ht₀ C hslab.1\nhave hnh : Set.Ioo (t₀-t₀/4) (t₀+t₀/4) ∈ 𝓝 t₀ := Ioo_mem_nhds (by linarith) (by linarith)\nhave hpos : Set.Ioo (t₀-t₀/4) (t₀+t₀/4) ⊆ Set.Ioi (0 : ℝ) := by\n  intro r hr\n  change 0 < r\n  have := hr.1\n  linarith\nhave hinside : Set.Ioo (t₀-t₀/4) (t₀+t₀/4) ⊆ Set.Ioo (t₀/2) (3*t₀/2) := by\n  intro r hr\n  constructor <;> (rcases hr with ⟨hl,hu⟩; linarith)\nhave htI : t₀ ∈ Set.Ioo (t₀/2) (3*t₀/2) := ⟨by linarith, by linarith⟩\nhave hrate : SupportedSection C (fun x => densityRate (ubar u q) x t₀) :=\n  hsections t₀ htI _ (Submodule.subset_span (show (fun x => densityRate (ubar u q) x t₀) ∈ sections (ubar u q) t₀ from Or.inr (Or.inl rfl)))\nrefine ⟨C.indicator (fun _ => B), hnh, hpos, ?_, h_T005.2 t₀ ht₀, hrate.1.aestronglyMeasurable, ?_, hbi, ?_⟩\n· filter_upwards [hnh] with r hr\n  have he : SupportedSection C (fun x => density (ubar u q) x r) :=\n    hsections r (hinside hr) _ (Submodule.subset_span (show (fun x => density (ubar u q) x r) ∈ sections (ubar u q) r from Or.inl rfl))\n  exact he.1.aestronglyMeasurable\n· apply Filter.Eventually.of_forall\n  intro x r hr\n  by_cases hx : x ∈ C\n  · rw [Set.indicator_of_mem hx]\n    exact hbound x hx r ⟨le_of_lt hr.1, le_of_lt hr.2⟩\n  · have hz : densityRate (ubar u q) x r = 0 := (hslab.2.2.2 x r hx (hinside hr)).2.2.2.2\n    rw [hz, norm_zero, Set.indicator_of_notMem hx]\n· apply Filter.Eventually.of_forall\n  intro x r hr\n  exact h_T003.2.2.2.2.1 x r (hpos hr)"
+  },
+  "check": {
+    "exit_code": 0,
+    "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/nl0-ir-check-i8eexdk3/output/Check.lean:128:58: warning: Variable name `h_T005` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nT006 : ∀ (n m : ℕ) (u : Space n × ↑(Set.Ioi 0) → Value m) (q : Value m),\n  (FirstCalculus (ubar u q) ∧\n      SecondCalculus (ubar u q) ∧\n        ContDiffOn ℝ ∞ (fun p => density (ubar u q) p.1 p.2) {p | 0 < p.2} ∧\n          ContDiffOn ℝ ∞ (fun p => densityRate (ubar u q) p.1 p.2) {p | 0 < p.2} ∧\n            (∀ (x : Space n) (t : ℝ),\n                0 < t → HasDerivAt (fun r => density (ubar u q) x r) (densityRate (ubar u q) x t) t) ∧\n              (∀ (j : Fin n) (x : Space n) (t : ℝ),\n                  0 < t →\n                    ∀ (k : Fin m),\n                      (fderiv ℝ (fun y => ubar u q (y, t) k) x) (Pi.single j 1) = spatial (ubar u q) j x t k ∧\n                        (fderiv ℝ (fun y => velocity (ubar u q) y t k) x) (Pi.single j 1) = mixed (ubar u q) j x t k ∧\n                          (fderiv ℝ (fun y => spatial (ubar u q) j y t k) x) (Pi.single j 1) =\n                            spatialSecond (ubar u q) j x t k) ∧\n                (∀ (x : Space n) (t : ↑(Set.Ioi 0)), ubar u q (x, ↑t) = u (x, t)) ∧\n                  ∀ (x : Space n), ∀ t ≤ 0, ubar u q (x, t) = q) →\n    ((∀ (t₀ : ℝ),\n          0 < t₀ →\n            ∃ C,\n              SlabVanishing (ubar u q) q t₀ C ∧\n                ∀ r ∈ Set.Ioo (t₀ / 2) (3 * t₀ / 2),\n                  ∀ h ∈ Submodule.span ℝ (sections (ubar u q) r), SupportedSection C h) ∧\n        ∀ (t : ℝ), 0 < t → Integrable (fun x => density (ubar u q) x t) volume) →\n      ∀ (t₀ : ℝ),\n        0 < t₀ →\n          ∃ b,\n            Set.Ioo (t₀ - t₀ / 4) (t₀ + t₀ / 4) ∈ 𝓝 t₀ ∧\n              Set.Ioo (t₀ - t₀ / 4) (t₀ + t₀ / 4) ⊆ Set.Ioi 0 ∧\n                (∀ᶠ (r : ℝ) in 𝓝 t₀, AEStronglyMeasurable (fun x => density (ubar u q) x r) volume) ∧\n                  Integrable (fun x => density (ubar u q) x t₀) volume ∧\n                    AEStronglyMeasurable (fun x => densityRate (ubar u q) x t₀) volume ∧\n                      (∀ᵐ (x : Space n),\n                          ∀ r ∈ Set.Ioo (t₀ - t₀ / 4) (t₀ + t₀ / 4), ‖densityRate (ubar u q) x r‖ ≤ b x) ∧\n                        Integrable b volume ∧\n                          ∀ᵐ (x : Space n),\n                            ∀ r ∈ Set.Ioo (t₀ - t₀ / 4) (t₀ + t₀ / 4),\n                              HasDerivAt (fun a => density (ubar u q) x a) (densityRate (ubar u q) x r) r\n'Translation.T006' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+    "stderr": "",
+    "wall_seconds": 3.124977957995725,
+    "native_limits": {
+      "timeout_seconds": 180,
+      "max_heartbeats": 20000000
+    },
+    "source_path": "/Users/syyui/projects/Yui-results/test_uncond/wave-map-energy/rigorous-proof/20261105T120332Z-cc987d3921/workflow/native-checks/ca851c15158347bcaba9e8a2679ace85.lean",
+    "source_sha256": "d2177c4f53272adea0b085dcca05ebfcf56a499ffe17cf3e2a471854727c2fd4",
+    "status": "LOCAL-PROOF-CHECKED",
+    "contract_sha256": "2b820e3b57b58c72be7580ce8a5f59adab64e0ed815a1f6877bc74a3d40b8f74",
+    "lean_sha256": "d2177c4f53272adea0b085dcca05ebfcf56a499ffe17cf3e2a471854727c2fd4",
+    "scope": "T006",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "accepted": true,
+    "stage_complete": false
+  }
+}

@@ -1,0 +1,64 @@
+[
+  {
+    "name": "yui_aux_0001",
+    "statement": "∀ (f : Space n → ℝ) (x : Space n) (c : ℝ), f =ᶠ[𝓝 x] (fun _ => c) → fderiv ℝ f x = 0",
+    "proof": "intro f x c he\nrw [he.fderiv_eq, fderiv_const_apply]",
+    "dependencies": [],
+    "context_sha256": "58a59682a1eea7a92d8ca07ebf0a842f440d2aec07f1e7ff7dd42594834783ef",
+    "sha256": "2b6e8664a7a4682b61f97d24a55d872d21c2831ab7bd27a0a49f6409e59e3f71",
+    "check": {
+      "exit_code": 0,
+      "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-t3f5y7u2/output/Auxiliary.lean:117:89: warning: Variable name `h_H006` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-t3f5y7u2/output/Auxiliary.lean:117:133: warning: Variable name `h_T003` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (n m : ℕ) (u : Space n × ↑(Set.Ioi 0) → Value m) (q : Value m),\n  CompactPerturbation (ubar u q) q →\n    (FirstCalculus (ubar u q) ∧\n        SecondCalculus (ubar u q) ∧\n          ContDiffOn ℝ ∞ (fun p => density (ubar u q) p.1 p.2) {p | 0 < p.2} ∧\n            ContDiffOn ℝ ∞ (fun p => densityRate (ubar u q) p.1 p.2) {p | 0 < p.2} ∧\n              (∀ (x : Space n) (t : ℝ),\n                  0 < t → HasDerivAt (fun r => density (ubar u q) x r) (densityRate (ubar u q) x t) t) ∧\n                (∀ (j : Fin n) (x : Space n) (t : ℝ),\n                    0 < t →\n                      ∀ (k : Fin m),\n                        (fderiv ℝ (fun y => ubar u q (y, t) k) x) (Pi.single j 1) = spatial (ubar u q) j x t k ∧\n                          (fderiv ℝ (fun y => velocity (ubar u q) y t k) x) (Pi.single j 1) = mixed (ubar u q) j x t k ∧\n                            (fderiv ℝ (fun y => spatial (ubar u q) j y t k) x) (Pi.single j 1) =\n                              spatialSecond (ubar u q) j x t k) ∧\n                  (∀ (x : Space n) (t : ↑(Set.Ioi 0)), ubar u q (x, ↑t) = u (x, t)) ∧\n                    ∀ (x : Space n), ∀ t ≤ 0, ubar u q (x, t) = q) →\n      ∀ (f : Space n → ℝ) (x : Space n) (c : ℝ), (f =ᶠ[𝓝 x] fun x => c) → fderiv ℝ f x = 0\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+      "stderr": "",
+      "wall_seconds": 2.893966249997902,
+      "native_limits": {
+        "timeout_seconds": 180,
+        "max_heartbeats": 20000000
+      },
+      "source_path": "/Users/syyui/projects/Yui-results/test_uncond/wave-map-energy/rigorous-proof/20261105T120332Z-cc987d3921/workflow/native-checks/1bd7ff1ce2a940deb4c9405a371d2f50.lean",
+      "source_sha256": "910fd4207780cf389c92ee559bacc72f4d0af0768742c5f48ad0a182952184ff",
+      "auxiliary_valid": true,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "lean_sha256": "910fd4207780cf389c92ee559bacc72f4d0af0768742c5f48ad0a182952184ff",
+      "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+      "context_port": "T004",
+      "candidate": 2
+    }
+  },
+  {
+    "name": "yui_aux_0002",
+    "statement": "∀ (C : Set (Space n)) (a b : ℝ), IsClosed C → (∀ x r, x ∉ C → r ∈ Set.Ioo a b → (ubar u q) (x,r) = q) → ∀ x r, x ∉ C → r ∈ Set.Ioo a b → velocity (ubar u q) x r = 0 ∧ ∀ j, spatial (ubar u q) j x r = 0",
+    "proof": "intro C a b hC hv x r hx hr\nconstructor\n· funext k\n  have he : (fun s => (ubar u q) (x,s) k) =ᶠ[𝓝 r] (fun _ => q k) := by\n    filter_upwards [isOpen_Ioo.mem_nhds hr] with s hs\n    exact congrFun (hv x s hx hs) k\n  change deriv (fun s => (ubar u q) (x,s) k) r = 0\n  rw [he.deriv_eq, deriv_const]\n· intro j\n  funext k\n  have he : (fun y => (ubar u q) (y,r) k) =ᶠ[𝓝 x] (fun _ => q k) := by\n    filter_upwards [hC.isOpen_compl.mem_nhds hx] with y hy\n    exact congrFun (hv y r hy hr) k\n  change fderiv ℝ (fun y => (ubar u q) (y,r) k) x (Pi.single j 1) = 0\n  rw [@yui_aux_0001 n m u q h_H006 h_T003 _ x (q k) he]\n  rfl",
+    "dependencies": [
+      "yui_aux_0001"
+    ],
+    "context_sha256": "58a59682a1eea7a92d8ca07ebf0a842f440d2aec07f1e7ff7dd42594834783ef",
+    "sha256": "14761707f4827915f30a9b5054911fbbd2c60a3935b735c78adc2713215a76a4",
+    "check": {
+      "exit_code": 0,
+      "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-5zz7in6a/output/Auxiliary.lean:117:94: warning: Variable name `h_H006` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-5zz7in6a/output/Auxiliary.lean:117:138: warning: Variable name `h_T003` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (n m : ℕ) (u : Space n × ↑(Set.Ioi 0) → Value m) (q : Value m),\n  CompactPerturbation (ubar u q) q →\n    (FirstCalculus (ubar u q) ∧\n        SecondCalculus (ubar u q) ∧\n          ContDiffOn ℝ ∞ (fun p => density (ubar u q) p.1 p.2) {p | 0 < p.2} ∧\n            ContDiffOn ℝ ∞ (fun p => densityRate (ubar u q) p.1 p.2) {p | 0 < p.2} ∧\n              (∀ (x : Space n) (t : ℝ),\n                  0 < t → HasDerivAt (fun r => density (ubar u q) x r) (densityRate (ubar u q) x t) t) ∧\n                (∀ (j : Fin n) (x : Space n) (t : ℝ),\n                    0 < t →\n                      ∀ (k : Fin m),\n                        (fderiv ℝ (fun y => ubar u q (y, t) k) x) (Pi.single j 1) = spatial (ubar u q) j x t k ∧\n                          (fderiv ℝ (fun y => velocity (ubar u q) y t k) x) (Pi.single j 1) = mixed (ubar u q) j x t k ∧\n                            (fderiv ℝ (fun y => spatial (ubar u q) j y t k) x) (Pi.single j 1) =\n                              spatialSecond (ubar u q) j x t k) ∧\n                  (∀ (x : Space n) (t : ↑(Set.Ioi 0)), ubar u q (x, ↑t) = u (x, t)) ∧\n                    ∀ (x : Space n), ∀ t ≤ 0, ubar u q (x, t) = q) →\n      ∀ (C : Set (Space n)) (a b : ℝ),\n        IsClosed C →\n          (∀ (x : Space n) (r : ℝ), x ∉ C → r ∈ Set.Ioo a b → ubar u q (x, r) = q) →\n            ∀ (x : Space n) (r : ℝ),\n              x ∉ C → r ∈ Set.Ioo a b → velocity (ubar u q) x r = 0 ∧ ∀ (j : Fin n), spatial (ubar u q) j x r = 0\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+      "stderr": "",
+      "wall_seconds": 3.186710250003671,
+      "native_limits": {
+        "timeout_seconds": 180,
+        "max_heartbeats": 20000000
+      },
+      "source_path": "/Users/syyui/projects/Yui-results/test_uncond/wave-map-energy/rigorous-proof/20261105T120332Z-cc987d3921/workflow/native-checks/1d3cf2a5723c477d9255c2715d98e465.lean",
+      "source_sha256": "cd08d8445d88c77620a6bbd28f9e2f3d8409e860c402466d92244c51e84b140d",
+      "auxiliary_valid": true,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "lean_sha256": "cd08d8445d88c77620a6bbd28f9e2f3d8409e860c402466d92244c51e84b140d",
+      "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+      "context_port": "T004",
+      "candidate": 3
+    }
+  }
+]

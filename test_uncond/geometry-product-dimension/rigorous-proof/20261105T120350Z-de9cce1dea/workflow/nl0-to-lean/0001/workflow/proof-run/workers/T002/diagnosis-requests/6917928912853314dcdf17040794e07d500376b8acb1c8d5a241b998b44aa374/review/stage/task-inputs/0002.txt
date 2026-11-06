@@ -1,0 +1,127 @@
+{
+  "version": 2,
+  "contract_sha256": "fef6b44a209ffc0e227a7d5438ab36706266a1338fee20f7a0ff09754c761498",
+  "header": "import Mathlib\nopen scoped ENNReal NNReal Topology\nopen Set MeasureTheory\nnamespace BasisObjects\nabbrev Rn (n : ℕ) := EuclideanSpace ℝ (Fin n)\nnoncomputable def content {X : Type*} [EMetricSpace X]\n    (s : ℝ) (r : ℝ≥0∞) (A : Set X) : ℝ≥0∞ :=\n  ⨅ (U : ℕ → Set X) (_ : A ⊆ ⋃ i, U i)\n    (_ : ∀ i, Metric.ediam (U i) ≤ r),\n      ∑' i, ⨆ (_ : (U i).Nonempty), (Metric.ediam (U i)) ^ s\ndef euclideanLift (n : ℕ) : Rn n × ℝ → WithLp 2 (Rn n × ℝ) :=\n  WithLp.toLp 2\nend BasisObjects\n\nnamespace IntervalProduct\nabbrev Rn := BasisObjects.Rn\ndef I : Set ℝ := Set.Icc 0 1\ndef F (n : ℕ) (E : Set (Rn n)) : Set (Rn n × ℝ) := E ×ˢ I\ndef j (n : ℕ) (p : WithLp 2 (Rn n × ℝ)) : Rn (n + 1) :=\n  WithLp.toLp 2 (Fin.snoc (fun i => p.fst i) p.snd)\ndef unj (n : ℕ) (v : Rn (n + 1)) : WithLp 2 (Rn n × ℝ) :=\n  WithLp.toLp 2 (WithLp.toLp 2 (fun i : Fin n => v i.castSucc), v (Fin.last n))\ndef G (n : ℕ) (E : Set (Rn n)) : Set (Rn (n + 1)) :=\n  j n '' (BasisObjects.euclideanLift n '' F n E)\nnoncomputable def H {X : Type*} [MetricSpace X] (a : ℝ) (A : Set X) : ℝ≥0∞ :=\n  letI : MeasurableSpace X := borel X\n  letI : BorelSpace X := ⟨rfl⟩\n  MeasureTheory.Measure.hausdorffMeasure a A\nnoncomputable def cost {ι X : Type*} [MetricSpace X] (a : ℝ) (U : ι → Set X) : ℝ≥0∞ :=\n  ∑' i, ⨆ (_ : (U i).Nonempty), (Metric.ediam (U i)) ^ a\nnoncomputable def realCost {ι X : Type*} [MetricSpace X] (a : ℝ) (U : ι → Set X) : ℝ≥0∞ :=\n  ∑' i, (ENNReal.ofReal (Metric.diam (U i))) ^ a\ndef Cover {X : Type*} [MetricSpace X] (δ : ℝ) (A : Set X) (U : ℕ → Set X) : Prop :=\n  A ⊆ ⋃ i, U i ∧ ∀ i, Metric.ediam (U i) ≤ ENNReal.ofReal δ\ndef RealCover {X : Type*} [MetricSpace X] (δ : ℝ) (A : Set X) (U : ℕ → Set X) : Prop :=\n  A ⊆ ⋃ i, U i ∧ (∀ i, Bornology.IsBounded (U i)) ∧ ∀ i, Metric.diam (U i) ≤ δ\nend IntervalProduct\nopen IntervalProduct\n",
+  "parameters": [
+    {
+      "name": "n",
+      "type": "ℕ"
+    },
+    {
+      "name": "E",
+      "type": "Set (BasisObjects.Rn n)"
+    }
+  ],
+  "representation": "n is the original natural n₀, including zero; E remains a subset of BasisObjects.Rn n = EuclideanSpace ℝ (Fin n). Ordinary X × ℝ uses Mathlib's maximum product metric. WithLp 2 (Rn n × ℝ) uses the L² product metric: here 2 is the extended nonnegative real exponent, not the coordinate count. EuclideanSpace is PiLp 2 over Fin n. The explicit j appends the last real coordinate with Fin.snoc and unj truncates at castSucc and reads Fin.last; T009 proves this is a bijective isometry. G is exactly the set of coordinate concatenations of E and I, as an image under these explicit functions, in Euclidean Rn(n+1). E001 transports dimension from the maximum product to the L² product; no unproved metric identification is definitional. H fixes the canonical Borel measurable structure locally, avoiding any extra measurability premise on X or A. content is the exact frozen basis definition; powers are ENNReal real powers, infima/suprema and nonnegative sums remain in ℝ≥0∞ with ∞ allowed. cost retains the nonempty-member supremum; for positive exponents an empty member costs zero. RealCover explicitly includes boundedness before using real diameters, and realCost uses their nonnegative finite casts. Cover is the finite extended-diameter condition, equivalent to RealCover at positive real scales. N004 supplies finiteness before any use of NNReal representatives or toReal; standard cast order/addition compatibility does not add an assumption. No M premise ports or background-note premise ports are introduced. The pinned product metric instances require Fact (1 ≤ p): this is a proof that the Lp exponent lies in the metric range, and at p=2 it is supplied by the library, not an additional project hypothesis. The pinned Prod.dist_eq is max of the coordinate distances. Fin n indexes exactly the initial n coordinates; Fin.castSucc preserves their values in Fin(n+1), and Fin.last n is the appended coordinate. In cost and content, ^ a has real exponent a on ENNReal; in the squared-distance formulas ^ 2 is the ordinary natural square of a real distance.",
+  "inputs": [
+    {
+      "id": "T001",
+      "binder": "h_T001",
+      "type": "∀ (X : Type*) [MetricSpace X] (A : Set X) (a : ℝ), 0 < a →\n  (∀ δ : ℝ, 0 < δ →\n    BasisObjects.content a (ENNReal.ofReal δ) A =\n      ⨅ (U : ℕ → Set X) (_ : RealCover δ A U), realCost a U) ∧\n  (∀ (ι : Type*) [Countable ι] (V : ι → Set X),\n    ∃ e : ι ↪ ℕ, ∃ U : ℕ → Set X,\n      (∀ k, U (e k) = V k) ∧\n      (∀ i, i ∉ Set.range e → U i = ∅) ∧\n      (⋃ i, U i) = (⋃ k, V k) ∧\n      cost a U = cost a V ∧ realCost a U = realCost a V) ∧\n  (∀ δ₁ δ₂ : ℝ, 0 < δ₁ → δ₁ ≤ δ₂ →\n    BasisObjects.content a (ENNReal.ofReal δ₂) A ≤\n      BasisObjects.content a (ENNReal.ofReal δ₁) A) ∧\n  (∀ (δ : ℝ) (U : ℕ → Set X), 0 < δ → Cover δ A U →\n    BasisObjects.content a (ENNReal.ofReal δ) A ≤ cost a U) ∧\n  (∀ (δ : ℝ) (b : ℝ≥0∞), 0 < δ →\n    (∀ U : ℕ → Set X, Cover δ A U → b ≤ cost a U) →\n      b ≤ BasisObjects.content a (ENNReal.ofReal δ) A) ∧\n  (H a A = ⨆ (δ : ℝ) (_ : 0 < δ), BasisObjects.content a (ENNReal.ofReal δ) A) ∧\n  (∀ δ : ℝ, 0 < δ → BasisObjects.content a (ENNReal.ofReal δ) A ≤ H a A) ∧\n  (∀ δ : ℝ, 0 < δ →\n    (BasisObjects.content a (ENNReal.ofReal δ) A = 0 ↔\n      ∀ ε : ℝ, 0 < ε → ∃ U : ℕ → Set X, Cover δ A U ∧ cost a U < ENNReal.ofReal ε)) ∧\n  (H a A = 0 ↔\n    ∀ δ : ℝ, 0 < δ → ∀ ε : ℝ, 0 < ε →\n      ∃ U : ℕ → Set X, Cover δ A U ∧ cost a U < ENNReal.ofReal ε)"
+    }
+  ],
+  "target": "∀ (X : Type*) [MetricSpace X] (A : Set X) (q : ℝ), 0 < q → H q A = 0 →\n  ∀ δ : ℝ, 0 < δ → ∀ ε : ℝ, 0 < ε →\n    ∃ U : ℕ → Set (X × ℝ), Cover δ (A ×ˢ I) U ∧ cost (q + 1) U < ENNReal.ofReal ε",
+  "explanation": "Existing upper covering construction only. At r=min(1,δ), take the q-cost <ε/4 cover from N001; add positive numerical radii with geometric q-cost ≤ε/4, without changing sets. The radii are at most r and one. Subdivide I into ceil(1/r_i) closed intervals, use the maximum metric and N_i≤2/r_i, then reindex the countable family of finite products. The obligation retains all positive scale/tolerance quantifiers and allows empty and zero-diameter members.",
+  "source_steps": [
+    {
+      "id": "S004",
+      "text": "Fix X,A,q and assume L1: q>0 and H^q(A)=0. Fix arbitrary real δ,ε and assume L2: δ>0 and ε>0. Put r=min(1,δ), so 0<r≤1 and r≤δ. By N001 with exponent q, scale r and tolerance ε/4 there exists a countable r-cover U of A whose total q-cost is <ε/4; reindex it as a sequence with empty padding if necessary. In particular its members have finite diameter."
+    },
+    {
+      "id": "S005",
+      "text": "Choose U from F001 and put d_i=diam(U_i), with d_i=0 on empty members. For each natural i define a_seq(i)=min(r,(ε·2^(-i-3))^(1/q)). Both entries of this minimum are positive, so 0<a_seq(i)≤r and a_seq(i)^q≤ε·2^(-i-3). The nonnegative geometric series has sum Σ_{i≥0}2^(-i-3)=1/4 (its partial sums are (1/4)(1-2^(-m)) for the first m terms). Hence Σ a_seq(i)^q≤ε/4. Put r_i=max(d_i,a_seq(i)). Then 0<r_i≤r≤1 and r_i^q=max(d_i^q,a_seq(i)^q)≤d_i^q+a_seq(i)^q. Summing nonnegative terms, using F001 and the geometric bound, gives Σ r_i^q<ε/2. Numerical padding changes no covering set and works even if X is a singleton."
+    },
+    {
+      "id": "S006",
+      "text": "For each natural i put N_i=ceil(1/r_i), a positive integer. Then 1/N_i≤r_i and N_i≤1/r_i+1≤2/r_i, since 0<r_i≤1. The closed intervals [h/N_i,(h+1)/N_i], 0≤h<N_i, cover I. Define W_seq(i,h)=U_i×[h/N_i,(h+1)/N_i]. In the maximum product metric any two points of this product have distance at most r_i, since the first-coordinate diameter is d_i≤r_i and the second-coordinate interval length is 1/N_i≤r_i. The product family covers A×I, and its index set {(i,h):i∈ℕ,0≤h<N_i} is countable. Empty products have zero cost. By N001 this countable family may be reindexed into ℕ without changing the union or sum. It is a δ-cover, and its total (q+1)-cost is at most Σ_i N_i r_i^(q+1)≤2Σ_i r_i^q<ε. The power cancellation r_i^(q+1)/r_i=r_i^q is valid because r_i>0. Rearranging these nonnegative sums is legitimate, and the upper bound is finite."
+    }
+  ],
+  "boundary": "Only listed inputs are project premises. The pinned Mathlib environment is freely available; no sibling proof is supplied.",
+  "accepted_background_notes": {
+    "R002.BG001": {
+      "id": "BG001",
+      "kind": "mathematical",
+      "at": "/inference/argument/1/text",
+      "fact": "For s>0, the function x↦x^s on nonnegative reals is increasing, 0^s=0, and (b^(1/s))^s=b for b>0. For x>0, x^(s+1)/x=x^s. Thus min(r,b^(1/s))^s≤b, and max(d,a)^s=max(d^s,a^s) when r,b,a>0 and d≥0.",
+      "grounds": [
+        {
+          "location": "/inference/argument/0/text",
+          "reason": "L1 gives q>0; L2 and r=min(1,δ) give r>0 and ε>0."
+        },
+        {
+          "location": "/inference/argument/1/text",
+          "reason": "b=ε·2^(-i-3)>0, d_i≥0, and a_seq(i)>0; hence r_i>0."
+        }
+      ],
+      "justification": "For positive bases use x^t=exp(t log x), monotonicity of log and exp, and their inverse identities. Multiplication of logarithms proves the reciprocal-exponent identity and the exponent-addition law. The extension 0^s=0 for s>0 preserves monotonicity at zero. Comparing the two arguments of a minimum or maximum gives the stated consequences."
+    },
+    "R002.BG002": {
+      "id": "BG002",
+      "kind": "mathematical",
+      "at": "/inference/argument/1/text",
+      "fact": "For ε>0, Σ_{i≥0}ε·2^(-i-3)=ε/4. Consequently the pointwise bounds 0≤a_seq(i)^q≤ε·2^(-i-3) imply Σ a_seq(i)^q≤ε/4.",
+      "grounds": [
+        {
+          "location": "/inference/argument/0/text",
+          "reason": "ε is a positive finite real."
+        },
+        {
+          "location": "/inference/argument/1/text",
+          "reason": "The text supplies both the pointwise bound and the first-m-terms formula (1/4)(1-2^(-m))."
+        }
+      ],
+      "justification": "The finite geometric-sum identity follows by subtracting half the sum from the sum. Since 2^m≥m+1, the Archimedean property implies 2^(-m)→0. The increasing partial sums therefore have supremum 1/4. Scaling by ε and taking suprema of the finite partial-sum inequalities proves the cost bound."
+    },
+    "R002.BG003": {
+      "id": "BG003",
+      "kind": "mathematical",
+      "at": "/inference/argument/2/text",
+      "fact": "Nonnegative countable sums in ℝ≥0∞ are monotone, additive, homogeneous for finite nonnegative scalars, and invariant under regrouping by countable disjoint finite fibers. In particular, if S=Σ d_i^q<ε/4 and T=Σ a_seq(i)^q≤ε/4, then Σ r_i^q≤S+T<ε/2; for finite N_i, Σ_{(i,h):h<N_i} r_i^(q+1)=Σ_i N_i r_i^(q+1).",
+      "grounds": [
+        {
+          "location": "/inference/argument/0/produces/0/statement",
+          "reason": "The original cost is nonnegative and strictly below the finite bound ε/4."
+        },
+        {
+          "location": "/inference/argument/1/text",
+          "reason": "Padding terms are nonnegative, have total at most ε/4, and r_i^q≤d_i^q+a_seq(i)^q."
+        },
+        {
+          "location": "/inference/argument/2/text",
+          "reason": "N_i is a finite positive integer; product costs are nonnegative and each is bounded by r_i^(q+1)."
+        }
+      ],
+      "justification": "Define a nonnegative countable sum as the supremum of finite subsums. Monotonicity follows termwise. For addition, finite supports on both sides can be enlarged to their union; this gives both inequalities for additivity. The same supremum argument proves finite-scalar homogeneity. For finite-fiber regrouping, each finite subset of pairs lies in finitely many whole fibers and each finite union of fibers is finite, giving equal suprema. All sums used in strict arithmetic here are bounded by finite real constants, so no undefined infinity subtraction occurs."
+    },
+    "R002.BG004": {
+      "id": "BG004",
+      "kind": "mathematical",
+      "at": "/inference/argument/2/text",
+      "fact": "If 0<t≤1 and N=ceil(1/t), then N is a positive finite integer, 1/N≤t and N≤2/t. The N closed intervals [h/N,(h+1)/N], 0≤h<N, cover [0,1]. For bounded U of diameter d≤t, each product of U with such an interval has maximum-product diameter at most t, including empty U. A family indexed by {(i,h)∈ℕ²:h<N_i} is countable.",
+      "grounds": [
+        {
+          "location": "/inference/argument/1/produces/0/statement",
+          "reason": "F002 gives 0<r_i≤1, d_i=diam(U_i)≤r_i, and that U covers A."
+        },
+        {
+          "location": "/inference/argument/0/text",
+          "reason": "The finite-scale cover makes U_i bounded, so D003 is applicable."
+        },
+        {
+          "location": "/definitions/5/definition",
+          "reason": "I is the entire closed interval [0,1]."
+        },
+        {
+          "location": "/definitions/6/definition",
+          "reason": "The product metric is the maximum of the two coordinate distances."
+        }
+      ],
+      "justification": "The ceiling property gives 1/t≤N≤1/t+1≤2/t and positivity permits taking reciprocals. For v<1, h=floor(Nv) lies between 0 and N-1 and its interval contains v; for v=1 choose h=N-1. Pairwise distances in a bounded set are bounded by its diameter (the defining supremum); within each interval they are at most 1/N. Taking the maximum and then the diameter supremum gives the product bound, with empty diameter zero. Finally ℕ² is countable, for example by listing pairs by increasing coordinate sum; its indicated subset is countable. These facts justify the already displayed subdivision construction, not a new route."
+    }
+  },
+  "background_supplement_sha256": "b0996a24c8877cb2b28b0f59b0a5816651076241531dd94d6294843d68491feb",
+  "objects": [],
+  "representations": [],
+  "bridges": [],
+  "shared_inputs": []
+}

@@ -1,0 +1,782 @@
+{
+  "contract_sha256": "2b820e3b57b58c72be7580ce8a5f59adab64e0ed815a1f6877bc74a3d40b8f74",
+  "plan_sha256": "666bfa7daca811546c40a9686fa3bea63c266c8c6138d7359000ab5255abce38",
+  "proofs": {
+    "T012": "intro t ht\nexact ⟨h_T005.2 t ht, (h_T011 t ht).differentiableAt, (h_T011 t ht).deriv⟩",
+    "T009": "intro x t ht\nobtain ⟨hUV, hVU⟩ := h_T008 x t ht\nrefine ⟨hUV, hVU, ?_⟩\nobtain ⟨a, ha⟩ := h_H005 x t ht\nrw [ha]\nchange (∑ k, velocity (ubar u q) x t k * (a * (ubar u q) (x, t) k)) = 0\ncalc\n  (∑ k, velocity (ubar u q) x t k * (a * (ubar u q) (x, t) k)) =\n      a * (∑ k, velocity (ubar u q) x t k * (ubar u q) (x, t) k) := by\n    rw [Finset.mul_sum]\n    apply Finset.sum_congr rfl\n    intro k hk\n    ring\n  _ = 0 := by change a * dot (velocity (ubar u q) x t) ((ubar u q) (x,t)) = 0; rw [hVU, mul_zero]",
+    "T007": "intro t₀ ht₀\nrcases h_T006 t₀ ht₀ with ⟨b, hs, hpos, hmeas, hint, hrate, hbound, hb, hderiv⟩\nchange HasDerivAt (fun r => ∫ x, density (ubar u q) x r)\n  (∫ x, densityRate (ubar u q) x t₀) t₀\nexact (hasDerivAt_integral_of_dominated_loc_of_deriv_le\n  (μ := volume) (F := fun r (x : Space n) => density (ubar u q) x r)\n  (F' := fun r (x : Space n) => densityRate (ubar u q) x r)\n  (bound := b) hs hmeas hint hrate hbound hb hderiv).2",
+    "T008": "  intro x t ht\n  have hd (k : Fin m) :\n      HasDerivAt (fun r => (ubar u q) (x, r) k)\n        (velocity (ubar u q) x t k) t :=\n    h_T003.1.2.2.2.1 x t ht k\n  have hs : HasDerivAt\n      (fun r => ∑ k : Fin m, (ubar u q) (x, r) k * (ubar u q) (x, r) k)\n      (∑ k : Fin m, (velocity (ubar u q) x t k * (ubar u q) (x, t) k +\n        (ubar u q) (x, t) k * velocity (ubar u q) x t k)) t := by\n    exact HasDerivAt.fun_sum (fun k _ => (hd k).mul (hd k))\n  have heq :\n      (fun r => ∑ k : Fin m, (ubar u q) (x, r) k * (ubar u q) (x, r) k)\n        =ᶠ[𝓝 t] (fun _ => (1 : ℝ)) := by\n    filter_upwards [eventually_gt_nhds ht] with r hr\n    exact h_H004 x r hr\n  have hz : HasDerivAt\n      (fun r => ∑ k : Fin m, (ubar u q) (x, r) k * (ubar u q) (x, r) k)\n      0 t :=\n    (hasDerivAt_const t (1 : ℝ)).congr_of_eventuallyEq heq\n  have hsum := hs.unique hz\n  have htwo : 2 * dot ((ubar u q) (x, t)) (velocity (ubar u q) x t) = 0 := by\n    dsimp [dot]\n    rw [Finset.mul_sum]\n    convert hsum using 1\n    apply Finset.sum_congr rfl\n    intro k hk\n    ring\n  have hdot : dot ((ubar u q) (x, t)) (velocity (ubar u q) x t) = 0 := by\n    linarith\n  refine ⟨hdot, ?_⟩\n  simpa only [dot, mul_comm] using hdot",
+    "T011": {
+      "schema": "yui-local-proof-1",
+      "step": "T011",
+      "context_sha256": "31f734d6224db8e3abe2b3b6eec3f25d734b4a1abf7525aebdea5480c2b387be",
+      "helpers": [
+        {
+          "name": "yui_aux_0001",
+          "statement": "∀ (a b : Value m) (s : Fin n → Value m), dot a (b - ∑ j, s j) = dot a b - ∑ j, dot a (s j)",
+          "proof": "intro a b s\nsimp only [dot, Pi.sub_apply, Finset.sum_apply, mul_sub, Finset.mul_sum, Finset.sum_sub_distrib]\nrw [Finset.sum_comm]",
+          "dependencies": [],
+          "context_sha256": "31f734d6224db8e3abe2b3b6eec3f25d734b4a1abf7525aebdea5480c2b387be",
+          "sha256": "74ceeb11aaeabff8648d1413be93e259c9a1ffb81aa8b3f7258af3f0599ee9f1",
+          "check": {
+            "exit_code": 0,
+            "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-nj7urlcl/output/Auxiliary.lean:117:89: warning: Variable name `h_T003` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-nj7urlcl/output/Auxiliary.lean:126:58: warning: Variable name `h_T005` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-nj7urlcl/output/Auxiliary.lean:130:66: warning: Variable name `h_T007` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-nj7urlcl/output/Auxiliary.lean:130:165: warning: Variable name `h_T009` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-nj7urlcl/output/Auxiliary.lean:133:94: warning: Variable name `h_T010` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (n m : ℕ) (u : Space n × ↑(Set.Ioi 0) → Value m) (q : Value m),\n  (FirstCalculus (ubar u q) ∧\n      SecondCalculus (ubar u q) ∧\n        ContDiffOn ℝ ∞ (fun p => density (ubar u q) p.1 p.2) {p | 0 < p.2} ∧\n          ContDiffOn ℝ ∞ (fun p => densityRate (ubar u q) p.1 p.2) {p | 0 < p.2} ∧\n            (∀ (x : Space n) (t : ℝ),\n                0 < t → HasDerivAt (fun r => density (ubar u q) x r) (densityRate (ubar u q) x t) t) ∧\n              (∀ (j : Fin n) (x : Space n) (t : ℝ),\n                  0 < t →\n                    ∀ (k : Fin m),\n                      (fderiv ℝ (fun y => ubar u q (y, t) k) x) (Pi.single j 1) = spatial (ubar u q) j x t k ∧\n                        (fderiv ℝ (fun y => velocity (ubar u q) y t k) x) (Pi.single j 1) = mixed (ubar u q) j x t k ∧\n                          (fderiv ℝ (fun y => spatial (ubar u q) j y t k) x) (Pi.single j 1) =\n                            spatialSecond (ubar u q) j x t k) ∧\n                (∀ (x : Space n) (t : ↑(Set.Ioi 0)), ubar u q (x, ↑t) = u (x, t)) ∧\n                  ∀ (x : Space n), ∀ t ≤ 0, ubar u q (x, t) = q) →\n    ((∀ (t₀ : ℝ),\n          0 < t₀ →\n            ∃ C,\n              SlabVanishing (ubar u q) q t₀ C ∧\n                ∀ r ∈ Set.Ioo (t₀ / 2) (3 * t₀ / 2),\n                  ∀ h ∈ Submodule.span ℝ (sections (ubar u q) r), SupportedSection C h) ∧\n        ∀ (t : ℝ), 0 < t → Integrable (fun x => density (ubar u q) x t) volume) →\n      (∀ (t₀ : ℝ), 0 < t₀ → HasDerivAt (energy (ubar u q)) (∫ (x : Space n), densityRate (ubar u q) x t₀) t₀) →\n        (∀ (x : Space n) (t : ℝ),\n            0 < t →\n              dot (ubar u q (x, t)) (velocity (ubar u q) x t) = 0 ∧\n                dot (velocity (ubar u q) x t) (ubar u q (x, t)) = 0 ∧\n                  dot (velocity (ubar u q) x t) (acceleration (ubar u q) x t - laplacian (ubar u q) x t) = 0) →\n          (∀ (t₀ : ℝ),\n              0 < t₀ →\n                ∀ (j : Fin n),\n                  ∫ (x : Space n), dot (spatial (ubar u q) j x t₀) (mixed (ubar u q) j x t₀) =\n                      -∫ (x : Space n), dot (velocity (ubar u q) x t₀) (spatialSecond (ubar u q) j x t₀) ∧\n                    Integrable (fun x => dot (spatial (ubar u q) j x t₀) (mixed (ubar u q) j x t₀)) volume ∧\n                      Integrable (fun x => dot (velocity (ubar u q) x t₀) (spatialSecond (ubar u q) j x t₀)) volume ∧\n                        ∀ (k : Fin m),\n                          Integrable (fun x => velocity (ubar u q) x t₀ k * spatialSecond (ubar u q) j x t₀ k) volume ∧\n                            Integrable (fun x => mixed (ubar u q) j x t₀ k * spatial (ubar u q) j x t₀ k) volume ∧\n                              Integrable (fun x => velocity (ubar u q) x t₀ k * spatial (ubar u q) j x t₀ k) volume) →\n            ∀ (a b : Value m) (s : Fin n → Value m), dot a (b - ∑ j, s j) = dot a b - ∑ j, dot a (s j)\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+            "stderr": "",
+            "wall_seconds": 3.2805924999993294,
+            "native_limits": {
+              "timeout_seconds": 180,
+              "max_heartbeats": 20000000
+            },
+            "source_path": "/Users/syyui/projects/Yui-results/test_uncond/wave-map-energy/rigorous-proof/20261105T120332Z-cc987d3921/workflow/native-checks/8b147312991748a8ba1026e868aa60e2.lean",
+            "source_sha256": "10b0bb67739d91f768c3993ad8fee8b9cc7bbba0d4a8f4f8bc57f6a8647226a4",
+            "auxiliary_valid": true,
+            "axioms": [
+              "Classical.choice",
+              "Quot.sound",
+              "propext"
+            ],
+            "lean_sha256": "10b0bb67739d91f768c3993ad8fee8b9cc7bbba0d4a8f4f8bc57f6a8647226a4",
+            "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+            "context_port": "T011",
+            "candidate": 1
+          }
+        },
+        {
+          "name": "yui_aux_0002",
+          "statement": "∀ t : ℝ, 0 < t → Integrable (fun x => dot (velocity (ubar u q) x t) (acceleration (ubar u q) x t))",
+          "proof": "intro t ht\nobtain ⟨C, hC, hsec⟩ := h_T005.1 t ht\nhave htmem : t ∈ Set.Ioo (t / 2) (3 * t / 2) := by constructor <;> linarith\nhave hmem : (fun x => dot (velocity (ubar u q) x t) (acceleration (ubar u q) x t)) ∈ sections (ubar u q) t := by\n  exact Or.inr (Or.inr (Or.inr (Or.inr (Or.inl rfl))))\nexact (hsec t htmem _ (Submodule.subset_span hmem)).2.2.2",
+          "dependencies": [],
+          "context_sha256": "31f734d6224db8e3abe2b3b6eec3f25d734b4a1abf7525aebdea5480c2b387be",
+          "sha256": "3677f20e9d899fd840c70616a65638be8942f1e6d7af1744a1ee6216a547c1ea",
+          "check": {
+            "exit_code": 0,
+            "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-k_fpaxh3/output/Auxiliary.lean:117:94: warning: Variable name `h_T003` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-k_fpaxh3/output/Auxiliary.lean:126:58: warning: Variable name `h_T005` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-k_fpaxh3/output/Auxiliary.lean:130:66: warning: Variable name `h_T007` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-k_fpaxh3/output/Auxiliary.lean:130:165: warning: Variable name `h_T009` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-k_fpaxh3/output/Auxiliary.lean:133:94: warning: Variable name `h_T010` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-k_fpaxh3/output/Auxiliary.lean:146:89: warning: Variable name `h_T003` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-k_fpaxh3/output/Auxiliary.lean:159:66: warning: Variable name `h_T007` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-k_fpaxh3/output/Auxiliary.lean:159:165: warning: Variable name `h_T009` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-k_fpaxh3/output/Auxiliary.lean:162:94: warning: Variable name `h_T010` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (n m : ℕ) (u : Space n × ↑(Set.Ioi 0) → Value m) (q : Value m),\n  (FirstCalculus (ubar u q) ∧\n      SecondCalculus (ubar u q) ∧\n        ContDiffOn ℝ ∞ (fun p => density (ubar u q) p.1 p.2) {p | 0 < p.2} ∧\n          ContDiffOn ℝ ∞ (fun p => densityRate (ubar u q) p.1 p.2) {p | 0 < p.2} ∧\n            (∀ (x : Space n) (t : ℝ),\n                0 < t → HasDerivAt (fun r => density (ubar u q) x r) (densityRate (ubar u q) x t) t) ∧\n              (∀ (j : Fin n) (x : Space n) (t : ℝ),\n                  0 < t →\n                    ∀ (k : Fin m),\n                      (fderiv ℝ (fun y => ubar u q (y, t) k) x) (Pi.single j 1) = spatial (ubar u q) j x t k ∧\n                        (fderiv ℝ (fun y => velocity (ubar u q) y t k) x) (Pi.single j 1) = mixed (ubar u q) j x t k ∧\n                          (fderiv ℝ (fun y => spatial (ubar u q) j y t k) x) (Pi.single j 1) =\n                            spatialSecond (ubar u q) j x t k) ∧\n                (∀ (x : Space n) (t : ↑(Set.Ioi 0)), ubar u q (x, ↑t) = u (x, t)) ∧\n                  ∀ (x : Space n), ∀ t ≤ 0, ubar u q (x, t) = q) →\n    ((∀ (t₀ : ℝ),\n          0 < t₀ →\n            ∃ C,\n              SlabVanishing (ubar u q) q t₀ C ∧\n                ∀ r ∈ Set.Ioo (t₀ / 2) (3 * t₀ / 2),\n                  ∀ h ∈ Submodule.span ℝ (sections (ubar u q) r), SupportedSection C h) ∧\n        ∀ (t : ℝ), 0 < t → Integrable (fun x => density (ubar u q) x t) volume) →\n      (∀ (t₀ : ℝ), 0 < t₀ → HasDerivAt (energy (ubar u q)) (∫ (x : Space n), densityRate (ubar u q) x t₀) t₀) →\n        (∀ (x : Space n) (t : ℝ),\n            0 < t →\n              dot (ubar u q (x, t)) (velocity (ubar u q) x t) = 0 ∧\n                dot (velocity (ubar u q) x t) (ubar u q (x, t)) = 0 ∧\n                  dot (velocity (ubar u q) x t) (acceleration (ubar u q) x t - laplacian (ubar u q) x t) = 0) →\n          (∀ (t₀ : ℝ),\n              0 < t₀ →\n                ∀ (j : Fin n),\n                  ∫ (x : Space n), dot (spatial (ubar u q) j x t₀) (mixed (ubar u q) j x t₀) =\n                      -∫ (x : Space n), dot (velocity (ubar u q) x t₀) (spatialSecond (ubar u q) j x t₀) ∧\n                    Integrable (fun x => dot (spatial (ubar u q) j x t₀) (mixed (ubar u q) j x t₀)) volume ∧\n                      Integrable (fun x => dot (velocity (ubar u q) x t₀) (spatialSecond (ubar u q) j x t₀)) volume ∧\n                        ∀ (k : Fin m),\n                          Integrable (fun x => velocity (ubar u q) x t₀ k * spatialSecond (ubar u q) j x t₀ k) volume ∧\n                            Integrable (fun x => mixed (ubar u q) j x t₀ k * spatial (ubar u q) j x t₀ k) volume ∧\n                              Integrable (fun x => velocity (ubar u q) x t₀ k * spatial (ubar u q) j x t₀ k) volume) →\n            ∀ (t : ℝ), 0 < t → Integrable (fun x => dot (velocity (ubar u q) x t) (acceleration (ubar u q) x t)) volume\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+            "stderr": "",
+            "wall_seconds": 3.033056125001167,
+            "native_limits": {
+              "timeout_seconds": 180,
+              "max_heartbeats": 20000000
+            },
+            "source_path": "/Users/syyui/projects/Yui-results/test_uncond/wave-map-energy/rigorous-proof/20261105T120332Z-cc987d3921/workflow/native-checks/ce13e36d13dc4d6eaeccccfbc67f44bc.lean",
+            "source_sha256": "4e5cc79d7f85557abfb43b9571f86b604b7dd7e1903830c00681ec36abf22d24",
+            "auxiliary_valid": true,
+            "axioms": [
+              "Classical.choice",
+              "Quot.sound",
+              "propext"
+            ],
+            "lean_sha256": "4e5cc79d7f85557abfb43b9571f86b604b7dd7e1903830c00681ec36abf22d24",
+            "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+            "context_port": "T011",
+            "candidate": 2
+          }
+        }
+      ],
+      "body": "classical\nintro t ht\nlet v := ubar u q\nlet f : Space n → ℝ := fun x => dot (velocity v x t) (acceleration v x t)\nlet g : Fin n → Space n → ℝ := fun j x => dot (spatial v j x t) (mixed v j x t)\nlet s : Fin n → Space n → ℝ := fun j x => dot (velocity v x t) (spatialSecond v j x t)\nhave hf : Integrable f := @yui_aux_0002 n m u q h_T003 h_T005 h_T007 h_T009 h_T010 t ht\nhave hg : ∀ j, Integrable (g j) := fun j => (h_T010 t ht j).2.1\nhave hs : ∀ j, Integrable (s j) := fun j => (h_T010 t ht j).2.2.1\nhave hgsum : Integrable (fun x => ∑ j, g j x) :=\n  integrable_finsetSum Finset.univ (fun j _ => hg j)\nhave hssum : Integrable (fun x => ∑ j, s j x) :=\n  integrable_finsetSum Finset.univ (fun j _ => hs j)\nhave hparts : ∀ j, (∫ x, g j x) = -(∫ x, s j x) :=\n  fun j => (h_T010 t ht j).1\nhave halg : ∀ x, dot (velocity v x t) (acceleration v x t - laplacian v x t) =\n    f x - ∑ j, s j x := by\n  intro x\n  exact @yui_aux_0001 n m u q h_T003 h_T005 h_T007 h_T009 h_T010\n    (velocity v x t) (acceleration v x t) (fun j => spatialSecond v j x t)\nhave hzero : (∫ x, densityRate v x t) = 0 := by\n  calc\n    (∫ x, densityRate v x t) =\n        2 * (∫ x, f x) + 2 * ∑ j, ∫ x, g j x := by\n      change (∫ x, 2 * f x + 2 * ∑ j, g j x) = _\n      rw [integral_add (hf.const_mul 2) (hgsum.const_mul 2),\n        integral_const_mul, integral_const_mul,\n        integral_finsetSum Finset.univ (fun j _ => hg j)]\n    _ = 2 * (∫ x, f x) - 2 * ∑ j, ∫ x, s j x := by\n      simp_rw [hparts]\n      rw [Finset.sum_neg_distrib]\n      ring\n    _ = 2 * (∫ x, f x - ∑ j, s j x) := by\n      rw [integral_sub hf hssum,\n        integral_finsetSum Finset.univ (fun j _ => hs j)]\n      ring\n    _ = 2 * (∫ x, dot (velocity v x t)\n        (acceleration v x t - laplacian v x t)) := by\n      congr 1\n      exact integral_congr_ae (Filter.Eventually.of_forall (fun x => (halg x).symm))\n    _ = 0 := by\n      have hz : (fun x => dot (velocity v x t)\n          (acceleration v x t - laplacian v x t)) = (fun _ : Space n => (0 : ℝ)) :=\n        funext (fun x => (h_T009 x t ht).2.2)\n      rw [hz]\n      simp\nhave hd := h_T007 t ht\nrw [hzero] at hd\nexact hd"
+    },
+    "T006": {
+      "schema": "yui-local-proof-1",
+      "step": "T006",
+      "context_sha256": "ba42334b231d551dee460a0efd895766a2989a53214d4e15895d13ba13a9a2a2",
+      "helpers": [
+        {
+          "name": "yui_aux_0001",
+          "statement": "∀ (t₀ : ℝ), 0 < t₀ → ∀ C : Set (Space n), IsCompact C → ∃ B : ℝ, 0 ≤ B ∧ Integrable (C.indicator (fun _ => B)) volume ∧ ∀ x ∈ C, ∀ r ∈ Set.Icc (t₀-t₀/4) (t₀+t₀/4), ‖densityRate (ubar u q) x r‖ ≤ B",
+          "proof": "intro t₀ ht C hC\nhave hK : IsCompact (C ×ˢ Set.Icc (t₀-t₀/4) (t₀+t₀/4)) := hC.prod isCompact_Icc\nhave hc : ContinuousOn (fun p : Space n × ℝ => densityRate (ubar u q) p.1 p.2) (C ×ˢ Set.Icc (t₀-t₀/4) (t₀+t₀/4)) := by\n  apply h_T003.2.2.2.1.continuousOn.mono\n  intro p hp\n  change 0 < p.2\n  have hl := hp.2.1\n  linarith\nobtain ⟨B₀, hB₀⟩ := hK.exists_bound_of_continuousOn hc\nrefine ⟨max B₀ 0, le_max_right _ _, ?_, ?_⟩\n· have hi : IntegrableOn (fun _ : Space n => max B₀ 0) C volume := integrableOn_const hC.measure_ne_top\n  exact hi.integrable_indicator hC.measurableSet\n· intro x hx r hr\n  exact (hB₀ (x,r) ⟨hx,hr⟩).trans (le_max_left _ _)",
+          "dependencies": [],
+          "context_sha256": "ba42334b231d551dee460a0efd895766a2989a53214d4e15895d13ba13a9a2a2",
+          "sha256": "0a6654f9c82952ccd380dcb0f49c0b9be892fce387345ee271bb49763c8d4398",
+          "check": {
+            "exit_code": 0,
+            "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-xa7z16t1/output/Auxiliary.lean:126:58: warning: Variable name `h_T005` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (n m : ℕ) (u : Space n × ↑(Set.Ioi 0) → Value m) (q : Value m),\n  (FirstCalculus (ubar u q) ∧\n      SecondCalculus (ubar u q) ∧\n        ContDiffOn ℝ ∞ (fun p => density (ubar u q) p.1 p.2) {p | 0 < p.2} ∧\n          ContDiffOn ℝ ∞ (fun p => densityRate (ubar u q) p.1 p.2) {p | 0 < p.2} ∧\n            (∀ (x : Space n) (t : ℝ),\n                0 < t → HasDerivAt (fun r => density (ubar u q) x r) (densityRate (ubar u q) x t) t) ∧\n              (∀ (j : Fin n) (x : Space n) (t : ℝ),\n                  0 < t →\n                    ∀ (k : Fin m),\n                      (fderiv ℝ (fun y => ubar u q (y, t) k) x) (Pi.single j 1) = spatial (ubar u q) j x t k ∧\n                        (fderiv ℝ (fun y => velocity (ubar u q) y t k) x) (Pi.single j 1) = mixed (ubar u q) j x t k ∧\n                          (fderiv ℝ (fun y => spatial (ubar u q) j y t k) x) (Pi.single j 1) =\n                            spatialSecond (ubar u q) j x t k) ∧\n                (∀ (x : Space n) (t : ↑(Set.Ioi 0)), ubar u q (x, ↑t) = u (x, t)) ∧\n                  ∀ (x : Space n), ∀ t ≤ 0, ubar u q (x, t) = q) →\n    ((∀ (t₀ : ℝ),\n          0 < t₀ →\n            ∃ C,\n              SlabVanishing (ubar u q) q t₀ C ∧\n                ∀ r ∈ Set.Ioo (t₀ / 2) (3 * t₀ / 2),\n                  ∀ h ∈ Submodule.span ℝ (sections (ubar u q) r), SupportedSection C h) ∧\n        ∀ (t : ℝ), 0 < t → Integrable (fun x => density (ubar u q) x t) volume) →\n      ∀ (t₀ : ℝ),\n        0 < t₀ →\n          ∀ (C : Set (Space n)),\n            IsCompact C →\n              ∃ B,\n                0 ≤ B ∧\n                  Integrable (C.indicator fun x => B) volume ∧\n                    ∀ x ∈ C, ∀ r ∈ Set.Icc (t₀ - t₀ / 4) (t₀ + t₀ / 4), ‖densityRate (ubar u q) x r‖ ≤ B\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+            "stderr": "",
+            "wall_seconds": 3.396384791994933,
+            "native_limits": {
+              "timeout_seconds": 180,
+              "max_heartbeats": 20000000
+            },
+            "source_path": "/Users/syyui/projects/Yui-results/test_uncond/wave-map-energy/rigorous-proof/20261105T120332Z-cc987d3921/workflow/native-checks/1f83e329b69e4051938c37b966ca4ac3.lean",
+            "source_sha256": "07d532adb7c6623fb0acadf40df652fc4261a80899a97ce4dba73676bb3a99ba",
+            "auxiliary_valid": true,
+            "axioms": [
+              "Classical.choice",
+              "Quot.sound",
+              "propext"
+            ],
+            "lean_sha256": "07d532adb7c6623fb0acadf40df652fc4261a80899a97ce4dba73676bb3a99ba",
+            "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+            "context_port": "T006",
+            "candidate": 1
+          }
+        }
+      ],
+      "body": "intro t₀ ht₀\nobtain ⟨C, hslab, hsections⟩ := h_T005.1 t₀ ht₀\nobtain ⟨B, hB, hbi, hbound⟩ := yui_aux_0001 n m u q h_T003 h_T005 t₀ ht₀ C hslab.1\nhave hnh : Set.Ioo (t₀-t₀/4) (t₀+t₀/4) ∈ 𝓝 t₀ := Ioo_mem_nhds (by linarith) (by linarith)\nhave hpos : Set.Ioo (t₀-t₀/4) (t₀+t₀/4) ⊆ Set.Ioi (0 : ℝ) := by\n  intro r hr\n  change 0 < r\n  have := hr.1\n  linarith\nhave hinside : Set.Ioo (t₀-t₀/4) (t₀+t₀/4) ⊆ Set.Ioo (t₀/2) (3*t₀/2) := by\n  intro r hr\n  constructor <;> (rcases hr with ⟨hl,hu⟩; linarith)\nhave htI : t₀ ∈ Set.Ioo (t₀/2) (3*t₀/2) := ⟨by linarith, by linarith⟩\nhave hrate : SupportedSection C (fun x => densityRate (ubar u q) x t₀) :=\n  hsections t₀ htI _ (Submodule.subset_span (show (fun x => densityRate (ubar u q) x t₀) ∈ sections (ubar u q) t₀ from Or.inr (Or.inl rfl)))\nrefine ⟨C.indicator (fun _ => B), hnh, hpos, ?_, h_T005.2 t₀ ht₀, hrate.1.aestronglyMeasurable, ?_, hbi, ?_⟩\n· filter_upwards [hnh] with r hr\n  have he : SupportedSection C (fun x => density (ubar u q) x r) :=\n    hsections r (hinside hr) _ (Submodule.subset_span (show (fun x => density (ubar u q) x r) ∈ sections (ubar u q) r from Or.inl rfl))\n  exact he.1.aestronglyMeasurable\n· apply Filter.Eventually.of_forall\n  intro x r hr\n  by_cases hx : x ∈ C\n  · rw [Set.indicator_of_mem hx]\n    exact hbound x hx r ⟨le_of_lt hr.1, le_of_lt hr.2⟩\n  · have hz : densityRate (ubar u q) x r = 0 := (hslab.2.2.2 x r hx (hinside hr)).2.2.2.2\n    rw [hz, norm_zero, Set.indicator_of_notMem hx]\n· apply Filter.Eventually.of_forall\n  intro x r hr\n  exact h_T003.2.2.2.2.1 x r (hpos hr)"
+    },
+    "T001": {
+      "schema": "yui-local-proof-1",
+      "step": "T001",
+      "context_sha256": "04e976c49daf6108d17c5e3b4b8a8ad85b87f6f24e4dfb59116532226121b630",
+      "helpers": [
+        {
+          "name": "yui_aux_0001",
+          "statement": "∀ (k : Fin m) (x : Space n) (t : ℝ), DifferentiableAt ℝ (fun p : Space n × ℝ => ubar u q p k) (x,t) → HasDerivAt (fun r => ubar u q (x,r) k) (fderiv ℝ (fun p : Space n × ℝ => ubar u q p k) (x,t) (0,1)) t ∧ HasFDerivAt (fun y => ubar u q (y,t) k) ((fderiv ℝ (fun p : Space n × ℝ => ubar u q p k) (x,t)).comp (ContinuousLinearMap.inl ℝ (Space n) ℝ)) x",
+          "proof": "intro k x t hd\nconstructor\n· have hc := hd.hasFDerivAt.comp t (hasFDerivAt_prodMk_right (𝕜 := ℝ) x t)\n  simpa [Function.comp_def] using hc.hasDerivAt\n· exact hd.hasFDerivAt.comp x (hasFDerivAt_prodMk_left (𝕜 := ℝ) x t)",
+          "dependencies": [],
+          "context_sha256": "04e976c49daf6108d17c5e3b4b8a8ad85b87f6f24e4dfb59116532226121b630",
+          "sha256": "949daaac53eecc18d1fe61467e0a56704a64bece71cc8a30b9b37d338ecf1bd0",
+          "check": {
+            "exit_code": 0,
+            "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-bcuj_jza/output/Auxiliary.lean:117:89: warning: Variable name `h_H001` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-bcuj_jza/output/Auxiliary.lean:117:114: warning: Variable name `h_H002` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (n m : ℕ) (u : Space n × ↑(Set.Ioi 0) → Value m) (q : Value m),\n  1 ≤ n ∧ 1 ≤ m →\n    Smooth (ubar u q) →\n      ∀ (k : Fin m) (x : Space n) (t : ℝ),\n        DifferentiableAt ℝ (fun p => ubar u q p k) (x, t) →\n          HasDerivAt (fun r => ubar u q (x, r) k) ((fderiv ℝ (fun p => ubar u q p k) (x, t)) (0, 1)) t ∧\n            HasFDerivAt (fun y => ubar u q (y, t) k)\n              (fderiv ℝ (fun p => ubar u q p k) (x, t) ∘SL ContinuousLinearMap.inl ℝ (Space n) ℝ) x\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+            "stderr": "",
+            "wall_seconds": 3.2462557920007384,
+            "native_limits": {
+              "timeout_seconds": 180,
+              "max_heartbeats": 20000000
+            },
+            "source_path": "/Users/syyui/projects/Yui-results/test_uncond/wave-map-energy/rigorous-proof/20261105T120332Z-cc987d3921/workflow/native-checks/91190d3bfea6490a8322886d15d7ea17.lean",
+            "source_sha256": "d7fe7bde831f0e0ce2d8b3ba34cdb5c6dc2f2ca2244db9d672d3a845c2863174",
+            "auxiliary_valid": true,
+            "axioms": [
+              "Classical.choice",
+              "Quot.sound",
+              "propext"
+            ],
+            "lean_sha256": "d7fe7bde831f0e0ce2d8b3ba34cdb5c6dc2f2ca2244db9d672d3a845c2863174",
+            "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+            "context_port": "T001",
+            "candidate": 2
+          }
+        }
+      ],
+      "body": "have hs : IsOpen {p : Space n × ℝ | 0 < p.2} := isOpen_lt continuous_const continuous_snd\nhave hk : ∀ k : Fin m, ContDiffOn ℝ ∞ (fun p : Space n × ℝ => ubar u q p k) {p | 0 < p.2} := contDiffOn_pi.mp h_H002\nhave hd : ∀ (k : Fin m) (x : Space n) (t : ℝ), 0 < t → DifferentiableAt ℝ (fun p : Space n × ℝ => ubar u q p k) (x,t) := by\n  intro k x t ht\n  exact ((hk k).contDiffAt (hs.mem_nhds ht)).differentiableAt (by simp)\nhave hslice := fun k x t ht => (@yui_aux_0001 n m u q h_H001 h_H002 k x t (hd k x t ht))\nhave hdf : ∀ k : Fin m, ContDiffOn ℝ ∞ (fderiv ℝ (fun p : Space n × ℝ => ubar u q p k)) {p | 0 < p.2} := by\n  intro k\n  exact ((contDiffOn_infty_iff_fderiv_of_isOpen hs).mp (hk k)).2\nhave hv : ∀ (x : Space n) (t : ℝ), 0 < t → ∀ k : Fin m, velocity (ubar u q) x t k = fderiv ℝ (fun p : Space n × ℝ => ubar u q p k) (x,t) (0,1) := by\n  intro x t ht k\n  exact (hslice k x t ht).1.deriv\nhave hp : ∀ (j : Fin n) (x : Space n) (t : ℝ), 0 < t → ∀ k : Fin m, spatial (ubar u q) j x t k = fderiv ℝ (fun p : Space n × ℝ => ubar u q p k) (x,t) (Pi.single j 1,0) := by\n  intro j x t ht k\n  change (fderiv ℝ (fun y => ubar u q (y,t) k) x) (Pi.single j 1) = _\n  rw [(hslice k x t ht).2.fderiv]\n  rfl\nrefine ⟨h_H002, ?_, ?_, ?_, ?_⟩\n· apply contDiffOn_pi.mpr\n  intro k\n  exact ((hdf k).clm_apply (contDiffOn_const (c := ((0 : Space n), (1 : ℝ))))).congr (fun p ht => hv p.1 p.2 ht k)\n· intro j\n  apply contDiffOn_pi.mpr\n  intro k\n  exact ((hdf k).clm_apply (contDiffOn_const (c := (Pi.single j (1 : ℝ), (0 : ℝ))))).congr (fun p ht => hp j p.1 p.2 ht k)\n· intro x t ht k\n  rw [hv x t ht k]\n  exact (hslice k x t ht).1\n· intro x t ht k\n  exact (hslice k x t ht).2.differentiableAt.hasFDerivAt"
+    },
+    "T004": {
+      "schema": "yui-local-proof-1",
+      "step": "T004",
+      "context_sha256": "58a59682a1eea7a92d8ca07ebf0a842f440d2aec07f1e7ff7dd42594834783ef",
+      "helpers": [
+        {
+          "name": "yui_aux_0001",
+          "statement": "∀ (f : Space n → ℝ) (x : Space n) (c : ℝ), f =ᶠ[𝓝 x] (fun _ => c) → fderiv ℝ f x = 0",
+          "proof": "intro f x c he\nrw [he.fderiv_eq, fderiv_const_apply]",
+          "dependencies": [],
+          "context_sha256": "58a59682a1eea7a92d8ca07ebf0a842f440d2aec07f1e7ff7dd42594834783ef",
+          "sha256": "2b6e8664a7a4682b61f97d24a55d872d21c2831ab7bd27a0a49f6409e59e3f71",
+          "check": {
+            "exit_code": 0,
+            "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-t3f5y7u2/output/Auxiliary.lean:117:89: warning: Variable name `h_H006` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-t3f5y7u2/output/Auxiliary.lean:117:133: warning: Variable name `h_T003` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (n m : ℕ) (u : Space n × ↑(Set.Ioi 0) → Value m) (q : Value m),\n  CompactPerturbation (ubar u q) q →\n    (FirstCalculus (ubar u q) ∧\n        SecondCalculus (ubar u q) ∧\n          ContDiffOn ℝ ∞ (fun p => density (ubar u q) p.1 p.2) {p | 0 < p.2} ∧\n            ContDiffOn ℝ ∞ (fun p => densityRate (ubar u q) p.1 p.2) {p | 0 < p.2} ∧\n              (∀ (x : Space n) (t : ℝ),\n                  0 < t → HasDerivAt (fun r => density (ubar u q) x r) (densityRate (ubar u q) x t) t) ∧\n                (∀ (j : Fin n) (x : Space n) (t : ℝ),\n                    0 < t →\n                      ∀ (k : Fin m),\n                        (fderiv ℝ (fun y => ubar u q (y, t) k) x) (Pi.single j 1) = spatial (ubar u q) j x t k ∧\n                          (fderiv ℝ (fun y => velocity (ubar u q) y t k) x) (Pi.single j 1) = mixed (ubar u q) j x t k ∧\n                            (fderiv ℝ (fun y => spatial (ubar u q) j y t k) x) (Pi.single j 1) =\n                              spatialSecond (ubar u q) j x t k) ∧\n                  (∀ (x : Space n) (t : ↑(Set.Ioi 0)), ubar u q (x, ↑t) = u (x, t)) ∧\n                    ∀ (x : Space n), ∀ t ≤ 0, ubar u q (x, t) = q) →\n      ∀ (f : Space n → ℝ) (x : Space n) (c : ℝ), (f =ᶠ[𝓝 x] fun x => c) → fderiv ℝ f x = 0\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+            "stderr": "",
+            "wall_seconds": 2.893966249997902,
+            "native_limits": {
+              "timeout_seconds": 180,
+              "max_heartbeats": 20000000
+            },
+            "source_path": "/Users/syyui/projects/Yui-results/test_uncond/wave-map-energy/rigorous-proof/20261105T120332Z-cc987d3921/workflow/native-checks/1bd7ff1ce2a940deb4c9405a371d2f50.lean",
+            "source_sha256": "910fd4207780cf389c92ee559bacc72f4d0af0768742c5f48ad0a182952184ff",
+            "auxiliary_valid": true,
+            "axioms": [
+              "Classical.choice",
+              "Quot.sound",
+              "propext"
+            ],
+            "lean_sha256": "910fd4207780cf389c92ee559bacc72f4d0af0768742c5f48ad0a182952184ff",
+            "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+            "context_port": "T004",
+            "candidate": 2
+          }
+        },
+        {
+          "name": "yui_aux_0002",
+          "statement": "∀ (C : Set (Space n)) (a b : ℝ), IsClosed C → (∀ x r, x ∉ C → r ∈ Set.Ioo a b → (ubar u q) (x,r) = q) → ∀ x r, x ∉ C → r ∈ Set.Ioo a b → velocity (ubar u q) x r = 0 ∧ ∀ j, spatial (ubar u q) j x r = 0",
+          "proof": "intro C a b hC hv x r hx hr\nconstructor\n· funext k\n  have he : (fun s => (ubar u q) (x,s) k) =ᶠ[𝓝 r] (fun _ => q k) := by\n    filter_upwards [isOpen_Ioo.mem_nhds hr] with s hs\n    exact congrFun (hv x s hx hs) k\n  change deriv (fun s => (ubar u q) (x,s) k) r = 0\n  rw [he.deriv_eq, deriv_const]\n· intro j\n  funext k\n  have he : (fun y => (ubar u q) (y,r) k) =ᶠ[𝓝 x] (fun _ => q k) := by\n    filter_upwards [hC.isOpen_compl.mem_nhds hx] with y hy\n    exact congrFun (hv y r hy hr) k\n  change fderiv ℝ (fun y => (ubar u q) (y,r) k) x (Pi.single j 1) = 0\n  rw [@yui_aux_0001 n m u q h_H006 h_T003 _ x (q k) he]\n  rfl",
+          "dependencies": [
+            "yui_aux_0001"
+          ],
+          "context_sha256": "58a59682a1eea7a92d8ca07ebf0a842f440d2aec07f1e7ff7dd42594834783ef",
+          "sha256": "14761707f4827915f30a9b5054911fbbd2c60a3935b735c78adc2713215a76a4",
+          "check": {
+            "exit_code": 0,
+            "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-5zz7in6a/output/Auxiliary.lean:117:94: warning: Variable name `h_H006` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-5zz7in6a/output/Auxiliary.lean:117:138: warning: Variable name `h_T003` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (n m : ℕ) (u : Space n × ↑(Set.Ioi 0) → Value m) (q : Value m),\n  CompactPerturbation (ubar u q) q →\n    (FirstCalculus (ubar u q) ∧\n        SecondCalculus (ubar u q) ∧\n          ContDiffOn ℝ ∞ (fun p => density (ubar u q) p.1 p.2) {p | 0 < p.2} ∧\n            ContDiffOn ℝ ∞ (fun p => densityRate (ubar u q) p.1 p.2) {p | 0 < p.2} ∧\n              (∀ (x : Space n) (t : ℝ),\n                  0 < t → HasDerivAt (fun r => density (ubar u q) x r) (densityRate (ubar u q) x t) t) ∧\n                (∀ (j : Fin n) (x : Space n) (t : ℝ),\n                    0 < t →\n                      ∀ (k : Fin m),\n                        (fderiv ℝ (fun y => ubar u q (y, t) k) x) (Pi.single j 1) = spatial (ubar u q) j x t k ∧\n                          (fderiv ℝ (fun y => velocity (ubar u q) y t k) x) (Pi.single j 1) = mixed (ubar u q) j x t k ∧\n                            (fderiv ℝ (fun y => spatial (ubar u q) j y t k) x) (Pi.single j 1) =\n                              spatialSecond (ubar u q) j x t k) ∧\n                  (∀ (x : Space n) (t : ↑(Set.Ioi 0)), ubar u q (x, ↑t) = u (x, t)) ∧\n                    ∀ (x : Space n), ∀ t ≤ 0, ubar u q (x, t) = q) →\n      ∀ (C : Set (Space n)) (a b : ℝ),\n        IsClosed C →\n          (∀ (x : Space n) (r : ℝ), x ∉ C → r ∈ Set.Ioo a b → ubar u q (x, r) = q) →\n            ∀ (x : Space n) (r : ℝ),\n              x ∉ C → r ∈ Set.Ioo a b → velocity (ubar u q) x r = 0 ∧ ∀ (j : Fin n), spatial (ubar u q) j x r = 0\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+            "stderr": "",
+            "wall_seconds": 3.186710250003671,
+            "native_limits": {
+              "timeout_seconds": 180,
+              "max_heartbeats": 20000000
+            },
+            "source_path": "/Users/syyui/projects/Yui-results/test_uncond/wave-map-energy/rigorous-proof/20261105T120332Z-cc987d3921/workflow/native-checks/1d3cf2a5723c477d9255c2715d98e465.lean",
+            "source_sha256": "cd08d8445d88c77620a6bbd28f9e2f3d8409e860c402466d92244c51e84b140d",
+            "auxiliary_valid": true,
+            "axioms": [
+              "Classical.choice",
+              "Quot.sound",
+              "propext"
+            ],
+            "lean_sha256": "cd08d8445d88c77620a6bbd28f9e2f3d8409e860c402466d92244c51e84b140d",
+            "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+            "context_port": "T004",
+            "candidate": 3
+          }
+        }
+      ],
+      "body": "intro t₀ ht₀\nobtain ⟨C, hC, hv⟩ := h_H006 (t₀ / 2) (3 * t₀ / 2) (by linarith) (by linarith)\nhave hv' : ∀ x r, x ∉ C → r ∈ Set.Ioo (t₀ / 2) (3 * t₀ / 2) →\n    (ubar u q) (x,r) = q := by\n  intro x r hx hr\n  exact hv x r hx ⟨hr.1.le, hr.2.le⟩\nhave hfirst := @yui_aux_0002 n m u q h_H006 h_T003 C (t₀ / 2) (3 * t₀ / 2)\n  hC.isClosed hv'\nrefine ⟨C, hC, hv, ?_, ?_⟩\n· intro ell hell x r hx hr\n  have hO : IsOpen (Cᶜ ×ˢ Set.Ioo (t₀ / 2) (3 * t₀ / 2)) :=\n    hC.isClosed.isOpen_compl.prod isOpen_Ioo\n  have he : ubar u q =ᶠ[𝓝 (x,r)] (fun _ => q) := by\n    filter_upwards [hO.mem_nhds ⟨hx, hr⟩] with p hp\n    exact hv' p.1 p.2 hp.1 hp.2\n  rw [(he.iteratedFDeriv ℝ ell).self_of_nhds,\n    iteratedFDeriv_const_of_ne (Nat.ne_of_gt hell)]\n  rfl\n· intro x r hx hr\n  obtain ⟨hV, hP⟩ := hfirst x r hx hr\n  have hA : acceleration (ubar u q) x r = 0 := by\n    funext k\n    have he : (fun s => velocity (ubar u q) x s k) =ᶠ[𝓝 r] (fun _ => (0 : ℝ)) := by\n      filter_upwards [isOpen_Ioo.mem_nhds hr] with s hs\n      exact congrFun (hfirst x s hx hs).1 k\n    change deriv (fun s => velocity (ubar u q) x s k) r = 0\n    rw [he.deriv_eq, deriv_const]\n  have hS : ∀ j, spatialSecond (ubar u q) j x r = 0 := by\n    intro j\n    funext k\n    have he : (fun y => spatial (ubar u q) j y r k) =ᶠ[𝓝 x] (fun _ => (0 : ℝ)) := by\n      filter_upwards [hC.isClosed.isOpen_compl.mem_nhds hx] with y hy\n      exact congrFun ((hfirst y r hy hr).2 j) k\n    change fderiv ℝ (fun y => spatial (ubar u q) j y r k) x (Pi.single j 1) = 0\n    rw [@yui_aux_0001 n m u q h_H006 h_T003 _ x 0 he]\n    rfl\n  have hW : ∀ j, mixed (ubar u q) j x r = 0 := by\n    intro j\n    funext k\n    have he : (fun y => velocity (ubar u q) y r k) =ᶠ[𝓝 x] (fun _ => (0 : ℝ)) := by\n      filter_upwards [hC.isClosed.isOpen_compl.mem_nhds hx] with y hy\n      exact congrFun (hfirst y r hy hr).1 k\n    change fderiv ℝ (fun y => velocity (ubar u q) y r k) x (Pi.single j 1) = 0\n    rw [@yui_aux_0001 n m u q h_H006 h_T003 _ x 0 he]\n    rfl\n  refine ⟨hV, hA, (fun j => ⟨hP j, hS j, hW j⟩), ?_, ?_⟩\n  · simp [density, hV, hP, normSq, dot]\n  · simp [densityRate, hV, hP, dot]\n"
+    },
+    "T005": {
+      "schema": "yui-local-proof-1",
+      "step": "T005",
+      "context_sha256": "6ef0022fd2fc7b42a055cb83be4750717719faa396449a43562fa079269a366f",
+      "helpers": [
+        {
+          "name": "yui_aux_0001",
+          "statement": "∀ r : ℝ, 0 < r → Continuous (fun x : Space n => velocity (ubar u q) x r)",
+          "proof": "intro r hr\nexact h_T003.1.2.1.continuousOn.comp_continuous\n  (continuous_id.prodMk continuous_const) (fun x => hr)",
+          "dependencies": [],
+          "context_sha256": "6ef0022fd2fc7b42a055cb83be4750717719faa396449a43562fa079269a366f",
+          "sha256": "a4ac297911a9a9b248c8a44e796d66bb989756795381cf07646ab89dd105020f",
+          "check": {
+            "exit_code": 0,
+            "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-txu0g65n/output/Auxiliary.lean:126:58: warning: Variable name `h_T004` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (n m : ℕ) (u : Space n × ↑(Set.Ioi 0) → Value m) (q : Value m),\n  (FirstCalculus (ubar u q) ∧\n      SecondCalculus (ubar u q) ∧\n        ContDiffOn ℝ ∞ (fun p => density (ubar u q) p.1 p.2) {p | 0 < p.2} ∧\n          ContDiffOn ℝ ∞ (fun p => densityRate (ubar u q) p.1 p.2) {p | 0 < p.2} ∧\n            (∀ (x : Space n) (t : ℝ),\n                0 < t → HasDerivAt (fun r => density (ubar u q) x r) (densityRate (ubar u q) x t) t) ∧\n              (∀ (j : Fin n) (x : Space n) (t : ℝ),\n                  0 < t →\n                    ∀ (k : Fin m),\n                      (fderiv ℝ (fun y => ubar u q (y, t) k) x) (Pi.single j 1) = spatial (ubar u q) j x t k ∧\n                        (fderiv ℝ (fun y => velocity (ubar u q) y t k) x) (Pi.single j 1) = mixed (ubar u q) j x t k ∧\n                          (fderiv ℝ (fun y => spatial (ubar u q) j y t k) x) (Pi.single j 1) =\n                            spatialSecond (ubar u q) j x t k) ∧\n                (∀ (x : Space n) (t : ↑(Set.Ioi 0)), ubar u q (x, ↑t) = u (x, t)) ∧\n                  ∀ (x : Space n), ∀ t ≤ 0, ubar u q (x, t) = q) →\n    (∀ (t₀ : ℝ), 0 < t₀ → ∃ C, SlabVanishing (ubar u q) q t₀ C) →\n      ∀ (r : ℝ), 0 < r → Continuous fun x => velocity (ubar u q) x r\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+            "stderr": "",
+            "wall_seconds": 2.871893417002866,
+            "native_limits": {
+              "timeout_seconds": 180,
+              "max_heartbeats": 20000000
+            },
+            "source_path": "/Users/syyui/projects/Yui-results/test_uncond/wave-map-energy/rigorous-proof/20261105T120332Z-cc987d3921/workflow/native-checks/1171093a9d1248448fa8c0b334843de1.lean",
+            "source_sha256": "9c7af5f189c314b68fa39d75ac1543d10e36c2fa2b99d233c39adac9cd7614b0",
+            "auxiliary_valid": true,
+            "axioms": [
+              "Classical.choice",
+              "Quot.sound",
+              "propext"
+            ],
+            "lean_sha256": "9c7af5f189c314b68fa39d75ac1543d10e36c2fa2b99d233c39adac9cd7614b0",
+            "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+            "context_port": "T005",
+            "candidate": 2
+          }
+        },
+        {
+          "name": "yui_aux_0002",
+          "statement": "∀ (r : ℝ), 0 < r → ∀ h ∈ sections (ubar u q) r, Continuous h",
+          "proof": "intro r hr\nhave slice {F : Type} [TopologicalSpace F] (f : Space n × ℝ → F)\n    (hf : ContinuousOn f {p | 0 < p.2}) :\n    Continuous (fun x : Space n => f (x,r)) :=\n  hf.comp_continuous (continuous_id.prodMk continuous_const) (fun x => hr)\nhave hv := yui_aux_0001 n m u q h_T003 h_T004 r hr\nhave ha := slice _ h_T003.2.1.1.continuousOn\nhave hs (j : Fin n) := slice _ (h_T003.1.2.2.1 j).continuousOn\nhave hss (j : Fin n) := slice _ (h_T003.2.1.2.1 j).continuousOn\nhave hm (j : Fin n) := slice _ (h_T003.2.1.2.2.1 j).continuousOn\nhave he := slice _ h_T003.2.2.1.continuousOn\nhave hd := slice _ h_T003.2.2.2.1.continuousOn\nhave hvk (k : Fin m) := (continuous_apply k).comp hv\nhave hak (k : Fin m) := (continuous_apply k).comp ha\nhave hsk (j : Fin n) (k : Fin m) := (continuous_apply k).comp (hs j)\nhave hssk (j : Fin n) (k : Fin m) := (continuous_apply k).comp (hss j)\nhave hmk (j : Fin n) (k : Fin m) := (continuous_apply k).comp (hm j)\nintro h hh\nrcases hh with hh | hh | ⟨k,hh⟩ | ⟨j,k,hh⟩ | hh | ⟨j,hh⟩\n· subst h; exact he\n· subst h; exact hd\n· rcases hh with hh | hh | hh <;> subst h <;> fun_prop\n· rcases hh with hh | hh | hh | hh | hh | hh | hh <;> subst h <;> fun_prop\n· subst h\n  unfold dot\n  fun_prop\n· rcases hh with hh | hh | hh | hh <;> subst h <;> unfold dot <;> fun_prop",
+          "dependencies": [
+            "yui_aux_0001"
+          ],
+          "context_sha256": "6ef0022fd2fc7b42a055cb83be4750717719faa396449a43562fa079269a366f",
+          "sha256": "3f7bcbc0acc695f8335b26f2ee8995969911857319d7cd1088fba08a8cb81c1d",
+          "check": {
+            "exit_code": 0,
+            "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-ko7m8tyw/output/Auxiliary.lean:126:58: warning: Variable name `h_T004` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (n m : ℕ) (u : Space n × ↑(Set.Ioi 0) → Value m) (q : Value m),\n  (FirstCalculus (ubar u q) ∧\n      SecondCalculus (ubar u q) ∧\n        ContDiffOn ℝ ∞ (fun p => density (ubar u q) p.1 p.2) {p | 0 < p.2} ∧\n          ContDiffOn ℝ ∞ (fun p => densityRate (ubar u q) p.1 p.2) {p | 0 < p.2} ∧\n            (∀ (x : Space n) (t : ℝ),\n                0 < t → HasDerivAt (fun r => density (ubar u q) x r) (densityRate (ubar u q) x t) t) ∧\n              (∀ (j : Fin n) (x : Space n) (t : ℝ),\n                  0 < t →\n                    ∀ (k : Fin m),\n                      (fderiv ℝ (fun y => ubar u q (y, t) k) x) (Pi.single j 1) = spatial (ubar u q) j x t k ∧\n                        (fderiv ℝ (fun y => velocity (ubar u q) y t k) x) (Pi.single j 1) = mixed (ubar u q) j x t k ∧\n                          (fderiv ℝ (fun y => spatial (ubar u q) j y t k) x) (Pi.single j 1) =\n                            spatialSecond (ubar u q) j x t k) ∧\n                (∀ (x : Space n) (t : ↑(Set.Ioi 0)), ubar u q (x, ↑t) = u (x, t)) ∧\n                  ∀ (x : Space n), ∀ t ≤ 0, ubar u q (x, t) = q) →\n    (∀ (t₀ : ℝ), 0 < t₀ → ∃ C, SlabVanishing (ubar u q) q t₀ C) →\n      ∀ (r : ℝ), 0 < r → ∀ h ∈ sections (ubar u q) r, Continuous h\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+            "stderr": "",
+            "wall_seconds": 3.1455219159979606,
+            "native_limits": {
+              "timeout_seconds": 180,
+              "max_heartbeats": 20000000
+            },
+            "source_path": "/Users/syyui/projects/Yui-results/test_uncond/wave-map-energy/rigorous-proof/20261105T120332Z-cc987d3921/workflow/native-checks/ab26ceea85054128adc0e15cb1c09cca.lean",
+            "source_sha256": "e008a69d4a1d114cd4c67631eaacdaa9aa372c678023d0e2dd028ceec9b59ea1",
+            "auxiliary_valid": true,
+            "axioms": [
+              "Classical.choice",
+              "Quot.sound",
+              "propext"
+            ],
+            "lean_sha256": "e008a69d4a1d114cd4c67631eaacdaa9aa372c678023d0e2dd028ceec9b59ea1",
+            "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+            "context_port": "T005",
+            "candidate": 3
+          }
+        },
+        {
+          "name": "yui_aux_0003",
+          "statement": "∀ (t₀ : ℝ) (C : Set (Space n)), SlabVanishing (ubar u q) q t₀ C → ∀ r ∈ Set.Ioo (t₀/2) (3*t₀/2), ∀ h ∈ sections (ubar u q) r, ∀ x, x ∉ C → h x = 0",
+          "proof": "intro t₀ C hC r hr h hh x hx\nobtain ⟨hv, ha, hs, he, hd⟩ := hC.2.2.2 x r hx hr\nhave hsp (j : Fin n) := (hs j).1\nhave hss (j : Fin n) := (hs j).2.1\nhave hm (j : Fin n) := (hs j).2.2\nrcases hh with hh | hh | ⟨k,hh⟩ | ⟨j,k,hh⟩ | hh | ⟨j,hh⟩\n· subst h; exact he\n· subst h; exact hd\n· rcases hh with hh | hh | hh <;> subst h <;> simp [hv, ha]\n· rcases hh with hh | hh | hh | hh | hh | hh | hh <;> subst h <;>\n    simp [hv, ha, hsp, hss, hm]\n· subst h; simp [dot, hv, ha]\n· rcases hh with hh | hh | hh | hh <;> subst h <;> simp [dot, hv, hsp, hss, hm]",
+          "dependencies": [],
+          "context_sha256": "6ef0022fd2fc7b42a055cb83be4750717719faa396449a43562fa079269a366f",
+          "sha256": "fa864d0a7781f70c9d6ab918d800efb919cee98a369c4ca00bd8c3216990e8d3",
+          "check": {
+            "exit_code": 0,
+            "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-asl6jo32/output/Auxiliary.lean:126:58: warning: Variable name `h_T004` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-asl6jo32/output/Auxiliary.lean:169:89: warning: Variable name `h_T003` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-asl6jo32/output/Auxiliary.lean:178:58: warning: Variable name `h_T004` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-asl6jo32/output/Auxiliary.lean:189:16: warning: This simp argument is unused:\n  ha\n\nHint: Omit it from the simp argument list.\n  simp [hv, ha̵,̵ ̵h̵sp, hss, hm]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nchecked : ∀ (n m : ℕ) (u : Space n × ↑(Set.Ioi 0) → Value m) (q : Value m),\n  (FirstCalculus (ubar u q) ∧\n      SecondCalculus (ubar u q) ∧\n        ContDiffOn ℝ ∞ (fun p => density (ubar u q) p.1 p.2) {p | 0 < p.2} ∧\n          ContDiffOn ℝ ∞ (fun p => densityRate (ubar u q) p.1 p.2) {p | 0 < p.2} ∧\n            (∀ (x : Space n) (t : ℝ),\n                0 < t → HasDerivAt (fun r => density (ubar u q) x r) (densityRate (ubar u q) x t) t) ∧\n              (∀ (j : Fin n) (x : Space n) (t : ℝ),\n                  0 < t →\n                    ∀ (k : Fin m),\n                      (fderiv ℝ (fun y => ubar u q (y, t) k) x) (Pi.single j 1) = spatial (ubar u q) j x t k ∧\n                        (fderiv ℝ (fun y => velocity (ubar u q) y t k) x) (Pi.single j 1) = mixed (ubar u q) j x t k ∧\n                          (fderiv ℝ (fun y => spatial (ubar u q) j y t k) x) (Pi.single j 1) =\n                            spatialSecond (ubar u q) j x t k) ∧\n                (∀ (x : Space n) (t : ↑(Set.Ioi 0)), ubar u q (x, ↑t) = u (x, t)) ∧\n                  ∀ (x : Space n), ∀ t ≤ 0, ubar u q (x, t) = q) →\n    (∀ (t₀ : ℝ), 0 < t₀ → ∃ C, SlabVanishing (ubar u q) q t₀ C) →\n      ∀ (t₀ : ℝ) (C : Set (Space n)),\n        SlabVanishing (ubar u q) q t₀ C →\n          ∀ r ∈ Set.Ioo (t₀ / 2) (3 * t₀ / 2), ∀ h ∈ sections (ubar u q) r, ∀ x ∉ C, h x = 0\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+            "stderr": "",
+            "wall_seconds": 4.589564999994764,
+            "native_limits": {
+              "timeout_seconds": 180,
+              "max_heartbeats": 20000000
+            },
+            "source_path": "/Users/syyui/projects/Yui-results/test_uncond/wave-map-energy/rigorous-proof/20261105T120332Z-cc987d3921/workflow/native-checks/2d6204d8c0004212b82f99648bf81d93.lean",
+            "source_sha256": "418d214b4eafaada5f5fda8dfd685e85a1440e42b9bc5b10a5d398b0d9a4114e",
+            "auxiliary_valid": true,
+            "axioms": [
+              "Classical.choice",
+              "Quot.sound",
+              "propext"
+            ],
+            "lean_sha256": "418d214b4eafaada5f5fda8dfd685e85a1440e42b9bc5b10a5d398b0d9a4114e",
+            "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+            "context_port": "T005",
+            "candidate": 4
+          }
+        },
+        {
+          "name": "yui_aux_0004",
+          "statement": "∀ (C : Set (Space n)) (h : Space n → ℝ), IsCompact C → Continuous h → (∀ x, x ∉ C → h x = 0) → SupportedSection C h",
+          "proof": "intro C h hC hc hz\nhave hs : Function.support h ⊆ C := by\n  intro x hx\n  by_contra hn\n  exact hx (hz x hn)\nhave ht : tsupport h ⊆ C := closure_minimal hs hC.isClosed\nhave hk : HasCompactSupport h := hC.of_isClosed_subset (isClosed_tsupport h) ht\nexact ⟨hc, ht, hk, hc.integrable_of_hasCompactSupport hk⟩",
+          "dependencies": [],
+          "context_sha256": "6ef0022fd2fc7b42a055cb83be4750717719faa396449a43562fa079269a366f",
+          "sha256": "89aaed7c405bc6c9fc53c88ef11226362b3ea9edd76255409b2d0e180ddc2446",
+          "check": {
+            "exit_code": 0,
+            "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-50xn1krc/output/Auxiliary.lean:126:58: warning: Variable name `h_T004` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-50xn1krc/output/Auxiliary.lean:169:94: warning: Variable name `h_T003` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-50xn1krc/output/Auxiliary.lean:178:58: warning: Variable name `h_T004` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-50xn1krc/output/Auxiliary.lean:189:16: warning: This simp argument is unused:\n  ha\n\nHint: Omit it from the simp argument list.\n  simp [hv, ha̵,̵ ̵h̵sp, hss, hm]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-50xn1krc/output/Auxiliary.lean:193:89: warning: Variable name `h_T003` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-50xn1krc/output/Auxiliary.lean:202:58: warning: Variable name `h_T004` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (n m : ℕ) (u : Space n × ↑(Set.Ioi 0) → Value m) (q : Value m),\n  (FirstCalculus (ubar u q) ∧\n      SecondCalculus (ubar u q) ∧\n        ContDiffOn ℝ ∞ (fun p => density (ubar u q) p.1 p.2) {p | 0 < p.2} ∧\n          ContDiffOn ℝ ∞ (fun p => densityRate (ubar u q) p.1 p.2) {p | 0 < p.2} ∧\n            (∀ (x : Space n) (t : ℝ),\n                0 < t → HasDerivAt (fun r => density (ubar u q) x r) (densityRate (ubar u q) x t) t) ∧\n              (∀ (j : Fin n) (x : Space n) (t : ℝ),\n                  0 < t →\n                    ∀ (k : Fin m),\n                      (fderiv ℝ (fun y => ubar u q (y, t) k) x) (Pi.single j 1) = spatial (ubar u q) j x t k ∧\n                        (fderiv ℝ (fun y => velocity (ubar u q) y t k) x) (Pi.single j 1) = mixed (ubar u q) j x t k ∧\n                          (fderiv ℝ (fun y => spatial (ubar u q) j y t k) x) (Pi.single j 1) =\n                            spatialSecond (ubar u q) j x t k) ∧\n                (∀ (x : Space n) (t : ↑(Set.Ioi 0)), ubar u q (x, ↑t) = u (x, t)) ∧\n                  ∀ (x : Space n), ∀ t ≤ 0, ubar u q (x, t) = q) →\n    (∀ (t₀ : ℝ), 0 < t₀ → ∃ C, SlabVanishing (ubar u q) q t₀ C) →\n      ∀ (C : Set (Space n)) (h : Space n → ℝ), IsCompact C → Continuous h → (∀ x ∉ C, h x = 0) → SupportedSection C h\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+            "stderr": "",
+            "wall_seconds": 4.152016749998438,
+            "native_limits": {
+              "timeout_seconds": 180,
+              "max_heartbeats": 20000000
+            },
+            "source_path": "/Users/syyui/projects/Yui-results/test_uncond/wave-map-energy/rigorous-proof/20261105T120332Z-cc987d3921/workflow/native-checks/655bcca5aaf649fb85e6bd82de258a99.lean",
+            "source_sha256": "449268f7bb8e76d737d19c44ec21b2a4e1e8add92409a1d6931cf2632579e17f",
+            "auxiliary_valid": true,
+            "axioms": [
+              "Classical.choice",
+              "Quot.sound",
+              "propext"
+            ],
+            "lean_sha256": "449268f7bb8e76d737d19c44ec21b2a4e1e8add92409a1d6931cf2632579e17f",
+            "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+            "context_port": "T005",
+            "candidate": 5
+          }
+        }
+      ],
+      "body": "classical\nhave hall : ∀ t₀ : ℝ, 0 < t₀ → ∃ C : Set (Space n),\n    SlabVanishing (ubar u q) q t₀ C ∧\n    ∀ r ∈ Set.Ioo (t₀/2) (3*t₀/2),\n    ∀ h ∈ Submodule.span ℝ (sections (ubar u q) r), SupportedSection C h := by\n  intro t₀ ht₀\n  obtain ⟨C, hC⟩ := h_T004 t₀ ht₀\n  refine ⟨C, hC, ?_⟩\n  intro r hr h hh\n  have hrpos : 0 < r := by linarith [hr.1]\n  have hp : Continuous h ∧ ∀ x, x ∉ C → h x = 0 := by\n    induction hh using Submodule.span_induction with\n    | mem f hf =>\n      exact ⟨yui_aux_0002 n m u q h_T003 h_T004 r hrpos f hf,\n        yui_aux_0003 n m u q h_T003 h_T004 t₀ C hC r hr f hf⟩\n    | zero =>\n      exact ⟨continuous_const, fun x hx => rfl⟩\n    | add f g hf hg hpf hpg =>\n      refine ⟨hpf.1.add hpg.1, ?_⟩\n      intro x hx\n      change f x + g x = 0\n      rw [hpf.2 x hx, hpg.2 x hx, add_zero]\n    | smul a f hf hpf =>\n      refine ⟨continuous_const.smul hpf.1, ?_⟩\n      intro x hx\n      change a • f x = 0\n      rw [hpf.2 x hx, smul_zero]\n  exact yui_aux_0004 n m u q h_T003 h_T004 C h hC.1 hp.1 hp.2\nrefine ⟨hall, ?_⟩\nintro t ht\nobtain ⟨C, hC, hs⟩ := hall t ht\nhave hmem : t ∈ Set.Ioo (t/2) (3*t/2) := by constructor <;> linarith\nhave hgen : (fun x => density (ubar u q) x t) ∈ sections (ubar u q) t :=\n  Or.inl rfl\nexact (hs t hmem _ (Submodule.subset_span hgen)).2.2.2"
+    },
+    "T003": {
+      "schema": "yui-local-proof-1",
+      "step": "T003",
+      "context_sha256": "9aa870555670f9dc88fb9c619ca9a248b4bff0c863abce4c300eb2f963451f16",
+      "helpers": [
+        {
+          "name": "yui_aux_0001",
+          "statement": "ContDiffOn ℝ ∞ (fun p : Space n × ℝ => density (ubar u q) p.1 p.2) {p | 0 < p.2} ∧ ContDiffOn ℝ ∞ (fun p : Space n × ℝ => densityRate (ubar u q) p.1 p.2) {p | 0 < p.2}",
+          "proof": "have hdot : ∀ (f g : Space n × ℝ → Value m),\n    ContDiffOn ℝ ∞ f {p | 0 < p.2} →\n    ContDiffOn ℝ ∞ g {p | 0 < p.2} →\n    ContDiffOn ℝ ∞ (fun p => dot (f p) (g p)) {p | 0 < p.2} := by\n  intro f g hf hg\n  unfold dot\n  exact ContDiffOn.sum (fun k _ =>\n    (contDiffOn_pi.mp hf k).mul (contDiffOn_pi.mp hg k))\nhave hv := h_T001.2.1\nhave hp := h_T001.2.2.1\nhave ha := h_T002.1\nhave hw := h_T002.2.2.1\nconstructor\n· unfold density normSq\n  exact (hdot _ _ hv hv).add (ContDiffOn.sum (fun j _ => hdot _ _ (hp j) (hp j)))\n· unfold densityRate\n  exact (contDiffOn_const.mul (hdot _ _ hv ha)).add\n    (contDiffOn_const.mul (ContDiffOn.sum (fun j _ => hdot _ _ (hp j) (hw j))))",
+          "dependencies": [],
+          "context_sha256": "9aa870555670f9dc88fb9c619ca9a248b4bff0c863abce4c300eb2f963451f16",
+          "sha256": "30adb7547e8357cdbcd6089b38de89fbbfb213152e0665ba77d67bb8df943a12",
+          "check": {
+            "exit_code": 0,
+            "stdout": "checked : ∀ (n m : ℕ) (u : Space n × ↑(Set.Ioi 0) → Value m) (q : Value m),\n  FirstCalculus (ubar u q) →\n    SecondCalculus (ubar u q) →\n      ContDiffOn ℝ ∞ (fun p => density (ubar u q) p.1 p.2) {p | 0 < p.2} ∧\n        ContDiffOn ℝ ∞ (fun p => densityRate (ubar u q) p.1 p.2) {p | 0 < p.2}\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+            "stderr": "",
+            "wall_seconds": 2.7899905419981224,
+            "native_limits": {
+              "timeout_seconds": 180,
+              "max_heartbeats": 20000000
+            },
+            "source_path": "/Users/syyui/projects/Yui-results/test_uncond/wave-map-energy/rigorous-proof/20261105T120332Z-cc987d3921/workflow/native-checks/7d954b4ca0844116af55c757630d7735.lean",
+            "source_sha256": "a9bfa8b8117d2dff40814ea11a861984cdfde9f20fe998a95fb763152cc070de",
+            "auxiliary_valid": true,
+            "axioms": [
+              "Classical.choice",
+              "Quot.sound",
+              "propext"
+            ],
+            "lean_sha256": "a9bfa8b8117d2dff40814ea11a861984cdfde9f20fe998a95fb763152cc070de",
+            "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+            "context_port": "T003",
+            "candidate": 1
+          }
+        },
+        {
+          "name": "yui_aux_0002",
+          "statement": "∀ (f : ℝ → ℝ) (a t : ℝ), HasDerivAt f a t → HasDerivAt (fun r => f r * f r) (2 * (f t * a)) t",
+          "proof": "intro f a t hf\nhave heq : a * f t + f t * a = 2 * (f t * a) := by ring\nsimpa only [heq] using hf.fun_mul hf",
+          "dependencies": [],
+          "context_sha256": "9aa870555670f9dc88fb9c619ca9a248b4bff0c863abce4c300eb2f963451f16",
+          "sha256": "e856fc91fb94d59b86e7e6251d7f5f434a6616d2faa651e1259c01f8e501ea2c",
+          "check": {
+            "exit_code": 0,
+            "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-dminn14_/output/Auxiliary.lean:137:89: warning: Variable name `h_T001` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-dminn14_/output/Auxiliary.lean:137:125: warning: Variable name `h_T002` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (n m : ℕ) (u : Space n × ↑(Set.Ioi 0) → Value m) (q : Value m),\n  FirstCalculus (ubar u q) →\n    SecondCalculus (ubar u q) →\n      ∀ (f : ℝ → ℝ) (a t : ℝ), HasDerivAt f a t → HasDerivAt (fun r => f r * f r) (2 * (f t * a)) t\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+            "stderr": "",
+            "wall_seconds": 2.835332874994492,
+            "native_limits": {
+              "timeout_seconds": 180,
+              "max_heartbeats": 20000000
+            },
+            "source_path": "/Users/syyui/projects/Yui-results/test_uncond/wave-map-energy/rigorous-proof/20261105T120332Z-cc987d3921/workflow/native-checks/124ce1fb5df240cb8ae2304bab05b126.lean",
+            "source_sha256": "2e67c512177691a1969bf6306e5437e7a5c1d990dde2b87189992e9d4aba9cdd",
+            "auxiliary_valid": true,
+            "axioms": [
+              "Classical.choice",
+              "Quot.sound",
+              "propext"
+            ],
+            "lean_sha256": "2e67c512177691a1969bf6306e5437e7a5c1d990dde2b87189992e9d4aba9cdd",
+            "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+            "context_port": "T003",
+            "candidate": 3
+          }
+        },
+        {
+          "name": "yui_aux_0003",
+          "statement": "∀ (x : Space n) (t : ℝ), 0 < t → HasDerivAt (fun r => density (ubar u q) x r) (densityRate (ubar u q) x t) t",
+          "proof": "intro x t ht\nhave hsquare : ∀ (f : ℝ → Value m) (a : Value m),\n    (∀ k, HasDerivAt (fun r => f r k) (a k) t) →\n    HasDerivAt (fun r => normSq (f r)) (2 * dot (f t) a) t := by\n  intro f a hf\n  have hk : ∀ k : Fin m, HasDerivAt (fun r => f r k * f r k)\n      (2 * (f t k * a k)) t := by\n    intro k\n    exact (@yui_aux_0002 n m u q h_T001 h_T002) (fun r => f r k) (a k) t (hf k)\n  have hsum := HasDerivAt.fun_sum (u := Finset.univ) (fun k _ => hk k)\n  simpa only [normSq, dot, Finset.mul_sum] using hsum\nhave hv := hsquare (fun r => velocity (ubar u q) x r) (acceleration (ubar u q) x t)\n  (h_T002.2.2.2.1 x t ht)\nhave hp : ∀ j : Fin n, HasDerivAt (fun r => normSq (spatial (ubar u q) j x r))\n    (2 * dot (spatial (ubar u q) j x t) (mixed (ubar u q) j x t)) t := by\n  intro j\n  exact hsquare _ _ (h_T002.2.2.2.2.1 j x t ht)\nhave hsum := HasDerivAt.fun_sum (u := Finset.univ) (fun j _ => hp j)\nsimpa only [density, densityRate, Finset.mul_sum] using hv.fun_add hsum",
+          "dependencies": [
+            "yui_aux_0002"
+          ],
+          "context_sha256": "9aa870555670f9dc88fb9c619ca9a248b4bff0c863abce4c300eb2f963451f16",
+          "sha256": "c6fb51bf5e810f8260abab00c32805901b42d478079759084ef180f0a5969241",
+          "check": {
+            "exit_code": 0,
+            "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-ka3mivod/output/Auxiliary.lean:137:94: warning: Variable name `h_T001` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-ka3mivod/output/Auxiliary.lean:137:130: warning: Variable name `h_T002` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (n m : ℕ) (u : Space n × ↑(Set.Ioi 0) → Value m) (q : Value m),\n  FirstCalculus (ubar u q) →\n    SecondCalculus (ubar u q) →\n      ∀ (x : Space n) (t : ℝ), 0 < t → HasDerivAt (fun r => density (ubar u q) x r) (densityRate (ubar u q) x t) t\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+            "stderr": "",
+            "wall_seconds": 3.2094768329989165,
+            "native_limits": {
+              "timeout_seconds": 180,
+              "max_heartbeats": 20000000
+            },
+            "source_path": "/Users/syyui/projects/Yui-results/test_uncond/wave-map-energy/rigorous-proof/20261105T120332Z-cc987d3921/workflow/native-checks/a3d941ee12e84e7ebce81ed9b3f16cbc.lean",
+            "source_sha256": "77752e1422e508dc15fdb8d503d8075a4650d83acb5e0b8d41f7e4eb833286b3",
+            "auxiliary_valid": true,
+            "axioms": [
+              "Classical.choice",
+              "Quot.sound",
+              "propext"
+            ],
+            "lean_sha256": "77752e1422e508dc15fdb8d503d8075a4650d83acb5e0b8d41f7e4eb833286b3",
+            "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+            "context_port": "T003",
+            "candidate": 4
+          }
+        },
+        {
+          "name": "yui_aux_0004",
+          "statement": "∀ (x : Space n) (t : Set.Ioi (0 : ℝ)), (ubar u q) (x,t) = u (x,t)",
+          "proof": "intro x t\nexact dif_pos (show 0 < (t : ℝ) from t.property)",
+          "dependencies": [],
+          "context_sha256": "9aa870555670f9dc88fb9c619ca9a248b4bff0c863abce4c300eb2f963451f16",
+          "sha256": "eab37ed977c36ccf2b835e083c7df87b5c2be8483979a5785af31f986ec99a40",
+          "check": {
+            "exit_code": 0,
+            "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-pjou_30b/output/Auxiliary.lean:137:94: warning: Variable name `h_T001` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-pjou_30b/output/Auxiliary.lean:137:130: warning: Variable name `h_T002` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-pjou_30b/output/Auxiliary.lean:163:89: warning: Variable name `h_T001` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-pjou_30b/output/Auxiliary.lean:163:125: warning: Variable name `h_T002` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (n m : ℕ) (u : Space n × ↑(Set.Ioi 0) → Value m) (q : Value m),\n  FirstCalculus (ubar u q) → SecondCalculus (ubar u q) → ∀ (x : Space n) (t : ↑(Set.Ioi 0)), ubar u q (x, ↑t) = u (x, t)\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+            "stderr": "",
+            "wall_seconds": 3.744236083002761,
+            "native_limits": {
+              "timeout_seconds": 180,
+              "max_heartbeats": 20000000
+            },
+            "source_path": "/Users/syyui/projects/Yui-results/test_uncond/wave-map-energy/rigorous-proof/20261105T120332Z-cc987d3921/workflow/native-checks/e8dba1d6f8774561b2bcac70ec7c1d22.lean",
+            "source_sha256": "5481ad729d3ffd75e33853e5f1124e948ee4da535702a89616f1319e9f703727",
+            "auxiliary_valid": true,
+            "axioms": [
+              "Classical.choice",
+              "Quot.sound",
+              "propext"
+            ],
+            "lean_sha256": "5481ad729d3ffd75e33853e5f1124e948ee4da535702a89616f1319e9f703727",
+            "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+            "context_port": "T003",
+            "candidate": 6
+          }
+        }
+      ],
+      "body": "have hs := @yui_aux_0001 n m u q h_T001 h_T002\nrefine ⟨h_T001, h_T002, hs.1, hs.2,\n  @yui_aux_0003 n m u q h_T001 h_T002, ?_,\n  @yui_aux_0004 n m u q h_T001 h_T002, ?_⟩\n· intro j x t ht k\n  exact ⟨rfl, rfl, rfl⟩\n· intro x t ht\n  exact dif_neg (not_lt.mpr ht)"
+    },
+    "T010": {
+      "schema": "yui-local-proof-1",
+      "step": "T010",
+      "context_sha256": "5916422ec535b5ee38a4352727f91d637f74b0ab8d4acf185d86edbd8a9d557e",
+      "helpers": [
+        {
+          "name": "yui_aux_0001",
+          "statement": "∀ (t : ℝ), 0 < t → ∀ h ∈ sections (ubar u q) t, Integrable h",
+          "proof": "intro t ht h hh\nobtain ⟨C, hC, hs⟩ := h_T005.1 t ht\nhave hmem : t ∈ Set.Ioo (t / 2) (3 * t / 2) := by constructor <;> linarith\nexact (hs t hmem h (Submodule.subset_span hh)).2.2.2",
+          "dependencies": [],
+          "context_sha256": "5916422ec535b5ee38a4352727f91d637f74b0ab8d4acf185d86edbd8a9d557e",
+          "sha256": "6ab8aa14bda8883303925ce7ba2592ea832a500264278d261adb5329fe083dcf",
+          "check": {
+            "exit_code": 0,
+            "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-1paxwf4m/output/Auxiliary.lean:117:89: warning: Variable name `h_T003` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (n m : ℕ) (u : Space n × ↑(Set.Ioi 0) → Value m) (q : Value m),\n  (FirstCalculus (ubar u q) ∧\n      SecondCalculus (ubar u q) ∧\n        ContDiffOn ℝ ∞ (fun p => density (ubar u q) p.1 p.2) {p | 0 < p.2} ∧\n          ContDiffOn ℝ ∞ (fun p => densityRate (ubar u q) p.1 p.2) {p | 0 < p.2} ∧\n            (∀ (x : Space n) (t : ℝ),\n                0 < t → HasDerivAt (fun r => density (ubar u q) x r) (densityRate (ubar u q) x t) t) ∧\n              (∀ (j : Fin n) (x : Space n) (t : ℝ),\n                  0 < t →\n                    ∀ (k : Fin m),\n                      (fderiv ℝ (fun y => ubar u q (y, t) k) x) (Pi.single j 1) = spatial (ubar u q) j x t k ∧\n                        (fderiv ℝ (fun y => velocity (ubar u q) y t k) x) (Pi.single j 1) = mixed (ubar u q) j x t k ∧\n                          (fderiv ℝ (fun y => spatial (ubar u q) j y t k) x) (Pi.single j 1) =\n                            spatialSecond (ubar u q) j x t k) ∧\n                (∀ (x : Space n) (t : ↑(Set.Ioi 0)), ubar u q (x, ↑t) = u (x, t)) ∧\n                  ∀ (x : Space n), ∀ t ≤ 0, ubar u q (x, t) = q) →\n    ((∀ (t₀ : ℝ),\n          0 < t₀ →\n            ∃ C,\n              SlabVanishing (ubar u q) q t₀ C ∧\n                ∀ r ∈ Set.Ioo (t₀ / 2) (3 * t₀ / 2),\n                  ∀ h ∈ Submodule.span ℝ (sections (ubar u q) r), SupportedSection C h) ∧\n        ∀ (t : ℝ), 0 < t → Integrable (fun x => density (ubar u q) x t) volume) →\n      ∀ (t : ℝ), 0 < t → ∀ h ∈ sections (ubar u q) t, Integrable h volume\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+            "stderr": "",
+            "wall_seconds": 3.217766665999079,
+            "native_limits": {
+              "timeout_seconds": 180,
+              "max_heartbeats": 20000000
+            },
+            "source_path": "/Users/syyui/projects/Yui-results/test_uncond/wave-map-energy/rigorous-proof/20261105T120332Z-cc987d3921/workflow/native-checks/d03cc5cb940f484ea47fd8a75ababa54.lean",
+            "source_sha256": "9438ad46a49b7733f735b35fa60b516c68eaaad238d7035c4969ef9961453e61",
+            "auxiliary_valid": true,
+            "axioms": [
+              "Classical.choice",
+              "Quot.sound",
+              "propext"
+            ],
+            "lean_sha256": "9438ad46a49b7733f735b35fa60b516c68eaaad238d7035c4969ef9961453e61",
+            "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+            "context_port": "T010",
+            "candidate": 2
+          }
+        },
+        {
+          "name": "yui_aux_0002",
+          "statement": "∀ (t : ℝ), 0 < t → ∀ (j : Fin n) (k : Fin m),\n Integrable (fun x => velocity (ubar u q) x t k * spatialSecond (ubar u q) j x t k) ∧\n Integrable (fun x => mixed (ubar u q) j x t k * spatial (ubar u q) j x t k) ∧\n Integrable (fun x => velocity (ubar u q) x t k * spatial (ubar u q) j x t k)",
+          "proof": "intro t ht j k\nhave hi := @yui_aux_0001 n m u q h_T003 h_T005 t ht\nconstructor\n· apply hi\n  simp only [sections, Set.mem_setOf_eq]\n  exact Or.inr (Or.inr (Or.inr (Or.inl ⟨j, k, Or.inr (Or.inr (Or.inr (Or.inr (Or.inl rfl))))⟩)))\nconstructor\n· apply hi\n  simp only [sections, Set.mem_setOf_eq]\n  exact Or.inr (Or.inr (Or.inr (Or.inl ⟨j, k, Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inr rfl)))))⟩)))\n· apply hi\n  simp only [sections, Set.mem_setOf_eq]\n  exact Or.inr (Or.inr (Or.inr (Or.inl ⟨j, k, Or.inr (Or.inr (Or.inr (Or.inr (Or.inr (Or.inl rfl)))))⟩)))",
+          "dependencies": [
+            "yui_aux_0001"
+          ],
+          "context_sha256": "5916422ec535b5ee38a4352727f91d637f74b0ab8d4acf185d86edbd8a9d557e",
+          "sha256": "4da79b61178a6834aed23fca33efe834eab6384767b6cb0a9f7b6a6681f11d3c",
+          "check": {
+            "exit_code": 0,
+            "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-gqd2zxnp/output/Auxiliary.lean:117:94: warning: Variable name `h_T003` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (n m : ℕ) (u : Space n × ↑(Set.Ioi 0) → Value m) (q : Value m),\n  (FirstCalculus (ubar u q) ∧\n      SecondCalculus (ubar u q) ∧\n        ContDiffOn ℝ ∞ (fun p => density (ubar u q) p.1 p.2) {p | 0 < p.2} ∧\n          ContDiffOn ℝ ∞ (fun p => densityRate (ubar u q) p.1 p.2) {p | 0 < p.2} ∧\n            (∀ (x : Space n) (t : ℝ),\n                0 < t → HasDerivAt (fun r => density (ubar u q) x r) (densityRate (ubar u q) x t) t) ∧\n              (∀ (j : Fin n) (x : Space n) (t : ℝ),\n                  0 < t →\n                    ∀ (k : Fin m),\n                      (fderiv ℝ (fun y => ubar u q (y, t) k) x) (Pi.single j 1) = spatial (ubar u q) j x t k ∧\n                        (fderiv ℝ (fun y => velocity (ubar u q) y t k) x) (Pi.single j 1) = mixed (ubar u q) j x t k ∧\n                          (fderiv ℝ (fun y => spatial (ubar u q) j y t k) x) (Pi.single j 1) =\n                            spatialSecond (ubar u q) j x t k) ∧\n                (∀ (x : Space n) (t : ↑(Set.Ioi 0)), ubar u q (x, ↑t) = u (x, t)) ∧\n                  ∀ (x : Space n), ∀ t ≤ 0, ubar u q (x, t) = q) →\n    ((∀ (t₀ : ℝ),\n          0 < t₀ →\n            ∃ C,\n              SlabVanishing (ubar u q) q t₀ C ∧\n                ∀ r ∈ Set.Ioo (t₀ / 2) (3 * t₀ / 2),\n                  ∀ h ∈ Submodule.span ℝ (sections (ubar u q) r), SupportedSection C h) ∧\n        ∀ (t : ℝ), 0 < t → Integrable (fun x => density (ubar u q) x t) volume) →\n      ∀ (t : ℝ),\n        0 < t →\n          ∀ (j : Fin n) (k : Fin m),\n            Integrable (fun x => velocity (ubar u q) x t k * spatialSecond (ubar u q) j x t k) volume ∧\n              Integrable (fun x => mixed (ubar u q) j x t k * spatial (ubar u q) j x t k) volume ∧\n                Integrable (fun x => velocity (ubar u q) x t k * spatial (ubar u q) j x t k) volume\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+            "stderr": "",
+            "wall_seconds": 3.9305375420008204,
+            "native_limits": {
+              "timeout_seconds": 180,
+              "max_heartbeats": 20000000
+            },
+            "source_path": "/Users/syyui/projects/Yui-results/test_uncond/wave-map-energy/rigorous-proof/20261105T120332Z-cc987d3921/workflow/native-checks/c26fbc2aaf764f1a9147e7034b339d94.lean",
+            "source_sha256": "5845592cccae67589620361b57c64905165857da620bf2b5008be6f06c276df1",
+            "auxiliary_valid": true,
+            "axioms": [
+              "Classical.choice",
+              "Quot.sound",
+              "propext"
+            ],
+            "lean_sha256": "5845592cccae67589620361b57c64905165857da620bf2b5008be6f06c276df1",
+            "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+            "context_port": "T010",
+            "candidate": 3
+          }
+        },
+        {
+          "name": "yui_aux_0003",
+          "statement": "∀ (t : ℝ), 0 < t → ∀ (j : Fin n) (k : Fin m),\n (∫ x, velocity (ubar u q) x t k * spatialSecond (ubar u q) j x t k) =\n -(∫ x, mixed (ubar u q) j x t k * spatial (ubar u q) j x t k)",
+          "proof": "intro t ht j k\nhave hi := @yui_aux_0002 n m u q h_T003 h_T005 t ht j k\nhave hd := h_T003.2.1.2.2.2.2.2\nexact integral_mul_fderiv_eq_neg_fderiv_mul_of_integrable\n  (μ := volume) (f := fun x => velocity (ubar u q) x t k)\n  (g := fun x => spatial (ubar u q) j x t k) (v := Pi.single j 1)\n  hi.2.1 hi.1 hi.2.2\n  (fun x _ => (hd j x t ht k).1.differentiableAt)\n  (fun x _ => (hd j x t ht k).2.differentiableAt)",
+          "dependencies": [
+            "yui_aux_0002"
+          ],
+          "context_sha256": "5916422ec535b5ee38a4352727f91d637f74b0ab8d4acf185d86edbd8a9d557e",
+          "sha256": "e87a2abd9f5f4cfc75091863345c86b0cf6a027585c8cdc3d9c90e199c774936",
+          "check": {
+            "exit_code": 0,
+            "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-p3es7xiw/output/Auxiliary.lean:117:94: warning: Variable name `h_T003` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (n m : ℕ) (u : Space n × ↑(Set.Ioi 0) → Value m) (q : Value m),\n  (FirstCalculus (ubar u q) ∧\n      SecondCalculus (ubar u q) ∧\n        ContDiffOn ℝ ∞ (fun p => density (ubar u q) p.1 p.2) {p | 0 < p.2} ∧\n          ContDiffOn ℝ ∞ (fun p => densityRate (ubar u q) p.1 p.2) {p | 0 < p.2} ∧\n            (∀ (x : Space n) (t : ℝ),\n                0 < t → HasDerivAt (fun r => density (ubar u q) x r) (densityRate (ubar u q) x t) t) ∧\n              (∀ (j : Fin n) (x : Space n) (t : ℝ),\n                  0 < t →\n                    ∀ (k : Fin m),\n                      (fderiv ℝ (fun y => ubar u q (y, t) k) x) (Pi.single j 1) = spatial (ubar u q) j x t k ∧\n                        (fderiv ℝ (fun y => velocity (ubar u q) y t k) x) (Pi.single j 1) = mixed (ubar u q) j x t k ∧\n                          (fderiv ℝ (fun y => spatial (ubar u q) j y t k) x) (Pi.single j 1) =\n                            spatialSecond (ubar u q) j x t k) ∧\n                (∀ (x : Space n) (t : ↑(Set.Ioi 0)), ubar u q (x, ↑t) = u (x, t)) ∧\n                  ∀ (x : Space n), ∀ t ≤ 0, ubar u q (x, t) = q) →\n    ((∀ (t₀ : ℝ),\n          0 < t₀ →\n            ∃ C,\n              SlabVanishing (ubar u q) q t₀ C ∧\n                ∀ r ∈ Set.Ioo (t₀ / 2) (3 * t₀ / 2),\n                  ∀ h ∈ Submodule.span ℝ (sections (ubar u q) r), SupportedSection C h) ∧\n        ∀ (t : ℝ), 0 < t → Integrable (fun x => density (ubar u q) x t) volume) →\n      ∀ (t : ℝ),\n        0 < t →\n          ∀ (j : Fin n) (k : Fin m),\n            ∫ (x : Space n), velocity (ubar u q) x t k * spatialSecond (ubar u q) j x t k =\n              -∫ (x : Space n), mixed (ubar u q) j x t k * spatial (ubar u q) j x t k\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+            "stderr": "",
+            "wall_seconds": 3.23903041700396,
+            "native_limits": {
+              "timeout_seconds": 180,
+              "max_heartbeats": 20000000
+            },
+            "source_path": "/Users/syyui/projects/Yui-results/test_uncond/wave-map-energy/rigorous-proof/20261105T120332Z-cc987d3921/workflow/native-checks/714ea218fd6946f181967a541bd75159.lean",
+            "source_sha256": "97d81df79baf0c23ecd8af010606e3d11376c49d277bc8d789b7cbcda65d9016",
+            "auxiliary_valid": true,
+            "axioms": [
+              "Classical.choice",
+              "Quot.sound",
+              "propext"
+            ],
+            "lean_sha256": "97d81df79baf0c23ecd8af010606e3d11376c49d277bc8d789b7cbcda65d9016",
+            "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+            "context_port": "T010",
+            "candidate": 4
+          }
+        },
+        {
+          "name": "yui_aux_0004",
+          "statement": "∀ f : Fin m → ℝ, (∑ k, - f k) = -(∑ k, f k)",
+          "proof": "intro f\nsimp only [Finset.sum_neg_distrib]",
+          "dependencies": [],
+          "context_sha256": "5916422ec535b5ee38a4352727f91d637f74b0ab8d4acf185d86edbd8a9d557e",
+          "sha256": "d2946e37c3ce410341f2f80886be4312583fbd6c58426530dd9207379883efaa",
+          "check": {
+            "exit_code": 0,
+            "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-dooeaa0v/output/Auxiliary.lean:117:94: warning: Variable name `h_T003` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-dooeaa0v/output/Auxiliary.lean:188:89: warning: Variable name `h_T003` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-dooeaa0v/output/Auxiliary.lean:197:58: warning: Variable name `h_T005` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (n m : ℕ) (u : Space n × ↑(Set.Ioi 0) → Value m) (q : Value m),\n  (FirstCalculus (ubar u q) ∧\n      SecondCalculus (ubar u q) ∧\n        ContDiffOn ℝ ∞ (fun p => density (ubar u q) p.1 p.2) {p | 0 < p.2} ∧\n          ContDiffOn ℝ ∞ (fun p => densityRate (ubar u q) p.1 p.2) {p | 0 < p.2} ∧\n            (∀ (x : Space n) (t : ℝ),\n                0 < t → HasDerivAt (fun r => density (ubar u q) x r) (densityRate (ubar u q) x t) t) ∧\n              (∀ (j : Fin n) (x : Space n) (t : ℝ),\n                  0 < t →\n                    ∀ (k : Fin m),\n                      (fderiv ℝ (fun y => ubar u q (y, t) k) x) (Pi.single j 1) = spatial (ubar u q) j x t k ∧\n                        (fderiv ℝ (fun y => velocity (ubar u q) y t k) x) (Pi.single j 1) = mixed (ubar u q) j x t k ∧\n                          (fderiv ℝ (fun y => spatial (ubar u q) j y t k) x) (Pi.single j 1) =\n                            spatialSecond (ubar u q) j x t k) ∧\n                (∀ (x : Space n) (t : ↑(Set.Ioi 0)), ubar u q (x, ↑t) = u (x, t)) ∧\n                  ∀ (x : Space n), ∀ t ≤ 0, ubar u q (x, t) = q) →\n    ((∀ (t₀ : ℝ),\n          0 < t₀ →\n            ∃ C,\n              SlabVanishing (ubar u q) q t₀ C ∧\n                ∀ r ∈ Set.Ioo (t₀ / 2) (3 * t₀ / 2),\n                  ∀ h ∈ Submodule.span ℝ (sections (ubar u q) r), SupportedSection C h) ∧\n        ∀ (t : ℝ), 0 < t → Integrable (fun x => density (ubar u q) x t) volume) →\n      ∀ (f : Fin m → ℝ), ∑ k, -f k = -∑ k, f k\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+            "stderr": "",
+            "wall_seconds": 3.0344718330015894,
+            "native_limits": {
+              "timeout_seconds": 180,
+              "max_heartbeats": 20000000
+            },
+            "source_path": "/Users/syyui/projects/Yui-results/test_uncond/wave-map-energy/rigorous-proof/20261105T120332Z-cc987d3921/workflow/native-checks/8ef96e6027d64861a8e47c683ebf9af8.lean",
+            "source_sha256": "d6463f00632985e2c1ae1d324fb0514f23eda844bb05b3b03a610e64a4c1b7e4",
+            "auxiliary_valid": true,
+            "axioms": [
+              "Classical.choice",
+              "Quot.sound",
+              "propext"
+            ],
+            "lean_sha256": "d6463f00632985e2c1ae1d324fb0514f23eda844bb05b3b03a610e64a4c1b7e4",
+            "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+            "context_port": "T010",
+            "candidate": 6
+          }
+        }
+      ],
+      "body": "intro t ht j\nhave hi := @yui_aux_0002 n m u q h_T003 h_T005 t ht j\nhave hid := @yui_aux_0003 n m u q h_T003 h_T005 t ht j\nhave hip : ∀ k : Fin m, Integrable (fun x => spatial (ubar u q) j x t k * mixed (ubar u q) j x t k) := by\n  intro k\n  simpa only [mul_comm] using (hi k).2.1\nconstructor\n· have hs : (∫ x, dot (velocity (ubar u q) x t) (spatialSecond (ubar u q) j x t)) =\n      -(∫ x, dot (mixed (ubar u q) j x t) (spatial (ubar u q) j x t)) := by\n    unfold dot\n    rw [integral_finsetSum Finset.univ (fun k _ => (hi k).1),\n        integral_finsetSum Finset.univ (fun k _ => (hi k).2.1)]\n    simp_rw [hid]\n    exact @yui_aux_0004 n m u q h_T003 h_T005 (fun k => ∫ x, mixed (ubar u q) j x t k * spatial (ubar u q) j x t k)\n  have hs' : (∫ x, dot (velocity (ubar u q) x t) (spatialSecond (ubar u q) j x t)) =\n      -(∫ x, dot (spatial (ubar u q) j x t) (mixed (ubar u q) j x t)) := by\n    simpa only [dot, mul_comm] using hs\n  linarith\nconstructor\n· unfold dot\n  exact integrable_finsetSum Finset.univ (fun k _ => hip k)\nconstructor\n· unfold dot\n  exact integrable_finsetSum Finset.univ (fun k _ => (hi k).1)\n· exact hi"
+    },
+    "T002": {
+      "schema": "yui-local-proof-1",
+      "step": "T002",
+      "context_sha256": "1f99f24f0a81f4f80f5f7100952eea0850a609497c1ff3170b01b1b81b5c846d",
+      "helpers": [
+        {
+          "name": "yui_aux_0001",
+          "statement": "∀ (x : Space n) (t : ℝ), HasFDerivAt (fun _ : Space n => t) (0 : Space n →L[ℝ] ℝ) x",
+          "proof": "intro x t\nexact hasFDerivAt_const t x",
+          "dependencies": [],
+          "context_sha256": "1f99f24f0a81f4f80f5f7100952eea0850a609497c1ff3170b01b1b81b5c846d",
+          "sha256": "ed17bd42a3fb7b9394c63b93ac1e05e3fb0b090befa371f9c701a22c34f29e76",
+          "check": {
+            "exit_code": 0,
+            "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-qic_lqtm/output/Auxiliary.lean:117:89: warning: Variable name `h_T001` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (n m : ℕ) (u : Space n × ↑(Set.Ioi 0) → Value m) (q : Value m),\n  FirstCalculus (ubar u q) → ∀ (x : Space n) (t : ℝ), HasFDerivAt (fun x => t) 0 x\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+            "stderr": "",
+            "wall_seconds": 3.2218624999950407,
+            "native_limits": {
+              "timeout_seconds": 180,
+              "max_heartbeats": 20000000
+            },
+            "source_path": "/Users/syyui/projects/Yui-results/test_uncond/wave-map-energy/rigorous-proof/20261105T120332Z-cc987d3921/workflow/native-checks/a5f92eb8b1fb4b22a586754dd1072176.lean",
+            "source_sha256": "4cd48cb854013f802ccee852feff057c51a96c236d0216456539c411682d03d7",
+            "auxiliary_valid": true,
+            "axioms": [
+              "Classical.choice",
+              "Quot.sound",
+              "propext"
+            ],
+            "lean_sha256": "4cd48cb854013f802ccee852feff057c51a96c236d0216456539c411682d03d7",
+            "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+            "context_port": "T002",
+            "candidate": 2
+          }
+        },
+        {
+          "name": "yui_aux_0002",
+          "statement": "∀ (f : Space n × ℝ → ℝ), ContDiffOn ℝ ∞ f {p | 0 < p.2} → ∀ (x : Space n) (t : ℝ), 0 < t → HasDerivAt (fun r => f (x,r)) (fderiv ℝ f (x,t) (0,1)) t ∧ HasFDerivAt (fun y => f (y,t)) ((fderiv ℝ f (x,t)).comp ((ContinuousLinearMap.id ℝ (Space n)).prod 0)) x",
+          "proof": "intro f hf x t ht\nhave ho : IsOpen {p : Space n × ℝ | 0 < p.2} := isOpen_lt continuous_const continuous_snd\nhave hd : HasFDerivAt f (fderiv ℝ f (x,t)) (x,t) :=\n  ((hf.contDiffAt (ho.mem_nhds ht)).differentiableAt (by simp)).hasFDerivAt\nconstructor\n· exact hd.comp_hasDerivAt t ((hasDerivAt_const t x).prodMk (hasDerivAt_id t))\n· exact hd.comp x ((hasFDerivAt_id x).prodMk (@yui_aux_0001 n m u q h_T001 x t))",
+          "dependencies": [
+            "yui_aux_0001"
+          ],
+          "context_sha256": "1f99f24f0a81f4f80f5f7100952eea0850a609497c1ff3170b01b1b81b5c846d",
+          "sha256": "4986aa88872455327b06e86a50e30436997691788645be3251159d8d3aaf3c14",
+          "check": {
+            "exit_code": 0,
+            "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-0e9dvotb/output/Auxiliary.lean:117:94: warning: Variable name `h_T001` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (n m : ℕ) (u : Space n × ↑(Set.Ioi 0) → Value m) (q : Value m),\n  FirstCalculus (ubar u q) →\n    ∀ (f : Space n × ℝ → ℝ),\n      ContDiffOn ℝ ∞ f {p | 0 < p.2} →\n        ∀ (x : Space n) (t : ℝ),\n          0 < t →\n            HasDerivAt (fun r => f (x, r)) ((fderiv ℝ f (x, t)) (0, 1)) t ∧\n              HasFDerivAt (fun y => f (y, t)) (fderiv ℝ f (x, t) ∘SL (ContinuousLinearMap.id ℝ (Space n)).prod 0) x\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+            "stderr": "",
+            "wall_seconds": 3.141927790995396,
+            "native_limits": {
+              "timeout_seconds": 180,
+              "max_heartbeats": 20000000
+            },
+            "source_path": "/Users/syyui/projects/Yui-results/test_uncond/wave-map-energy/rigorous-proof/20261105T120332Z-cc987d3921/workflow/native-checks/1d5739063ec84c4fa4c55dbdd83c6967.lean",
+            "source_sha256": "1f7a59aae8fcdf0b95a5520137498062f2b646e245d728d1bdf3d87bfa387747",
+            "auxiliary_valid": true,
+            "axioms": [
+              "Classical.choice",
+              "Quot.sound",
+              "propext"
+            ],
+            "lean_sha256": "1f7a59aae8fcdf0b95a5520137498062f2b646e245d728d1bdf3d87bfa387747",
+            "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+            "context_port": "T002",
+            "candidate": 3
+          }
+        },
+        {
+          "name": "yui_aux_0003",
+          "statement": "∀ (f : Space n × ℝ → ℝ), ContDiffOn ℝ ∞ f {p | 0 < p.2} → (ContDiffOn ℝ ∞ (fun p : Space n × ℝ => deriv (fun r => f (p.1,r)) p.2) {p | 0 < p.2}) ∧ (∀ a : Space n, ContDiffOn ℝ ∞ (fun p : Space n × ℝ => fderiv ℝ (fun y => f (y,p.2)) p.1 a) {p | 0 < p.2}) ∧ (∀ (x : Space n) (t : ℝ), 0 < t → deriv (fun r => f (x,r)) t = fderiv ℝ f (x,t) (0,1) ∧ ∀ a : Space n, fderiv ℝ (fun y => f (y,t)) x a = fderiv ℝ f (x,t) (a,0))",
+          "proof": "intro f hf\nhave ho : IsOpen {p : Space n × ℝ | 0 < p.2} := isOpen_lt continuous_const continuous_snd\nhave hid := @yui_aux_0002 n m u q h_T001 f hf\nhave he : ∀ (x : Space n) (t : ℝ), 0 < t → deriv (fun r => f (x,r)) t = fderiv ℝ f (x,t) (0,1) ∧ ∀ a : Space n, fderiv ℝ (fun y => f (y,t)) x a = fderiv ℝ f (x,t) (a,0) := by\n  intro x t ht\n  refine ⟨(hid x t ht).1.deriv, ?_⟩\n  intro a\n  rw [(hid x t ht).2.fderiv]\n  simp\nhave hD : ContDiffOn ℝ ∞ (fderiv ℝ f) {p | 0 < p.2} := hf.fderiv_of_isOpen ho (by simp)\nrefine ⟨?_, ?_, he⟩\n· exact (hD.clm_apply (contDiffOn_const (c := ((0 : Space n), (1 : ℝ))))).congr (fun p hp => (he p.1 p.2 hp).1)\n· intro a\n  exact (hD.clm_apply (contDiffOn_const (c := (a, (0 : ℝ))))).congr (fun p hp => (he p.1 p.2 hp).2 a)",
+          "dependencies": [
+            "yui_aux_0002"
+          ],
+          "context_sha256": "1f99f24f0a81f4f80f5f7100952eea0850a609497c1ff3170b01b1b81b5c846d",
+          "sha256": "7074e1924c198c20d8c1549f50360a3763a2a90915f4e9ad9303ee02d9cb8a3f",
+          "check": {
+            "exit_code": 0,
+            "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-uji8_spb/output/Auxiliary.lean:117:94: warning: Variable name `h_T001` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (n m : ℕ) (u : Space n × ↑(Set.Ioi 0) → Value m) (q : Value m),\n  FirstCalculus (ubar u q) →\n    ∀ (f : Space n × ℝ → ℝ),\n      ContDiffOn ℝ ∞ f {p | 0 < p.2} →\n        ContDiffOn ℝ ∞ (fun p => deriv (fun r => f (p.1, r)) p.2) {p | 0 < p.2} ∧\n          (∀ (a : Space n), ContDiffOn ℝ ∞ (fun p => (fderiv ℝ (fun y => f (y, p.2)) p.1) a) {p | 0 < p.2}) ∧\n            ∀ (x : Space n) (t : ℝ),\n              0 < t →\n                deriv (fun r => f (x, r)) t = (fderiv ℝ f (x, t)) (0, 1) ∧\n                  ∀ (a : Space n), (fderiv ℝ (fun y => f (y, t)) x) a = (fderiv ℝ f (x, t)) (a, 0)\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+            "stderr": "",
+            "wall_seconds": 3.4464660000012373,
+            "native_limits": {
+              "timeout_seconds": 180,
+              "max_heartbeats": 20000000
+            },
+            "source_path": "/Users/syyui/projects/Yui-results/test_uncond/wave-map-energy/rigorous-proof/20261105T120332Z-cc987d3921/workflow/native-checks/d49b0e84ed9944a586eb7e3aa62058f0.lean",
+            "source_sha256": "497dfd25f9e4773b40fe1f052c8e93a30c4338b165e37fcdae7279a83063f7d8",
+            "auxiliary_valid": true,
+            "axioms": [
+              "Classical.choice",
+              "Quot.sound",
+              "propext"
+            ],
+            "lean_sha256": "497dfd25f9e4773b40fe1f052c8e93a30c4338b165e37fcdae7279a83063f7d8",
+            "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+            "context_port": "T002",
+            "candidate": 5
+          }
+        },
+        {
+          "name": "yui_aux_0004",
+          "statement": "∀ (f : Space n × ℝ → ℝ) (p : Space n × ℝ), ContDiffAt ℝ ∞ f p → IsSymmSndFDerivAt ℝ f p",
+          "proof": "intro f p hf\napply hf.isSymmSndFDerivAt\nsimp only [minSmoothness_of_isRCLikeNormedField]\nshow ((2 : ℕ∞) : WithTop ℕ∞) ≤ ((⊤ : ℕ∞) : WithTop ℕ∞)\nexact WithTop.coe_le_coe.mpr le_top",
+          "dependencies": [],
+          "context_sha256": "1f99f24f0a81f4f80f5f7100952eea0850a609497c1ff3170b01b1b81b5c846d",
+          "sha256": "07f7e681f596c13909713805242dd2568ab1850465967fc2a88e06873d16acfb",
+          "check": {
+            "exit_code": 0,
+            "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-snrkb_hr/output/Auxiliary.lean:117:94: warning: Variable name `h_T001` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-snrkb_hr/output/Auxiliary.lean:146:89: warning: Variable name `h_T001` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (n m : ℕ) (u : Space n × ↑(Set.Ioi 0) → Value m) (q : Value m),\n  FirstCalculus (ubar u q) → ∀ (f : Space n × ℝ → ℝ) (p : Space n × ℝ), ContDiffAt ℝ ∞ f p → IsSymmSndFDerivAt ℝ f p\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+            "stderr": "",
+            "wall_seconds": 3.057245749994763,
+            "native_limits": {
+              "timeout_seconds": 180,
+              "max_heartbeats": 20000000
+            },
+            "source_path": "/Users/syyui/projects/Yui-results/test_uncond/wave-map-energy/rigorous-proof/20261105T120332Z-cc987d3921/workflow/native-checks/767abbb5603d420d9fb3661572ec731a.lean",
+            "source_sha256": "fdae7d28d78d4feaa99499216509771ffff5d4f03ccc697e5e2f7b1c8519160a",
+            "auxiliary_valid": true,
+            "axioms": [
+              "Classical.choice",
+              "Quot.sound",
+              "propext"
+            ],
+            "lean_sha256": "fdae7d28d78d4feaa99499216509771ffff5d4f03ccc697e5e2f7b1c8519160a",
+            "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+            "context_port": "T002",
+            "candidate": 8
+          }
+        },
+        {
+          "name": "yui_aux_0005",
+          "statement": "∀ (f : Space n × ℝ → ℝ), ContDiffOn ℝ ∞ f {p | 0 < p.2} → ∀ (a : Space n) (x : Space n) (t : ℝ), 0 < t → HasDerivAt (fun r => fderiv ℝ (fun y => f (y,r)) x a) (fderiv ℝ (fun y => deriv (fun r => f (y,r)) t) x a) t",
+          "proof": "intro f hf a x t ht\nhave ho : IsOpen {p : Space n × ℝ | 0 < p.2} := isOpen_lt continuous_const continuous_snd\nhave hp : {p : Space n × ℝ | 0 < p.2} ∈ 𝓝 (x,t) := ho.mem_nhds ht\nhave hD : ContDiffOn ℝ ∞ (fderiv ℝ f) {p | 0 < p.2} := hf.fderiv_of_isOpen ho (by simp)\nhave hDD := ((hD.contDiffAt hp).differentiableAt (by simp)).hasFDerivAt\nhave hg : HasFDerivAt (fun p : Space n × ℝ => fderiv ℝ (fun y => f (y,p.2)) p.1 a)\n    ((fderiv ℝ (fderiv ℝ f) (x,t)).flip (a,0)) (x,t) := by\n  have hbase : HasFDerivAt (fun p => fderiv ℝ f p (a,0))\n      ((fderiv ℝ (fderiv ℝ f) (x,t)).flip (a,0)) (x,t) := by\n    simpa using hDD.clm_apply (hasFDerivAt_const (a, (0 : ℝ)) (x,t))\n  apply hbase.congr_of_eventuallyEq\n  filter_upwards [hp] with p hp'\n  exact ((@yui_aux_0003 n m u q h_T001 f hf).2.2 p.1 p.2 hp').2 a\nhave hh : HasFDerivAt (fun p : Space n × ℝ => deriv (fun r => f (p.1,r)) p.2)\n    ((fderiv ℝ (fderiv ℝ f) (x,t)).flip (0,1)) (x,t) := by\n  have hbase : HasFDerivAt (fun p => fderiv ℝ f p (0,1))\n      ((fderiv ℝ (fderiv ℝ f) (x,t)).flip (0,1)) (x,t) := by\n    simpa using hDD.clm_apply (hasFDerivAt_const ((0 : Space n), (1 : ℝ)) (x,t))\n  apply hbase.congr_of_eventuallyEq\n  filter_upwards [hp] with p hp'\n  exact ((@yui_aux_0003 n m u q h_T001 f hf).2.2 p.1 p.2 hp').1\nhave hs := hh.comp x ((hasFDerivAt_id x).prodMk (@yui_aux_0001 n m u q h_T001 x t))\nhave he : fderiv ℝ (fun y => deriv (fun r => f (y,r)) t) x a =\n    fderiv ℝ (fderiv ℝ f) (x,t) (a,0) (0,1) := by\n  simpa only [Function.comp_def, id_eq, ContinuousLinearMap.comp_apply,\n    ContinuousLinearMap.prod_apply, ContinuousLinearMap.id_apply,\n    ContinuousLinearMap.zero_apply, ContinuousLinearMap.flip_apply] using\n    congrArg (fun L : Space n →L[ℝ] ℝ => L a) hs.fderiv\nrw [he]\nhave hsym : fderiv ℝ (fderiv ℝ f) (x,t) (0,1) (a,0) =\n    fderiv ℝ (fderiv ℝ f) (x,t) (a,0) (0,1) :=\n  (@yui_aux_0004 n m u q h_T001 f (x,t) (hf.contDiffAt hp)) (0,1) (a,0)\nrw [← hsym]\nexact hg.comp_hasDerivAt t ((hasDerivAt_const t x).prodMk (hasDerivAt_id t))",
+          "dependencies": [
+            "yui_aux_0001",
+            "yui_aux_0003",
+            "yui_aux_0004"
+          ],
+          "context_sha256": "1f99f24f0a81f4f80f5f7100952eea0850a609497c1ff3170b01b1b81b5c846d",
+          "sha256": "fe49f29008921ebb8e0ac4d05973be64f2dba17962f10aaaea1ea5a2b2d2066d",
+          "check": {
+            "exit_code": 0,
+            "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-qg66afek/output/Auxiliary.lean:117:94: warning: Variable name `h_T001` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-qg66afek/output/Auxiliary.lean:146:94: warning: Variable name `h_T001` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-qg66afek/output/Auxiliary.lean:180:6: warning: `ContinuousLinearMap.zero_apply` has been deprecated: Use `zero_apply` instead\n\nNote: The updated constant is in a different namespace. Dot notation may need to be changed (e.g., from `x.zero_apply` to `zero_apply x`).\nchecked : ∀ (n m : ℕ) (u : Space n × ↑(Set.Ioi 0) → Value m) (q : Value m),\n  FirstCalculus (ubar u q) →\n    ∀ (f : Space n × ℝ → ℝ),\n      ContDiffOn ℝ ∞ f {p | 0 < p.2} →\n        ∀ (a x : Space n) (t : ℝ),\n          0 < t →\n            HasDerivAt (fun r => (fderiv ℝ (fun y => f (y, r)) x) a)\n              ((fderiv ℝ (fun y => deriv (fun r => f (y, r)) t) x) a) t\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+            "stderr": "",
+            "wall_seconds": 3.8043951250001555,
+            "native_limits": {
+              "timeout_seconds": 180,
+              "max_heartbeats": 20000000
+            },
+            "source_path": "/Users/syyui/projects/Yui-results/test_uncond/wave-map-energy/rigorous-proof/20261105T120332Z-cc987d3921/workflow/native-checks/1ae30c648bd340919f3c2dcdd5dd031f.lean",
+            "source_sha256": "ccd1c64f88e309a59bf6898aaa6586b5fbc5acca78d19d524a74d8d4948449ca",
+            "auxiliary_valid": true,
+            "axioms": [
+              "Classical.choice",
+              "Quot.sound",
+              "propext"
+            ],
+            "lean_sha256": "ccd1c64f88e309a59bf6898aaa6586b5fbc5acca78d19d524a74d8d4948449ca",
+            "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+            "context_port": "T002",
+            "candidate": 9
+          }
+        }
+      ],
+      "body": "have hfirst := h_T001\nrcases hfirst with ⟨hs, hv, hsp, _, _⟩\nhave hvk : ∀ k : Fin m, ContDiffOn ℝ ∞\n    (fun p : Space n × ℝ => velocity (ubar u q) p.1 p.2 k) {p | 0 < p.2} :=\n  contDiffOn_pi.mp hv\nhave hspk : ∀ (j : Fin n) (k : Fin m), ContDiffOn ℝ ∞\n    (fun p : Space n × ℝ => spatial (ubar u q) j p.1 p.2 k) {p | 0 < p.2} :=\n  fun j => contDiffOn_pi.mp (hsp j)\nhave huk : ∀ k : Fin m, ContDiffOn ℝ ∞\n    (fun p : Space n × ℝ => ubar u q p k) {p | 0 < p.2} :=\n  contDiffOn_pi.mp hs\nrefine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩\n· apply contDiffOn_pi.mpr\n  intro k\n  exact (@yui_aux_0003 n m u q h_T001\n    (fun p => velocity (ubar u q) p.1 p.2 k) (hvk k)).1\n· intro j\n  apply contDiffOn_pi.mpr\n  intro k\n  exact (@yui_aux_0003 n m u q h_T001\n    (fun p => spatial (ubar u q) j p.1 p.2 k) (hspk j k)).2.1 (Pi.single j 1)\n· intro j\n  apply contDiffOn_pi.mpr\n  intro k\n  exact (@yui_aux_0003 n m u q h_T001\n    (fun p => velocity (ubar u q) p.1 p.2 k) (hvk k)).2.1 (Pi.single j 1)\n· intro x t ht k\n  exact ((@yui_aux_0002 n m u q h_T001\n    (fun p => velocity (ubar u q) p.1 p.2 k) (hvk k) x t ht).1).differentiableAt.hasDerivAt\n· intro j x t ht k\n  exact @yui_aux_0005 n m u q h_T001\n    (fun p => ubar u q p k) (huk k) (Pi.single j 1) x t ht\n· intro j x t ht k\n  constructor\n  · exact ((@yui_aux_0002 n m u q h_T001\n      (fun p => velocity (ubar u q) p.1 p.2 k) (hvk k) x t ht).2).differentiableAt.hasFDerivAt\n  · exact ((@yui_aux_0002 n m u q h_T001\n      (fun p => spatial (ubar u q) j p.1 p.2 k) (hspk j k) x t ht).2).differentiableAt.hasFDerivAt"
+    }
+  }
+}

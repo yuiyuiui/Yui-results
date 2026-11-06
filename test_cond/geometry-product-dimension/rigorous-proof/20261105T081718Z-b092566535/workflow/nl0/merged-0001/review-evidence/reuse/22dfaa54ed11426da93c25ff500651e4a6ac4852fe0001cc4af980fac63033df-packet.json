@@ -1,0 +1,861 @@
+{
+  "contract_version": 2,
+  "case_id": "preparation",
+  "graph_sha256": "b8f9a75244b1766c4a53c18ac8f92cd8fd6b9e63f5230ed9982e7a15e0f5167e",
+  "spec_sha256": "0805c1657313d56480865b08c7f83481766e6f8740b21a732def7b6f58d0d728",
+  "parameters": [
+    {
+      "symbol": "n",
+      "type": "natural number (the nonnegative integer index of the Euclidean ambient space)"
+    },
+    {
+      "symbol": "E",
+      "type": "subset of Eucl(n)"
+    }
+  ],
+  "logic": {
+    "classical": true,
+    "rules": [
+      "direct",
+      "forall_introduction",
+      "exists_elimination",
+      "case_elimination",
+      "contradiction_classical",
+      "implication_introduction"
+    ],
+    "calculations": [
+      "equality: Equality reflexivity, symmetry, transitivity and substitution.",
+      "definitions: Unfold an explicitly supplied definition; this proves no extra property.",
+      "finite_algebra: Routine finite semiring/ring/field arithmetic, including zero/one laws, distributivity, associativity and finite polynomial identities. Correct elementary compression is permitted; a substantive missing argument is not.",
+      "finite_order: Routine ordered-field reasoning with actual signs/domains: order laws, adding inequalities, multiplication/division with sign conditions, and real square nonnegativity. Ordinary valid elementary inferences need no exhaustive displayed chain. Check that the conclusion follows; substantial named theorems still require inputs or verified-background admission.",
+      "finite_sums: Unfold and rearrange finite sums/products with explicitly given finite indices."
+    ],
+    "primitives": [
+      {
+        "symbol": "0",
+        "type": "typed numeral",
+        "meaning": "Zero of the explicitly specified mathematical type."
+      },
+      {
+        "symbol": "1",
+        "type": "typed numeral",
+        "meaning": "One of the explicitly specified mathematical type."
+      },
+      {
+        "symbol": "2",
+        "type": "typed numeral",
+        "meaning": "Two of the explicitly specified mathematical type, including an exponent two."
+      },
+      {
+        "symbol": "ℕ",
+        "type": "number system",
+        "meaning": "The natural numbers with their usual arithmetic."
+      },
+      {
+        "symbol": "ℤ",
+        "type": "number system",
+        "meaning": "The integers with their usual arithmetic."
+      },
+      {
+        "symbol": "ℚ",
+        "type": "number system",
+        "meaning": "The rational numbers with their usual ordered-field operations."
+      },
+      {
+        "symbol": "ℝ",
+        "type": "number system",
+        "meaning": "The real numbers with their usual ordered-field structure."
+      },
+      {
+        "symbol": "ℂ",
+        "type": "number system",
+        "meaning": "The complex numbers with their usual field structure."
+      },
+      {
+        "symbol": "∅",
+        "type": "typed set notation",
+        "meaning": "The empty set in the explicitly specified ambient type."
+      },
+      {
+        "symbol": "∞",
+        "type": "typed order notation",
+        "meaning": "The top element in an explicitly specified extended ordered codomain."
+      }
+    ]
+  },
+  "pins": {
+    "lean_version": "4.32.2",
+    "mathlib_commit": "905b95818eb32af7874a58b427f50c1711a5e96c",
+    "mathlib_root": "/Users/syyui/formalization-tools/lean-mathlib-v4.32.2/mathlib"
+  },
+  "foundation_profile": "elementary-language-4",
+  "standard_language": "Ordinary typed mathematical language: logical connectives, quantifiers, equality, sets, functions, tuples, finite indices and their usual notation. A type explicitly named natural numbers, integers, rationals, reals or complex numbers means that standard structure, with its usual numerals and arithmetic operations; these operation tokens need not be redeclared as project objects. The fixed finite calculation rules below, including a+0=a, are controller permissions, not an author claim. The core symbol table below is not a dictionary of all allowed mathematics. Objects and notation from any subject are introduced by this problem's parameters, D definitions or scoped locals, with their types and dependencies. Their properties need direct inputs or displayed local proofs; a familiar name or symbol supplies no theorem.",
+  "background_policy": "mathematical-background-v2-1",
+  "definitions": [
+    {
+      "id": "D001",
+      "symbol": "Eucl",
+      "type": "nonnegative integer → Euclidean metric space",
+      "definition": "For each nonnegative integer k, Eucl(k)=R^k is the space of real k-tuples, with distance (sum_{j=1}^k |x_j-y_j|^2)^(1/2) and its Borel sigma algebra. The empty tuple is the sole point of Eucl(0). Eucl(k)×R is identified with Eucl(k+1) by adjoining the last coordinate; this identification uses the Euclidean distance sqrt(||x-y||_2^2+|t-u|^2).",
+      "depends_on": [],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "k",
+          "type": "nonnegative integer"
+        },
+        {
+          "symbol": "x",
+          "type": "point of Eucl(k)"
+        },
+        {
+          "symbol": "y",
+          "type": "point of Eucl(k)"
+        },
+        {
+          "symbol": "t",
+          "type": "real"
+        },
+        {
+          "symbol": "u",
+          "type": "real"
+        }
+      ],
+      "objects": []
+    },
+    {
+      "id": "D002",
+      "symbol": "diam",
+      "type": "diameter function on subsets of metric or extended metric spaces",
+      "definition": "diam(A)=sup{dist(x,y): x,y in A}, as an extended nonnegative number, with supremum of the empty set zero. Thus diam(empty)=0. In ordinary Euclidean spaces a nonempty set of diameter zero is a singleton. Native ediam is this extended-valued diameter. Euclidean finite diameters are identified with their nonnegative real values.",
+      "depends_on": [],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "A",
+          "type": "subset of a metric or extended metric space"
+        }
+      ],
+      "objects": []
+    },
+    {
+      "id": "D003",
+      "symbol": "H",
+      "type": "positive exponent and scale Hausdorff contents and limiting Hausdorff measure on Euclidean sets",
+      "definition": "For a Euclidean set \\(A\\), exponent \\(s>0\\), and scale \\(\\delta>0\\), put\n\n\\[\nH^s_\\delta(A)=\\inf\\left\\{\\sum_i(\\operatorname{diam}U_i)^s:\n A\\subseteq\\bigcup_iU_i,\\quad\\operatorname{diam}U_i\\leq\\delta\\right\\},\n\\qquad H^s(A)=\\sup_{\\delta>0}H^s_\\delta(A).\n\\]\n\nCovers are countable, with empty members contributing zero.\n",
+      "depends_on": [
+        "D001",
+        "D002"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "A",
+          "type": "subset of a Euclidean space"
+        },
+        {
+          "symbol": "s",
+          "type": "positive real"
+        },
+        {
+          "symbol": "delta",
+          "type": "positive real"
+        },
+        {
+          "symbol": "U_i",
+          "type": "countable family of subsets of the same Euclidean space"
+        }
+      ],
+      "objects": [
+        "Eucl",
+        "diam"
+      ]
+    },
+    {
+      "id": "D004",
+      "symbol": "muH",
+      "type": "real exponent → Borel Hausdorff measure on any extended metric space",
+      "definition": "muH(a) denotes the native unnormalized Borel Hausdorff measure MeasureTheory.Measure.hausdorffMeasure a. It is obtained by the metric outer-measure construction mkMetric with gauge r↦r^a on extended nonnegative diameters: at each positive scale take the maximal outer measure bounded by the gauge on all nonempty sets of at most that diameter, then take the supremum over scales and its Borel-measure realization. Values on arbitrary sets mean outer-measure values. Empty covering members cost zero and nonempty members cost diam^a with extended nonnegative-real powers; at a=0 a nonempty singleton has cost 1.",
+      "depends_on": [
+        "D002"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "a",
+          "type": "real"
+        }
+      ],
+      "objects": [
+        "diam"
+      ]
+    },
+    {
+      "id": "D005",
+      "symbol": "dimH",
+      "type": "Hausdorff dimension of subsets of metric spaces, valued in [0,infinity]",
+      "definition": "dimH(A), also written dim_H A, is the standard Hausdorff dimension: sup({a≥0 : muH(a)(A)=infinity}) in [0,infinity], where the supremum of an empty set is 0. This is the native dimH definition. The notation uses the empty-set dimension convention 0. Critical-exponent properties and agreement with the supplied positive-exponent diameter-cost measure are proof obligations, not extra assumptions.",
+      "depends_on": [
+        "D004"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "A",
+          "type": "subset of an extended metric space"
+        }
+      ],
+      "objects": [
+        "muH"
+      ]
+    },
+    {
+      "id": "D006",
+      "symbol": "I",
+      "type": "subset of R",
+      "definition": "I=[0,1]={t in R:0≤t≤1}.",
+      "depends_on": [],
+      "requires": [],
+      "binders": [],
+      "objects": []
+    },
+    {
+      "id": "D007",
+      "symbol": "F",
+      "type": "subset of Eucl(n+1)",
+      "definition": "F=E×I under the Euclidean identification in D001.",
+      "depends_on": [
+        "D001",
+        "D006"
+      ],
+      "requires": [],
+      "binders": [],
+      "objects": [
+        "E",
+        "n",
+        "Eucl",
+        "I"
+      ]
+    },
+    {
+      "id": "D008",
+      "symbol": "D",
+      "type": "extended nonnegative real",
+      "definition": "D=dimH(E), initially an extended nonnegative real. Real arithmetic involving D is used only after its finiteness is proved.",
+      "depends_on": [
+        "D005"
+      ],
+      "requires": [],
+      "binders": [],
+      "objects": [
+        "dimH",
+        "E"
+      ]
+    },
+    {
+      "id": "D009",
+      "symbol": "lambda",
+      "type": "Lebesgue measure on R and associated integral notation",
+      "definition": "lambda is the standard Lebesgue measure on R with its Borel measurable structure and the normalization by interval length. For a Borel set J, |J| denotes lambda(J). The symbol 1_J denotes its indicator, equal to 1 on J and 0 elsewhere. Integrals of nonnegative functions are extended Lebesgue integrals (native lintegral). Restriction to I is lambda restricted to [0,1]. The usual interval values are lambda(I)=1 and lambda((a,b))=b-a for a<b; only these interval values are used.",
+      "depends_on": [
+        "D006"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "J",
+          "type": "Borel subset of R"
+        },
+        {
+          "symbol": "a",
+          "type": "real"
+        },
+        {
+          "symbol": "b",
+          "type": "real"
+        }
+      ],
+      "objects": [
+        "I"
+      ]
+    }
+  ],
+  "inputs": [
+    {
+      "id": "N002",
+      "kind": "internal",
+      "statement": "0≤D≤n, so D is finite. Also, for every s>0 and delta>0, H^s_delta(E)<infinity.",
+      "definitions": [
+        "D001",
+        "D002",
+        "D003",
+        "D008"
+      ],
+      "binders": [
+        {
+          "symbol": "s",
+          "type": "real"
+        },
+        {
+          "symbol": "delta",
+          "type": "real"
+        }
+      ],
+      "objects": [
+        "D",
+        "n",
+        "s",
+        "delta",
+        "H",
+        "E"
+      ]
+    },
+    {
+      "id": "M001",
+      "kind": "mathlib",
+      "statement": "For any measurable space X, any measure nu on X, any countable type T, and any family f:T→X→[0,infinity], if every f(i) is nu-almost-everywhere measurable, then the nonnegative extended integral of sum_{i in T} f(i) equals sum_{i in T} of the nonnegative extended integrals of f(i). No finiteness or sigma-finiteness assumption is required.",
+      "definitions": [],
+      "binders": [
+        {
+          "symbol": "X",
+          "type": "measurable space"
+        },
+        {
+          "symbol": "nu",
+          "type": "measure on X"
+        },
+        {
+          "symbol": "T",
+          "type": "type"
+        },
+        {
+          "symbol": "f",
+          "type": "T→X→[0,infinity]"
+        }
+      ],
+      "objects": [
+        "X",
+        "nu",
+        "T",
+        "f"
+      ],
+      "source_contract": {
+        "hypotheses": [
+          "X is a measurable space and nu a measure on it.",
+          "T is countable.",
+          "For every i in T, f(i) is nu-almost-everywhere measurable."
+        ],
+        "declaration": "MeasureTheory.lintegral_tsum",
+        "signature": "@MeasureTheory.lintegral_tsum : ∀ {α : Type u_1} {β : Type u_2} {m : MeasurableSpace.{u_1} α} {μ : MeasureTheory.Measure.{u_1} α}\n  [Countable.{u_2 + 1} β] {f : β → α → ENNReal},\n  (∀ (i : β), AEMeasurable.{u_1, 0} (f i) μ) →\n    Eq.{1} (∫⁻ (a : α), ∑' (i : β), f i a ∂μ) (∑' (i : β), ∫⁻ (a : α), f i a ∂μ)"
+      }
+    }
+  ],
+  "output": {
+    "id": "N004",
+    "kind": "internal",
+    "statement": "For every real s>0 and delta>0, H^s_delta(E)≤H^{s+1}_delta(F).",
+    "definitions": [
+      "D003",
+      "D007"
+    ],
+    "binders": [
+      {
+        "symbol": "s",
+        "type": "real"
+      },
+      {
+        "symbol": "delta",
+        "type": "real"
+      }
+    ],
+    "objects": [
+      "s",
+      "delta",
+      "H",
+      "E",
+      "F"
+    ]
+  },
+  "inference": {
+    "id": "R004",
+    "inputs": [
+      "N002",
+      "M001"
+    ],
+    "output": "N004",
+    "definitions": [
+      "D001",
+      "D002",
+      "D003",
+      "D006",
+      "D007",
+      "D009"
+    ],
+    "rules": [
+      "direct",
+      "forall_introduction",
+      "implication_introduction",
+      "case_elimination"
+    ],
+    "locals": [
+      {
+        "symbol": "s",
+        "type": "positive real",
+        "scope": "R004/argument",
+        "start": "S001",
+        "end": "S006",
+        "kind": "arbitrary",
+        "declaration": "Fix s>0.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": []
+      },
+      {
+        "symbol": "delta",
+        "type": "positive real",
+        "scope": "R004/argument",
+        "start": "S001",
+        "end": "S006",
+        "kind": "arbitrary",
+        "declaration": "Fix delta>0.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": []
+      },
+      {
+        "symbol": "V",
+        "type": "countable family of subsets of Eucl(n+1)",
+        "scope": "R004/argument",
+        "start": "S001",
+        "end": "S006",
+        "kind": "arbitrary",
+        "declaration": "Consider an arbitrary countable family V, temporarily assumed in L1 to be a delta-cover of F.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "Eucl",
+          "n"
+        ]
+      },
+      {
+        "symbol": "T",
+        "type": "subset of N",
+        "scope": "R004/argument",
+        "start": "S001",
+        "end": "S006",
+        "kind": "definition",
+        "declaration": "Enumerate the original family by N, allowing empty padding; let T be the indices of its nonempty members. All i-series below range over T.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "V"
+        ]
+      },
+      {
+        "symbol": "rho",
+        "type": "T-indexed family of nonnegative reals",
+        "scope": "R004/argument",
+        "start": "S001",
+        "end": "S006",
+        "kind": "definition",
+        "declaration": "For i in T set rho_i=diam(V_i).",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "V",
+          "T",
+          "diam"
+        ]
+      },
+      {
+        "symbol": "A_i",
+        "type": "T-indexed family of subsets of Eucl(n)",
+        "scope": "R004/argument",
+        "start": "S001",
+        "end": "S005",
+        "kind": "definition",
+        "declaration": "For i in T let A_i be the first-coordinate projection of V_i.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "V",
+          "T",
+          "Eucl",
+          "n"
+        ]
+      },
+      {
+        "symbol": "B_i",
+        "type": "T-indexed family of subsets of R",
+        "scope": "R004/argument",
+        "start": "S001",
+        "end": "S005",
+        "kind": "definition",
+        "declaration": "For i in T let B_i be the last-coordinate projection of V_i.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "V",
+          "T"
+        ]
+      },
+      {
+        "symbol": "c",
+        "type": "extended nonnegative real",
+        "scope": "R004/argument",
+        "start": "S001",
+        "end": "S006",
+        "kind": "definition",
+        "declaration": "Set c=H^s_delta(E), initially as an extended nonnegative real.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "H",
+          "s",
+          "delta",
+          "E"
+        ]
+      },
+      {
+        "symbol": "epsilon",
+        "type": "positive real",
+        "scope": "R004/argument",
+        "start": "S002",
+        "end": "S005",
+        "kind": "arbitrary",
+        "declaration": "Fix arbitrary epsilon>0.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": []
+      },
+      {
+        "symbol": "eta",
+        "type": "T-indexed family of positive reals",
+        "scope": "R004/argument",
+        "start": "S002",
+        "end": "S005",
+        "kind": "definition",
+        "declaration": "Set eta_i=epsilon 2^(-i-1)/(1+rho_i^s).",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "epsilon",
+          "rho",
+          "s",
+          "T"
+        ]
+      },
+      {
+        "symbol": "J",
+        "type": "T-indexed family of open bounded intervals in R",
+        "scope": "R004/argument",
+        "start": "S002",
+        "end": "S005",
+        "kind": "definition",
+        "declaration": "Set J_i=(inf B_i-eta_i/2,sup B_i+eta_i/2). F001 supplies bounded nonempty B_i.",
+        "from_inputs": [],
+        "from_local": [
+          "F001"
+        ],
+        "objects": [
+          "B_i",
+          "eta",
+          "T"
+        ]
+      },
+      {
+        "symbol": "f",
+        "type": "T→R→[0,infinity]",
+        "scope": "R004/argument",
+        "start": "S003",
+        "end": "S004",
+        "kind": "definition",
+        "declaration": "Define f_i(t)=rho_i^s 1_{J_i}(t), with its finite nonnegative coefficient included in the extended nonnegative reals.",
+        "from_inputs": [],
+        "from_local": [
+          "F001"
+        ],
+        "objects": [
+          "rho",
+          "s",
+          "J",
+          "T"
+        ]
+      },
+      {
+        "symbol": "t",
+        "type": "point of I",
+        "scope": "R004/argument",
+        "start": "S003",
+        "end": "S003",
+        "kind": "arbitrary",
+        "declaration": "Fix t in I to check the slice cover.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "I"
+        ]
+      }
+    ],
+    "argument": [
+      {
+        "id": "S001",
+        "text": "Fix s>0 and delta>0. Take any countable family V and introduce L1: V is a delta-cover of F. Enumerate it with possible empty padding, discard empties, and write T⊆N for the remaining indices; all i-series in this inference are over T. Define rho_i=diam(V_i), and A_i and B_i as its first and last coordinate projections. By the Euclidean distance formula, each coordinate projection is 1-Lipschitz. Thus A_i and B_i are nonempty and have diameter ≤rho_i≤delta. In particular B_i is bounded, with finite infimum and supremum and sup B_i-inf B_i≤rho_i. Put c=H^s_delta(E). By N002, c is finite.",
+        "uses": [
+          "N002"
+        ],
+        "uses_local": [],
+        "objects": [
+          "s",
+          "delta",
+          "V",
+          "T",
+          "rho",
+          "A_i",
+          "B_i",
+          "F",
+          "E",
+          "c",
+          "H",
+          "diam"
+        ],
+        "produces": [
+          {
+            "id": "F001",
+            "statement": "c<infinity; for every i in T, 0≤rho_i≤delta, diam(A_i)≤rho_i, and B_i is nonempty and bounded with sup B_i-inf B_i≤rho_i.",
+            "binders": [],
+            "objects": [
+              "c",
+              "T",
+              "rho",
+              "delta",
+              "A_i",
+              "B_i",
+              "diam"
+            ],
+            "assumptions": [
+              "L1"
+            ]
+          }
+        ],
+        "introduces": [
+          "L1"
+        ],
+        "discharges": []
+      },
+      {
+        "id": "S002",
+        "text": "For arbitrary epsilon>0 set eta_i=epsilon 2^(-i-1)/(1+rho_i^s)>0. By F001 define the bounded open interval J_i=(inf B_i-eta_i/2,sup B_i+eta_i/2). It contains B_i and its length is sup B_i-inf B_i+eta_i≤rho_i+eta_i. This construction also works when rho_i=0. No measurability of V_i, A_i or B_i is asserted or required. Furthermore sum_i eta_i rho_i^s≤epsilon sum_{i in T}2^(-i-1)≤epsilon, since 0≤rho_i^s/(1+rho_i^s)≤1.",
+        "uses": [],
+        "uses_local": [
+          "F001"
+        ],
+        "objects": [
+          "epsilon",
+          "eta",
+          "rho",
+          "s",
+          "T",
+          "B_i",
+          "J"
+        ],
+        "produces": [
+          {
+            "id": "F002",
+            "statement": "For every i in T, B_i⊆J_i, J_i is a bounded open interval and |J_i∩I|≤rho_i+eta_i; also sum_{i in T} eta_i rho_i^s≤epsilon.",
+            "binders": [],
+            "objects": [
+              "T",
+              "B_i",
+              "J",
+              "I",
+              "rho",
+              "eta",
+              "s",
+              "epsilon",
+              "lambda"
+            ],
+            "assumptions": [
+              "L1"
+            ]
+          }
+        ],
+        "introduces": [],
+        "discharges": []
+      },
+      {
+        "id": "S003",
+        "text": "For each t∈I, the A_i with t∈J_i cover E. Indeed, for each x∈E, the point (x,t)∈F lies in some V_i, so x∈A_i and t∈B_i⊆J_i. Their diameters are ≤rho_i≤delta by F001. The definition of the infimum H^s_delta(E) therefore gives c≤sum_i rho_i^s 1_{J_i}(t). Define f_i(t)=rho_i^s 1_{J_i}(t). Each f_i is a nonnegative Borel measurable function: J_i is open and the coefficient rho_i^s is finite. Thus it is almost-everywhere measurable for lambda restricted to I.",
+        "uses": [],
+        "uses_local": [
+          "F001",
+          "F002"
+        ],
+        "objects": [
+          "t",
+          "I",
+          "E",
+          "F",
+          "V",
+          "T",
+          "A_i",
+          "B_i",
+          "J",
+          "rho",
+          "delta",
+          "s",
+          "c",
+          "f",
+          "H",
+          "lambda"
+        ],
+        "produces": [
+          {
+            "id": "F003",
+            "statement": "For every t0∈I, c≤sum_{i in T} f_i(t0). Every f_i is Borel measurable, hence almost-everywhere measurable for lambda restricted to I.",
+            "binders": [
+              {
+                "symbol": "t0",
+                "type": "real"
+              }
+            ],
+            "objects": [
+              "I",
+              "c",
+              "T",
+              "f",
+              "lambda"
+            ],
+            "assumptions": [
+              "L1"
+            ]
+          }
+        ],
+        "introduces": [],
+        "discharges": []
+      },
+      {
+        "id": "S004",
+        "text": "Integrate F003 over I, whose Lebesgue measure is one. Monotonicity of the nonnegative integral gives c≤integral_I sum_i f_i. Apply M001 on R with measure lambda restricted to I, index type T, and this f: T is countable as a subset of N, and F003 gives the required almost-everywhere measurability. We obtain c≤sum_i integral_I f_i=sum_i rho_i^s |J_i∩I|. The last equality is the integral formula for a nonnegative constant times a measurable indicator, which follows directly from the simple-function definition of the integral. By F002, c≤sum_i rho_i^s |J_i∩I|≤sum_i rho_i^(s+1)+sum_i eta_i rho_i^s≤sum_i rho_i^(s+1)+epsilon. Here rho_i^s rho_i=rho_i^(s+1) also at rho_i=0 since s>0; nonnegative series permit termwise comparison and splitting.",
+        "uses": [
+          "M001"
+        ],
+        "uses_local": [
+          "F001",
+          "F002",
+          "F003"
+        ],
+        "objects": [
+          "c",
+          "I",
+          "lambda",
+          "f",
+          "T",
+          "rho",
+          "s",
+          "J",
+          "eta",
+          "epsilon"
+        ],
+        "produces": [
+          {
+            "id": "F004",
+            "statement": "For every e0>0, c≤sum_{i in T} rho_i^(s+1)+e0.",
+            "binders": [
+              {
+                "symbol": "e0",
+                "type": "positive real"
+              }
+            ],
+            "objects": [
+              "c",
+              "T",
+              "rho",
+              "s"
+            ],
+            "assumptions": [
+              "L1"
+            ]
+          }
+        ],
+        "introduces": [],
+        "discharges": []
+      },
+      {
+        "id": "S005",
+        "text": "The construction works for every epsilon>0, and F004 has eliminated the private intervals and their dependence on epsilon. If sum_i rho_i^(s+1)=infinity, c≤that series is immediate. If it is finite, the inequalities in F004 for all e0>0 and the finite c from F001 allow e0 to decrease to zero, giving c≤sum_i rho_i^(s+1). Thus in both cases c≤the (s+1)-cost of the original cover, since deleted empties have zero cost.",
+        "uses": [],
+        "uses_local": [
+          "F001",
+          "F004"
+        ],
+        "objects": [
+          "c",
+          "T",
+          "rho",
+          "s",
+          "V",
+          "epsilon",
+          "J",
+          "eta"
+        ],
+        "produces": [
+          {
+            "id": "F005",
+            "statement": "c≤sum_{i in T}rho_i^(s+1).",
+            "binders": [],
+            "objects": [
+              "c",
+              "T",
+              "rho",
+              "s"
+            ],
+            "assumptions": [
+              "L1"
+            ]
+          }
+        ],
+        "introduces": [],
+        "discharges": []
+      },
+      {
+        "id": "S006",
+        "text": "Discharge L1: every countable delta-cover V of F has (s+1)-cost at least c=H^s_delta(E). Taking its infimum proves H^s_delta(E)≤H^{s+1}_delta(F). This is valid even if no admissible cover existed, when the right infimum would be infinity. Quantify s>0 and delta>0 to obtain the exported claim. No object depending on a particular V or epsilon occurs in this output.",
+        "uses": [],
+        "uses_local": [
+          "F005"
+        ],
+        "objects": [
+          "V",
+          "s",
+          "delta",
+          "c",
+          "E",
+          "F",
+          "H",
+          "T",
+          "rho"
+        ],
+        "produces": [],
+        "introduces": [],
+        "discharges": [
+          "L1"
+        ]
+      }
+    ],
+    "applications": [
+      {
+        "input": "M001",
+        "at": "S004",
+        "bindings": "Source X=R with its Borel sigma algebra, nu=lambda restricted to I, source index type=T⊆N, source family f_i(t)=rho_i^s 1_{J_i}(t), as defined in S003.",
+        "hypothesis_checks": [
+          "D009 supplies Lebesgue measure and its restriction to I on the measurable space R.",
+          "T⊆N by S001, hence it is a countable index type.",
+          "F003 proves each f_i Borel measurable, so each is almost-everywhere measurable for this restricted measure."
+        ]
+      }
+    ]
+  },
+  "warning": "Direct inputs and fixed logic are supplied. Audit A may record mathematically checked routine background with actual conditions and justification; exact Lean bindings belong to nl02lean. No ancestor proof or extra H is available. A packet is not an audit certificate.",
+  "packet_sha256": "e48b64f670350ada3e5a3da6f501c7adc48671812248222e53932ebc4465c90e"
+}

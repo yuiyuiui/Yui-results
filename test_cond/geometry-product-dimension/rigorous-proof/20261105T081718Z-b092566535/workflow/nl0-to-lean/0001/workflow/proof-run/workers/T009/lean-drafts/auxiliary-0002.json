@@ -1,0 +1,29 @@
+{
+  "statement": "1 ≤ n → ∀ q : ℝ, dimH E < ENNReal.ofReal q → ∀ δ : ℝ, 0 < δ → YuiContent (q + 1) δ (YuiCylinder E) = 0",
+  "proof": "intro hn q hq δ hδ\nhave hs : 0 < Real.sqrt 2 := Real.sqrt_pos.2 (by norm_num)\nlet r : ℝ := min 1 (δ / Real.sqrt 2)\nhave hr : 0 < r := lt_min (by norm_num) (div_pos hδ hs)\nhave hr1 : r ≤ 1 := min_le_left _ _\nhave hrs : Real.sqrt 2 * r ≤ δ := by\n  have h : r ≤ δ / Real.sqrt 2 := min_le_right _ _\n  have := (le_div_iff₀ hs).1 h\n  nlinarith\nlet C : ℝ := 2 * (Real.sqrt 2) ^ (q + 1)\nhave hC : 0 < C := mul_pos (by norm_num) (Real.rpow_pos_of_pos hs _)\nhave hbound : ∀ j : ℕ,\n    YuiContent (q + 1) δ (YuiCylinder E) ≤\n      ENNReal.ofReal (C * (1 / ((j : ℝ) + 1))) := by\n  intro j\n  obtain ⟨W, hW, hcost⟩ := h_T008 hn q hq r (1 / ((j : ℝ) + 1)) hr hr1 (by positivity)\n  have hcover : YuiCover δ (YuiCylinder E) W := by\n    refine ⟨hW.1, fun i => (hW.2 i).trans ?_⟩\n    exact ENNReal.ofReal_le_ofReal hrs\n  exact (iInf_le_of_le W (iInf_le_of_le hcover le_rfl)).trans hcost.le\nhave hlimR : Filter.Tendsto (fun j : ℕ => C * (1 / ((j : ℝ) + 1)))\n    Filter.atTop (nhds (0 : ℝ)) := by\n  simpa using (tendsto_const_nhds (x := C)).mul\n    (tendsto_one_div_add_atTop_nhds_zero_nat (𝕜 := ℝ))\nhave hlim : Filter.Tendsto (fun j : ℕ => ENNReal.ofReal (C * (1 / ((j : ℝ) + 1))))\n    Filter.atTop (nhds (0 : ℝ≥0∞)) := by\n  simpa using (ENNReal.continuous_ofReal.tendsto (0 : ℝ)).comp hlimR\nexact le_antisymm (ge_of_tendsto' hlim hbound) (zero_le _)",
+  "check": {
+    "exit_code": 1,
+    "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-f277s31u/output/Auxiliary.lean:34:52: warning: Variable name `h_T002` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-f277s31u/output/Auxiliary.lean:34:702: warning: Variable name `h_T006` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-f277s31u/output/Auxiliary.lean:34:755: warning: Variable name `h_T008` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-f277s31u/output/Auxiliary.lean:61:42: error: Application type mismatch: The argument\n  hcover\nhas type\n  YuiCover δ (YuiCylinder E) W\nof sort `Prop` but is expected to have type\n  ℕ\nof sort `Type` in the application\n  iInf_le_of_le hcover\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-f277s31u/output/Auxiliary.lean:68:4: error: Type mismatch: After simplification, term\n  Filter.Tendsto.comp (Continuous.tendsto ENNReal.continuous_ofReal 0) hlimR\n has type\n  @Filter.Tendsto ℕ ℝ≥0∞ (ENNReal.ofReal ∘ fun j => C * (↑j + 1)⁻¹) Filter.atTop (nhds 0)\nbut is expected to have type\n  @Filter.Tendsto ℕ ℝ≥0∞ (fun j => ENNReal.ofReal (C * (↑j + 1)⁻¹)) Filter.atTop (nhds 0)\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-f277s31u/output/Auxiliary.lean:69:50: error: Function expected at\n  zero_le\nbut this term has type\n  0 ≤ ?m.595\n\nNote: Expected a function because this term is being applied to the argument\n  _\nchecked : ∀ (n : ℕ) (E : Set (YuiEucl n)),\n  ((∀ (k : ℕ) (A : Set (YuiEucl k)) (a : ℝ),\n        0 < a →\n          YuiMeasure a A = (MeasureTheory.Measure.hausdorffMeasure a) A ∧\n            (dimH A < ENNReal.ofReal a → YuiMeasure a A = 0) ∧\n              (ENNReal.ofReal a < dimH A → YuiMeasure a A = ∞) ∧\n                (YuiMeasure a A = 0 → dimH A ≤ ENNReal.ofReal a) ∧ (YuiMeasure a A = ∞ → ENNReal.ofReal a ≤ dimH A)) ∧\n      (∀ (k : ℕ) (A : Set (YuiEucl k)), 0 ≤ dimH A) ∧\n        (∀ (k : ℕ) (A B : Set (YuiEucl k)), A ⊆ B → dimH A ≤ dimH B) ∧\n          ∀ (k l : ℕ) (A : Set (YuiEucl k)) (g : ↑A → YuiEucl l), Isometry g → dimH (Set.range g) = dimH A) →\n    ((0 ≤ dimH E ∧ dimH E ≤ ↑n ∧ dimH E < ∞) ∧ ∀ (s δ : ℝ), 0 < s → 0 < δ → YuiContent s δ E < ∞) →\n      (n = 0 → dimH (YuiCylinder E) ≤ dimH E + 1) →\n        (1 ≤ n →\n            ∀ (q : ℝ),\n              dimH E < ENNReal.ofReal q →\n                ∀ (r ε : ℝ),\n                  0 < r →\n                    r ≤ 1 →\n                      0 < ε →\n                        ∃ W,\n                          YuiCover (√2 * r) (YuiCylinder E) W ∧\n                            YuiCost (q + 1) W < ENNReal.ofReal (2 * √2 ^ (q + 1) * ε)) →\n          1 ≤ n → ∀ (q : ℝ), dimH E < ENNReal.ofReal q → ∀ (δ : ℝ), 0 < δ → YuiContent (q + 1) δ (YuiCylinder E) = 0\n'YuiAuxiliary.checked' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]\n",
+    "stderr": "",
+    "wall_seconds": 3.3731302919986774,
+    "native_limits": {
+      "timeout_seconds": 180,
+      "max_heartbeats": 20000000
+    },
+    "source_path": "/Users/syyui/projects/Yui-results/test_cond/geometry-product-dimension/rigorous-proof/20261105T081718Z-b092566535/workflow/native-checks/9cad520161344d33892476aa94491987.lean",
+    "source_sha256": "6132db35e9f5163cc58171b0b7da185270ce44d9edc02bd46671760ad07ae90c",
+    "auxiliary_valid": false,
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext",
+      "sorryAx"
+    ],
+    "lean_sha256": "6132db35e9f5163cc58171b0b7da185270ce44d9edc02bd46671760ad07ae90c",
+    "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+    "context_port": "T009",
+    "candidate": 2,
+    "accepted": false,
+    "stage_complete": false
+  }
+}

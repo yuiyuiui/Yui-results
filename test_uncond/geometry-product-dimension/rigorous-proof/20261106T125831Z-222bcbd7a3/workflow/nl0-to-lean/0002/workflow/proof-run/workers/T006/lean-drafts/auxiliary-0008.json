@@ -1,0 +1,34 @@
+{
+  "statement": "∀ (c : ℝ≥0∞) (d : ℕ → ℝ≥0∞) (s : ℝ) (J : ℕ → Set ℝ), 0 < s → (∀ i, IsClosed (J i)) → (∀ i, volume (J i) ≤ d i) → (∀ t ∈ YuiBasis.unitInterval, c ≤ ∑' i, (J i).indicator (fun _ : ℝ => d i ^ s) t) → c ≤ ∑' i, d i ^ (s+1)",
+  "proof": "classical\nintro c d s J hs hclosed hvol hslice\nlet g : ℕ → ℝ → ℝ≥0∞ := fun i => (J i ∩ YuiBasis.unitInterval).indicator (fun _ => d i ^ s)\nhave hm (i : ℕ) : Measurable (g i) :=\n  measurable_const.indicator ((hclosed i).measurableSet.inter measurableSet_Icc)\nhave hpoint : ∀ t : ℝ, YuiBasis.unitInterval.indicator (fun _ => c) t ≤ ∑' i, g i t := by\n  intro t\n  by_cases ht : t ∈ YuiBasis.unitInterval\n  · have heq (i : ℕ) : g i t = (J i).indicator (fun _ : ℝ => d i ^ s) t := by\n      by_cases hj : t ∈ J i <;> simp [g, ht, hj]\n    simpa only [Set.indicator_of_mem ht, heq] using hslice t ht\n  · simp [Set.indicator_of_notMem ht]\ncalc\n  c = ∫⁻ t : ℝ, YuiBasis.unitInterval.indicator (fun _ => c) t := (yui_aux_0004 n E h_T004 h_T005 c).symm\n  _ ≤ ∫⁻ t : ℝ, ∑' i, g i t := lintegral_mono hpoint\n  _ = ∑' i, ∫⁻ t : ℝ, g i t := lintegral_tsum (fun i => (hm i).aemeasurable)\n  _ ≤ ∑' i, d i ^ (s+1) := by\n    apply ENNReal.tsum_le_tsum\n    intro i\n    rw [show (∫⁻ t : ℝ, g i t) = d i ^ s * volume (J i ∩ YuiBasis.unitInterval) from\n      lintegral_indicator_const ((hclosed i).measurableSet.inter measurableSet_Icc) _]\n    calc\n      _ ≤ d i ^ s * volume (J i) := mul_le_mul_left' (measure_mono Set.inter_subset_left) _\n      _ ≤ d i ^ s * d i := mul_le_mul_left' (hvol i) _\n      _ = d i ^ (s+1) := yui_aux_0003 n E h_T004 h_T005 (d i) s hs",
+  "check": {
+    "exit_code": 0,
+    "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-wjvka9wo/output/Auxiliary.lean:26:25: warning: Variable name `E` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-wjvka9wo/output/Auxiliary.lean:38:25: warning: Variable name `E` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-wjvka9wo/output/Auxiliary.lean:55:99: warning: Variable name `h_T005` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-wjvka9wo/output/Auxiliary.lean:84:61: warning: Variable name `h_T004` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-wjvka9wo/output/Auxiliary.lean:84:99: warning: Variable name `h_T005` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-wjvka9wo/output/Auxiliary.lean:90:61: warning: Variable name `h_T004` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-wjvka9wo/output/Auxiliary.lean:90:99: warning: Variable name `h_T005` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-wjvka9wo/output/Auxiliary.lean:119:38: warning: `mul_le_mul_left'` has been deprecated: Use `mul_le_mul_right` instead\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-wjvka9wo/output/Auxiliary.lean:120:29: warning: `mul_le_mul_left'` has been deprecated: Use `mul_le_mul_right` instead\nchecked : ∀ (n : ℕ) (E : Set (Ambient n)),\n  YuiPortTypes.T004 n E →\n    YuiPortTypes.T005 n E →\n      ∀ (c : ℝ≥0∞) (d : ℕ → ℝ≥0∞) (s : ℝ) (J : ℕ → Set ℝ),\n        0 < s →\n          (∀ (i : ℕ), IsClosed (J i)) →\n            (∀ (i : ℕ), volume (J i) ≤ d i) →\n              (∀ t ∈ YuiBasis.unitInterval, c ≤ ∑' (i : ℕ), (J i).indicator (fun x => d i ^ s) t) →\n                c ≤ ∑' (i : ℕ), d i ^ (s + 1)\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+    "stderr": "",
+    "wall_seconds": 2.9358187500038184,
+    "native_limits": {
+      "timeout_seconds": 180,
+      "max_heartbeats": 20000000
+    },
+    "source_path": "/Users/syyui/projects/Yui-results/test_uncond/geometry-product-dimension/rigorous-proof/20261106T125831Z-222bcbd7a3/workflow/native-checks/f63a96c2c5e84b04a719527260e3faab.lean",
+    "source_sha256": "a1041f4de9f6c7001f8ebdee874235496b5a9ae8b4c65ec3cc0b2cbf425241c8",
+    "auxiliary_valid": true,
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "lean_sha256": "a1041f4de9f6c7001f8ebdee874235496b5a9ae8b4c65ec3cc0b2cbf425241c8",
+    "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+    "context_port": "T006",
+    "candidate": 8,
+    "helper": {
+      "name": "yui_aux_0005",
+      "statement": "∀ (c : ℝ≥0∞) (d : ℕ → ℝ≥0∞) (s : ℝ) (J : ℕ → Set ℝ), 0 < s → (∀ i, IsClosed (J i)) → (∀ i, volume (J i) ≤ d i) → (∀ t ∈ YuiBasis.unitInterval, c ≤ ∑' i, (J i).indicator (fun _ : ℝ => d i ^ s) t) → c ≤ ∑' i, d i ^ (s+1)",
+      "application": "@yui_aux_0005 n E h_T004 h_T005",
+      "scope": "Checked same-node theorem; available in later checks and the final body."
+    },
+    "accepted": true,
+    "stage_complete": false
+  }
+}

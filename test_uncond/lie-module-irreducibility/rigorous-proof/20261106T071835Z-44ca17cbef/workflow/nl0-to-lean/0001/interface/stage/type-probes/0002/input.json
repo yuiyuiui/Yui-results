@@ -1,0 +1,37 @@
+{
+  "header": "import Mathlib\n\nnamespace YuiObjects\n\nnoncomputable def dividedPower {V : Type*} [AddCommGroup V] [Module ℂ V]\n    (a : Module.End ℂ V) (r : ℕ) : Module.End ℂ V :=\n  ((Nat.factorial r : ℂ)⁻¹) • (a ^ r)\n\ndef stable {F V : Type*} [Field F] [AddCommGroup V] [Module F V]\n    (a : Module.End F V) (W : Submodule F V) : Prop :=\n  ∀ w ∈ W, a w ∈ W\n\ndef highestWeightData {V : Type*} [AddCommGroup V] [Module ℂ V]\n    (lam : ℕ) (h x y : Module.End ℂ V) (v : V) : Prop :=\n  v ≠ 0 ∧ x v = 0 ∧ h v = (lam : ℂ) • v ∧\n  h * x - x * h = (2 : ℂ) • x ∧\n  h * y - y * h = (-2 : ℂ) • y ∧\n  x * y - y * x = h ∧ Module.finrank ℂ V = lam + 1\n\ndef admissibleLattice {V : Type*} [AddCommGroup V] [Module ℂ V]\n    (lam : ℕ) (x y : Module.End ℂ V) (M : Submodule ℤ V) : Prop :=\n  (∃ (b : Module.Basis (Fin (lam + 1)) ℤ M)\n      (e : Module.Basis (Fin (lam + 1)) ℂ V), ∀ i, (b i : V) = e i) ∧\n  (∀ (r : ℕ) (m : M), dividedPower x r (m : V) ∈ M) ∧\n  (∀ (r : ℕ) (m : M), dividedPower y r (m : V) ∈ M)\n\ndef matrixUnits {F V I : Type*} [Field F] [AddCommGroup V] [Module F V]\n    [Fintype I] [DecidableEq I] (f : I → I → Module.End F V) : Prop :=\n  (∀ i j k l, f i j * f k l = if j = k then f i l else 0) ∧\n  (∑ i, f i i) = 1\n\nend YuiObjects\n\nnamespace YuiObjects\nnoncomputable def latticeEnd {V : Type*} [AddCommGroup V] [Module ℂ V]\n    (M : Submodule ℤ V) (f : Module.End ℂ V) : Module.End ℤ M :=\n  @dite (Module.End ℤ M) (∀ z ∈ M, f z ∈ M)\n    (Classical.propDecidable _) (fun hs => (f.restrictScalars ℤ).restrict hs) (fun _ => 0)\nend YuiObjects\n",
+  "parameters": [
+    {
+      "name": "K",
+      "type": "Type"
+    },
+    {
+      "name": "instK",
+      "type": "Field K",
+      "binder_kind": "instance"
+    },
+    {
+      "name": "V",
+      "type": "Type"
+    },
+    {
+      "name": "instV",
+      "type": "AddCommGroup V",
+      "binder_kind": "instance"
+    },
+    {
+      "name": "instCV",
+      "type": "Module ℂ V",
+      "binder_kind": "instance"
+    },
+    {
+      "name": "M",
+      "type": "Submodule ℤ V"
+    }
+  ],
+  "types": [
+    "Module.End K (TensorProduct ℤ M K)",
+    "Module.End K (TensorProduct ℤ K M)",
+    "@TensorProduct.AlgebraTensorModule.map"
+  ]
+}

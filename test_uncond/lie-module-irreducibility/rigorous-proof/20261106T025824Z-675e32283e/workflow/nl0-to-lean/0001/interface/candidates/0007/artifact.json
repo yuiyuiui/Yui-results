@@ -1,0 +1,318 @@
+{
+  "header": "import Mathlib\n\nnamespace YuiBasisObjects\n\nnoncomputable def dividedPower {V : Type*} [AddCommGroup V] [Module ℂ V]\n    (f : Module.End ℂ V) (r : ℕ) : Module.End ℂ V :=\n  ((r.factorial : ℂ)⁻¹) • f ^ r\n\ndef Stable {K V : Type*} [Field K] [AddCommGroup V] [Module K V]\n    (W : Submodule K V) (f : Module.End K V) : Prop :=\n  ∀ w, w ∈ W → f w ∈ W\n\nstructure AdmissibleLattice (n : ℕ) (V : Type*) [AddCommGroup V] [Module ℂ V]\n    (x y : Module.End ℂ V) where\n  carrier : Submodule ℤ V\n  zBasis : Module.Basis (Fin n) ℤ carrier\n  cBasis : Module.Basis (Fin n) ℂ V\n  coe_basis : ∀ i, (zBasis i : V) = cBasis i\n  stableX : ∀ (r : ℕ) (m : V), m ∈ carrier → dividedPower x r m ∈ carrier\n  stableY : ∀ (r : ℕ) (m : V), m ∈ carrier → dividedPower y r m ∈ carrier\n\nend YuiBasisObjects\n\nuniverse uK uV\n\nnamespace Reduction\nopen scoped BigOperators\nopen YuiBasisObjects\nvariable {V : Type*} [AddCommGroup V] [Module ℂ V]\nnoncomputable def e (y : Module.End ℂ V) (v : V) (i : ℕ) : V :=\n  (i.factorial : ℂ)⁻¹ • (y ^ i) v\ndef c (ell : ℕ) (j : Fin (ell + 1)) : ℕ := Nat.choose ell j.val\ndef Dprod (ell : ℕ) : ℕ := ∏ j : Fin (ell + 1), c ell j\ndef d (ell : ℕ) (j : Fin (ell + 1)) : ℕ :=\n  ∏ k : Fin (ell + 1), if k = j then 1 else c ell k\ndef hM {M : Type*} [AddCommGroup M] [Module ℤ M]\n    (XM YM : ℕ → Module.End ℤ M) : Module.End ℤ M :=\n  XM 1 * YM 1 - YM 1 * XM 1\ndef A {M : Type*} [AddCommGroup M] [Module ℤ M]\n    (XM YM : ℕ → Module.End ℤ M) (ell : ℕ)\n    (i j : Fin (ell + 1)) : Module.End ℤ M :=\n  XM (ell - i.val) * (YM ell * XM ell) * YM (ell - j.val)\nnoncomputable def AC (x y : Module.End ℂ V) (ell : ℕ)\n    (i j : Fin (ell + 1)) : Module.End ℂ V :=\n  dividedPower x (ell - i.val) *\n    (dividedPower y ell * dividedPower x ell) * dividedPower y (ell - j.val)\ndef VK (K M : Type*) [Field K] [AddCommGroup M] [Module ℤ M] :=\n  TensorProduct ℤ M K\ndef pure (K : Type*) {M : Type*} [Field K] [AddCommGroup M] [Module ℤ M]\n    (m : M) (a : K) : VK K M := TensorProduct.tmul ℤ m a\nnoncomputable instance vkAdd (K M : Type*) [Field K] [AddCommGroup M] [Module ℤ M] :\n    AddCommGroup (VK K M) := inferInstanceAs (AddCommGroup (TensorProduct ℤ M K))\nnoncomputable def swapAdd (K M : Type*) [Field K] [AddCommGroup M] [Module ℤ M] :\n    VK K M ≃+ TensorProduct ℤ K M :=\n  letI : Module ℤ (TensorProduct ℤ M K) := TensorProduct.instModule\n  letI : Module ℤ (TensorProduct ℤ K M) := TensorProduct.instModule\n  (TensorProduct.comm ℤ M K).toAddEquiv\nnoncomputable instance vkModule (K M : Type*) [Field K] [AddCommGroup M] [Module ℤ M] :\n    Module K (VK K M) := (swapAdd K M).module K\nnoncomputable def swap (K M : Type*) [Field K] [AddCommGroup M] [Module ℤ M] :\n    VK K M ≃ₗ[K] TensorProduct ℤ K M :=\n  (swapAdd K M).linearEquiv K\nnoncomputable def F (K : Type*) {M : Type*} [Field K] [AddCommGroup M] [Module ℤ M]\n    (f : Module.End ℤ M) : Module.End K (TensorProduct ℤ K M) := f.baseChange K\nnoncomputable def ind (K : Type*) {M : Type*} [Field K] [AddCommGroup M] [Module ℤ M]\n    (f : Module.End ℤ M) : Module.End K (VK K M) :=\n  (swap K M).symm.toLinearMap ∘ₗ F K f ∘ₗ (swap K M).toLinearMap\nnoncomputable def T (K : Type*) {M : Type*} [Field K] [AddCommGroup M] [Module ℤ M]\n    (XM YM : ℕ → Module.End ℤ M) (ell : ℕ)\n    (i j : Fin (ell + 1)) : Module.End K (TensorProduct ℤ K M) :=\n  (c ell j : K)⁻¹ • F K (A XM YM ell i j)\ndef MatrixUnits {k : Type*} [Field k] {U : Type*} [AddCommGroup U] [Module k U]\n    (n : ℕ) (t : Fin n → Fin n → Module.End k U) : Prop :=\n  (∀ i j a b, t i j * t a b = if j = a then t i b else 0) ∧\n  (∑ j, t j j) = 1\nend Reduction\n",
+  "parameters": [
+    {
+      "name": "p",
+      "type": "ℕ"
+    },
+    {
+      "name": "K",
+      "type": "Type uK"
+    },
+    {
+      "name": "instK",
+      "type": "Field K",
+      "binder_kind": "instance"
+    },
+    {
+      "name": "lambda",
+      "type": "ℤ"
+    },
+    {
+      "name": "V",
+      "type": "Type uV"
+    },
+    {
+      "name": "instV",
+      "type": "AddCommGroup V",
+      "binder_kind": "instance"
+    },
+    {
+      "name": "instCV",
+      "type": "Module ℂ V",
+      "binder_kind": "instance"
+    },
+    {
+      "name": "x",
+      "type": "Module.End ℂ V"
+    },
+    {
+      "name": "y",
+      "type": "Module.End ℂ V"
+    },
+    {
+      "name": "h",
+      "type": "Module.End ℂ V"
+    },
+    {
+      "name": "v",
+      "type": "V"
+    },
+    {
+      "name": "M",
+      "type": "Submodule ℤ V"
+    },
+    {
+      "name": "XM",
+      "type": "ℕ → Module.End ℤ M"
+    },
+    {
+      "name": "YM",
+      "type": "ℕ → Module.End ℤ M"
+    }
+  ],
+  "premise_types": {
+    "H001": "Nat.Prime p",
+    "H002": "CharP K p",
+    "H003": "0 ≤ lambda ∧ lambda < (p : ℤ)",
+    "H004": "FiniteDimensional ℂ V ∧ (Module.finrank ℂ V : ℤ) = lambda + 1 ∧ Nontrivial V ∧\n(∀ W : Submodule ℂ V, YuiBasisObjects.Stable W x → YuiBasisObjects.Stable W y →\n YuiBasisObjects.Stable W h → W = ⊥ ∨ W = ⊤) ∧\n(∃ w : V, w ≠ 0 ∧ x w = 0 ∧ h w = (lambda : ℂ) • w)",
+    "H005": "h * x - x * h = (2 : ℂ) • x ∧ h * y - y * h = (-2 : ℂ) • y ∧ x * y - y * x = h",
+    "H006": "v ≠ 0 ∧ x v = 0 ∧ h v = (lambda : ℂ) • v",
+    "H007": "(∃ (I : Type uV) (bZ : Module.Basis I ℤ M) (bC : Module.Basis I ℂ V),\n ∀ i, (bZ i : V) = bC i) ∧\n(∀ (r : ℕ) (m : M), (XM r m : V) = YuiBasisObjects.dividedPower x r (m : V)) ∧\n(∀ (r : ℕ) (m : M), (YM r m : V) = YuiBasisObjects.dividedPower y r (m : V))",
+    "E001": "∀ (K M : Type*) [Field K] [AddCommGroup M] [Module ℤ M], ∃ F : Module.End ℤ M →+* Module.End K (TensorProduct ℤ K M), ∀ (f : Module.End ℤ M) (a : K) (m : M), F f (TensorProduct.tmul ℤ a m) = TensorProduct.tmul ℤ a (f m)"
+  },
+  "conclusion_type": "Nontrivial (Reduction.VK K M) ∧\n∀ W : Submodule K (Reduction.VK K M),\n YuiBasisObjects.Stable W (Reduction.ind K (XM 1)) →\n YuiBasisObjects.Stable W (Reduction.ind K (YM 1)) →\n YuiBasisObjects.Stable W (Reduction.ind K (Reduction.hM XM YM)) →\n W = ⊥ ∨ W = ⊤",
+  "representation": "Complex and reduced actions are endomorphisms; multiplication composes rightmost first. The lattice is the original integer submodule M, with XM/YM the uniquely determined restrictions, specified in H007. Use both tensor orders with a transported right-factor K-module on VK; prove the pure-tensor and invariant-subspace identifications in N003. No background note is a premise, and all M results are direct library uses.",
+  "objects": [],
+  "steps": [
+    {
+      "id": "T001",
+      "statement": "(lambda = (lambda.toNat : ℤ) ∧ lambda.toNat < p ∧\nFiniteDimensional ℂ V ∧ Module.finrank ℂ V = lambda.toNat + 1) ∧ v ≠ 0 ∧ x v = 0 ∧ h v = (lambda.toNat : ℂ) • v ∧ (∀ i : ℕ, h ((y ^ i) v) = ((lambda.toNat : ℂ) - 2 * (i : ℂ)) • ((y ^ i) v)) ∧\n(∀ i : ℕ, 1 ≤ i → x ((y ^ i) v) =\n ((i : ℂ) * ((lambda.toNat : ℂ) - (i : ℂ) + 1)) • ((y ^ (i - 1)) v))",
+      "inputs": [
+        "H003",
+        "H004",
+        "H005",
+        "H006"
+      ],
+      "source_steps": [
+        "S001",
+        "S002"
+      ],
+      "explanation": "Normalize the nonnegative integer weight and prove both all-power commutator recurrences by the source inductions, before using any termination."
+    },
+    {
+      "id": "T002",
+      "statement": "(∀ i : Fin (lambda.toNat + 1), Reduction.e y v i.val ≠ 0 ∧\n h (Reduction.e y v i.val) = ((lambda.toNat : ℂ) - 2 * (i.val : ℂ)) • Reduction.e y v i.val) ∧\nFunction.Injective (fun i : Fin (lambda.toNat + 1) => (lambda.toNat : ℂ) - 2 * (i.val : ℂ)) ∧\n(∃ b : Module.Basis (Fin (lambda.toNat + 1)) ℂ V,\n ∀ i, b i = Reduction.e y v i.val)",
+      "inputs": [
+        "T001"
+      ],
+      "source_steps": [
+        "S003",
+        "S004",
+        "S005"
+      ],
+      "explanation": "Use the iterated raising calculation for nonvanishing, polynomial eigenvalue isolation for independence, and dimension for spanning. Apply the pinned library directly for finite-dimensional basis facts."
+    },
+    {
+      "id": "T003",
+      "statement": "(lambda = (lambda.toNat : ℤ) ∧ lambda.toNat < p ∧\nFiniteDimensional ℂ V ∧ Module.finrank ℂ V = lambda.toNat + 1) ∧ (∃ b : Module.Basis (Fin (lambda.toNat + 1)) ℂ V,\n ∀ i, b i = Reduction.e y v i.val) ∧ (y ^ (lambda.toNat + 1)) v = 0 ∧\n(∀ s : ℕ, lambda.toNat + 1 ≤ s → (y ^ s) v = 0) ∧\n((∀ i : ℕ, i ≤ lambda.toNat →\n x (Reduction.e y v i) =\n  if i = 0 then 0 else ((lambda.toNat - i + 1 : ℕ) : ℂ) • Reduction.e y v (i - 1)) ∧\n(∀ i : ℕ, i ≤ lambda.toNat →\n y (Reduction.e y v i) =\n  if i < lambda.toNat then ((i + 1 : ℕ) : ℂ) • Reduction.e y v (i + 1) else 0) ∧\n(∀ i : ℕ, i ≤ lambda.toNat →\n h (Reduction.e y v i) = ((lambda.toNat : ℂ) - 2 * (i : ℂ)) • Reduction.e y v i)) ∧ ((∀ (r i : ℕ), i ≤ lambda.toNat →\n YuiBasisObjects.dividedPower x r (Reduction.e y v i) =\n  if r ≤ i then (Nat.choose (lambda.toNat - i + r) r : ℂ) • Reduction.e y v (i - r) else 0) ∧\n(∀ (r i : ℕ), i ≤ lambda.toNat →\n YuiBasisObjects.dividedPower y r (Reduction.e y v i) =\n  if i + r ≤ lambda.toNat then (Nat.choose (i + r) r : ℂ) • Reduction.e y v (i + r) else 0))",
+      "inputs": [
+        "T001",
+        "T002"
+      ],
+      "source_steps": [
+        "S006",
+        "S007"
+      ],
+      "explanation": "N001 in full. Expand the next lowering vector in the constructed basis to prove termination; divide the recurrences by factorials and iterate to obtain all divided-power formulas and zero cases. Natural e indices avoid dependent Fin subtraction; every formula is guarded by i≤ell."
+    },
+    {
+      "id": "T004",
+      "statement": "(∀ r : ℕ, r.factorial • XM r = XM 1 ^ r) ∧\n(∀ r : ℕ, r.factorial • YM r = YM 1 ^ r) ∧\n(∀ m : M, (XM 1 m : V) = x (m : V)) ∧\n(∀ m : M, (YM 1 m : V) = y (m : V)) ∧\n(∀ m : M, (Reduction.hM XM YM m : V) = h (m : V))",
+      "inputs": [
+        "H005",
+        "H007"
+      ],
+      "source_steps": [
+        "S008"
+      ],
+      "explanation": "Restrict the characteristic-zero factorial identities to M and identify x,y,h by the injective inclusion. Integer multiples involve no integer division."
+    },
+    {
+      "id": "T005",
+      "statement": "(∀ i j k l : Fin (lambda.toNat + 1),\n Reduction.AC x y lambda.toNat i j * Reduction.AC x y lambda.toNat k l =\n if j = k then (Reduction.c lambda.toNat j : ℂ) • Reduction.AC x y lambda.toNat i l else 0) ∧\n(∀ j : Fin (lambda.toNat + 1),\n Reduction.d lambda.toNat j * Reduction.c lambda.toNat j = Reduction.Dprod lambda.toNat) ∧\n((∑ j : Fin (lambda.toNat + 1),\n (Reduction.d lambda.toNat j : ℂ) • Reduction.AC x y lambda.toNat j j) =\n (Reduction.Dprod lambda.toNat : ℂ) • (1 : Module.End ℂ V))",
+      "inputs": [
+        "T003"
+      ],
+      "source_steps": [
+        "S009",
+        "S010",
+        "S011",
+        "S012"
+      ],
+      "explanation": "Define coordinate matrix units locally using the N001 basis; check Q, the adjacent strings and AC=c_j E_ij on the basis, then derive the weighted product and diagonal-sum identities. Use basis extensionality and binomial identities directly."
+    },
+    {
+      "id": "T006",
+      "statement": "((∀ r : ℕ, r.factorial • XM r = XM 1 ^ r) ∧\n(∀ r : ℕ, r.factorial • YM r = YM 1 ^ r) ∧\n(∀ m : M, (XM 1 m : V) = x (m : V)) ∧\n(∀ m : M, (YM 1 m : V) = y (m : V)) ∧\n(∀ m : M, (Reduction.hM XM YM m : V) = h (m : V))) ∧ ((∀ i j k l : Fin (lambda.toNat + 1),\n Reduction.A XM YM lambda.toNat i j * Reduction.A XM YM lambda.toNat k l =\n if j = k then Reduction.c lambda.toNat j • Reduction.A XM YM lambda.toNat i l else 0)) ∧ (∀ j : Fin (lambda.toNat + 1),\n Reduction.d lambda.toNat j * Reduction.c lambda.toNat j = Reduction.Dprod lambda.toNat) ∧ ((∑ j : Fin (lambda.toNat + 1),\n Reduction.d lambda.toNat j • Reduction.A XM YM lambda.toNat j j) =\n Reduction.Dprod lambda.toNat • (1 : Module.End ℤ M))",
+      "inputs": [
+        "H007",
+        "T004",
+        "T005"
+      ],
+      "source_steps": [
+        "S013"
+      ],
+      "explanation": "N002 in full. The products AC restrict to A because every divided-power factor does; injectivity of inclusion transfers the complex identities. Retain both factorial identities and all three intertwining formulas from T004."
+    },
+    {
+      "id": "T007",
+      "statement": "(∃ b : Module.Basis (Fin (lambda.toNat + 1)) ℤ M,\n ∃ q : Module.Basis (Fin (lambda.toNat + 1)) K (TensorProduct ℤ K M),\n ∀ i, q i = TensorProduct.tmul ℤ (1 : K) (b i)) ∧\nFiniteDimensional K (TensorProduct ℤ K M) ∧\nModule.finrank K (TensorProduct ℤ K M) = lambda.toNat + 1 ∧\n0 < lambda.toNat + 1 ∧ Nontrivial (TensorProduct ℤ K M)",
+      "inputs": [
+        "H003",
+        "H004",
+        "H007"
+      ],
+      "source_steps": [
+        "S014",
+        "S015"
+      ],
+      "explanation": "Reindex the supplied common basis by Fin(ell+1), then use its canonical scalar-extended basis. This is the original arbitrary lattice basis, with no prescribed scaling of highest-weight coordinates. Obtain finite dimension, dimension and nonzeroness."
+    },
+    {
+      "id": "T008",
+      "statement": "((∃ b : Module.Basis (Fin (lambda.toNat + 1)) ℤ M,\n ∃ q : Module.Basis (Fin (lambda.toNat + 1)) K (TensorProduct ℤ K M),\n ∀ i, q i = TensorProduct.tmul ℤ (1 : K) (b i)) ∧\nFiniteDimensional K (TensorProduct ℤ K M) ∧\nModule.finrank K (TensorProduct ℤ K M) = lambda.toNat + 1 ∧\n0 < lambda.toNat + 1 ∧ Nontrivial (TensorProduct ℤ K M)) ∧ (∃ G : Module.End ℤ M →+* Module.End K (TensorProduct ℤ K M),\n (∀ f, G f = Reduction.F K f) ∧\n (∀ (f : Module.End ℤ M) (a : K) (m : M),\n Reduction.F K f (TensorProduct.tmul ℤ a m) = TensorProduct.tmul ℤ a (f m))) ∧ ((∀ (a b : K) (m : M),\n a • Reduction.pure K m b = Reduction.pure K m (a * b)) ∧\n(∀ (m : M) (a : K),\n Reduction.swap K M (TensorProduct.tmul ℤ m a) = TensorProduct.tmul ℤ a m) ∧\n(∀ (a : K) (m : M),\n (Reduction.swap K M).symm (TensorProduct.tmul ℤ a m) = TensorProduct.tmul ℤ m a) ∧\n(∀ (f : Module.End ℤ M) (m : M) (a : K),\n Reduction.ind K f (TensorProduct.tmul ℤ m a) = TensorProduct.tmul ℤ (f m) a) ∧\n(∀ (f : Module.End ℤ M) (w : Reduction.VK K M),\n Reduction.swap K M (Reduction.ind K f w) = Reduction.F K f (Reduction.swap K M w)) ∧\n(∀ (f : Module.End ℤ M) (W : Submodule K (Reduction.VK K M)),\n YuiBasisObjects.Stable W (Reduction.ind K f) ↔\n YuiBasisObjects.Stable (W.map (Reduction.swap K M).toLinearMap) (Reduction.F K f)) ∧\n(∀ W : Submodule K (Reduction.VK K M),\n (W.map (Reduction.swap K M).toLinearMap).map (Reduction.swap K M).symm.toLinearMap = W) ∧\n(∀ Z : Submodule K (TensorProduct ℤ K M),\n (Z.map (Reduction.swap K M).symm.toLinearMap).map (Reduction.swap K M).toLinearMap = Z) ∧\n((⊥ : Submodule K (Reduction.VK K M)).map (Reduction.swap K M).toLinearMap = ⊥) ∧\n((⊤ : Submodule K (Reduction.VK K M)).map (Reduction.swap K M).toLinearMap = ⊤) ∧\n((⊥ : Submodule K (TensorProduct ℤ K M)).map (Reduction.swap K M).symm.toLinearMap = ⊥) ∧\n((⊤ : Submodule K (TensorProduct ℤ K M)).map (Reduction.swap K M).symm.toLinearMap = ⊤) ∧\nNontrivial (Reduction.VK K M))",
+      "inputs": [
+        "E001",
+        "T007"
+      ],
+      "source_steps": [
+        "S016",
+        "S017",
+        "S018"
+      ],
+      "explanation": "N003 in full, including the actual representation bridge. Instantiate E001 at K,M and identify its homomorphism with the defined baseChange function by pure tensors; do not re-prove the prepared dependency. Establish the right-factor scalar rule, inverse swap formulas, induced-operator formula and intertwining on pure tensors; transport stable subspaces in both directions and preserve bottom/top.",
+      "input_instances": {
+        "E001": [
+          {
+            "levels": [
+              "uK",
+              "uV"
+            ],
+            "uses": [
+              {
+                "args": [
+                  "K",
+                  "M"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "T009",
+      "statement": "lambda.toNat < p ∧\n(∀ r : ℕ, r ≤ lambda.toNat → (r.factorial : K) ≠ 0) ∧\n(∀ j : Fin (lambda.toNat + 1), (Reduction.c lambda.toNat j : K) ≠ 0) ∧\n(Reduction.Dprod lambda.toNat : K) ≠ 0",
+      "inputs": [
+        "H001",
+        "H002",
+        "H003"
+      ],
+      "source_steps": [
+        "S019"
+      ],
+      "explanation": "Factorial nonvanishing below p and the binomial-factorial identity give nonzero reduced c_j and their finite product. The all-r factorial clause is the same subargument used at S021."
+    },
+    {
+      "id": "T010",
+      "statement": "(lambda.toNat < p ∧\n(∀ r : ℕ, r ≤ lambda.toNat → (r.factorial : K) ≠ 0) ∧\n(∀ j : Fin (lambda.toNat + 1), (Reduction.c lambda.toNat j : K) ≠ 0) ∧\n(Reduction.Dprod lambda.toNat : K) ≠ 0) ∧\nReduction.MatrixUnits (lambda.toNat + 1) (Reduction.T K XM YM lambda.toNat) ∧\n(∀ r : ℕ, r ≤ lambda.toNat →\n Reduction.F K (XM r) = (r.factorial : K)⁻¹ • Reduction.F K (XM 1) ^ r ∧\n Reduction.F K (YM r) = (r.factorial : K)⁻¹ • Reduction.F K (YM 1) ^ r) ∧ (∀ W : Submodule K (TensorProduct ℤ K M),\n YuiBasisObjects.Stable W (Reduction.F K (XM 1)) →\n YuiBasisObjects.Stable W (Reduction.F K (YM 1)) →\n ∀ i j : Fin (lambda.toNat + 1),\n YuiBasisObjects.Stable W (Reduction.T K XM YM lambda.toNat i j))",
+      "inputs": [
+        "H007",
+        "T006",
+        "T008",
+        "T009"
+      ],
+      "source_steps": [
+        "S020",
+        "S021",
+        "S022"
+      ],
+      "explanation": "N004 in full. Apply the homomorphism from N003 to the integral identities, normalize by c_j and Dprod, and invert only factorials r≤ell<p. Power, scalar and composition stability give stability of every T_ij."
+    },
+    {
+      "id": "T011",
+      "statement": "∀ (k0 : Type uK) [Field k0] (U0 : Type (max uK uV))\n [AddCommGroup U0] [Module k0 U0] (n0 : ℕ)\n (t : Fin n0 → Fin n0 → Module.End k0 U0),\n 0 < n0 → FiniteDimensional k0 U0 → Module.finrank k0 U0 = n0 →\n Reduction.MatrixUnits n0 t →\n ∀ W0 : Submodule k0 U0, (∀ i j, YuiBasisObjects.Stable W0 (t i j)) →\n W0 = ⊥ ∨ W0 = ⊤",
+      "inputs": [],
+      "source_steps": [
+        "S023",
+        "S024",
+        "S025",
+        "S026",
+        "S027",
+        "S028"
+      ],
+      "explanation": "N005 as a universe-polymorphic internal theorem. Follow the nonzero diagonal component construction; applying matrix units proves independence of n vectors, then dimension proves they span. No division by n0 and no trace or semisimplicity theorem."
+    },
+    {
+      "id": "T012",
+      "statement": "((Reduction.hM XM YM) * (XM 1) - (XM 1) * (Reduction.hM XM YM) = (2 : ℤ) • (XM 1) ∧\n(Reduction.hM XM YM) * (YM 1) - (YM 1) * (Reduction.hM XM YM) = (-2 : ℤ) • (YM 1) ∧\n(XM 1) * (YM 1) - (YM 1) * (XM 1) = (Reduction.hM XM YM)) ∧\n((Reduction.ind K (Reduction.hM XM YM)) * (Reduction.ind K (XM 1)) - (Reduction.ind K (XM 1)) * (Reduction.ind K (Reduction.hM XM YM)) = (2 : K) • (Reduction.ind K (XM 1)) ∧\n(Reduction.ind K (Reduction.hM XM YM)) * (Reduction.ind K (YM 1)) - (Reduction.ind K (YM 1)) * (Reduction.ind K (Reduction.hM XM YM)) = (-2 : K) • (Reduction.ind K (YM 1)) ∧\n(Reduction.ind K (XM 1)) * (Reduction.ind K (YM 1)) - (Reduction.ind K (YM 1)) * (Reduction.ind K (XM 1)) = (Reduction.ind K (Reduction.hM XM YM))) ∧\n(∀ W : Submodule K (Reduction.VK K M),\n (YuiBasisObjects.Stable W (Reduction.ind K (XM 1)) ∧\n  YuiBasisObjects.Stable W (Reduction.ind K (YM 1)) ∧\n  YuiBasisObjects.Stable W (Reduction.ind K (Reduction.hM XM YM))) ↔\n (∀ a b c : K, YuiBasisObjects.Stable W\n (a • Reduction.ind K (XM 1) + b • Reduction.ind K (YM 1) +\n c • Reduction.ind K (Reduction.hM XM YM))))",
+      "inputs": [
+        "H005",
+        "H007",
+        "T006",
+        "T008"
+      ],
+      "source_steps": [
+        "S029"
+      ],
+      "explanation": "Check the integral Chevalley relations using the inclusion, and transfer them through F and the tensor swap. The abstract free Chevalley generators act by these three operators; linear closure makes invariance equivalent to invariance under all their K-linear combinations. This statement remains valid at p=2."
+    },
+    {
+      "id": "T013",
+      "statement": "Nontrivial (Reduction.VK K M) ∧\n∀ W : Submodule K (Reduction.VK K M),\n YuiBasisObjects.Stable W (Reduction.ind K (XM 1)) →\n YuiBasisObjects.Stable W (Reduction.ind K (YM 1)) →\n YuiBasisObjects.Stable W (Reduction.ind K (Reduction.hM XM YM)) →\n W = ⊥ ∨ W = ⊤",
+      "inputs": [
+        "H001",
+        "H002",
+        "H003",
+        "T003",
+        "T006",
+        "T008",
+        "T010",
+        "T011",
+        "T012"
+      ],
+      "input_instances": {
+        "T011": [
+          {
+            "levels": [],
+            "uses": [
+              {
+                "args": [
+                  "K",
+                  "TensorProduct ℤ K M",
+                  "lambda.toNat + 1",
+                  "Reduction.T K XM YM lambda.toNat"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "source_steps": [
+        "S030",
+        "S031"
+      ],
+      "explanation": "For each original invariant subspace W, map it by swap, invoke N004 and the generic matrix-unit lemma with K,U,n,T, then map back. N003 supplies nonzeroness. Use N001 and the weight bound for the endpoint discussion; no extra assumption on p,K or the lattice is introduced."
+    }
+  ],
+  "terminal": "T013",
+  "source_outputs": {
+    "N001": "T003",
+    "N002": "T006",
+    "N003": "T008",
+    "N004": "T010",
+    "N005": "T011",
+    "P": "T013"
+  },
+  "endpoint_correspondence": {
+    "E001": {
+      "mode": "direct",
+      "explanation": "Exact closed prepared B005 proposition, with its own bound field/module and existential unital ring homomorphism; no additional premise."
+    },
+    "P": {
+      "mode": "equivalent",
+      "explanation": "All original H roots remain. H004 expresses the finite-dimensional irreducible highest-weight representation by its three generator operators, dimension and existence of a highest-weight vector; H005 fixes their Chevalley relations and H006 the chosen vector. H007 states the common integer/complex basis and specifies the unique restricted divided powers XM/YM: original stability supplies these restrictions, and their existence implies stability; closure under the generated integer algebra is equivalent to generator stability. No lattice minimality is imposed. VK is M⊗ℤK with the K-module transported by tensor commutation; T008 proves that this action multiplies the second factor and that ind(f)(m⊗a)=f(m)⊗a, together with the invariant-subspace transport in both directions. Thus Nontrivial VK and the universal zero-or-whole assertion are exactly the full original target. T012 checks the three integral/reduced Chevalley relations, so stability under their K-linear combinations is stability under the stipulated free Chevalley Lie algebra, including characteristic 2. Integers lambda, arbitrary fields of prime characteristic, lambda=0 and p=2 are retained."
+    }
+  }
+}

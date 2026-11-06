@@ -1,0 +1,29 @@
+{
+  "statement": "∀ (X : Type*) (ι : Type*) [Countable ι] (V : ι → Set X), ∃ e : ι ↪ ℕ, ∃ U : ℕ → Set X, (∀ k, U (e k) = V k) ∧ (∀ i, i ∉ Set.range e → U i = ∅) ∧ (⋃ i, U i) = (⋃ k, V k) ∧ (∀ w : Set X → ℝ≥0∞, w ∅ = 0 → (∑' i, w (U i)) = ∑' k, w (V k))",
+  "proof": "intro X ι _ V\nclassical\nobtain ⟨f, hf⟩ := Countable.exists_injective_nat ι\nlet e : ι ↪ ℕ := ⟨f, hf⟩\nlet U : ℕ → Set X := fun i => ⋃ k, ⋃ (_ : e k = i), V k\nhave he : ∀ k, U (e k) = V k := by\n  intro k\n  simp [U, e.injective.eq_iff]\nhave hz : ∀ i, i ∉ Set.range e → U i = ∅ := by\n  intro i hi\n  have hne : ∀ k, e k ≠ i := fun k hk => hi ⟨k, hk⟩\n  simp [U, hne]\nrefine ⟨e, U, he, hz, ?_, ?_⟩\n· ext x\n  constructor\n  · intro hx\n    rcases Set.mem_iUnion.mp hx with ⟨i, hi⟩\n    rcases Set.mem_iUnion.mp hi with ⟨k, hk⟩\n    rcases Set.mem_iUnion.mp hk with ⟨_, hv⟩\n    exact Set.mem_iUnion.mpr ⟨k, hv⟩\n  · intro hx\n    rcases Set.mem_iUnion.mp hx with ⟨k, hk⟩\n    exact Set.mem_iUnion.mpr ⟨e k, by rwa [he]⟩\n· intro w hw\n  have hs : Function.support (fun i => w (U i)) ⊆ Set.range e := by\n    intro i hi\n    by_contra hn\n    exact hi (by rw [hz i hn, hw])\n  calc\n    (∑' i, w (U i)) = ∑' k, w (U (e k)) := (e.injective.tsum_eq hs).symm\n    _ = ∑' k, w (V k) := tsum_congr (fun k => congrArg w (he k))",
+  "check": {
+    "exit_code": 1,
+    "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-vwg5hi5a/output/Auxiliary.lean:47:30: warning: Variable name `E` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-vwg5hi5a/output/Auxiliary.lean:58:30: warning: Variable name `E` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-vwg5hi5a/output/Auxiliary.lean:71:30: warning: Variable name `E` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-vwg5hi5a/output/Auxiliary.lean:128:23: error: Tactic `rewrite` failed: Did not find an occurrence of the pattern\n  U i\nin the target expression\n  (fun i => w (U i)) i = 0\n\nn : ℕ\nE : Set (BasisObjects.Rn n)\nX : Type u_1\nι : Type u_2\ninst✝ : Countable ι\nV : ι → Set X\nf : ι → ℕ\nhf : Function.Injective f\ne : ι ↪ ℕ := { toFun := f, inj' := hf }\nU : ℕ → Set X := fun i => ⋃ k, ⋃ (_ : e k = i), V k\nhe : ∀ (k : ι), U (e k) = V k\nhz : ∀ i ∉ range ⇑e, U i = ∅\nw : Set X → ℝ≥0∞\nhw : w ∅ = 0\ni : ℕ\nhi : i ∈ Function.support fun i => w (U i)\nhn : i ∉ range ⇑e\n⊢ (fun i => w (U i)) i = 0\nchecked : ∀ (n : ℕ) (E : Set (BasisObjects.Rn n)) (X : Type u_1) (ι : Type u_2) [Countable ι] (V : ι → Set X),\n  ∃ e U,\n    (∀ (k : ι), U (e k) = V k) ∧\n      (∀ i ∉ range ⇑e, U i = ∅) ∧\n        ⋃ i, U i = ⋃ k, V k ∧ ∀ (w : Set X → ℝ≥0∞), w ∅ = 0 → ∑' (i : ℕ), w (U i) = ∑' (k : ι), w (V k)\n'YuiAuxiliary.checked' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]\n",
+    "stderr": "",
+    "wall_seconds": 3.239770457999839,
+    "native_limits": {
+      "timeout_seconds": 180,
+      "max_heartbeats": 20000000
+    },
+    "source_path": "/Users/syyui/projects/Yui-results/test_uncond/geometry-product-dimension/rigorous-proof/20261105T120350Z-de9cce1dea/workflow/native-checks/b165d4529041402f9fb46feda2c8bb9e.lean",
+    "source_sha256": "628c488eaece2c67dcf9e7f4ba31689d41829babdbae9807bd18575753ffe333",
+    "auxiliary_valid": false,
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext",
+      "sorryAx"
+    ],
+    "lean_sha256": "628c488eaece2c67dcf9e7f4ba31689d41829babdbae9807bd18575753ffe333",
+    "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+    "context_port": "T001",
+    "candidate": 5,
+    "accepted": false,
+    "stage_complete": false
+  }
+}

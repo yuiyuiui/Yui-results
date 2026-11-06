@@ -1,0 +1,34 @@
+{
+  "statement": "∀ q : ℚ, q ≠ 0 → ∃ (n : ℤ) (u : ℚ), u ∈ Chevalley.R p ∧ u⁻¹ ∈ Chevalley.R p ∧ u ≠ 0 ∧ q = (p : ℚ) ^ n * u",
+  "proof": "intro q hq\nletI : Fact p.Prime := ⟨h_H001.1⟩\nhave hn : q.num ≠ 0 := Rat.num_ne_zero.mpr hq\nhave hd : (q.den : ℤ) ≠ 0 := by exact_mod_cast q.den_ne_zero\nobtain ⟨a, ha, hpa⟩ := (padicValRat.finite_int_prime_iff (p := p)).mpr hn |>.exists_eq_pow_mul_and_not_dvd\nobtain ⟨b, hb, hpb⟩ := (padicValRat.finite_int_prime_iff (p := p)).mpr hd |>.exists_eq_pow_mul_and_not_dvd\nhave ha0 : a ≠ 0 := by intro h; simp [h] at hpa\nhave hb0 : b ≠ 0 := by intro h; simp [h] at hpb\nhave hRint (z : ℤ) : (z : ℚ) ∈ Chevalley.R p := (Chevalley.R p).algebraMap_mem z\nhave hRinv (z : ℤ) (hz : ¬ (p : ℤ) ∣ z) : (z : ℚ)⁻¹ ∈ Chevalley.R p :=\n  Algebra.subset_adjoin ⟨z, hz, rfl⟩\nrefine ⟨(multiplicity (p : ℤ) q.num : ℤ) - (multiplicity (p : ℤ) (q.den : ℤ) : ℤ),\n  (a : ℚ) / b, ?_, ?_, div_ne_zero (by exact_mod_cast ha0) (by exact_mod_cast hb0), ?_⟩\n· exact (Chevalley.R p).mul_mem (hRint a) (hRinv b hpb)\n· simpa [div_eq_mul_inv, mul_comm] using (Chevalley.R p).mul_mem (hRint b) (hRinv a hpa)\n· have haq : (q.num : ℚ) = (p : ℚ) ^ multiplicity (p : ℤ) q.num * (a : ℚ) := by exact_mod_cast ha\n  have hbq : (q.den : ℚ) = (p : ℚ) ^ multiplicity (p : ℤ) (q.den : ℤ) * (b : ℚ) := by exact_mod_cast hb\n  rw [zpow_sub₀ (by exact_mod_cast h_H001.1.ne_zero), zpow_natCast, zpow_natCast]\n  calc\n    q = (q.num : ℚ) / q.den := (Rat.num_div_den q).symm\n    _ = _ := by rw [haq, hbq]; ring",
+  "check": {
+    "exit_code": 0,
+    "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-bioeavta/output/Auxiliary.lean:92:28: warning: Variable name `instV` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-bioeavta/output/Auxiliary.lean:92:53: warning: Variable name `instCV` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-bioeavta/output/Auxiliary.lean:92:122: warning: Variable name `x` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-bioeavta/output/Auxiliary.lean:92:164: warning: Variable name `h` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-bioeavta/output/Auxiliary.lean:92:270: warning: Variable name `h_T010` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (V : Type) [instV : AddCommGroup V] [instCV : _root_.Module ℂ V] (K : Type) [instK : Field K] (p : ℕ)\n  (ell : ℤ) (x y h : Module.End ℂ V) (v : V) (M : Submodule ℤ V),\n  Nat.Prime p ∧ CharP K p ∧ 0 ≤ ell ∧ ell < ↑p →\n    ((∀ (i : Chevalley.Index ell), Chevalley.J p M y v ↑i = Chevalley.J p M y v 0) ∧\n          (Chevalley.J p M y v 0).FG ∧\n            Chevalley.J p M y v 0 ≠ ⊥ ∧\n              ∀ (u : V),\n                u ∈ Chevalley.image p M ↔\n                  ∃! c,\n                    (∀ (i : Chevalley.Index ell), c i ∈ Chevalley.J p M y v 0) ∧ u = ∑ i, c i • Chevalley.e y v ↑i) ∧\n        (Function.Injective ⇑(Chevalley.qmul p M y v) ∧\n            (Chevalley.qmul p M y v).range = Chevalley.QJ p M y v ∧\n              FiniteDimensional ℚ (ℚ ⊗[↥(Chevalley.R p)] ↥(Chevalley.J p M y v 0)) ∧\n                FiniteDimensional ℚ ↥(Chevalley.QJ p M y v)) ∧\n          Module.finrank ℚ (ℚ ⊗[↥(Chevalley.R p)] Chevalley.MR p M) = ell.toNat + 1 ∧\n            ell.toNat + 1 = (ell.toNat + 1) * Module.finrank ℚ (ℚ ⊗[↥(Chevalley.R p)] ↥(Chevalley.J p M y v 0)) ∧\n              Module.finrank ℚ (ℚ ⊗[↥(Chevalley.R p)] ↥(Chevalley.J p M y v 0)) = 1 ∧\n                Module.finrank ℚ ↥(Chevalley.QJ p M y v) = 1 →\n      ∀ (q : ℚ), q ≠ 0 → ∃ n, ∃ u ∈ Chevalley.R p, u⁻¹ ∈ Chevalley.R p ∧ u ≠ 0 ∧ q = ↑p ^ n * u\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+    "stderr": "",
+    "wall_seconds": 5.183746665999934,
+    "native_limits": {
+      "timeout_seconds": 180,
+      "max_heartbeats": 20000000
+    },
+    "source_path": "/Users/syyui/projects/Yui-results/test_cond/lie-module-irreducibility/rigorous-proof/20261105T071559Z-f79f8e65f9/workflow/native-checks/ae9eb5190bed4a088cfff70d5661d910.lean",
+    "source_sha256": "cd3169f0b0b725009783384cf03c40e4161945e6df3c904fb5f3d183c32cd43f",
+    "auxiliary_valid": true,
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "lean_sha256": "cd3169f0b0b725009783384cf03c40e4161945e6df3c904fb5f3d183c32cd43f",
+    "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+    "context_port": "T011",
+    "candidate": 2,
+    "helper": {
+      "name": "yui_aux_0001",
+      "statement": "∀ q : ℚ, q ≠ 0 → ∃ (n : ℤ) (u : ℚ), u ∈ Chevalley.R p ∧ u⁻¹ ∈ Chevalley.R p ∧ u ≠ 0 ∧ q = (p : ℚ) ^ n * u",
+      "application": "@yui_aux_0001 V instV instCV K instK p ell x y h v M h_H001 h_T010",
+      "scope": "Checked same-node theorem; available in later checks and the final body."
+    },
+    "accepted": true,
+    "stage_complete": false
+  }
+}

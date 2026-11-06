@@ -1,0 +1,176 @@
+{
+  "header": "import Mathlib\nopen scoped ENNReal NNReal Topology\nopen Set MeasureTheory\nnamespace BasisObjects\nabbrev Rn (n : ℕ) := EuclideanSpace ℝ (Fin n)\nnoncomputable def content {X : Type*} [EMetricSpace X]\n    (s : ℝ) (r : ℝ≥0∞) (A : Set X) : ℝ≥0∞ :=\n  ⨅ (U : ℕ → Set X) (_ : A ⊆ ⋃ i, U i)\n    (_ : ∀ i, Metric.ediam (U i) ≤ r),\n      ∑' i, ⨆ (_ : (U i).Nonempty), (Metric.ediam (U i)) ^ s\ndef euclideanLift (n : ℕ) : Rn n × ℝ → WithLp 2 (Rn n × ℝ) :=\n  WithLp.toLp 2\nend BasisObjects\n\nnamespace IntervalProduct\nabbrev Rn := BasisObjects.Rn\ndef I : Set ℝ := Set.Icc 0 1\ndef F (n : ℕ) (E : Set (Rn n)) : Set (Rn n × ℝ) := E ×ˢ I\ndef j (n : ℕ) (p : WithLp 2 (Rn n × ℝ)) : Rn (n + 1) :=\n  WithLp.toLp 2 (Fin.snoc (fun i => p.fst i) p.snd)\ndef unj (n : ℕ) (v : Rn (n + 1)) : WithLp 2 (Rn n × ℝ) :=\n  WithLp.toLp 2 (WithLp.toLp 2 (fun i : Fin n => v i.castSucc), v (Fin.last n))\ndef G (n : ℕ) (E : Set (Rn n)) : Set (Rn (n + 1)) :=\n  j n '' (BasisObjects.euclideanLift n '' F n E)\nnoncomputable def H {X : Type*} [MetricSpace X] (a : ℝ) (A : Set X) : ℝ≥0∞ :=\n  letI : MeasurableSpace X := borel X\n  letI : BorelSpace X := ⟨rfl⟩\n  MeasureTheory.Measure.hausdorffMeasure a A\nnoncomputable def cost {ι X : Type*} [MetricSpace X] (a : ℝ) (U : ι → Set X) : ℝ≥0∞ :=\n  ∑' i, ⨆ (_ : (U i).Nonempty), (Metric.ediam (U i)) ^ a\nnoncomputable def realCost {ι X : Type*} [MetricSpace X] (a : ℝ) (U : ι → Set X) : ℝ≥0∞ :=\n  ∑' i, (ENNReal.ofReal (Metric.diam (U i))) ^ a\ndef Cover {X : Type*} [MetricSpace X] (δ : ℝ) (A : Set X) (U : ℕ → Set X) : Prop :=\n  A ⊆ ⋃ i, U i ∧ ∀ i, Metric.ediam (U i) ≤ ENNReal.ofReal δ\ndef RealCover {X : Type*} [MetricSpace X] (δ : ℝ) (A : Set X) (U : ℕ → Set X) : Prop :=\n  A ⊆ ⋃ i, U i ∧ (∀ i, Bornology.IsBounded (U i)) ∧ ∀ i, Metric.diam (U i) ≤ δ\nend IntervalProduct\nopen IntervalProduct\n",
+  "parameters": [
+    {
+      "name": "n",
+      "type": "ℕ"
+    },
+    {
+      "name": "E",
+      "type": "Set (BasisObjects.Rn n)"
+    }
+  ],
+  "premise_types": {
+    "H001": "E.Nonempty",
+    "H002": "IsCompact E",
+    "E001": "∀ (n : ℕ) (S : Set (BasisObjects.Rn n × ℝ)),\n  dimH (BasisObjects.euclideanLift n '' S) = dimH S"
+  },
+  "conclusion_type": "dimH (G n E) = dimH E + 1 ∧ dimH E < ⊤ ∧ dimH (G n E) < ⊤",
+  "representation": "n is the original natural n₀, including zero; E remains a subset of BasisObjects.Rn n = EuclideanSpace ℝ (Fin n). Ordinary X × ℝ uses Mathlib's maximum product metric. WithLp 2 (Rn n × ℝ) uses the L² product metric: here 2 is the extended nonnegative real exponent, not the coordinate count. EuclideanSpace is PiLp 2 over Fin n. The explicit j appends the last real coordinate with Fin.snoc and unj truncates at castSucc and reads Fin.last; T009 proves this is a bijective isometry. G is exactly the set of coordinate concatenations of E and I, as an image under these explicit functions, in Euclidean Rn(n+1). E001 transports dimension from the maximum product to the L² product; no unproved metric identification is definitional. H fixes the canonical Borel measurable structure locally, avoiding any extra measurability premise on X or A. content is the exact frozen basis definition; powers are ENNReal real powers, infima/suprema and nonnegative sums remain in ℝ≥0∞ with ∞ allowed. cost retains the nonempty-member supremum; for positive exponents an empty member costs zero. RealCover explicitly includes boundedness before using real diameters, and realCost uses their nonnegative finite casts. Cover is the finite extended-diameter condition, equivalent to RealCover at positive real scales. N004 supplies finiteness before any use of NNReal representatives or toReal; standard cast order/addition compatibility does not add an assumption. No M premise ports or background-note premise ports are introduced. The pinned product metric instances require Fact (1 ≤ p): this is a proof that the Lp exponent lies in the metric range, and at p=2 it is supplied by the library, not an additional project hypothesis. The pinned Prod.dist_eq is max of the coordinate distances. Fin n indexes exactly the initial n coordinates; Fin.castSucc preserves their values in Fin(n+1), and Fin.last n is the appended coordinate. In cost and content, ^ a has real exponent a on ENNReal; in the squared-distance formulas ^ 2 is the ordinary natural square of a real distance.",
+  "objects": [],
+  "steps": [
+    {
+      "id": "T001",
+      "statement": "∀ (X : Type u) [MetricSpace X] (A : Set X) (a : ℝ), 0 < a →\n  (∀ δ : ℝ, 0 < δ →\n    BasisObjects.content a (ENNReal.ofReal δ) A =\n      ⨅ (U : ℕ → Set X) (_ : RealCover δ A U), realCost a U) ∧\n  (∀ (ι : Type v) [Countable ι] (V : ι → Set X),\n    ∃ e : ι ↪ ℕ, ∃ U : ℕ → Set X,\n      (∀ k, U (e k) = V k) ∧\n      (∀ i, i ∉ Set.range e → U i = ∅) ∧\n      (⋃ i, U i) = (⋃ k, V k) ∧\n      cost a U = cost a V ∧ realCost a U = realCost a V) ∧\n  (∀ δ₁ δ₂ : ℝ, 0 < δ₁ → δ₁ ≤ δ₂ →\n    BasisObjects.content a (ENNReal.ofReal δ₂) A ≤\n      BasisObjects.content a (ENNReal.ofReal δ₁) A) ∧\n  (∀ (δ : ℝ) (U : ℕ → Set X), 0 < δ → Cover δ A U →\n    BasisObjects.content a (ENNReal.ofReal δ) A ≤ cost a U) ∧\n  (∀ (δ : ℝ) (b : ℝ≥0∞), 0 < δ →\n    (∀ U : ℕ → Set X, Cover δ A U → b ≤ cost a U) →\n      b ≤ BasisObjects.content a (ENNReal.ofReal δ) A) ∧\n  (H a A = ⨆ (δ : ℝ) (_ : 0 < δ), BasisObjects.content a (ENNReal.ofReal δ) A) ∧\n  (∀ δ : ℝ, 0 < δ → BasisObjects.content a (ENNReal.ofReal δ) A ≤ H a A) ∧\n  (∀ δ : ℝ, 0 < δ →\n    (BasisObjects.content a (ENNReal.ofReal δ) A = 0 ↔\n      ∀ ε : ℝ, 0 < ε → ∃ U : ℕ → Set X, Cover δ A U ∧ cost a U < ENNReal.ofReal ε)) ∧\n  (H a A = 0 ↔\n    ∀ δ : ℝ, 0 < δ → ∀ ε : ℝ, 0 < ε →\n      ∃ U : ℕ → Set X, Cover δ A U ∧ cost a U < ENNReal.ofReal ε)",
+      "inputs": [],
+      "source_steps": [
+        "S001",
+        "S002",
+        "S003"
+      ],
+      "explanation": "Complete N001 package: identify the guarded extended-diameter infima with bounded real-diameter covers at positive scale; explicitly reindex arbitrary countable families with empty padding and equal union/cost; prove scale monotonicity, both infimum bounds, positive-real-scale supremum, and the two zero/cheap-cover equivalences. Use the pinned hausdorffMeasure_apply formula directly with the Borel structure fixed by H. No measurability or boundedness of A is assumed; the empty admissible family has infimum ∞. Strict inequalities compare with ofReal ε only when ε>0. Pending internal repair: u denotes the shared ambient level and v the independent countable-index level. These names are not currently declared by the frozen header or the documented step schema; the actual strict check rejects them. Consumers additionally need an explicit level-zero specialization at the Euclidean handoff and at the finite-fiber countable index. This draft preserves the complete producer proposition and is not a checked repair."
+    },
+    {
+      "id": "T002",
+      "statement": "∀ (X : Type*) [MetricSpace X] (A : Set X) (q : ℝ), 0 < q → H q A = 0 →\n  ∀ δ : ℝ, 0 < δ → ∀ ε : ℝ, 0 < ε →\n    ∃ U : ℕ → Set (X × ℝ), Cover δ (A ×ˢ I) U ∧ cost (q + 1) U < ENNReal.ofReal ε",
+      "inputs": [
+        "T001"
+      ],
+      "source_steps": [
+        "S004",
+        "S005",
+        "S006"
+      ],
+      "explanation": "Existing upper covering construction only. At r=min(1,δ), take the q-cost <ε/4 cover from N001; add positive numerical radii with geometric q-cost ≤ε/4, without changing sets. The radii are at most r and one. Subdivide I into ceil(1/r_i) closed intervals, use the maximum metric and N_i≤2/r_i, then reindex the countable family of finite products. The obligation retains all positive scale/tolerance quantifiers and allows empty and zero-diameter members."
+    },
+    {
+      "id": "T003",
+      "statement": "∀ (X : Type*) [MetricSpace X] (A : Set X) (q : ℝ), 0 < q → H q A = 0 →\n  H (q + 1) (A ×ˢ I) = 0 ∧\n  ∀ δ : ℝ, 0 < δ → ∀ ε : ℝ, 0 < ε →\n    ∃ U : ℕ → Set (X × ℝ), Cover δ (A ×ˢ I) U ∧ cost (q + 1) U < ENNReal.ofReal ε",
+      "inputs": [
+        "T001",
+        "T002"
+      ],
+      "source_steps": [
+        "S007"
+      ],
+      "explanation": "Export full N002: retain T002's covers and apply N001's zero-measure equivalence at exponent q+1 in X×ℝ. This closes the temporary scale/tolerance assumptions; no dimension or compactness condition is used."
+    },
+    {
+      "id": "T004",
+      "statement": "∀ (X : Type*) [MetricSpace X] (A : Set X) (s δ : ℝ),\n  0 < s → 0 < δ → ∀ V : ℕ → Set (X × ℝ), Cover δ (A ×ˢ I) V →\n    BasisObjects.content s (ENNReal.ofReal δ) A ≤ cost (s + 1) V",
+      "inputs": [
+        "T001"
+      ],
+      "source_steps": [
+        "S008",
+        "S009",
+        "S010",
+        "S011"
+      ],
+      "explanation": "For an arbitrary product cover, derive boundedness from its finite diameter bound, project the sets, and enclose each nonempty real projection by its closed [inf,sup] hull (empty members use ∅). Hulls are Borel, contain the projections, and have volume at most the member diameter. The selected projected sets cover each fibre t∈I. Integrate the resulting indicator inequality over ℝ. The series interchange uses a.e. measurability of each nonnegative indicator summand; no finiteness or integrability is required. Keep c and every series in ℝ≥0∞, including c=∞. Apply the direct library interval measure, lintegral monotonicity, lintegral_tsum and indicator-constant formulas with their actual conditions. For the zero-diameter power identity use s>0."
+    },
+    {
+      "id": "T005",
+      "statement": "∀ (X : Type*) [MetricSpace X] (A : Set X) (s : ℝ), 0 < s →\n  (∀ δ : ℝ, 0 < δ →\n    BasisObjects.content s (ENNReal.ofReal δ) A ≤\n      BasisObjects.content (s + 1) (ENNReal.ofReal δ) (A ×ˢ I)) ∧\n  H s A ≤ H (s + 1) (A ×ˢ I)",
+      "inputs": [
+        "T001",
+        "T004"
+      ],
+      "source_steps": [
+        "S012"
+      ],
+      "explanation": "Export full N003 by the lower-infimum bound of N001 applied to T004, even when there is no admissible cover. Take suprema over positive real scales at exponents s and s+1 to obtain the Hausdorff-measure inequality. Both inequalities are unconditional in finiteness and require no measurability of A or covering sets."
+    },
+    {
+      "id": "T006",
+      "statement": "0 ≤ dimH E ∧ dimH E ≤ (n : ℝ≥0∞) ∧ (n : ℝ≥0∞) < ⊤ ∧\n  1 ≤ dimH (F n E) ∧ dimH (F n E) ≤ (n : ℝ≥0∞) + 1 ∧\n  dimH E < ⊤ ∧ dimH (F n E) < ⊤ ∧ dimH I = 1 ∧\n  ∃ d k : ℝ≥0, (d : ℝ≥0∞) = dimH E ∧ (k : ℝ≥0∞) = dimH (F n E) ∧ 1 ≤ k",
+      "inputs": [
+        "H001"
+      ],
+      "source_steps": [
+        "S013",
+        "S014",
+        "S015",
+        "S016"
+      ],
+      "explanation": "Export N004 using coordinate bases to get finrank n and n+1 (including the empty basis at n=0), direct Mathlib full-space dimension and monotonicity, and the interval interior dimension formula. A point of E supplied by H001 gives the isometric fibre t↦(x,t), hence T≥1. The finite ENNReal bounds yield the stated NNReal representatives; casts preserve order and addition of finite values by the ordinary library identities. The chosen point does not escape. The quantified representatives are NNReal values d,k; their real coercions give d_real,k_real, and their ENNReal coercions recover D,T without any truncation."
+    },
+    {
+      "id": "T007",
+      "statement": "dimH (F n E) ≤ dimH E + 1 ∧ dimH E < ⊤ ∧ dimH (F n E) < ⊤",
+      "inputs": [
+        "T003",
+        "T006"
+      ],
+      "source_steps": [
+        "S017",
+        "S018",
+        "S019",
+        "S020"
+      ],
+      "explanation": "Export N005. Choose the finite representatives from N004. For every real q>d, q>0; apply the critical-exponent zero-measure theorem to E at the NNReal exponent determined by q, N002, and the dimension upper bound from measure ≠∞. A contrary strict upper inequality is refuted at the source midpoint q=(d+k-1)/2. Cast the resulting finite-real inequality back to ENNReal. The direct library critical-exponent declarations quantify NNReal exponents, so positivity supplies the needed nonnegative subtype and its real coercion."
+    },
+    {
+      "id": "T008",
+      "statement": "dimH (F n E) = dimH E + 1 ∧ dimH E < ⊤ ∧\n  dimH (F n E) < ⊤ ∧ dimH E + 1 < ⊤",
+      "inputs": [
+        "T005",
+        "T006",
+        "T007"
+      ],
+      "source_steps": [
+        "S021",
+        "S022",
+        "S023",
+        "S024",
+        "S025"
+      ],
+      "explanation": "Export N006 on the original domain. For the finite real representatives d,k, handle d=0 using the fibre bound k≥1. If d>0 and k<d+1, use the source midpoint s=(k-1+d)/2; it is positive, less than d, and s+1>k. The critical-exponent infinite-measure theorem, N003 and the dimension lower bound from infinite measure contradict this. Antisymmetry with N005 gives equality. N004 gives finiteness and includes n=0. H002 remains an original project premise although this source argument does not use compactness."
+    },
+    {
+      "id": "T009",
+      "statement": "Isometry (j n) ∧ Function.Bijective (j n) ∧\n  Function.LeftInverse (unj n) (j n) ∧ Function.RightInverse (unj n) (j n) ∧\n  j n '' (BasisObjects.euclideanLift n '' F n E) = G n E ∧\n  ∀ (x y : Rn n) (t u : ℝ),\n    (dist (j n (BasisObjects.euclideanLift n (x,t)))\n      (j n (BasisObjects.euclideanLift n (y,u)))) ^ 2 =\n      (∑ h : Fin n, |x h - y h| ^ 2) + |t - u| ^ 2 ∧\n    (dist (BasisObjects.euclideanLift n (x,t))\n      (BasisObjects.euclideanLift n (y,u))) ^ 2 =\n      (∑ h : Fin n, |x h - y h| ^ 2) + |t - u| ^ 2",
+      "inputs": [],
+      "source_steps": [
+        "S026",
+        "S027"
+      ],
+      "explanation": "Export full N007 in the fixed Euclidean representations. Split squared L² product norm into its two coordinate norms and expand the Euclidean norm as the finite coordinate sum; split the concatenated sum at Fin.last. Equal squares of nonnegative distances give Isometry j. Check both composites with the explicit truncation/last-coordinate unj, and identify the image set. The last conjunct records the squared-distance identity for all x,y,t,u. n=0 is retained with an empty initial sum. The metric bridge is a proved obligation, not a definition of an isometry."
+    },
+    {
+      "id": "T010",
+      "statement": "dimH (G n E) = dimH E + 1 ∧ dimH E < ⊤ ∧ dimH (G n E) < ⊤",
+      "inputs": [
+        "T008",
+        "T009",
+        "E001"
+      ],
+      "source_steps": [
+        "S028",
+        "S029"
+      ],
+      "explanation": "Instantiate the exact E001 port at n and S=F n E to transport dimH from the maximum product to its L² image. Apply isometry invariance to j from N007 and its explicit image G, then use N006. This gives the complete target equality and transfers finiteness to G. H001 and H002 remain the exact original nonempty/compact assumptions in the exported project theorem; no positivity assumption on n is introduced."
+    }
+  ],
+  "terminal": "T010",
+  "source_outputs": {
+    "N001": "T001",
+    "N002": "T003",
+    "N003": "T005",
+    "N004": "T006",
+    "N005": "T007",
+    "N006": "T008",
+    "N007": "T009",
+    "P": "T010"
+  },
+  "endpoint_correspondence": {
+    "E001": {
+      "mode": "direct",
+      "explanation": "The closed type is copied exactly from prepared B011: every natural n and every set S in the ordinary maximum-norm product are quantified, with no nonempty, compact or measurable assumption. BasisObjects.euclideanLift n is exactly WithLp.toLp 2, the inverse of the library product continuous linear equivalence; its codomain carries the L² product norm. No extra external statement is assumed."
+    },
+    "P": {
+      "mode": "direct",
+      "explanation": "The parameters are every natural n (including zero) and every subset E of the original Euclidean Rn n; H001=E.Nonempty and H002=IsCompact E are preserved in the exported conditional theorem. G n E is, by its explicit j/image definition, exactly all (n+1)-coordinate concatenations of x∈E and t∈[0,1], with EuclideanSpace's L² metric. T009 proves the intervening L²-product/coordinate-space isometry, and E001 supplies the distinct maximum-product dimension change. The terminal asserts dimH G=dimH E+1 and finiteness of both dimensions in ℝ≥0∞; since addition and order on these finite values agree with their nonnegative real representatives, this is also the original real Hausdorff-dimension equality. Conversely the full source conclusion includes the same finiteness, so its real equality casts to this terminal proposition. No assumption or case n=0 is lost."
+    }
+  }
+}

@@ -1,0 +1,184 @@
+[
+  {
+    "name": "yui_aux_0001",
+    "statement": "∀ (N : ℕ), 0 < N → ∀ t ∈ Set.Icc (0 : ℝ) 1, ∃ j : Fin N, t ∈ Set.Icc ((j : ℝ) / N) (((j : ℝ) + 1) / N)",
+    "proof": "intro N hN t ht\nhave hn : (0 : ℝ) < N := by exact_mod_cast hN\nby_cases ht1 : t = 1\n· refine ⟨⟨N - 1, Nat.sub_lt hN (by omega)⟩, ?_⟩\n  have hc : ((N - 1 : ℕ) : ℝ) = (N : ℝ) - 1 := by rw [Nat.cast_sub (by omega)]; simp\n  simp only [Fin.val_mk, ht1, Set.mem_Icc]\n  rw [hc]\n  constructor\n  · apply (div_le_iff₀ hn).mpr\n    linarith\n  · apply (le_div_iff₀ hn).mpr\n    linarith\n· have htt : t < 1 := lt_of_le_of_ne ht.2 ht1\n  have hnon : 0 ≤ t * N := mul_nonneg ht.1 hn.le\n  have hj : ⌊t * N⌋₊ < N := (Nat.floor_lt hnon).mpr (by nlinarith)\n  refine ⟨⟨⌊t * N⌋₊, hj⟩, ?_⟩\n  change (⌊t * N⌋₊ : ℝ) / N ≤ t ∧ t ≤ ((⌊t * N⌋₊ : ℝ) + 1) / N\n  exact ⟨(div_le_iff₀ hn).mpr (Nat.floor_le hnon),\n    (le_div_iff₀ hn).mpr (Nat.lt_floor_add_one _).le⟩",
+    "dependencies": [],
+    "context_sha256": "36a45898782b6f8abcc26f0e509da76e1ebc08bbff22bef94bebd6c63a3cb1f7",
+    "sha256": "cf1b3a8b0c4dafe15fc71726f1009ddf44042359f8c887f0f9a56b7500ff759b",
+    "check": {
+      "exit_code": 0,
+      "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-dy9kviwu/output/Auxiliary.lean:26:25: warning: Variable name `E` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-dy9kviwu/output/Auxiliary.lean:48:56: warning: Variable name `h_T004` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-dy9kviwu/output/Auxiliary.lean:54:15: warning: This simp argument is unused:\n  Fin.val_mk\n\nHint: Omit it from the simp argument list.\n  simp only [F̵i̵n̵.̵v̵a̵l̵_̵m̵k̵,̵ ̵ht1, Set.mem_Icc]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\nchecked : ∀ (n : ℕ) (E : Set (Ambient n)),\n  YuiPortTypes.T004 n E → ∀ (N : ℕ), 0 < N → ∀ t ∈ Icc 0 1, ∃ j, t ∈ Icc (↑↑j / ↑N) ((↑↑j + 1) / ↑N)\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+      "stderr": "",
+      "wall_seconds": 2.9608967500098515,
+      "native_limits": {
+        "timeout_seconds": 180,
+        "max_heartbeats": 20000000
+      },
+      "source_path": "/Users/syyui/projects/Yui-results/test_uncond/geometry-product-dimension/rigorous-proof/20261106T125831Z-222bcbd7a3/workflow/native-checks/b2fe63c2b50444c29d862657efc59947.lean",
+      "source_sha256": "bc131b4f8fbd8794f9e3bac3a8656eb089d993c67d056093cd6a05171b27dcff",
+      "auxiliary_valid": true,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "lean_sha256": "bc131b4f8fbd8794f9e3bac3a8656eb089d993c67d056093cd6a05171b27dcff",
+      "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+      "context_port": "T007",
+      "candidate": 2
+    }
+  },
+  {
+    "name": "yui_aux_0002",
+    "statement": "∀ (a : ℝ), 0 < a → a ≤ 1 → let N := ⌈1 / a⌉₊; 0 < N ∧ 1 / (N : ℝ) ≤ a ∧ (N : ℝ) * a ≤ 2",
+    "proof": "intro a ha ha1\ndsimp\nhave hN : 0 < ⌈1 / a⌉₊ := Nat.ceil_pos.mpr (by positivity)\nhave hNr : (0 : ℝ) < ⌈1 / a⌉₊ := by exact_mod_cast hN\nhave hlo : 1 / a ≤ (⌈1 / a⌉₊ : ℝ) := Nat.le_ceil _\nhave hhi : (⌈1 / a⌉₊ : ℝ) < 1 / a + 1 := Nat.ceil_lt_add_one (by positivity)\nrefine ⟨hN, ?_, ?_⟩\n· apply (div_le_iff₀ hNr).mpr\n  have := (div_le_iff₀ ha).mp hlo\n  nlinarith\n· have hh := mul_lt_mul_of_pos_right hhi ha\n  have he : (1 / a + 1) * a = 1 + a := by field_simp\n  rw [he] at hh\n  linarith",
+    "dependencies": [],
+    "context_sha256": "36a45898782b6f8abcc26f0e509da76e1ebc08bbff22bef94bebd6c63a3cb1f7",
+    "sha256": "41068ebab6ecf429571a76a411e5a6b939b9b3540e971747957ea36f67c229ab",
+    "check": {
+      "exit_code": 0,
+      "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-m5yn5mdk/output/Auxiliary.lean:26:25: warning: Variable name `E` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-m5yn5mdk/output/Auxiliary.lean:48:61: warning: Variable name `h_T004` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-m5yn5mdk/output/Auxiliary.lean:54:15: warning: This simp argument is unused:\n  Fin.val_mk\n\nHint: Omit it from the simp argument list.\n  simp only [F̵i̵n̵.̵v̵a̵l̵_̵m̵k̵,̵ ̵ht1, Set.mem_Icc]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-m5yn5mdk/output/Auxiliary.lean:69:56: warning: Variable name `h_T004` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (n : ℕ) (E : Set (Ambient n)),\n  YuiPortTypes.T004 n E →\n    ∀ (a : ℝ),\n      0 < a →\n        a ≤ 1 →\n          have N := ⌈1 / a⌉₊;\n          0 < N ∧ 1 / ↑N ≤ a ∧ ↑N * a ≤ 2\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+      "stderr": "",
+      "wall_seconds": 2.9631545419979375,
+      "native_limits": {
+        "timeout_seconds": 180,
+        "max_heartbeats": 20000000
+      },
+      "source_path": "/Users/syyui/projects/Yui-results/test_uncond/geometry-product-dimension/rigorous-proof/20261106T125831Z-222bcbd7a3/workflow/native-checks/e22511c47b384f25b5f42686c7c1ddf4.lean",
+      "source_sha256": "1e40e85f28617c5efcd83c48876f1724a29ba2dfa7fdd5d2834d5b422c798394",
+      "auxiliary_valid": true,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "lean_sha256": "1e40e85f28617c5efcd83c48876f1724a29ba2dfa7fdd5d2834d5b422c798394",
+      "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+      "context_port": "T007",
+      "candidate": 3
+    }
+  },
+  {
+    "name": "yui_aux_0003",
+    "statement": "∀ (X : Type u) [MetricSpace X] (U : Set X) (a : ℝ) (N : ℕ), 0 < N → Metric.ediam U ≤ ENNReal.ofReal a → 1 / (N : ℝ) ≤ a → ∀ j : Fin N, Metric.ediam (U ×ˢ Set.Icc ((j : ℝ) / N) (((j : ℝ) + 1) / N)) ≤ ENNReal.ofReal a",
+    "proof": "intro X inst U a N hN hU hNa j\napply Metric.ediam_le_iff.mpr\nintro x hx y hy\nrw [Prod.edist_eq]\napply max_le\n· exact Metric.edist_le_of_ediam_le hx.1 hy.1 hU\n· have hJ : Metric.ediam (Set.Icc ((j : ℝ) / N) (((j : ℝ) + 1) / N)) ≤ ENNReal.ofReal a := by\n    rw [Real.ediam_Icc]\n    apply ENNReal.ofReal_le_ofReal\n    convert hNa using 1 <;> ring\n  exact Metric.edist_le_of_ediam_le hx.2 hy.2 hJ",
+    "dependencies": [],
+    "context_sha256": "36a45898782b6f8abcc26f0e509da76e1ebc08bbff22bef94bebd6c63a3cb1f7",
+    "sha256": "7acb183f145c754db3e44847e694bc4fb8cc78a5b739e278c752fc7b85da5795",
+    "check": {
+      "exit_code": 0,
+      "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-7l8on5ry/output/Auxiliary.lean:26:25: warning: Variable name `E` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-7l8on5ry/output/Auxiliary.lean:48:61: warning: Variable name `h_T004` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-7l8on5ry/output/Auxiliary.lean:54:15: warning: This simp argument is unused:\n  Fin.val_mk\n\nHint: Omit it from the simp argument list.\n  simp only [F̵i̵n̵.̵v̵a̵l̵_̵m̵k̵,̵ ̵ht1, Set.mem_Icc]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-7l8on5ry/output/Auxiliary.lean:69:61: warning: Variable name `h_T004` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-7l8on5ry/output/Auxiliary.lean:85:56: warning: Variable name `h_T004` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-7l8on5ry/output/Auxiliary.lean:95:26: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice\n\nNote: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`\nchecked : ∀ (n : ℕ) (E : Set (Ambient n)),\n  YuiPortTypes.T004 n E →\n    ∀ (X : Type u_1) [inst : MetricSpace X] (U : Set X) (a : ℝ) (N : ℕ),\n      0 < N →\n        ediam U ≤ ENNReal.ofReal a →\n          1 / ↑N ≤ a → ∀ (j : Fin N), ediam (U ×ˢ Icc (↑↑j / ↑N) ((↑↑j + 1) / ↑N)) ≤ ENNReal.ofReal a\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+      "stderr": "",
+      "wall_seconds": 3.2105542089993833,
+      "native_limits": {
+        "timeout_seconds": 180,
+        "max_heartbeats": 20000000
+      },
+      "source_path": "/Users/syyui/projects/Yui-results/test_uncond/geometry-product-dimension/rigorous-proof/20261106T125831Z-222bcbd7a3/workflow/native-checks/3febada18cae4cca9a3f0427bfbd8a97.lean",
+      "source_sha256": "fd51174f29030d9c0ea00757a26b197d4dbcf18da6ec57ef356730d9e437e1f3",
+      "auxiliary_valid": true,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "lean_sha256": "fd51174f29030d9c0ea00757a26b197d4dbcf18da6ec57ef356730d9e437e1f3",
+      "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+      "context_port": "T007",
+      "candidate": 4
+    }
+  },
+  {
+    "name": "yui_aux_0004",
+    "statement": "∀ (N : ℕ) (b : ℝ), 0 ≤ b → (∑' j : Fin N, ENNReal.ofReal b) = ENNReal.ofReal ((N : ℝ) * b)",
+    "proof": "intro N b hb\nsimp only [tsum_fintype, Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]\nrw [ENNReal.ofReal_mul (Nat.cast_nonneg N)]\nsimp",
+    "dependencies": [],
+    "context_sha256": "36a45898782b6f8abcc26f0e509da76e1ebc08bbff22bef94bebd6c63a3cb1f7",
+    "sha256": "4e3d17eaf24581a8971e046bfff2e2fdfd018eb1672ce044a8ef4f9c3b4e87f4",
+    "check": {
+      "exit_code": 0,
+      "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-1b0rjjwx/output/Auxiliary.lean:26:25: warning: Variable name `E` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-1b0rjjwx/output/Auxiliary.lean:48:61: warning: Variable name `h_T004` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-1b0rjjwx/output/Auxiliary.lean:54:15: warning: This simp argument is unused:\n  Fin.val_mk\n\nHint: Omit it from the simp argument list.\n  simp only [F̵i̵n̵.̵v̵a̵l̵_̵m̵k̵,̵ ̵ht1, Set.mem_Icc]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-1b0rjjwx/output/Auxiliary.lean:69:61: warning: Variable name `h_T004` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-1b0rjjwx/output/Auxiliary.lean:85:61: warning: Variable name `h_T004` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-1b0rjjwx/output/Auxiliary.lean:95:26: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice\n\nNote: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-1b0rjjwx/output/Auxiliary.lean:98:56: warning: Variable name `h_T004` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (n : ℕ) (E : Set (Ambient n)),\n  YuiPortTypes.T004 n E → ∀ (N : ℕ) (b : ℝ), 0 ≤ b → ∑' (j : Fin N), ENNReal.ofReal b = ENNReal.ofReal (↑N * b)\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+      "stderr": "",
+      "wall_seconds": 3.1116110000002664,
+      "native_limits": {
+        "timeout_seconds": 180,
+        "max_heartbeats": 20000000
+      },
+      "source_path": "/Users/syyui/projects/Yui-results/test_uncond/geometry-product-dimension/rigorous-proof/20261106T125831Z-222bcbd7a3/workflow/native-checks/8531a97c24fa4556b58818d6175b1906.lean",
+      "source_sha256": "4f4fab55456510702dd6a92aa82472e127589c7950e66b8f6fb661496b747482",
+      "auxiliary_valid": true,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "lean_sha256": "4f4fab55456510702dd6a92aa82472e127589c7950e66b8f6fb661496b747482",
+      "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+      "context_port": "T007",
+      "candidate": 5
+    }
+  },
+  {
+    "name": "yui_aux_0005",
+    "statement": "∀ (N : ℕ) (a q : ℝ) (c : Fin N → ℝ≥0∞), 0 < a → 0 < q → (N : ℝ) * a ≤ 2 → (∀ j, c j ≤ ENNReal.ofReal a) → (∑' j, (c j) ^ (q + 1)) ≤ 2 * ENNReal.ofReal (a ^ q)",
+    "proof": "intro N a q c ha hq hNa hc\nhave hp : 0 ≤ q + 1 := by linarith\ncalc\n  (∑' j, c j ^ (q + 1)) ≤ ∑' j : Fin N, ENNReal.ofReal (a ^ (q + 1)) := by\n    apply ENNReal.tsum_le_tsum\n    intro j\n    rw [← ENNReal.ofReal_rpow_of_pos ha]\n    exact ENNReal.rpow_le_rpow (hc j) hp\n  _ = ENNReal.ofReal ((N : ℝ) * a ^ (q + 1)) :=\n    @yui_aux_0004 n E h_T004 N _ (Real.rpow_nonneg ha.le _)\n  _ ≤ ENNReal.ofReal (2 * a ^ q) := by\n    apply ENNReal.ofReal_le_ofReal\n    rw [Real.rpow_add_one ha.ne']\n    nlinarith [mul_le_mul_of_nonneg_right hNa (Real.rpow_nonneg ha.le q)]\n  _ = 2 * ENNReal.ofReal (a ^ q) := by rw [ENNReal.ofReal_mul (by norm_num)]; norm_num",
+    "dependencies": [
+      "yui_aux_0004"
+    ],
+    "context_sha256": "36a45898782b6f8abcc26f0e509da76e1ebc08bbff22bef94bebd6c63a3cb1f7",
+    "sha256": "d71439db125c0d1c0c3860e62063dfa8c8c75a83a1466e8b3679a52f9150e974",
+    "check": {
+      "exit_code": 0,
+      "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-46jlpfw8/output/Auxiliary.lean:26:25: warning: Variable name `E` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-46jlpfw8/output/Auxiliary.lean:48:61: warning: Variable name `h_T004` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-46jlpfw8/output/Auxiliary.lean:54:15: warning: This simp argument is unused:\n  Fin.val_mk\n\nHint: Omit it from the simp argument list.\n  simp only [F̵i̵n̵.̵v̵a̵l̵_̵m̵k̵,̵ ̵ht1, Set.mem_Icc]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-46jlpfw8/output/Auxiliary.lean:69:61: warning: Variable name `h_T004` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-46jlpfw8/output/Auxiliary.lean:85:61: warning: Variable name `h_T004` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-46jlpfw8/output/Auxiliary.lean:95:26: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice\n\nNote: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-46jlpfw8/output/Auxiliary.lean:98:61: warning: Variable name `h_T004` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (n : ℕ) (E : Set (Ambient n)),\n  YuiPortTypes.T004 n E →\n    ∀ (N : ℕ) (a q : ℝ) (c : Fin N → ℝ≥0∞),\n      0 < a →\n        0 < q →\n          ↑N * a ≤ 2 →\n            (∀ (j : Fin N), c j ≤ ENNReal.ofReal a) → ∑' (j : Fin N), c j ^ (q + 1) ≤ 2 * ENNReal.ofReal (a ^ q)\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+      "stderr": "",
+      "wall_seconds": 3.6522145420021843,
+      "native_limits": {
+        "timeout_seconds": 180,
+        "max_heartbeats": 20000000
+      },
+      "source_path": "/Users/syyui/projects/Yui-results/test_uncond/geometry-product-dimension/rigorous-proof/20261106T125831Z-222bcbd7a3/workflow/native-checks/0e28c07d14ce460bb0510264222e4a87.lean",
+      "source_sha256": "af00f1b7cb203731a078742864d1337f1105da2a2a8ae8859cbd873cf8b76303",
+      "auxiliary_valid": true,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "lean_sha256": "af00f1b7cb203731a078742864d1337f1105da2a2a8ae8859cbd873cf8b76303",
+      "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+      "context_port": "T007",
+      "candidate": 6
+    }
+  },
+  {
+    "name": "yui_aux_0006",
+    "statement": "∀ (b c : ℝ≥0∞), b < c → (2 : ℝ≥0∞) * b < 2 * c",
+    "proof": "intro b c hbc\nsimpa only [mul_comm] using\n  (ENNReal.mul_lt_mul_left (a := (2 : ℝ≥0∞)) (by norm_num) (by norm_num) hbc)",
+    "dependencies": [],
+    "context_sha256": "36a45898782b6f8abcc26f0e509da76e1ebc08bbff22bef94bebd6c63a3cb1f7",
+    "sha256": "96cd0c9f8b180d7229900d0eaad3b7d83fc3ff0a9cc57554c820f9d52986dda3",
+    "check": {
+      "exit_code": 0,
+      "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-ozrwqhd3/output/Auxiliary.lean:26:25: warning: Variable name `E` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-ozrwqhd3/output/Auxiliary.lean:48:61: warning: Variable name `h_T004` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-ozrwqhd3/output/Auxiliary.lean:54:15: warning: This simp argument is unused:\n  Fin.val_mk\n\nHint: Omit it from the simp argument list.\n  simp only [F̵i̵n̵.̵v̵a̵l̵_̵m̵k̵,̵ ̵ht1, Set.mem_Icc]\n\nNote: This linter can be disabled with `set_option linter.unusedSimpArgs false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-ozrwqhd3/output/Auxiliary.lean:69:61: warning: Variable name `h_T004` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-ozrwqhd3/output/Auxiliary.lean:85:61: warning: Variable name `h_T004` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-ozrwqhd3/output/Auxiliary.lean:95:26: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice\n\nNote: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-ozrwqhd3/output/Auxiliary.lean:98:61: warning: Variable name `h_T004` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-ozrwqhd3/output/Auxiliary.lean:121:56: warning: Variable name `h_T004` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (n : ℕ) (E : Set (Ambient n)), YuiPortTypes.T004 n E → ∀ (b c : ℝ≥0∞), b < c → 2 * b < 2 * c\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+      "stderr": "",
+      "wall_seconds": 3.2352850419993047,
+      "native_limits": {
+        "timeout_seconds": 180,
+        "max_heartbeats": 20000000
+      },
+      "source_path": "/Users/syyui/projects/Yui-results/test_uncond/geometry-product-dimension/rigorous-proof/20261106T125831Z-222bcbd7a3/workflow/native-checks/d2f5e177f75b4f45b5440ce843299c5f.lean",
+      "source_sha256": "bd53706e2850fec1dbbe6afd565e17b0934d16a8d561939418272a7e7192a295",
+      "auxiliary_valid": true,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "lean_sha256": "bd53706e2850fec1dbbe6afd565e17b0934d16a8d561939418272a7e7192a295",
+      "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+      "context_port": "T007",
+      "candidate": 8
+    }
+  }
+]

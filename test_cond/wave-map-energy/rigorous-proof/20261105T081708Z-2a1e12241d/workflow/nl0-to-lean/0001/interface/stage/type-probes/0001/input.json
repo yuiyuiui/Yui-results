@@ -1,0 +1,28 @@
+{
+  "header": "import Mathlib\nopen scoped BigOperators ContDiff Topology\nopen MeasureTheory\nnamespace WaveMap\nabbrev Space (d : ℕ) := EuclideanSpace ℝ (Fin d)\ndef timeDomain (n : ℕ) : Set (Space n × ℝ) := {p | 0 < p.2}\nnoncomputable def dt {n m : ℕ} (u : Space n → ℝ → Space m) (x : Space n) (t : ℝ) : Space m :=\n  deriv (u x) t\nnoncomputable def dtt {n m : ℕ} (u : Space n → ℝ → Space m) (x : Space n) (t : ℝ) : Space m :=\n  deriv (fun r => dt u x r) t\nnoncomputable def dx {n : ℕ} {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]\n    (f : Space n → F) (j : Fin n) (x : Space n) : F :=\n  fderiv ℝ f x (EuclideanSpace.single j 1)\nnoncomputable def du {n m : ℕ} (u : Space n → ℝ → Space m) (j : Fin n) (x : Space n) (t : ℝ) : Space m :=\n  dx (fun y => u y t) j x\nnoncomputable def duu {n m : ℕ} (u : Space n → ℝ → Space m) (j : Fin n) (x : Space n) (t : ℝ) : Space m :=\n  dx (fun y => du u j y t) j x\nnoncomputable def dut {n m : ℕ} (u : Space n → ℝ → Space m) (j : Fin n) (x : Space n) (t : ℝ) : Space m :=\n  dx (fun y => dt u y t) j x\nnoncomputable def lap {n m : ℕ} (u : Space n → ℝ → Space m) (x : Space n) (t : ℝ) : Space m :=\n  ∑ j, duu u j x t\nnoncomputable def density {n m : ℕ} (u : Space n → ℝ → Space m) (x : Space n) (t : ℝ) : ℝ :=\n  ‖dt u x t‖ ^ 2 + ∑ j, ‖du u j x t‖ ^ 2\nnoncomputable def densityT {n m : ℕ} (u : Space n → ℝ → Space m) (x : Space n) (t : ℝ) : ℝ :=\n  deriv (density u x) t\nnoncomputable def energy {n m : ℕ} (u : Space n → ℝ → Space m) (t : ℝ) : ℝ :=\n  ∫ x, density u x t\nnoncomputable def flux {n m : ℕ} (u : Space n → ℝ → Space m) (j : Fin n) (t : ℝ) (x : Space n) : ℝ :=\n  inner ℝ (dt u x t) (du u j x t)\ndef box {n : ℕ} (R : ℝ) : Set (Space n) := {x | ∀ j, x j ∈ Set.Icc (-R) R}\ndef openBox {n : ℕ} (R : ℝ) : Set (Space n) := {x | ∀ j, x j ∈ Set.Ioo (-R) R}\ndef sectionGood {n : ℕ} (f : Space n → ℝ) (C : Set (Space n)) (R : ℝ) : Prop :=\n  Continuous f ∧ (∃ B : ℝ, ∀ x ∈ box (n := n) R, |f x| ≤ B) ∧\n  (∀ x ∉ C, f x = 0) ∧ Integrable f\nend WaveMap\n",
+  "parameters": [
+    {
+      "name": "n",
+      "type": "ℕ"
+    },
+    {
+      "name": "m",
+      "type": "ℕ"
+    },
+    {
+      "name": "u",
+      "type": "WaveMap.Space n → ℝ → WaveMap.Space m"
+    },
+    {
+      "name": "q",
+      "type": "WaveMap.Space m"
+    }
+  ],
+  "types": [
+    "ContDiffOn ℝ ∞ (Function.uncurry u) (WaveMap.timeDomain n)",
+    "∀ t : ℝ, 0 < t → Integrable (fun x => WaveMap.density u x t)",
+    "∀ k : ℕ, 0 < k → ∀ p : WaveMap.Space n × ℝ, iteratedFDeriv ℝ k (Function.uncurry u) p = 0",
+    "∀ R : ℝ, volume (WaveMap.box (n := n) R) = ENNReal.ofReal ((2 * R) ^ n)",
+    "∀ t : ℝ, 0 < t → HasDerivAt (WaveMap.energy u) 0 t"
+  ]
+}

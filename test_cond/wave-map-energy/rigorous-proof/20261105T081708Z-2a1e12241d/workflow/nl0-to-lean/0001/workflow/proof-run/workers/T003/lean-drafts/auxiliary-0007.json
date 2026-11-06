@@ -1,0 +1,29 @@
+{
+  "statement": "∀ R : ℝ, 0 < R → IsCompact (box (n := n) R) ∧\nvolume (box (n := n) R) = ENNReal.ofReal ((2 * R) ^ n) ∧ volume (box (n := n) R) < ⊤",
+  "proof": "intro R hR\nlet B : Set (Fin n → ℝ) := Set.Icc (fun _ => -R) (fun _ => R)\nhave him : WithLp.toLp 2 '' B = box (n := n) R := by\n  ext x\n  constructor\n  · rintro ⟨y, hy, rfl⟩\n    exact fun j => ⟨hy.1 j, hy.2 j⟩\n  · intro hx\n    exact ⟨WithLp.ofLp x, ⟨fun j => (hx j).1, fun j => (hx j).2⟩, rfl⟩\nhave hc : IsCompact (box (n := n) R) := by\n  rw [← him]\n  exact isCompact_Icc.image (PiLp.continuous_toLp 2 (fun _ : Fin n => ℝ))\nhave hv : volume (box (n := n) R) = ENNReal.ofReal ((2 * R) ^ n) := by\n  have hp : WithLp.ofLp ⁻¹' B = box (n := n) R := by\n    ext x\n    exact ⟨fun h j => ⟨h.1 j, h.2 j⟩, fun h => ⟨fun j => (h j).1, fun j => (h j).2⟩⟩\n  rw [← hp, (PiLp.volume_preserving_ofLp (Fin n)).measure_preimage measurableSet_Icc]\n  simp only [B, Real.volume_Icc_pi, sub_neg_eq_add, ← two_mul, Finset.prod_const,\n    Finset.card_univ, Fintype.card_fin]\n  exact (ENNReal.ofReal_pow (by positivity) _).symm\nexact ⟨hc, hv, hv ▸ ENNReal.ofReal_lt_top⟩",
+  "check": {
+    "exit_code": 1,
+    "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-eatwzcv6/output/Auxiliary.lean:46:104: warning: Variable name `h_H001` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-eatwzcv6/output/Auxiliary.lean:46:129: warning: Variable name `h_H002` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-eatwzcv6/output/Auxiliary.lean:46:191: warning: Variable name `h_H006` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-eatwzcv6/output/Auxiliary.lean:68:104: warning: Variable name `h_H001` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-eatwzcv6/output/Auxiliary.lean:68:129: warning: Variable name `h_H002` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-eatwzcv6/output/Auxiliary.lean:68:191: warning: Variable name `h_H006` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-eatwzcv6/output/Auxiliary.lean:72:104: warning: Variable name `h_H001` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-eatwzcv6/output/Auxiliary.lean:72:129: warning: Variable name `h_H002` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-eatwzcv6/output/Auxiliary.lean:72:191: warning: Variable name `h_H006` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-eatwzcv6/output/Auxiliary.lean:124:69: error(lean.synthInstanceFailed): failed to synthesize instance of type class\n  TopologicalSpace (NullMeasurableSpace (Fin n → ℝ) volume)\n\nHint: Type class instance resolution failures can be inspected with the `set_option trace.Meta.synthInstance true` command.\nchecked : ∀ (n m : ℕ) (u : Space n → ℝ → Space m) (q : Space m),\n  1 ≤ n ∧ 1 ≤ m →\n    ContDiffOn ℝ ∞ (Function.uncurry u) (timeDomain n) →\n      (∀ (s t : ℝ), 0 < s → s < t → ∃ C, IsCompact C ∧ ∀ (x : Space n) (r : ℝ), x ∉ C → r ∈ Set.Icc s t → u x r = q) →\n        ∀ (R : ℝ), 0 < R → IsCompact (box R) ∧ volume (box R) = ENNReal.ofReal ((2 * R) ^ n) ∧ volume (box R) < ⊤\n'YuiAuxiliary.checked' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]\n",
+    "stderr": "",
+    "wall_seconds": 3.080800083000213,
+    "native_limits": {
+      "timeout_seconds": 180,
+      "max_heartbeats": 20000000
+    },
+    "source_path": "/Users/syyui/projects/Yui-results/test_cond/wave-map-energy/rigorous-proof/20261105T081708Z-2a1e12241d/workflow/native-checks/521d3c4277f745e98d65047430581325.lean",
+    "source_sha256": "ae461e72070cc9589ab246e598fbdf6f8ef53f6149cebaa0ffdc4680f67ffc74",
+    "auxiliary_valid": false,
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext",
+      "sorryAx"
+    ],
+    "lean_sha256": "ae461e72070cc9589ab246e598fbdf6f8ef53f6149cebaa0ffdc4680f67ffc74",
+    "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+    "context_port": "T003",
+    "candidate": 7,
+    "accepted": false,
+    "stage_complete": false
+  }
+}

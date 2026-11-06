@@ -56,7 +56,35 @@ Save the exact inputs, prompt, configuration, elapsed time, native token records
 
 The three test problems cover different fields, at roughly advanced undergraduate to graduate level. They test Yui's reliability across the complete natural-language proof, review, Lean translation and final acceptance workflow.
 
-Only the latest full run for each problem is retained in the current checkout. All three used the same harness runtime as Yui commit [`adf65d18`](https://github.com/yuiyuiui/Yui/commit/adf65d18c810ffa9105e03a4b89b2fb5ad441e26), with **10 local workers per case**, and finished with `WORKFLOW-PASSED` and `AUDIT-B-PASSED`.
+### Latest unconditional geometry test
+
+The November 6 Hausdorff product-dimension run completed the full unconditional
+workflow using Yui [`8bd6c72b`](https://github.com/yuiyuiui/Yui/commit/8bd6c72bd0123a830f95d1ee81535a050909614c),
+with **gpt-6.1-sol / high / Standard** and automatic phase-sized worker pools.
+This was one fresh run with ordinary automatic repair enabled. All 14 local
+Lean proof nodes completed; observed peak proof concurrency was 14.
+
+| Problem | Elapsed time | Observed tokens | Accepted scope |
+| --- | ---: | ---: | --- |
+| Hausdorff dimension of a product with an interval | 01:10:03 | 17,831,046 (`PARTIAL`) | `UNCONDITIONAL_LEAN`, `WORKFLOW-PASSED` |
+
+The bound Audit A receipt, reviewed frozen interface, machine Audit B and final
+b2lean closure passed. The export `YuiClosed.P` retains the original nonempty
+and compactness hypotheses, with no residual class-4 dependency or source
+warning. Audit B inherited the independently reviewed frozen interface and
+checked the final proof; it did not call another final semantic reviewer.
+
+[Final outcome](test_uncond/geometry-product-dimension/rigorous-proof/20261106T125831Z-222bcbd7a3/FINAL_OUTCOME.json)
+· [Lean proof](test_uncond/geometry-product-dimension/rigorous-proof/20261106T125831Z-222bcbd7a3/workflow/b2lean/Proof.lean)
+· [Acceptance and cleanup recheck](test_uncond/geometry-product-dimension/rigorous-proof/20261106T125831Z-222bcbd7a3/OWNER_CLOSEOUT_VERIFICATION.json).
+All owned processes exited and all 132 registered temporary workspace paths
+were absent at closeout. Proofs, review evidence and the frozen runtime remain
+in the result directory.
+
+### Historical conditional baseline
+
+The following table records the November 1 conditional full-workflow baseline.
+All three used the same harness runtime as Yui commit [`adf65d18`](https://github.com/yuiyuiui/Yui/commit/adf65d18c810ffa9105e03a4b89b2fb5ad441e26), with **10 local workers per case**, and finished with `WORKFLOW-PASSED` and `AUDIT-B-PASSED`.
 
 | Problem | Elapsed time | Observed tokens | Result directory |
 | --- | ---: | ---: | --- |
@@ -74,7 +102,10 @@ Each problem's `problem.md` records its source, complete target and approved int
 4. Reviews: the proof reviews and acceptance checks for the natural-language proof and Lean translation.
 5. Execution records: the run configuration, process records, logs, timing and token accounting.
 
-Older runs remain in Git history.
+Later successful and cancelled runs are also retained for comparison and
+failure analysis; see the [November 6 run-record index](docs/run-records-2026-11-06.md).
+The index explains how to restore the losslessly archived oversized historical
+traces. Earlier removed runs remain in Git history.
 
 ### Execute one problem in a fresh task
 

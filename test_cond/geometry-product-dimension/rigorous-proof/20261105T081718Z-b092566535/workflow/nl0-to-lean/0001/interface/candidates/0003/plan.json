@@ -1,0 +1,308 @@
+{
+  "version": 2,
+  "contract_sha256": "3575d5d75c1eb2aaf8b92e3182b02e09afba2fd0f4d1ab9e569e2cc16c872495",
+  "representation_notes": "Use EuclideanSpace ℝ (Fin n)=PiLp 2 (constant ℝ), indexed by Fin n, with its native L2 metric and Borel structure; n is a natural ambient dimension including 0. YuiSnoc appends a real coordinate and YuiHead/YuiLast recover it; YuiCylinder E is defined by these coordinates directly in EuclideanSpace ℝ (Fin (n+1)). T003 checks the coordinate inverse and Euclidean distance identities used by all cylinder arguments, so there is no max-product metric or unproved metric replacement. The interval remains Set.Icc (0:ℝ) 1. Metric.ediam, YuiCost, YuiContent and YuiMeasure take values in ℝ≥0∞; ^ with a real exponent is ENNReal.rpow. The supremum over a nonempty witness equals ediam^s and over an empty witness equals zero, giving the prescribed empty-cover convention even at exponent zero. All uses of Hausdorff content or normalization are guarded by s>0 and δ>0. Cover sequences enumerate countable covers with empty padding; the positive-diameter construction uses a subset of ℕ to avoid duplicating finite nonempty families. dimH is native, defined as the supremum of nonnegative exponents with infinite native unnormalized Hausdorff measure; its nonnegative extended codomain gives dimH empty=0. Positive real exponents are embedded by ENNReal.ofReal only with the relevant positivity; D remains dimH E in ℝ≥0∞ and its toReal value is used only downstream of T005's finiteness. Nat casts of n and constants are finite ENNReal values. Lebesgue measure/integrals in the slicing and interval workers are volume on ℝ and the nonnegative lintegral. All five M facts are supplied by direct pinned Mathlib use, not additional premises. Background notes remain optional node-local references. N outputs are unchanged; auxiliary T001 exposes the uniform metric-space normalization calculation already used in S001 so both Euclidean and real-interval instances can share it.",
+  "steps": [
+    {
+      "id": "T001",
+      "statement": "∀ (X : Type) [MetricSpace X] [MeasurableSpace X] [BorelSpace X] (A : Set X) (a : ℝ), 0 < a → YuiMeasure a A = MeasureTheory.Measure.hausdorffMeasure a A",
+      "inputs": [],
+      "source_steps": [
+        "S001"
+      ],
+      "explanation": "Implementation normalization lemma for the same diameter-cover definition. The proof in S001 is uniform in the metric space; instantiate the generic native hausdorffMeasure_apply both for Euclidean spaces and for the real interval, without introducing a second interval representation. Restrict the native positive extended scales to positive finite real scales by cofinality toward zero. Enumerating countable families with empty padding preserves the infimum. Nonempty-index suprema give zero for empty sets and ediam^a otherwise; at a>0 this agrees with real diameter power on every finite-scale member. No theorem is assumed by a definition.",
+      "background_notes": [
+        "R001.BG001"
+      ]
+    },
+    {
+      "id": "T002",
+      "statement": "(∀ (k : ℕ) (A : Set (YuiEucl k)) (a : ℝ), 0 < a → YuiMeasure a A = MeasureTheory.Measure.hausdorffMeasure a A ∧ (dimH A < ENNReal.ofReal a → YuiMeasure a A = 0) ∧ (ENNReal.ofReal a < dimH A → YuiMeasure a A = ⊤) ∧ (YuiMeasure a A = 0 → dimH A ≤ ENNReal.ofReal a) ∧ (YuiMeasure a A = ⊤ → ENNReal.ofReal a ≤ dimH A)) ∧ (∀ (k : ℕ) (A : Set (YuiEucl k)), 0 ≤ dimH A) ∧ (∀ (k : ℕ) (A B : Set (YuiEucl k)), A ⊆ B → dimH A ≤ dimH B) ∧ (∀ (k l : ℕ) (A : Set (YuiEucl k)) (g : A → YuiEucl l), Isometry g → dimH (Set.range g) = dimH A)",
+      "inputs": [
+        "T001"
+      ],
+      "source_steps": [
+        "S002",
+        "S003",
+        "S004",
+        "S005"
+      ],
+      "explanation": "Complete N001. For positive a, ENNReal.ofReal a is the exact embedding, not a truncation; apply the native critical-exponent theorems with d : ℝ≥0 obtained from a and its positivity. Keep all four implications. Nonnegativity is in the extended nonnegative order. Prove cover monotonicity and the between-exponents contradiction of S004; for g on the subtype A, intersect covers with A and transport them in both directions using distance preservation, as in S005. Set.range g is precisely g(A); subtype distances are inherited ambient distances. Empty A is included.",
+      "background_notes": [
+        "R001.BG002",
+        "R001.BG003"
+      ]
+    },
+    {
+      "id": "T003",
+      "statement": "∀ k : ℕ, (∀ (x : YuiEucl k) (t : ℝ), YuiHead (YuiSnoc x t) = x ∧ YuiLast (YuiSnoc x t) = t) ∧ (∀ z : YuiEucl (k + 1), YuiSnoc (YuiHead z) (YuiLast z) = z) ∧ (∀ (x y : YuiEucl k) (t u : ℝ), dist (YuiSnoc x t) (YuiSnoc y u) = Real.sqrt ((dist x y) ^ 2 + |t-u| ^ 2)) ∧ LipschitzWith 1 (YuiHead (n := k)) ∧ LipschitzWith 1 (YuiLast (n := k))",
+      "inputs": [],
+      "source_steps": [
+        "S012",
+        "S016",
+        "S030"
+      ],
+      "explanation": "Shared coordinate implementation facts already used by the accepted product-distance calculations. Fin n indexes the first n coordinates; Fin.last n is the appended coordinate. Fin.snoc, head and last are inverse point constructions including n=0. EuclideanSpace is PiLp 2, so EuclideanSpace.dist_eq/dist_sq_eq split the finite sum into the first n squares and the last square. The numeral 2 is the L2 exponent, not a coordinate count or max-product norm; LipschitzWith 1 uses a nonnegative real Lipschitz constant. These identities justify the two coordinate diameter bounds and the fixed-x interval embedding.",
+      "background_notes": [
+        "R003.BG004",
+        "R004.BG001",
+        "R007.BG001"
+      ]
+    },
+    {
+      "id": "T004",
+      "statement": "0 ≤ dimH E ∧ dimH E ≤ (n : ℝ≥0∞) ∧ dimH E < ⊤",
+      "inputs": [
+        "H001",
+        "H002",
+        "H003",
+        "T002"
+      ],
+      "source_steps": [
+        "S006",
+        "S007",
+        "S008"
+      ],
+      "explanation": "Compactness supplies a positive enclosing box size. For n≥1 retain the grid argument: C depends only on the box and n; for each fixed exponent s>n its cost C*n^(s/2)*h^(s-n) tends to zero as positive h tends to zero, with h also below the chosen mesh bound. Use N001 to get D≤n. For n=0 use the sole empty tuple and nonemptiness, and zero singleton costs. The dimension and n casts here lie in ℝ≥0∞; prove strict finiteness rather than using toReal before it is available.",
+      "background_notes": [
+        "R002.BG001",
+        "R002.BG002",
+        "R002.BG003",
+        "R002.BG004"
+      ]
+    },
+    {
+      "id": "T005",
+      "statement": "(0 ≤ dimH E ∧ dimH E ≤ (n : ℝ≥0∞) ∧ dimH E < ⊤) ∧ (∀ (s δ : ℝ), 0 < s → 0 < δ → YuiContent s δ E < ⊤)",
+      "inputs": [
+        "H003",
+        "T004"
+      ],
+      "source_steps": [
+        "S009"
+      ],
+      "explanation": "Complete N002, preserving T004 and adding finite positive-scale contents. For each s>0 and δ>0 a finite subcover of radius δ/4 balls has mesh at most δ/2 and finite cost; pad with empty sets to match YuiCover. This holds also at n=0. Each scale has its own finite cover; no uniform bound in s or δ is claimed.",
+      "background_notes": [
+        "R002.BG005"
+      ]
+    },
+    {
+      "id": "T006",
+      "statement": "n = 0 → dimH (YuiCylinder E) ≤ dimH E + 1",
+      "inputs": [
+        "H002",
+        "T002",
+        "T003",
+        "T005"
+      ],
+      "source_steps": [
+        "S010"
+      ],
+      "explanation": "Zero-ambient upper branch. Nonempty E in Eucl 0 is the singleton; its cylinder is the appended interval. Equal subinterval covers transported by the coordinate map have mesh 1/N and a-cost N^(1-a), tending to zero for every fixed a>1. Apply N001 to the cylinder and use D=0 from N002. The metric identity is supplied by T003, including its zero-coordinate case.",
+      "background_notes": []
+    },
+    {
+      "id": "T007",
+      "statement": "1 ≤ n → ∀ q : ℝ, dimH E < ENNReal.ofReal q → ∀ r ε : ℝ, 0 < r → r ≤ 1 → 0 < ε → ∃ (T : Set ℕ) (U : T → Set (YuiEucl n)), E ⊆ ⋃ i, U i ∧ (∀ i, (U i).Nonempty ∧ 0 < Metric.ediam (U i) ∧ Metric.ediam (U i) ≤ ENNReal.ofReal r) ∧ YuiCost q U < ENNReal.ofReal ε",
+      "inputs": [
+        "H002",
+        "T002",
+        "T005"
+      ],
+      "source_steps": [
+        "S011"
+      ],
+      "explanation": "Positive-diameter cover construction with the original scope 1≤n and q>D. This strict comparison forces q>0 because D≥0, so ofReal q is an exact embedding. At arbitrary r∈(0,1] and ε>0, use zero q-content and replace nonempty zero-diameter members by small positive-diameter balls with summable q-cost budget. Keep the other members. Use a subtype T⊆ℕ to index the remaining members; it is countable and permits finite families without duplicating nonempty members. The existential cover is chosen after r and ε, so no uniform witness is asserted.",
+      "background_notes": [
+        "R003.BG001",
+        "R003.BG002"
+      ]
+    },
+    {
+      "id": "T008",
+      "statement": "1 ≤ n → ∀ q : ℝ, dimH E < ENNReal.ofReal q → ∀ r ε : ℝ, 0 < r → r ≤ 1 → 0 < ε → ∃ W : ℕ → Set (YuiEucl (n + 1)), YuiCover (Real.sqrt 2 * r) (YuiCylinder E) W ∧ YuiCost (q + 1) W < ENNReal.ofReal (2 * (Real.sqrt 2) ^ (q + 1) * ε)",
+      "inputs": [
+        "T003",
+        "T007"
+      ],
+      "source_steps": [
+        "S012",
+        "S013"
+      ],
+      "explanation": "Apply T007 at the given q,r,ε. For each positive diameter r_i partition I into ceil(1/r_i) intervals and append them to U_i. The finite multiplicity is ≤2/r_i, and T003 gives Euclidean mesh ≤sqrt(2)*r_i. Group the nonnegative countable sum to bound (q+1)-cost by 2*(sqrt 2)^(q+1) times the original q-cost; all powers use real exponents and finite positive diameters. Enumerate the countable union of finite families with empty padding. The conclusion eliminates the private U, indices and partitions.",
+      "background_notes": [
+        "R003.BG004",
+        "R003.BG005"
+      ]
+    },
+    {
+      "id": "T009",
+      "statement": "dimH (YuiCylinder E) ≤ dimH E + 1",
+      "inputs": [
+        "T002",
+        "T005",
+        "T006",
+        "T008"
+      ],
+      "source_steps": [
+        "S014",
+        "S015"
+      ],
+      "explanation": "Complete N003. At fixed δ>0 use r=min(1,δ/sqrt 2) and arbitrary ε>0 in T008. The positive finite cost multiplier depends on q alone, so letting ε decrease to zero gives H^{q+1}_δ(F)=0 and then H^{q+1}(F)=0. N001 yields dimension ≤ofReal(q+1). N002 permits approximating D by the real values D.toReal+1/j; finiteness justifies restoring the ENNReal embedding. Combine the n≥1 branch with T006.",
+      "background_notes": [
+        "R003.BG003",
+        "R003.BG006",
+        "R003.BG007"
+      ]
+    },
+    {
+      "id": "T010",
+      "statement": "∀ s δ : ℝ, 0 < s → 0 < δ → ∀ V : ℕ → Set (YuiEucl (n + 1)), YuiCover δ (YuiCylinder E) V → ∀ ε : ℝ, 0 < ε → YuiContent s δ E ≤ YuiCost (s + 1) V + ENNReal.ofReal ε",
+      "inputs": [
+        "T003",
+        "T005"
+      ],
+      "source_steps": [
+        "S016",
+        "S017",
+        "S018",
+        "S019"
+      ],
+      "explanation": "Slice integration bound for an arbitrary original cover V; V, its nonempty index subtype and its diameters do not depend on ε. By finite mesh all diameters are finite. T003 bounds head and last projections. With rho_i the real finite diameter, enlarge each last projection to the bounded open interval J_i by eta_i=ε*2^(-i-1)/(1+rho_i^s). The weighted eta-error sums to at most ε, including zero diameters. The corresponding head slices cover E at each t∈I. Integrate c≤sum rho_i^s*1_Ji over volume.restrict YuiI. Here c=YuiContent s δ E is finite by T005 and volume(I)=1. Apply MeasureTheory.lintegral_tsum at the countable nonempty index subtype with the measurable interval indicators and ENNReal coefficients; only AE measurability of each summand is needed, with no finiteness or sigma-finiteness requirement. Indicators integrate to volume(J_i∩I) and interval length bounds give cost+ε. Neither V nor its projections require measurability. Convert each finite diameter to a real only after its mesh bound; restore ENNReal powers and nonnegative series at the interface.",
+      "background_notes": [
+        "R004.BG001",
+        "R004.BG002",
+        "R004.BG003",
+        "R004.BG004",
+        "R004.BG005"
+      ]
+    },
+    {
+      "id": "T011",
+      "statement": "∀ s δ : ℝ, 0 < s → 0 < δ → YuiContent s δ E ≤ YuiContent (s + 1) δ (YuiCylinder E)",
+      "inputs": [
+        "T005",
+        "T010"
+      ],
+      "source_steps": [
+        "S020",
+        "S021"
+      ],
+      "explanation": "Complete N004. For any fixed δ-cover, apply T010 for every ε>0. If its cost is infinite the bound is immediate; otherwise pass ε to zero with this cover fixed. Then take the infimum over all covers. An empty admissible class gives top and satisfies the same conclusion. Quantify s and δ; no chosen cover or interval escapes.",
+      "background_notes": [
+        "R004.BG006",
+        "R004.BG007"
+      ]
+    },
+    {
+      "id": "T012",
+      "statement": "0 < dimH E → dimH E + 1 ≤ dimH (YuiCylinder E)",
+      "inputs": [
+        "T002",
+        "T005",
+        "T011"
+      ],
+      "source_steps": [
+        "S022",
+        "S023",
+        "S024"
+      ],
+      "explanation": "Complete N005. For every real 0<s<D, N001 gives H^s(E)=top. The scale contents are monotone as δ decreases, so their supremum being top means arbitrarily large small-scale values. T011 transfers them to F at exponent s+1; hence H^{s+1}(F)=top and N001 gives ofReal(s+1)≤dimH F. Under D>0 and the finite D of N002 choose s=D.toReal*(1-1/j), j≥2, and pass the increasing real exponents to D. All displayed assumptions stay in the implication.",
+      "background_notes": [
+        "R005.BG001",
+        "R005.BG002"
+      ]
+    },
+    {
+      "id": "T013",
+      "statement": "∀ a : ℝ, 1 < a → YuiMeasure a YuiI = 0",
+      "inputs": [],
+      "source_steps": [
+        "S025"
+      ],
+      "explanation": "Interval upper-measure calculation: equal closed subinterval covers have mesh 1/N and a-cost N^(1-a) tending to zero for fixed a>1. At every fixed positive δ they are eventually admissible and have arbitrarily small cost; take the scale supremum. YuiI is the original real interval, with the usual absolute-value metric.",
+      "background_notes": [
+        "R006.BG001"
+      ]
+    },
+    {
+      "id": "T014",
+      "statement": "∀ δ : ℝ, 0 < δ → ∀ V : ℕ → Set ℝ, YuiCover δ YuiI V → (1 : ℝ≥0∞) ≤ ∑' i, Metric.ediam (V i)",
+      "inputs": [],
+      "source_steps": [
+        "S026",
+        "S027"
+      ],
+      "explanation": "Interval length lower bound for arbitrary covers, retaining the original epsilon-thickening argument. Restrict to nonempty indices, convert bounded real sets' finite diameters to sup minus inf, and enlarge them by ε*2^(-i-1) total width. The resulting open intervals cover I. Apply MeasureTheory.measure_iUnion_le with μ=volume and the countable index subtype; no measurability is needed for subadditivity, while interval values use their openness. Get 1≤sum rho_i+ε for every ε>0; split the infinite and finite sum cases before letting ε decrease to zero. Empty members have ediam zero and do not affect the restored ℕ-series.",
+      "background_notes": [
+        "R006.BG002",
+        "R006.BG003"
+      ]
+    },
+    {
+      "id": "T015",
+      "statement": "∀ s δ : ℝ, 0 < s → s < 1 → 0 < δ → (ENNReal.ofReal δ) ^ (s - 1) ≤ YuiContent s δ YuiI",
+      "inputs": [
+        "T014"
+      ],
+      "source_steps": [
+        "S028"
+      ],
+      "explanation": "For each δ-cover, finite real diameters satisfy rho^s≥δ^(s-1)*rho; use decreasing negative exponent s-1 for rho>0 and treat rho=0 separately. Apply T014, compare nonnegative extended sums and take the cover infimum. Since δ>0 its ofReal image is strictly positive and finite, so the negative real exponent has exactly the intended meaning.",
+      "background_notes": [
+        "R006.BG004",
+        "R006.BG006"
+      ]
+    },
+    {
+      "id": "T016",
+      "statement": "dimH YuiI = 1",
+      "inputs": [
+        "T001",
+        "T002",
+        "T013",
+        "T015"
+      ],
+      "source_steps": [
+        "S029"
+      ],
+      "explanation": "Complete N006. T015 and divergence of δ^(s-1) as δ decreases to zero give YuiMeasure s I=top for each 0<s<1. T001 instantiated with X=ℝ identifies this with native Hausdorff measure; native critical-exponent implications give dimension ≥s and hence ≥1. T013 and T001 similarly give dimension ≤a for all a>1 and hence ≤1. This uses the real-interval instance of the same normalization proof, without an extra assumed bridge.",
+      "background_notes": [
+        "R006.BG005"
+      ]
+    },
+    {
+      "id": "T017",
+      "statement": "dimH E = 0 → (1 : ℝ≥0∞) ≤ dimH (YuiCylinder E) ∧ (1 : ℝ≥0∞) = dimH E + 1",
+      "inputs": [
+        "H002",
+        "T002",
+        "T003",
+        "T016"
+      ],
+      "source_steps": [
+        "S030"
+      ],
+      "explanation": "Complete N007. Choose x0∈E and let g:ℝ→YuiEucl(n+1) append t to x0. T003 proves distance preservation; isometry_iff_dist_eq identifies this with the native Isometry predicate, and Isometry.dimH_image applied to YuiI gives dimH(g '' YuiI)=dimH YuiI. Image containment follows from the cylinder definition, and dimH_mono gives 1≤dimH F using T016. These pinned library facts implement exactly the same isometry and inclusion argument as S030; they introduce no premise ports. Under D=0 record also 1=D+1. The selected x0 is private and absent from the output.",
+      "background_notes": [
+        "R007.BG001"
+      ]
+    },
+    {
+      "id": "T018",
+      "statement": "dimH (YuiCylinder E) = dimH E + 1",
+      "inputs": [
+        "T005",
+        "T009",
+        "T012",
+        "T017"
+      ],
+      "source_steps": [
+        "S031"
+      ],
+      "explanation": "Complete P. Nonnegative finite D from N002 is either zero or positive. T012 and T017 give the same lower bound in these cases; T009 supplies the upper bound, so antisymmetry yields equality. YuiCylinder is the subset of Euclidean (n+1)-space with head in E and last coordinate in [0,1], exactly the specified product identification.",
+      "background_notes": []
+    }
+  ],
+  "terminal": "T018"
+}

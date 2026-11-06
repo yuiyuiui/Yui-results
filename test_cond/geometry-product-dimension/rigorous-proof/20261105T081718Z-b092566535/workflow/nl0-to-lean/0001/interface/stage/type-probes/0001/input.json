@@ -1,0 +1,22 @@
+{
+  "header": "import Mathlib\n\nabbrev YuiEucl (n : ℕ) := EuclideanSpace ℝ (Fin n)\ndef YuiI : Set ℝ := Set.Icc 0 1\ndef YuiSnoc {n : ℕ} (x : YuiEucl n) (t : ℝ) : YuiEucl (n + 1) :=\n  WithLp.toLp 2 (Fin.snoc (fun i => x i) t)\ndef YuiHead {n : ℕ} (z : YuiEucl (n + 1)) : YuiEucl n :=\n  WithLp.toLp 2 (fun i : Fin n => z i.castSucc)\ndef YuiLast {n : ℕ} (z : YuiEucl (n + 1)) : ℝ := z (Fin.last n)\ndef YuiCylinder {n : ℕ} (E : Set (YuiEucl n)) : Set (YuiEucl (n + 1)) :=\n  {z | YuiHead z ∈ E ∧ YuiLast z ∈ YuiI}\nnoncomputable def YuiCost {X : Type*} [PseudoEMetricSpace X] {ι : Type*}\n    (s : ℝ) (U : ι → Set X) : ℝ≥0∞ :=\n  ∑' i, ⨆ (_ : (U i).Nonempty), (Metric.ediam (U i)) ^ s\ndef YuiCover {X : Type*} [PseudoEMetricSpace X] (δ : ℝ) (A : Set X)\n    (U : ℕ → Set X) : Prop :=\n  A ⊆ ⋃ i, U i ∧ ∀ i, Metric.ediam (U i) ≤ ENNReal.ofReal δ\nnoncomputable def YuiContent {X : Type*} [PseudoEMetricSpace X]\n    (s δ : ℝ) (A : Set X) : ℝ≥0∞ :=\n  ⨅ (U : ℕ → Set X) (_ : YuiCover δ A U), YuiCost s U\nnoncomputable def YuiMeasure {X : Type*} [PseudoEMetricSpace X]\n    (s : ℝ) (A : Set X) : ℝ≥0∞ :=\n  ⨆ (δ : ℝ) (_ : 0 < δ), YuiContent s δ A\n",
+  "parameters": [
+    {
+      "name": "n",
+      "type": "ℕ"
+    },
+    {
+      "name": "E",
+      "type": "Set (YuiEucl n)"
+    }
+  ],
+  "types": [
+    "∀ (X : Type) [MetricSpace X] [MeasurableSpace X] [BorelSpace X] (A : Set X) (a : ℝ), 0 < a → YuiMeasure a A = MeasureTheory.Measure.hausdorffMeasure a A",
+    "∀ k : ℕ, (∀ (x : YuiEucl k) (t : ℝ), YuiHead (YuiSnoc x t) = x ∧ YuiLast (YuiSnoc x t) = t) ∧ (∀ z : YuiEucl (k + 1), YuiSnoc (YuiHead z) (YuiLast z) = z) ∧ (∀ (x y : YuiEucl k) (t u : ℝ), dist (YuiSnoc x t) (YuiSnoc y u) = Real.sqrt ((dist x y) ^ 2 + |t-u| ^ 2)) ∧ LipschitzWith 1 (YuiHead (n := k)) ∧ LipschitzWith 1 (YuiLast (n := k))",
+    "∀ (k l : ℕ) (A : Set (YuiEucl k)) (g : A → YuiEucl l), Isometry g → dimH (Set.range g) = dimH A",
+    "dimH (YuiCylinder E) = dimH E + 1",
+    "MeasureTheory.lintegral_tsum",
+    "EuclideanSpace.dist_eq",
+    "Fin.snoc"
+  ]
+}

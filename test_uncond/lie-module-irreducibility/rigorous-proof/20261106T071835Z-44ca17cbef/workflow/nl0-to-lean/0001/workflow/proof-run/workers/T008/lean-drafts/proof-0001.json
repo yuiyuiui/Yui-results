@@ -1,0 +1,97 @@
+{
+  "proof": "classical\nhave he := @yui_aux_0002 p K instK lam V instV instCV x y h v M h_T007 h_H004 h_H005\nhave hli : LinearIndependent ℂ (fun i : Idx lam => ev y v i.val) := by\n  apply h.eigenvectors_linearIndependent' (fun i : Idx lam => (ell lam : ℂ) - 2 * (i.val : ℂ)) he.2\n  intro i\n  exact ⟨Module.End.mem_eigenspace_iff.mpr (he.1 i).2, (he.1 i).1⟩\nletI : FiniteDimensional ℂ V := h_H004.1\nhave hdZ : (Module.finrank ℂ V : ℤ) = ((ell lam + 1 : ℕ) : ℤ) := by\n  push_cast\n  rw [h_T007.1]\n  exact h_H004.2.1\nhave hd : Module.finrank ℂ V = ell lam + 1 := by exact_mod_cast hdZ\nhave hc : Fintype.card (Idx lam) = Module.finrank ℂ V := by\n  simpa only [Idx, Fintype.card_fin] using hd.symm\nrefine ⟨he.1, he.2, hli, ?_⟩\nrefine ⟨basisOfLinearIndependentOfCardEqFinrank' (fun i : Idx lam => ev y v i.val) hli hc, ?_⟩\nintro i\nexact congrFun (coe_basisOfLinearIndependentOfCardEqFinrank' (K := ℂ) (fun i : Idx lam => ev y v i.val) hli hc) i",
+  "statement": "(∀ i : Idx lam, ev y v i.val ≠ 0 ∧ h (ev y v i.val) = ((ell lam : ℂ) - 2 * (i.val : ℂ)) • ev y v i.val) ∧\nFunction.Injective (fun i : Idx lam => (ell lam : ℂ) - 2 * (i.val : ℂ)) ∧\nLinearIndependent ℂ (fun i : Idx lam => ev y v i.val) ∧\n(∃ b : Module.Basis (Idx lam) ℂ V, ∀ i, b i = ev y v i.val)",
+  "proof_package": {
+    "schema": "yui-local-proof-1",
+    "step": "T008",
+    "context_sha256": "5a05fb31170be6c68e6917de9239a0c637f670f10498cdbc23151409d31970b5",
+    "helpers": [
+      {
+        "name": "yui_aux_0001",
+        "statement": "∀ r : ℕ, r ≤ ell lam → (y ^ r) v ≠ 0",
+        "proof": "intro r\ninduction r with\n| zero =>\n    intro _\n    simpa using h_H005.1\n| succ r ih =>\n    intro hr hz\n    have hn : ell lam ≠ r := by omega\n    have hc : (ell lam : ℂ) - (r : ℂ) ≠ 0 := sub_ne_zero.mpr (by exact_mod_cast hn)\n    have hs : ((r + 1 : ℕ) : ℂ) ≠ 0 := by exact_mod_cast (Nat.succ_ne_zero r)\n    have hv : (y ^ r) v ≠ 0 := ih (by omega)\n    have he := h_T007.2.2.2 r\n    rw [hz, map_zero] at he\n    exact (smul_ne_zero (mul_ne_zero hs hc) hv) he.symm",
+        "dependencies": [],
+        "context_sha256": "5a05fb31170be6c68e6917de9239a0c637f670f10498cdbc23151409d31970b5",
+        "sha256": "0d0d2b1a957ef70f4feff5bcd3331c923b6d3235459cff41e9a3c9c93b3a356c",
+        "check": {
+          "exit_code": 0,
+          "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-x6ac_u60/output/Auxiliary.lean:85:17: warning: Variable name `p` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-x6ac_u60/output/Auxiliary.lean:85:39: warning: Variable name `instK` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-x6ac_u60/output/Auxiliary.lean:85:199: warning: Variable name `M` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (p : ℕ) (K : Type u_1) [instK : Field K] (lam : ℤ) (V : Type u_2) [instV : AddCommGroup V]\n  [instCV : _root_.Module ℂ V] (x y h : Module.End ℂ V) (v : V) (M : Submodule ℤ V),\n  (↑(ell lam) = lam ∧\n      0 < ell lam + 1 ∧\n        (∀ (r : ℕ), h ((y ^ r) v) = (↑(ell lam) - 2 * ↑r) • (y ^ r) v) ∧\n          ∀ (r : ℕ), x ((y ^ (r + 1)) v) = (↑(r + 1) * (↑(ell lam) - ↑r)) • (y ^ r) v) →\n    (FiniteDimensional ℂ V ∧\n        ↑(Module.finrank ℂ V) = lam + 1 ∧ ∀ (W : Submodule ℂ V), stable x W → stable y W → stable h W → W = ⊥ ∨ W = ⊤) →\n      v ≠ 0 ∧ x v = 0 ∧ h v = ↑lam • v ∧ h * x - x * h = 2 • x ∧ h * y - y * h = -2 • y ∧ x * y - y * x = h →\n        ∀ r ≤ ell lam, (y ^ r) v ≠ 0\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+          "stderr": "",
+          "wall_seconds": 2.7712012920092093,
+          "native_limits": {
+            "timeout_seconds": 180,
+            "max_heartbeats": 20000000
+          },
+          "source_path": "/Users/syyui/projects/Yui-results/test_uncond/lie-module-irreducibility/rigorous-proof/20261106T071835Z-44ca17cbef/workflow/native-checks/ca1b6cffa9ef4a459cdb212927af3ee9.lean",
+          "source_sha256": "a0236ad129b43d46aea48025fee2dd9b61d06a00179d798039224228338df3f8",
+          "auxiliary_valid": true,
+          "axioms": [
+            "Classical.choice",
+            "Quot.sound",
+            "propext"
+          ],
+          "lean_sha256": "a0236ad129b43d46aea48025fee2dd9b61d06a00179d798039224228338df3f8",
+          "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+          "context_port": "T008",
+          "candidate": 1
+        }
+      },
+      {
+        "name": "yui_aux_0002",
+        "statement": "(∀ i : Idx lam, ev y v i.val ≠ 0 ∧ h (ev y v i.val) = ((ell lam : ℂ) - 2 * (i.val : ℂ)) • ev y v i.val) ∧ Function.Injective (fun i : Idx lam => (ell lam : ℂ) - 2 * (i.val : ℂ))",
+        "proof": "constructor\n· intro i\n  have hn : (y ^ i.val) v ≠ 0 :=\n    (@yui_aux_0001 p K instK lam V instV instCV x y h v M h_T007 h_H004 h_H005) i.val (by have := i.isLt; omega)\n  have hf : (Nat.factorial i.val : ℂ) ≠ 0 := by exact_mod_cast Nat.factorial_ne_zero i.val\n  constructor\n  · simpa only [ev, dividedPower, LinearMap.smul_apply] using smul_ne_zero (inv_ne_zero hf) hn\n  · simp only [ev, dividedPower, LinearMap.smul_apply, map_smul]\n    rw [h_T007.2.2.1 i.val, smul_comm]\n· intro i j he\n  apply Fin.ext\n  have hc : (i.val : ℂ) = (j.val : ℂ) := by\n    linear_combination (-1 / 2 : ℂ) * he\n  exact_mod_cast hc",
+        "dependencies": [
+          "yui_aux_0001"
+        ],
+        "context_sha256": "5a05fb31170be6c68e6917de9239a0c637f670f10498cdbc23151409d31970b5",
+        "sha256": "8c2a990bb46fd79e934d285cbe6d3aa7f514a97bc0ac12a873dd9415e51aa3f2",
+        "check": {
+          "exit_code": 0,
+          "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-d2u7hxrz/output/Auxiliary.lean:85:22: warning: Variable name `p` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-d2u7hxrz/output/Auxiliary.lean:85:44: warning: Variable name `instK` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-d2u7hxrz/output/Auxiliary.lean:85:204: warning: Variable name `M` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (p : ℕ) (K : Type u_1) [instK : Field K] (lam : ℤ) (V : Type u_2) [instV : AddCommGroup V]\n  [instCV : _root_.Module ℂ V] (x y h : Module.End ℂ V) (v : V) (M : Submodule ℤ V),\n  (↑(ell lam) = lam ∧\n      0 < ell lam + 1 ∧\n        (∀ (r : ℕ), h ((y ^ r) v) = (↑(ell lam) - 2 * ↑r) • (y ^ r) v) ∧\n          ∀ (r : ℕ), x ((y ^ (r + 1)) v) = (↑(r + 1) * (↑(ell lam) - ↑r)) • (y ^ r) v) →\n    (FiniteDimensional ℂ V ∧\n        ↑(Module.finrank ℂ V) = lam + 1 ∧ ∀ (W : Submodule ℂ V), stable x W → stable y W → stable h W → W = ⊥ ∨ W = ⊤) →\n      v ≠ 0 ∧ x v = 0 ∧ h v = ↑lam • v ∧ h * x - x * h = 2 • x ∧ h * y - y * h = -2 • y ∧ x * y - y * x = h →\n        (∀ (i : Idx lam), ev y v ↑i ≠ 0 ∧ h (ev y v ↑i) = (↑(ell lam) - 2 * ↑↑i) • ev y v ↑i) ∧\n          Function.Injective fun i => ↑(ell lam) - 2 * ↑↑i\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+          "stderr": "",
+          "wall_seconds": 3.0052880409930367,
+          "native_limits": {
+            "timeout_seconds": 180,
+            "max_heartbeats": 20000000
+          },
+          "source_path": "/Users/syyui/projects/Yui-results/test_uncond/lie-module-irreducibility/rigorous-proof/20261106T071835Z-44ca17cbef/workflow/native-checks/12aa0fd2491d4a7a8d2929350c0bee5c.lean",
+          "source_sha256": "e848faceaf1cf32b9dcf61ec28b279c30835cd9639a243d86cb0d9f11e750600",
+          "auxiliary_valid": true,
+          "axioms": [
+            "Classical.choice",
+            "Quot.sound",
+            "propext"
+          ],
+          "lean_sha256": "e848faceaf1cf32b9dcf61ec28b279c30835cd9639a243d86cb0d9f11e750600",
+          "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+          "context_port": "T008",
+          "candidate": 2
+        }
+      }
+    ],
+    "body": "classical\nhave he := @yui_aux_0002 p K instK lam V instV instCV x y h v M h_T007 h_H004 h_H005\nhave hli : LinearIndependent ℂ (fun i : Idx lam => ev y v i.val) := by\n  apply h.eigenvectors_linearIndependent' (fun i : Idx lam => (ell lam : ℂ) - 2 * (i.val : ℂ)) he.2\n  intro i\n  exact ⟨Module.End.mem_eigenspace_iff.mpr (he.1 i).2, (he.1 i).1⟩\nletI : FiniteDimensional ℂ V := h_H004.1\nhave hdZ : (Module.finrank ℂ V : ℤ) = ((ell lam + 1 : ℕ) : ℤ) := by\n  push_cast\n  rw [h_T007.1]\n  exact h_H004.2.1\nhave hd : Module.finrank ℂ V = ell lam + 1 := by exact_mod_cast hdZ\nhave hc : Fintype.card (Idx lam) = Module.finrank ℂ V := by\n  simpa only [Idx, Fintype.card_fin] using hd.symm\nrefine ⟨he.1, he.2, hli, ?_⟩\nrefine ⟨basisOfLinearIndependentOfCardEqFinrank' (fun i : Idx lam => ev y v i.val) hli hc, ?_⟩\nintro i\nexact congrFun (coe_basisOfLinearIndependentOfCardEqFinrank' (K := ℂ) (fun i : Idx lam => ev y v i.val) hli hc) i"
+  },
+  "check": {
+    "exit_code": 0,
+    "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/nl0-ir-check-7cr23ci2/output/Check.lean:87:22: warning: Variable name `p` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/nl0-ir-check-7cr23ci2/output/Check.lean:87:44: warning: Variable name `instK` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/nl0-ir-check-7cr23ci2/output/Check.lean:87:204: warning: Variable name `M` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nT008 : ∀ (p : ℕ) (K : Type u_1) [instK : Field K] (lam : ℤ) (V : Type u_2) [instV : AddCommGroup V]\n  [instCV : _root_.Module ℂ V] (x y h : Module.End ℂ V) (v : V) (M : Submodule ℤ V),\n  (↑(ell lam) = lam ∧\n      0 < ell lam + 1 ∧\n        (∀ (r : ℕ), h ((y ^ r) v) = (↑(ell lam) - 2 * ↑r) • (y ^ r) v) ∧\n          ∀ (r : ℕ), x ((y ^ (r + 1)) v) = (↑(r + 1) * (↑(ell lam) - ↑r)) • (y ^ r) v) →\n    (FiniteDimensional ℂ V ∧\n        ↑(Module.finrank ℂ V) = lam + 1 ∧ ∀ (W : Submodule ℂ V), stable x W → stable y W → stable h W → W = ⊥ ∨ W = ⊤) →\n      v ≠ 0 ∧ x v = 0 ∧ h v = ↑lam • v ∧ h * x - x * h = 2 • x ∧ h * y - y * h = -2 • y ∧ x * y - y * x = h →\n        (∀ (i : Idx lam), ev y v ↑i ≠ 0 ∧ h (ev y v ↑i) = (↑(ell lam) - 2 * ↑↑i) • ev y v ↑i) ∧\n          (Function.Injective fun i => ↑(ell lam) - 2 * ↑↑i) ∧\n            (LinearIndependent ℂ fun i => ev y v ↑i) ∧ ∃ b, ∀ (i : Idx lam), b i = ev y v ↑i\n'Translation.T008' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+    "stderr": "",
+    "wall_seconds": 3.6285984159912914,
+    "native_limits": {
+      "timeout_seconds": 180,
+      "max_heartbeats": 20000000
+    },
+    "source_path": "/Users/syyui/projects/Yui-results/test_uncond/lie-module-irreducibility/rigorous-proof/20261106T071835Z-44ca17cbef/workflow/native-checks/59763a9c6b394627a706b0493cdf0735.lean",
+    "source_sha256": "15273dfc0833a0fd30a529e94ba3daa33bf4183c1b00846f85aab7183a6e0aaa",
+    "status": "LOCAL-PROOF-CHECKED",
+    "contract_sha256": "50d46c51063efc39c328bb34fe611d9811aceb3585abe01fb29e7f17efce8163",
+    "lean_sha256": "15273dfc0833a0fd30a529e94ba3daa33bf4183c1b00846f85aab7183a6e0aaa",
+    "scope": "T008",
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "accepted": true,
+    "stage_complete": true
+  }
+}

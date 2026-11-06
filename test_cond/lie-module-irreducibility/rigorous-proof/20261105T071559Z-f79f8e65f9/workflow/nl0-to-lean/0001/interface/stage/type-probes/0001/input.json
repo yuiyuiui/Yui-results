@@ -1,0 +1,32 @@
+{
+  "header": "import Mathlib\nopen scoped TensorProduct\nnoncomputable section\nnamespace Chevalley\ndef R (p : ℕ) : Subalgebra ℤ ℚ :=\n  Algebra.adjoin ℤ {q : ℚ | ∃ b : ℤ, ¬ (p : ℤ) ∣ b ∧ q = (b : ℚ)⁻¹}\ninstance rComplex (p : ℕ) : Algebra (R p) ℂ :=\n  Algebra.compHom ℂ (algebraMap (R p) ℚ)\nvariable {V : Type} [AddCommGroup V] [Module ℂ V]\ndef dp (f : Module.End ℂ V) (r : ℕ) : Module.End ℂ V :=\n  ((r.factorial : ℂ)⁻¹) • f ^ r\ndef e (y : Module.End ℂ V) (v : V) (i : ℕ) : V := dp y i v\ndef MR (p : ℕ) (M : Submodule ℤ V) := (R p) ⊗[ℤ] M\ndef mu (p : ℕ) (M : Submodule ℤ V) : MR p M → V :=\n  letI := Module.compHom V (algebraMap (R p) ℂ)\n  letI := IsScalarTower.of_compHom (R p) ℂ V\n  M.subtype.liftBaseChange (R p)\ndef image (p : ℕ) (M : Submodule ℤ V) : Set V := Set.range (mu p M)\ndef latticeOp (M : Submodule ℤ V) (f : Module.End ℂ V) : Module.End ℤ M :=\n  letI := Classical.propDecidable\n  if hf : ∀ u ∈ M, f u ∈ M then (f.restrictScalars ℤ).restrict hf else 0\ndef VK (K : Type) [Field K] (M : Submodule ℤ V) := K ⊗[ℤ] M\ndef opK (K : Type) [Field K] (M : Submodule ℤ V) (f : Module.End ℂ V) :\n    Module.End K (VK K M) := (latticeOp M f).baseChange K\ndef unitOp {F W : Type} [Field F] [AddCommGroup W] [Module F W]\n    {ι : Type} (b : Module.Basis ι F W) (i j : ι) : Module.End F W :=\n  (b.coord j).smulRight (b i)\nend Chevalley\n",
+  "parameters": [
+    {
+      "name": "V",
+      "type": "Type"
+    },
+    {
+      "name": "instV",
+      "type": "AddCommGroup V",
+      "binder_kind": "instance"
+    },
+    {
+      "name": "instCV",
+      "type": "Module ℂ V",
+      "binder_kind": "instance"
+    },
+    {
+      "name": "p",
+      "type": "ℕ"
+    },
+    {
+      "name": "M",
+      "type": "Submodule ℤ V"
+    }
+  ],
+  "types": [
+    "Chevalley.MR p M",
+    "Chevalley.mu p M",
+    "Chevalley.opK ℚ M (0 : Module.End ℂ V)"
+  ]
+}

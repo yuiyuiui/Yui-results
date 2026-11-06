@@ -1,0 +1,672 @@
+{
+  "contract_version": 2,
+  "case_id": "preparation",
+  "graph_sha256": "e1405d9528cdd4ea4a9b44a14c143b1b813e8eb82476ea8550c6ce60b211f72e",
+  "spec_sha256": "8a2e11cea1eaf82cae5b7f7d78a385b1973ec42a4243a95f80a47ec666afb2f7",
+  "parameters": [
+    {
+      "symbol": "n₀",
+      "type": "natural number"
+    },
+    {
+      "symbol": "E",
+      "type": "subset of Euclidean ℝ^n₀"
+    }
+  ],
+  "logic": {
+    "classical": true,
+    "rules": [
+      "direct",
+      "forall_introduction",
+      "implication_introduction",
+      "exists_elimination",
+      "case_elimination",
+      "contradiction_classical"
+    ],
+    "calculations": [
+      "equality: Equality reflexivity, symmetry, transitivity and substitution.",
+      "definitions: Unfold an explicitly supplied definition; this proves no extra property.",
+      "finite_algebra: Routine finite semiring/ring/field arithmetic, including zero/one laws, distributivity, associativity and finite polynomial identities. Correct elementary compression is permitted; a substantive missing argument is not.",
+      "finite_order: Routine ordered-field reasoning with actual signs/domains: order laws, adding inequalities, multiplication/division with sign conditions, and real square nonnegativity. Ordinary valid elementary inferences need no exhaustive displayed chain. Check that the conclusion follows; substantial named theorems still require inputs or verified-background admission.",
+      "finite_sums: Unfold and rearrange finite sums/products with explicitly given finite indices."
+    ],
+    "primitives": [
+      {
+        "symbol": "0",
+        "type": "typed numeral",
+        "meaning": "Zero of the explicitly specified mathematical type."
+      },
+      {
+        "symbol": "1",
+        "type": "typed numeral",
+        "meaning": "One of the explicitly specified mathematical type."
+      },
+      {
+        "symbol": "2",
+        "type": "typed numeral",
+        "meaning": "Two of the explicitly specified mathematical type, including an exponent two."
+      },
+      {
+        "symbol": "ℕ",
+        "type": "number system",
+        "meaning": "The natural numbers with their usual arithmetic."
+      },
+      {
+        "symbol": "ℤ",
+        "type": "number system",
+        "meaning": "The integers with their usual arithmetic."
+      },
+      {
+        "symbol": "ℚ",
+        "type": "number system",
+        "meaning": "The rational numbers with their usual ordered-field operations."
+      },
+      {
+        "symbol": "ℝ",
+        "type": "number system",
+        "meaning": "The real numbers with their usual ordered-field structure."
+      },
+      {
+        "symbol": "ℂ",
+        "type": "number system",
+        "meaning": "The complex numbers with their usual field structure."
+      },
+      {
+        "symbol": "∅",
+        "type": "typed set notation",
+        "meaning": "The empty set in the explicitly specified ambient type."
+      },
+      {
+        "symbol": "∞",
+        "type": "typed order notation",
+        "meaning": "The top element in an explicitly specified extended ordered codomain."
+      }
+    ]
+  },
+  "pins": {
+    "lean_version": "4.32.2",
+    "mathlib_commit": "905b95818eb32af7874a58b427f50c1711a5e96c",
+    "mathlib_root": "/Users/syyui/formalization-tools/lean-mathlib-v4.32.2/mathlib"
+  },
+  "foundation_profile": "elementary-language-4",
+  "standard_language": "Ordinary typed mathematical language: logical connectives, quantifiers, equality, sets, functions, tuples, finite indices and their usual notation. A type explicitly named natural numbers, integers, rationals, reals or complex numbers means that standard structure, with its usual numerals and arithmetic operations; these operation tokens need not be redeclared as project objects. The fixed finite calculation rules below, including a+0=a, are controller permissions, not an author claim. The core symbol table below is not a dictionary of all allowed mathematics. Objects and notation from any subject are introduced by this problem's parameters, D definitions or scoped locals, with their types and dependencies. Their properties need direct inputs or displayed local proofs; a familiar name or symbol supplies no theorem.",
+  "background_policy": "mathematical-background-v2-1",
+  "definitions": [
+    {
+      "id": "D001",
+      "symbol": "Rn",
+      "type": "family of Euclidean real normed spaces indexed by natural numbers",
+      "definition": "For each natural m, Rn(m)=EuclideanSpace ℝ (Fin m), namely real m-tuples with norm (Σ_{h<m}|x_h|²)^(1/2). For m=0 this is the one-point zero vector space.",
+      "depends_on": [],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "m",
+          "type": "natural number"
+        },
+        {
+          "symbol": "x",
+          "type": "element of Rn(m)"
+        },
+        {
+          "symbol": "h",
+          "type": "coordinate index less than m"
+        }
+      ],
+      "objects": [
+        "m",
+        "x",
+        "h"
+      ]
+    },
+    {
+      "id": "D006",
+      "symbol": "H",
+      "type": "unnormalized Hausdorff measure evaluated on a set",
+      "definition": "For a Borel emetric space W, B⊆W and real a, H^a(B)=MeasureTheory.Measure.hausdorffMeasure a B. This is the metric outer-measure construction with gauge r↦r^a and no dimensional prefactor, taking values in ℝ≥0∞.",
+      "depends_on": [],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "W",
+          "type": "emetric space with its Borel measurable structure"
+        },
+        {
+          "symbol": "B",
+          "type": "subset of W"
+        },
+        {
+          "symbol": "a",
+          "type": "real exponent"
+        }
+      ],
+      "objects": [
+        "W",
+        "B",
+        "a"
+      ]
+    },
+    {
+      "id": "D007",
+      "symbol": "dimH",
+      "type": "Hausdorff dimension of a subset of an emetric space",
+      "definition": "For an emetric space W and B⊆W, dimH(B)=sup{d∈ℝ≥0 : H^d(B)=∞}, interpreted in ℝ≥0∞, using the Borel structure of W. This is Hausdorff dimension and gives dimH(∅)=0. A finite dimension can be represented by its nonnegative real value; we explicitly establish finiteness before doing so.",
+      "depends_on": [
+        "D006"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "W",
+          "type": "emetric space"
+        },
+        {
+          "symbol": "B",
+          "type": "subset of W"
+        },
+        {
+          "symbol": "d",
+          "type": "nonnegative real exponent"
+        }
+      ],
+      "objects": [
+        "H",
+        "W",
+        "B",
+        "d"
+      ]
+    },
+    {
+      "id": "D008",
+      "symbol": "I",
+      "type": "subset of ℝ",
+      "definition": "I=[0,1], the closed unit interval in ℝ.",
+      "depends_on": [],
+      "requires": [],
+      "binders": [],
+      "objects": []
+    },
+    {
+      "id": "D009",
+      "symbol": "MaxProd",
+      "type": "family of metric spaces",
+      "definition": "For a metric space W, MaxProd(W)=W×ℝ with distance max(dist(x,y),|t-u|) between (x,t) and (y,u). For real normed W this is its usual maximum product norm.",
+      "depends_on": [],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "W",
+          "type": "metric space"
+        },
+        {
+          "symbol": "x",
+          "type": "point of W"
+        },
+        {
+          "symbol": "y",
+          "type": "point of W"
+        },
+        {
+          "symbol": "t",
+          "type": "real number"
+        },
+        {
+          "symbol": "u",
+          "type": "real number"
+        }
+      ],
+      "objects": [
+        "W",
+        "x",
+        "y",
+        "t",
+        "u"
+      ]
+    },
+    {
+      "id": "D010",
+      "symbol": "L2Prod",
+      "type": "family of real normed spaces indexed by natural numbers",
+      "definition": "L2Prod(m)=WithLp 2 (Rn(m)×ℝ), with the library L² product norm and its induced metric.",
+      "depends_on": [
+        "D001"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "m",
+          "type": "natural number"
+        }
+      ],
+      "objects": [
+        "Rn",
+        "m"
+      ]
+    },
+    {
+      "id": "D011",
+      "symbol": "euclideanLift",
+      "type": "family of maps MaxProd(Rn(m))→L2Prod(m)",
+      "definition": "For every natural m, euclideanLift m=WithLp.toLp 2 on Rn(m)×ℝ; it is the identity on underlying pairs. This is exactly the definition in the frozen basis header.",
+      "depends_on": [
+        "D001",
+        "D009",
+        "D010"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "m",
+          "type": "natural number"
+        }
+      ],
+      "objects": [
+        "Rn",
+        "MaxProd",
+        "L2Prod",
+        "m"
+      ]
+    },
+    {
+      "id": "D012",
+      "symbol": "j",
+      "type": "family of coordinate concatenation maps L2Prod(m)→Rn(m+1)",
+      "definition": "For each natural m, j(m)(p) is the (m+1)-tuple whose first m coordinates are those of p.fst and whose last coordinate is p.snd. This defines a total coordinate concatenation map.",
+      "depends_on": [
+        "D001",
+        "D010"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "m",
+          "type": "natural number"
+        },
+        {
+          "symbol": "p",
+          "type": "point of L2Prod(m)"
+        }
+      ],
+      "objects": [
+        "Rn",
+        "L2Prod",
+        "m",
+        "p"
+      ]
+    },
+    {
+      "id": "D013",
+      "symbol": "F",
+      "type": "subset of MaxProd(Rn(n₀))",
+      "definition": "F=E×I, regarded during the cover argument as a subset of MaxProd(Rn(n₀)).",
+      "depends_on": [
+        "D001",
+        "D008",
+        "D009"
+      ],
+      "requires": [],
+      "binders": [],
+      "objects": [
+        "E",
+        "I",
+        "MaxProd",
+        "Rn",
+        "n₀"
+      ]
+    },
+    {
+      "id": "D014",
+      "symbol": "D",
+      "type": "extended nonnegative real number",
+      "definition": "D=dimH(E), with E in its original Euclidean Rn(n₀) metric.",
+      "depends_on": [
+        "D001",
+        "D007"
+      ],
+      "requires": [],
+      "binders": [],
+      "objects": [
+        "dimH",
+        "E",
+        "Rn",
+        "n₀"
+      ]
+    },
+    {
+      "id": "D015",
+      "symbol": "T",
+      "type": "extended nonnegative real number",
+      "definition": "T=dimH(F), using the maximum product metric.",
+      "depends_on": [
+        "D007",
+        "D013"
+      ],
+      "requires": [],
+      "binders": [],
+      "objects": [
+        "dimH",
+        "F"
+      ]
+    },
+    {
+      "id": "D016",
+      "symbol": "G",
+      "type": "subset of Euclidean Rn(n₀+1)",
+      "definition": "G consists of coordinate concatenations (x_0,…,x_{n₀-1},t) with x∈E and t∈I. This is exactly E×[0,1] under the original target's specified identification with Euclidean ℝ^(n₀+1).",
+      "depends_on": [
+        "D001",
+        "D008"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "x",
+          "type": "point of E"
+        },
+        {
+          "symbol": "t",
+          "type": "point of I"
+        }
+      ],
+      "objects": [
+        "Rn",
+        "n₀",
+        "E",
+        "I",
+        "x",
+        "t"
+      ]
+    }
+  ],
+  "inputs": [
+    {
+      "id": "N006",
+      "kind": "internal",
+      "statement": "T=D+1, where D=dimH(E) in Euclidean Rn(n₀) and T=dimH(F) in MaxProd(Rn(n₀)). Both sides are finite extended nonnegative reals. Equivalently, dimH(E×I)=dimH(E)+1 in the maximum product metric, for the original nonempty compact E and every natural n₀, including n₀=0.",
+      "definitions": [
+        "D001",
+        "D006",
+        "D007",
+        "D008",
+        "D009",
+        "D013",
+        "D014",
+        "D015"
+      ],
+      "binders": [],
+      "objects": [
+        "T",
+        "D",
+        "E",
+        "F",
+        "Rn",
+        "n₀",
+        "MaxProd",
+        "dimH",
+        "I"
+      ]
+    },
+    {
+      "id": "N007",
+      "kind": "internal",
+      "statement": "The coordinate concatenation map j(n₀):L2Prod(n₀)→Rn(n₀+1) is a bijective isometry for the library L² product norm and the Euclidean norm on Rn(n₀+1). Its inverse truncates the first n₀ coordinates and extracts the last coordinate. It sends euclideanLift n₀ '' F exactly to G. For any x,y∈Rn(n₀) and t,u∈ℝ, the squared distance of the concatenated points is Σ_{h<n₀}|x_h-y_h|²+|t-u|², equal to the squared L² product distance between euclideanLift n₀ (x,t) and euclideanLift n₀ (y,u). For n₀=0 the sum is empty and this is the usual identification of ℝ^0×ℝ with ℝ.",
+      "definitions": [
+        "D001",
+        "D010",
+        "D011",
+        "D012",
+        "D013",
+        "D016"
+      ],
+      "binders": [
+        {
+          "symbol": "x",
+          "type": "point of Rn(n₀)"
+        },
+        {
+          "symbol": "y",
+          "type": "point of Rn(n₀)"
+        },
+        {
+          "symbol": "t",
+          "type": "real number"
+        },
+        {
+          "symbol": "u",
+          "type": "real number"
+        },
+        {
+          "symbol": "h",
+          "type": "coordinate index less than n₀"
+        }
+      ],
+      "objects": [
+        "j",
+        "n₀",
+        "L2Prod",
+        "Rn",
+        "euclideanLift",
+        "F",
+        "G",
+        "x",
+        "y",
+        "t",
+        "u",
+        "h"
+      ]
+    },
+    {
+      "id": "E001",
+      "kind": "external",
+      "statement": "For every n≥0 and every S⊆Rn(n)×ℝ equipped with the maximum product norm, euclideanLift n sends S to an equal-dimensional set in WithLp 2 (Rn(n)×ℝ). This is the identity on underlying pairs and equips the target with the Euclidean product norm.",
+      "definitions": [
+        "D001",
+        "D007",
+        "D009",
+        "D010",
+        "D011"
+      ],
+      "binders": [
+        {
+          "symbol": "n",
+          "type": "natural number, universally bound in this exact source statement"
+        },
+        {
+          "symbol": "S",
+          "type": "subset of MaxProd(Rn(n))"
+        }
+      ],
+      "objects": [
+        "n",
+        "S",
+        "Rn",
+        "euclideanLift",
+        "dimH",
+        "MaxProd",
+        "L2Prod"
+      ],
+      "source_contract": {
+        "hypotheses": []
+      }
+    },
+    {
+      "id": "M008",
+      "kind": "mathlib",
+      "statement": "For every pair of emetric spaces W,Z, isometry f:W→Z and A⊆W, dimH(f '' A)=dimH(A). Isometry means preservation of extended distances of every pair of points.",
+      "definitions": [
+        "D007"
+      ],
+      "binders": [
+        {
+          "symbol": "W",
+          "type": "emetric space"
+        },
+        {
+          "symbol": "Z",
+          "type": "emetric space"
+        },
+        {
+          "symbol": "f",
+          "type": "map W→Z"
+        },
+        {
+          "symbol": "A",
+          "type": "subset of W"
+        }
+      ],
+      "objects": [
+        "W",
+        "Z",
+        "f",
+        "A",
+        "dimH"
+      ],
+      "source_contract": {
+        "hypotheses": [
+          "W and Z are emetric spaces.",
+          "f preserves all extended distances."
+        ],
+        "declaration": "Isometry.dimH_image",
+        "signature": "@Isometry.dimH_image : ∀ {X : Type u_2} {Y : Type u_3} [inst : EMetricSpace.{u_2} X] [inst_1 : EMetricSpace.{u_3} Y] {f : X → Y},\n  Isometry.{u_2, u_3} f → ∀ (s : Set.{u_2} X), Eq.{1} (dimH.{u_3} (Set.image.{u_2, u_3} f s)) (dimH.{u_2} s)"
+      }
+    }
+  ],
+  "output": {
+    "id": "P",
+    "kind": "target",
+    "statement": "dimH(G)=dimH(E)+1, where E has its original Euclidean metric and G is E×[0,1] identified with Euclidean Rn(n₀+1) as specified in the selected target; this holds for every natural n₀, including n₀=0. Both sides are finite, so the equality also holds for real Hausdorff dimensions.",
+    "definitions": [
+      "D001",
+      "D007",
+      "D008",
+      "D013",
+      "D014",
+      "D016"
+    ],
+    "binders": [],
+    "objects": [
+      "n₀",
+      "E",
+      "G",
+      "dimH",
+      "Rn",
+      "I",
+      "D",
+      "F"
+    ]
+  },
+  "inference": {
+    "id": "R008",
+    "inputs": [
+      "N006",
+      "N007",
+      "E001",
+      "M008"
+    ],
+    "output": "P",
+    "definitions": [
+      "D001",
+      "D007",
+      "D008",
+      "D009",
+      "D010",
+      "D011",
+      "D012",
+      "D013",
+      "D014",
+      "D015",
+      "D016"
+    ],
+    "rules": [
+      "direct"
+    ],
+    "locals": [],
+    "argument": [
+      {
+        "id": "S001",
+        "text": "Apply the exact prepared basis port E001 with its universally bound n equal to the current n₀ and S=F⊆MaxProd(Rn(n₀)). Its identity map on underlying pairs is euclideanLift n₀, with image in L2Prod(n₀). It gives dimH(euclideanLift n₀ '' F)=dimH(F)=T. This is exactly the registered maximum-to-L² product dimension equality.",
+        "uses": [
+          "E001"
+        ],
+        "uses_local": [],
+        "objects": [
+          "n₀",
+          "F",
+          "T",
+          "MaxProd",
+          "Rn",
+          "euclideanLift",
+          "L2Prod",
+          "dimH"
+        ],
+        "produces": [
+          {
+            "id": "F001",
+            "statement": "dimH(euclideanLift n₀ '' F)=T.",
+            "binders": [],
+            "objects": [
+              "dimH",
+              "euclideanLift",
+              "n₀",
+              "F",
+              "T"
+            ],
+            "assumptions": []
+          }
+        ],
+        "introduces": [],
+        "discharges": []
+      },
+      {
+        "id": "S002",
+        "text": "N007 proves that j(n₀):L2Prod(n₀)→Rn(n₀+1) is an isometry and that j(n₀) '' (euclideanLift n₀ '' F)=G. Apply M008 with this map and set euclideanLift n₀ '' F. It gives dimH(G)=dimH(euclideanLift n₀ '' F). By F001 and N006 this equals T=D+1=dimH(E)+1. N006 also provides finiteness. By D016, G is exactly the specified Euclidean E×[0,1] under coordinate concatenation, and E on the right retains its original Euclidean Rn(n₀) metric. N007 includes the n₀=0 identification, so there is no excluded ambient dimension. Since the dimensions are finite, the extended nonnegative equality is also equality of the real Hausdorff dimensions. This is the complete selected conclusion.",
+        "uses": [
+          "N006",
+          "N007",
+          "M008"
+        ],
+        "uses_local": [
+          "F001"
+        ],
+        "objects": [
+          "n₀",
+          "j",
+          "L2Prod",
+          "Rn",
+          "euclideanLift",
+          "F",
+          "G",
+          "D",
+          "T",
+          "E",
+          "I",
+          "dimH"
+        ],
+        "produces": [],
+        "introduces": [],
+        "discharges": []
+      }
+    ],
+    "applications": [
+      {
+        "input": "E001",
+        "at": "S001",
+        "bindings": "Instantiate the source's universally bound n by the current n₀ and its S by F=E×I in MaxProd(Rn(n₀)); the image is taken in L2Prod(n₀).",
+        "hypothesis_checks": [],
+        "id": "A001"
+      },
+      {
+        "input": "M008",
+        "at": "S002",
+        "bindings": "Take W=L2Prod(n₀), Z=Rn(n₀+1), f=j(n₀) and A=euclideanLift n₀ '' F.",
+        "hypothesis_checks": [
+          "Both are real normed spaces with their induced metric, hence emetric structures.",
+          "The direct input N007 states that j(n₀) is an isometry."
+        ],
+        "id": "A002"
+      }
+    ]
+  },
+  "warning": "Direct inputs and fixed logic are supplied. Audit A may record mathematically checked routine background with actual conditions and justification; exact Lean bindings belong to nl02lean. No ancestor proof or extra H is available. A packet is not an audit certificate.",
+  "packet_sha256": "5c92d37414ce65328d3843fa0d6bc7848082d3cc0912215075d5552fbefeb496"
+}

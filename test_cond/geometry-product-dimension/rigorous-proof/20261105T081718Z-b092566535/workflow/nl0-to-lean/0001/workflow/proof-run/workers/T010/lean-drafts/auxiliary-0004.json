@@ -1,0 +1,34 @@
+{
+  "statement": "∀ (s δ : ℝ), 0 < s → ∀ (V : ℕ → Set (YuiEucl (n + 1))), YuiCover δ (YuiCylinder E) V → ∀ (J : ℕ → Set ℝ), (∀ i, YuiLast '' V i ⊆ J i) → ∀ t ∈ YuiI, YuiContent s δ E ≤ ∑' i, (J i).indicator (fun _ : ℝ => (Metric.ediam (V i)) ^ s) t",
+  "proof": "classical\nintro s δ hs V hV J hJ t ht\nlet W : ℕ → Set (YuiEucl n) := fun i => if t ∈ J i then YuiHead '' V i else ∅\nhave hd (i : ℕ) : Metric.ediam (YuiHead '' V i) ≤ Metric.ediam (V i) := by\n  simpa using (h_T003 n).2.2.2.1.ediam_image_le (V i)\nhave hc : YuiCover δ E W := by\n  constructor\n  · intro x hx\n    have hxt : YuiSnoc x t ∈ YuiCylinder E := by\n      change YuiHead (YuiSnoc x t) ∈ E ∧ YuiLast (YuiSnoc x t) ∈ YuiI\n      rw [(h_T003 n).1 x t |>.1, (h_T003 n).1 x t |>.2]\n      exact ⟨hx, ht⟩\n    obtain ⟨i, hi⟩ := Set.mem_iUnion.mp (hV.1 hxt)\n    have hj : t ∈ J i := by\n      have := hJ i (Set.mem_image_of_mem YuiLast hi)\n      simpa only [(h_T003 n).1 x t |>.2] using this\n    apply Set.mem_iUnion.mpr\n    refine ⟨i, ?_⟩\n    dsimp [W]\n    rw [if_pos hj]\n    exact ⟨YuiSnoc x t, hi, (h_T003 n).1 x t |>.1⟩\n  · intro i\n    dsimp [W]\n    split_ifs with h\n    · exact (hd i).trans (hV.2 i)\n    · simpa using (zero_le (ENNReal.ofReal δ))\ncalc\n  YuiContent s δ E ≤ YuiCost s W := iInf_le_of_le W (iInf_le_of_le hc le_rfl)\n  _ ≤ ∑' i, (J i).indicator (fun _ : ℝ => (Metric.ediam (V i)) ^ s) t := by\n    apply ENNReal.tsum_le_tsum\n    intro i\n    by_cases hi : t ∈ J i\n    · simp only [Set.indicator_of_mem hi]\n      apply iSup_le\n      intro hne\n      dsimp [W]\n      rw [if_pos hi]\n      exact ENNReal.rpow_le_rpow (hd i) hs.le\n    · simp [W, hi]",
+  "check": {
+    "exit_code": 0,
+    "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-r3dfofiu/output/Auxiliary.lean:34:52: warning: Variable name `h_T003` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-r3dfofiu/output/Auxiliary.lean:34:401: warning: Variable name `h_T005` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-r3dfofiu/output/Auxiliary.lean:49:52: warning: Variable name `h_T003` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-r3dfofiu/output/Auxiliary.lean:49:401: warning: Variable name `h_T005` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-r3dfofiu/output/Auxiliary.lean:91:8: warning: try 'simp' instead of 'simpa'\n\nNote: This linter can be disabled with `set_option linter.unnecessarySimpa false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-r3dfofiu/output/Auxiliary.lean:65:396: warning: Variable name `h_T005` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (n : ℕ) (E : Set (YuiEucl n)),\n  (∀ (k : ℕ),\n      (∀ (x : YuiEucl k) (t : ℝ), YuiHead (YuiSnoc x t) = x ∧ YuiLast (YuiSnoc x t) = t) ∧\n        (∀ (z : YuiEucl (k + 1)), YuiSnoc (YuiHead z) (YuiLast z) = z) ∧\n          (∀ (x y : YuiEucl k) (t u : ℝ), dist (YuiSnoc x t) (YuiSnoc y u) = √(dist x y ^ 2 + |t - u| ^ 2)) ∧\n            LipschitzWith 1 YuiHead ∧ LipschitzWith 1 YuiLast) →\n    ((0 ≤ dimH E ∧ dimH E ≤ ↑n ∧ dimH E < ∞) ∧ ∀ (s δ : ℝ), 0 < s → 0 < δ → YuiContent s δ E < ∞) →\n      ∀ (s δ : ℝ),\n        0 < s →\n          ∀ (V : ℕ → Set (YuiEucl (n + 1))),\n            YuiCover δ (YuiCylinder E) V →\n              ∀ (J : ℕ → Set ℝ),\n                (∀ (i : ℕ), YuiLast '' V i ⊆ J i) →\n                  ∀ t ∈ YuiI, YuiContent s δ E ≤ ∑' (i : ℕ), (J i).indicator (fun x => Metric.ediam (V i) ^ s) t\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+    "stderr": "",
+    "wall_seconds": 3.9773810830010916,
+    "native_limits": {
+      "timeout_seconds": 180,
+      "max_heartbeats": 20000000
+    },
+    "source_path": "/Users/syyui/projects/Yui-results/test_cond/geometry-product-dimension/rigorous-proof/20261105T081718Z-b092566535/workflow/native-checks/79731292a93c4599bbbdc2de67e9d6bf.lean",
+    "source_sha256": "a8ae147826ef91b5a4961b7dd08dd617cb8b15663b5ea94e0e8a30f5f20fa72f",
+    "auxiliary_valid": true,
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext"
+    ],
+    "lean_sha256": "a8ae147826ef91b5a4961b7dd08dd617cb8b15663b5ea94e0e8a30f5f20fa72f",
+    "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+    "context_port": "T010",
+    "candidate": 4,
+    "helper": {
+      "name": "yui_aux_0003",
+      "statement": "∀ (s δ : ℝ), 0 < s → ∀ (V : ℕ → Set (YuiEucl (n + 1))), YuiCover δ (YuiCylinder E) V → ∀ (J : ℕ → Set ℝ), (∀ i, YuiLast '' V i ⊆ J i) → ∀ t ∈ YuiI, YuiContent s δ E ≤ ∑' i, (J i).indicator (fun _ : ℝ => (Metric.ediam (V i)) ^ s) t",
+      "application": "@yui_aux_0003 n E h_T003 h_T005",
+      "scope": "Checked same-node theorem; available in later checks and the final body."
+    },
+    "accepted": true,
+    "stage_complete": false
+  }
+}

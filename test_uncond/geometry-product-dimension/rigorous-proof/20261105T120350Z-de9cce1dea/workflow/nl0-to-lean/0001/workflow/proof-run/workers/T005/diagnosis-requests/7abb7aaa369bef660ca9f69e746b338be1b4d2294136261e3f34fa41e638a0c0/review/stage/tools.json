@@ -1,0 +1,423 @@
+[
+  {
+    "type": "function",
+    "name": "search_mathlib",
+    "description": "在固定 mathlib 的 Lean 源码中搜索正则表达式，返回至多 100 行。",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "query"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "type": "function",
+    "name": "read_mathlib",
+    "description": "读取固定 mathlib 中一个 Mathlib/...lean 文件的指定行。",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "start_line": {
+          "type": "integer"
+        },
+        "line_count": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "path",
+        "start_line",
+        "line_count"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "type": "function",
+    "name": "search_external_sources",
+    "description": "Follow source-retrieval.md: arxiv first (default; an exact arXiv ID is allowed), then google title/author search, then google title/author DOI search, then scihub with a confirmed DOI. Use browser:true for normal local-browser readback of JavaScript/verification pages. Results and DOI strings are locators, not source/theorem approval. Record failed access and continue conditionally when the original stays unavailable.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string"
+        },
+        "engine": {
+          "type": "string",
+          "enum": [
+            "arxiv",
+            "google",
+            "scihub"
+          ]
+        },
+        "browser": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "query"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "type": "function",
+    "name": "read_external_source",
+    "description": "Read and retain a public HTTPS source and its hash-bound access record. Use offset to continue cached text. Retry with browser:true for a normal isolated local Chrome session if HTTPS needs JavaScript or verification. The optional browser uses ordinary site controls; unsupported challenges remain explicit failures. Verify full PDF identity, version, theorem and context yourself.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string"
+        },
+        "offset": {
+          "type": "integer"
+        },
+        "limit": {
+          "type": "integer"
+        },
+        "browser": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "url"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "type": "function",
+    "name": "read_task_inputs",
+    "description": "Read one to eight declared text/JSON fragments together, at most 32 KiB total. Use the same coordinates as read_task_input. Each returned fragment retains its own continuation; next_request identifies any requests not yet read. No implicit source or arbitrary local file access.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "requests": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "pointer": {
+                "type": "string"
+              },
+              "start": {
+                "type": "integer"
+              },
+              "end": {
+                "type": "integer"
+              },
+              "column": {
+                "type": "integer"
+              },
+              "offset": {
+                "type": "integer"
+              },
+              "limit": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "id"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "requests"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "type": "function",
+    "name": "read_task_input",
+    "description": "Read one declared frozen document. For JSON use pointer (empty string lists the root); large objects return keys, and strings resume with offset=next_offset. For text use inclusive start/end lines and column=next_column when continuing a long line. Every serialized result is at most 32 KiB. Follow has_more and the returned continuation coordinates; no arbitrary local files are accessible.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "start": {
+          "type": "integer"
+        },
+        "end": {
+          "type": "integer"
+        },
+        "column": {
+          "type": "integer"
+        },
+        "pointer": {
+          "type": "string"
+        },
+        "offset": {
+          "type": "integer"
+        },
+        "limit": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "type": "function",
+    "name": "read_yui",
+    "description": "Read declared Yui rules/templates; no tests, historical runs or personal files.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "start": {
+          "type": "integer"
+        },
+        "end": {
+          "type": "integer"
+        },
+        "column": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "path",
+        "start",
+        "end"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "type": "function",
+    "name": "check_artifact",
+    "description": "Check a JSON artifact against the explicit stage contract; this is not automatic mathematical certification.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "artifact_json": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "artifact_json"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "type": "function",
+    "name": "submit_artifact",
+    "description": "Submit a JSON artifact after its stage checks.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "artifact_json": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "artifact_json"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "type": "function",
+    "name": "report_obstacle",
+    "description": "Report an actual obstacle using these five direct fields. Countercheck the alleged implication against the complete definitions, quantifiers and inequality directions; a feasible example alone does not determine an extremum. A fact not yet proved or registered in the current draft is an obligation to complete, not by itself a gap. For a mathematical stop, identify the concrete implication and actual mathematical difficulty encountered during normal checking/completion, not merely unfilled inventory or exposition. No fixed time/attempt count or counterexample is required. SUBSTANTIVE_GAP/SUSPECTED_GAP stop for an actual supported mathematical obstruction; INPUT_CONFLICT stops for incompatible inputs. In NL0, use source retrieval and explicit conditional deferral for unavailable primary texts; MISSING_SOURCE_STATEMENT requires that no complete secondary statement can be obtained. Other stages may report SOURCE_UNAVAILABLE for an actual access obstacle. Ordinary unfinished work is not an obstacle report. No mathematical acceptance is generated.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "SUBSTANTIVE_GAP",
+            "SUSPECTED_GAP",
+            "SOURCE_UNAVAILABLE",
+            "MISSING_SOURCE_STATEMENT",
+            "INPUT_CONFLICT"
+          ]
+        },
+        "location": {
+          "type": "string"
+        },
+        "explanation": {
+          "type": "string"
+        },
+        "basis": {
+          "type": "string"
+        },
+        "partial_progress": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "status",
+        "location",
+        "explanation",
+        "basis",
+        "partial_progress"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "type": "function",
+    "name": "check_draft",
+    "description": "Preferred structured-object form of check_artifact: provide artifact as an actual JSON object, not an escaped JSON string. Same complete validation and acceptance scope.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "artifact": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "artifact"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "type": "function",
+    "name": "submit_draft",
+    "description": "Preferred structured-object form of submit_artifact: provide artifact as an actual JSON object, not an escaped JSON string. Same complete validation and acceptance scope.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "artifact": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "artifact"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "type": "function",
+    "name": "report_basis_defect",
+    "description": "Report a located conflict in the frozen basis only. Supply an existing basis_id, field (statement or lean.type), its exact frozen_value, a verbatim source_quote from an original problem/material or basis-evidence file, and the affected use with a verbatim use_quote. Use basis-proof.md or a declared nl0.json, contract.json or plan.json. For JSON, use_pointer must resolve to the text of the affected use; for text use an empty pointer. Explain the conflict and proposed correction. This pauses the case for an explicit operator repair.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "basis_id": {
+          "type": "string"
+        },
+        "field": {
+          "type": "string",
+          "enum": [
+            "statement",
+            "lean.type"
+          ]
+        },
+        "frozen_value": {
+          "type": "string"
+        },
+        "source_id": {
+          "type": "string"
+        },
+        "source_quote": {
+          "type": "string"
+        },
+        "use_id": {
+          "type": "string"
+        },
+        "use_pointer": {
+          "type": "string"
+        },
+        "use_quote": {
+          "type": "string"
+        },
+        "explanation": {
+          "type": "string"
+        },
+        "correction": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "basis_id",
+        "field",
+        "frozen_value",
+        "source_id",
+        "source_quote",
+        "use_id",
+        "use_pointer",
+        "use_quote",
+        "explanation",
+        "correction"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "type": "function",
+    "name": "read_assembly_feedback",
+    "description": "Read only this author stage's saved candidate, generated proof or full native diagnostics. Positive candidate ID; inclusive line bounds. No other case or arbitrary path is accessible.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "candidate": {
+          "type": "integer"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "mapping",
+            "feedback",
+            "proof_source",
+            "audit_source",
+            "assembly_inputs",
+            "mechanical",
+            "assembly",
+            "inspection",
+            "compiler_stdout",
+            "compiler_stderr",
+            "assembly_stdout",
+            "assembly_stderr"
+          ]
+        },
+        "start": {
+          "type": "integer"
+        },
+        "end": {
+          "type": "integer"
+        },
+        "column": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "candidate",
+        "kind",
+        "start",
+        "end"
+      ],
+      "additionalProperties": false
+    }
+  }
+]

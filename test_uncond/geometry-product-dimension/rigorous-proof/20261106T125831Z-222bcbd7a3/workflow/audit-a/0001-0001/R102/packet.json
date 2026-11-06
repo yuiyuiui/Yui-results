@@ -1,0 +1,1402 @@
+{
+  "contract_version": 2,
+  "case_id": "preparation",
+  "graph_sha256": "e35174e444ddf85d929d0fa74c90a91bd67920243ec4e4456041ebd73a48826a",
+  "spec_sha256": "c36e8ecda98f5f43474912320c35173896490dd94bb953a30682587e802b5211",
+  "parameters": [
+    {
+      "symbol": "n",
+      "type": "natural number, including zero"
+    },
+    {
+      "symbol": "E",
+      "type": "subset of Ambient n"
+    }
+  ],
+  "logic": {
+    "classical": true,
+    "rules": [
+      "direct",
+      "forall_introduction",
+      "implication_introduction",
+      "exists_elimination",
+      "case_elimination",
+      "contradiction_classical"
+    ],
+    "calculations": [
+      "equality: Equality reflexivity, symmetry, transitivity and substitution.",
+      "definitions: Unfold an explicitly supplied definition; this proves no extra property.",
+      "finite_algebra: Routine finite semiring/ring/field arithmetic, including zero/one laws, distributivity, associativity and finite polynomial identities. Correct elementary compression is permitted; a substantive missing argument is not.",
+      "finite_order: Routine ordered-field reasoning with actual signs/domains: order laws, adding inequalities, multiplication/division with sign conditions, and real square nonnegativity. Ordinary valid elementary inferences need no exhaustive displayed chain. Check that the conclusion follows; substantial named theorems still require inputs or verified-background admission.",
+      "finite_sums: Unfold and rearrange finite sums/products with explicitly given finite indices."
+    ],
+    "primitives": [
+      {
+        "symbol": "0",
+        "type": "typed numeral",
+        "meaning": "Zero of the explicitly specified mathematical type."
+      },
+      {
+        "symbol": "1",
+        "type": "typed numeral",
+        "meaning": "One of the explicitly specified mathematical type."
+      },
+      {
+        "symbol": "2",
+        "type": "typed numeral",
+        "meaning": "Two of the explicitly specified mathematical type, including an exponent two."
+      },
+      {
+        "symbol": "ℕ",
+        "type": "number system",
+        "meaning": "The natural numbers with their usual arithmetic."
+      },
+      {
+        "symbol": "ℤ",
+        "type": "number system",
+        "meaning": "The integers with their usual arithmetic."
+      },
+      {
+        "symbol": "ℚ",
+        "type": "number system",
+        "meaning": "The rational numbers with their usual ordered-field operations."
+      },
+      {
+        "symbol": "ℝ",
+        "type": "number system",
+        "meaning": "The real numbers with their usual ordered-field structure."
+      },
+      {
+        "symbol": "ℂ",
+        "type": "number system",
+        "meaning": "The complex numbers with their usual field structure."
+      },
+      {
+        "symbol": "∅",
+        "type": "typed set notation",
+        "meaning": "The empty set in the explicitly specified ambient type."
+      },
+      {
+        "symbol": "∞",
+        "type": "typed order notation",
+        "meaning": "The top element in an explicitly specified extended ordered codomain."
+      }
+    ]
+  },
+  "pins": {
+    "lean_version": "4.32.2",
+    "mathlib_commit": "905b95818eb32af7874a58b427f50c1711a5e96c",
+    "mathlib_root": "/Users/syyui/formalization-tools/lean-mathlib-v4.32.2/mathlib"
+  },
+  "foundation_profile": "elementary-language-4",
+  "standard_language": "Ordinary typed mathematical language: logical connectives, quantifiers, equality, sets, functions, tuples, finite indices and their usual notation. A type explicitly named natural numbers, integers, rationals, reals or complex numbers means that standard structure, with its usual numerals and arithmetic operations; these operation tokens need not be redeclared as project objects. The fixed finite calculation rules below, including a+0=a, are controller permissions, not an author claim. The core symbol table below is not a dictionary of all allowed mathematics. Objects and notation from any subject are introduced by this problem's parameters, D definitions or scoped locals, with their types and dependencies. Their properties need direct inputs or displayed local proofs; a familiar name or symbol supplies no theorem.",
+  "background_policy": "mathematical-background-v2-1",
+  "definitions": [
+    {
+      "id": "D002",
+      "symbol": "ediam",
+      "type": "extended diameter of a subset of any pseudo extended metric space",
+      "definition": "For a pseudo extended metric space Z and B⊆Z, ediam(B)=sup{edist(x,y):x∈B,y∈B} in [0,∞], with supremum of the empty set zero. For finite ediam, diam(B)=(ediam B).toReal and ediam B=ofReal(diam B). In metric spaces edist is ofReal of the ordinary distance.",
+      "depends_on": [
+        "D003"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "Z",
+          "type": "pseudo extended metric space"
+        },
+        {
+          "symbol": "B",
+          "type": "subset of Z"
+        }
+      ],
+      "objects": [
+        "Z",
+        "B",
+        "ofReal"
+      ]
+    },
+    {
+      "id": "D003",
+      "symbol": "ofReal",
+      "type": "ℝ → [0,∞]",
+      "definition": "ofReal(v) is max(v,0) embedded in the extended nonnegative reals. The notation z.toReal for z∈[0,∞] is its real value when finite, and zero for z=∞.",
+      "depends_on": [],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "v",
+          "type": "ℝ"
+        },
+        {
+          "symbol": "z",
+          "type": "[0,∞]"
+        }
+      ],
+      "objects": [
+        "v",
+        "z"
+      ]
+    },
+    {
+      "id": "D004",
+      "symbol": "Content",
+      "type": "real exponent × extended scale × subset of an extended metric space → [0,∞]",
+      "definition": "For an extended metric space Z, exponent u∈ℝ, scale h∈[0,∞], and B⊆Z, Content(u,h,B)=inf_{U:ℕ→Set Z; B⊆⋃_i U_i; ∀i ediam(U_i)≤h} Σ_i sup_{(_ : U_i nonempty)} (ediam U_i)^u. Infima, suprema and sums are in [0,∞]; an infimum over no covers is ∞. This is exactly the Content in basis-registry.json /lean_header. Countable covers may be padded by empty sets.",
+      "depends_on": [
+        "D002",
+        "D018"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "Z",
+          "type": "extended metric space"
+        },
+        {
+          "symbol": "u",
+          "type": "ℝ"
+        },
+        {
+          "symbol": "h",
+          "type": "[0,∞]"
+        },
+        {
+          "symbol": "B",
+          "type": "subset of Z"
+        },
+        {
+          "symbol": "U",
+          "type": "ℕ→Set Z"
+        }
+      ],
+      "objects": [
+        "Z",
+        "u",
+        "h",
+        "B",
+        "U",
+        "ediam",
+        "rpow"
+      ]
+    },
+    {
+      "id": "D005",
+      "symbol": "C",
+      "type": "real exponent × real scale × subset → [0,∞]",
+      "definition": "C_u(h,B), also written C_u(h,B), means Content(u,ofReal h,B) for real scale h. We use it only at h>0.",
+      "depends_on": [
+        "D003",
+        "D004"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "u",
+          "type": "ℝ"
+        },
+        {
+          "symbol": "h",
+          "type": "ℝ"
+        },
+        {
+          "symbol": "B",
+          "type": "subset of an extended metric space"
+        }
+      ],
+      "objects": [
+        "u",
+        "h",
+        "B",
+        "Content",
+        "ofReal"
+      ]
+    },
+    {
+      "id": "D006",
+      "symbol": "H",
+      "type": "real exponent × subset of a Borel extended metric space → [0,∞]",
+      "definition": "H^u(B)=μH[u](B) denotes Mathlib's unnormalized Hausdorff measure, the metric measure mkMetric for the gauge r↦r^u on the Borel sigma algebra. The metric-measure construction takes countable-cover outer contents for this gauge, with the empty-set gauge cost forced to zero, and their supremum as the scale tends to zero. Its precise cover evaluation will be applied as an explicit native source, rather than assumed as an extra premise. No spherical or dimensional normalization factor is used.",
+      "depends_on": [
+        "D018"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "u",
+          "type": "ℝ"
+        },
+        {
+          "symbol": "B",
+          "type": "subset of a Borel extended metric space"
+        }
+      ],
+      "objects": [
+        "u",
+        "B",
+        "rpow"
+      ]
+    },
+    {
+      "id": "D008",
+      "symbol": "I",
+      "type": "subset of ℝ",
+      "definition": "I=[0,1]={t∈ℝ:0≤t≤1}. This is unitInterval in the basis header.",
+      "depends_on": [],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "t",
+          "type": "ℝ"
+        }
+      ],
+      "objects": [
+        "t"
+      ]
+    },
+    {
+      "id": "D009",
+      "symbol": "MaxProd",
+      "type": "metric space → metric spaces",
+      "definition": "For a metric space Z, MaxProd(Z)=Z×ℝ with distance d_max((x,t),(y,u))=max(d_Z(x,y),|t−u|). For B⊆Z, B×I always denotes a subset of MaxProd(Z) in intermediate lemmas. All metric spaces in integration or Hausdorff-measure statements carry their Borel sigma algebra.",
+      "depends_on": [
+        "D008"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "Z",
+          "type": "metric space"
+        },
+        {
+          "symbol": "x",
+          "type": "point of Z"
+        },
+        {
+          "symbol": "y",
+          "type": "point of Z"
+        },
+        {
+          "symbol": "t",
+          "type": "ℝ"
+        },
+        {
+          "symbol": "u",
+          "type": "ℝ"
+        },
+        {
+          "symbol": "B",
+          "type": "subset of Z"
+        }
+      ],
+      "objects": [
+        "Z",
+        "x",
+        "y",
+        "t",
+        "u",
+        "B",
+        "I"
+      ]
+    },
+    {
+      "id": "D011",
+      "symbol": "volume",
+      "type": "measure on the Borel sets of ℝ",
+      "definition": "volume is Lebesgue measure on ℝ, with its usual Borel measurable structure (and its extension as an outer measure on arbitrary sets). Thus measure monotonicity applies to all subsets; no measurability of a covering set is implicit.",
+      "depends_on": [],
+      "requires": [],
+      "binders": [],
+      "objects": []
+    },
+    {
+      "id": "D012",
+      "symbol": "indicator",
+      "type": "subset × constant → functions",
+      "definition": "For a set B⊆Z and a scalar c∈[0,∞], c1_B denotes the function equal to c on B and zero off B, that is B.indicator(fun _ => c). This is meaningful for c=∞ as well, with no subtraction of infinities.",
+      "depends_on": [],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "Z",
+          "type": "type"
+        },
+        {
+          "symbol": "B",
+          "type": "subset of Z"
+        },
+        {
+          "symbol": "c",
+          "type": "[0,∞]"
+        }
+      ],
+      "objects": [
+        "Z",
+        "B",
+        "c"
+      ]
+    },
+    {
+      "id": "D013",
+      "symbol": "lintegral",
+      "type": "measure × nonnegative extended function → [0,∞]",
+      "definition": "For a measurable space Z, measure μ and f:Z→[0,∞], ∫⁻ f dμ (the lower Lebesgue integral, lintegral) is the supremum of ∫g dμ over measurable nonnegative simple functions g≤f; a simple function integral is its finite sum of values times the measures of the corresponding disjoint level sets. All integrals in the slicing proof are lower integrals; integrability is never required.",
+      "depends_on": [
+        "D012"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "Z",
+          "type": "measurable space"
+        },
+        {
+          "symbol": "μ",
+          "type": "measure on Z"
+        },
+        {
+          "symbol": "f",
+          "type": "Z→[0,∞]"
+        },
+        {
+          "symbol": "g",
+          "type": "nonnegative measurable simple function on Z"
+        }
+      ],
+      "objects": [
+        "Z",
+        "μ",
+        "f",
+        "g",
+        "indicator"
+      ]
+    },
+    {
+      "id": "D014",
+      "symbol": "LipschitzWith",
+      "type": "nonnegative real × map of pseudo extended metric spaces → propositions",
+      "definition": "LipschitzWith(K,f) means ∀x,y, edist(f x,f y)≤K·edist(x,y), where K is a finite nonnegative real embedded into [0,∞]. On metric spaces this is the usual distance inequality.",
+      "depends_on": [],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "K",
+          "type": "nonnegative real"
+        },
+        {
+          "symbol": "f",
+          "type": "map between pseudo extended metric spaces"
+        },
+        {
+          "symbol": "x",
+          "type": "point of source of f"
+        },
+        {
+          "symbol": "y",
+          "type": "point of source of f"
+        }
+      ],
+      "objects": [
+        "K",
+        "f",
+        "x",
+        "y"
+      ]
+    },
+    {
+      "id": "D018",
+      "symbol": "rpow",
+      "type": "real or extended nonnegative base × real exponent → corresponding scalars",
+      "definition": "The notation v^u uses the standard real power; on positive real v it is exp(u log v), with 0^u=0 for u>0 and 0^0=1. For extended nonnegative bases it is the usual extension: at u>0, ∞^u=∞ and 0^u=0; at u=0 the value is 1; at u<0, 0^u=∞ and ∞^u=0. Only nonnegative real bases and positive exponents occur in the covering calculations. The native real function at negative v is defined using |v|, as in Real.rpow.",
+      "depends_on": [],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "v",
+          "type": "real or extended nonnegative scalar"
+        },
+        {
+          "symbol": "u",
+          "type": "ℝ"
+        }
+      ],
+      "objects": [
+        "v",
+        "u"
+      ]
+    }
+  ],
+  "inputs": [
+    {
+      "id": "N101",
+      "kind": "internal",
+      "statement": "For every metric space X, subset A⊆X and real s>0: C_s(δ,A) at every real δ>0 is the infimum of Σ_i(ediam U_i)^s over natural-indexed δ-covers of A, empty members contributing zero. If 0<δ₁≤δ₂ then C_s(δ₂,A)≤C_s(δ₁,A). Moreover H^s(A)=sup_{δ∈ℝ,δ>0} C_s(δ,A), so H agrees exactly with the unnormalized positive-exponent Hausdorff measure of problem.md. If H^s(A)=0, then for every r>0 and ε>0 there exist a natural-indexed cover U of A and real budgets a:ℕ→ℝ such that 0<a_i≤r, ediam U_i≤ofReal(a_i), and Σ_i ofReal(a_i^s)<ofReal ε.",
+      "definitions": [
+        "D002",
+        "D003",
+        "D004",
+        "D005",
+        "D006",
+        "D018"
+      ],
+      "binders": [
+        {
+          "symbol": "X",
+          "type": "metric space with Borel measurable structure"
+        },
+        {
+          "symbol": "A",
+          "type": "subset of X"
+        },
+        {
+          "symbol": "s",
+          "type": "ℝ"
+        },
+        {
+          "symbol": "δ",
+          "type": "ℝ"
+        },
+        {
+          "symbol": "δ₁",
+          "type": "ℝ"
+        },
+        {
+          "symbol": "δ₂",
+          "type": "ℝ"
+        },
+        {
+          "symbol": "r",
+          "type": "ℝ"
+        },
+        {
+          "symbol": "ε",
+          "type": "ℝ"
+        },
+        {
+          "symbol": "U",
+          "type": "ℕ→Set X"
+        },
+        {
+          "symbol": "a",
+          "type": "ℕ→ℝ"
+        }
+      ],
+      "objects": [
+        "X",
+        "A",
+        "s",
+        "δ",
+        "δ₁",
+        "δ₂",
+        "r",
+        "ε",
+        "U",
+        "a",
+        "ediam",
+        "Content",
+        "C",
+        "H",
+        "ofReal",
+        "rpow"
+      ]
+    },
+    {
+      "id": "M021",
+      "kind": "mathlib",
+      "statement": "For pseudo extended metric spaces Z,W, finite K≥0, and f:Z→W, if f is K-Lipschitz then for every B⊆Z, ediam(f '' B)≤K·ediam(B).",
+      "definitions": [
+        "D002",
+        "D014"
+      ],
+      "binders": [
+        {
+          "symbol": "Z",
+          "type": "pseudo extended metric space"
+        },
+        {
+          "symbol": "W",
+          "type": "pseudo extended metric space"
+        },
+        {
+          "symbol": "K",
+          "type": "nonnegative real"
+        },
+        {
+          "symbol": "f",
+          "type": "Z→W"
+        },
+        {
+          "symbol": "B",
+          "type": "subset of Z"
+        }
+      ],
+      "objects": [
+        "Z",
+        "W",
+        "K",
+        "f",
+        "B",
+        "ediam",
+        "LipschitzWith"
+      ],
+      "source_contract": {
+        "hypotheses": [
+          "Z,W are pseudo extended metric spaces and K is a nonnegative real.",
+          "f is K-Lipschitz."
+        ],
+        "declaration": "LipschitzWith.ediam_image_le",
+        "signature": "@LipschitzWith.ediam_image_le : ∀ {α : Type u} {β : Type v} [inst : PseudoEMetricSpace.{u} α] [inst_1 : PseudoEMetricSpace.{v} β] {K : NNReal}\n  {f : α → β},\n  LipschitzWith.{u, v} K f →\n    ∀ (s : Set.{u} α),\n      LE.le.{0} (Metric.ediam.{v} (Set.image.{u, v} f s)) (HMul.hMul.{0, 0, 0} (↑K) (Metric.ediam.{u} s))"
+      }
+    },
+    {
+      "id": "M017",
+      "kind": "mathlib",
+      "statement": "For a bounded B⊆ℝ, ediam(B)=ofReal(sup B−inf B), with native sSup/sInf conventions also for B=∅.",
+      "definitions": [
+        "D002",
+        "D003"
+      ],
+      "binders": [
+        {
+          "symbol": "B",
+          "type": "subset of ℝ"
+        }
+      ],
+      "objects": [
+        "B",
+        "ediam",
+        "ofReal"
+      ],
+      "source_contract": {
+        "hypotheses": [
+          "B is bounded in ℝ."
+        ],
+        "declaration": "Real.ediam_eq",
+        "signature": "@Real.ediam_eq : ∀ {s : Set.{0} ℝ},\n  Bornology.IsBounded.{0} s →\n    Eq.{1} (Metric.ediam.{0} s) (ENNReal.ofReal (HSub.hSub.{0, 0, 0} (sSup.{0} s) (sInf.{0} s)))"
+      }
+    },
+    {
+      "id": "M018",
+      "kind": "mathlib",
+      "statement": "For a type Z with a bornology and a conditionally complete lattice order, with IsOrderBornology, every bornologically bounded B⊆Z satisfies B⊆[inf B,sup B].",
+      "definitions": [],
+      "binders": [
+        {
+          "symbol": "Z",
+          "type": "bornological conditionally complete lattice with IsOrderBornology"
+        },
+        {
+          "symbol": "B",
+          "type": "subset of Z"
+        }
+      ],
+      "objects": [
+        "Z",
+        "B"
+      ],
+      "source_contract": {
+        "hypotheses": [
+          "Z has a bornology, a conditionally complete lattice structure and IsOrderBornology.",
+          "B is bornologically bounded."
+        ],
+        "declaration": "Bornology.IsBounded.subset_Icc_sInf_sSup",
+        "signature": "@Bornology.IsBounded.subset_Icc_sInf_sSup : ∀ {α : Type u_1} [inst : Bornology.{u_1} α] [inst_1 : ConditionallyCompleteLattice.{u_1} α] [IsOrderBornology.{u_1} α]\n  {s : Set.{u_1} α}, Bornology.IsBounded.{u_1} s → s ⊆ Set.Icc.{u_1} (sInf.{u_1} s) (sSup.{u_1} s)"
+      }
+    },
+    {
+      "id": "M019",
+      "kind": "mathlib",
+      "statement": "For every a,b∈ℝ, volume([a,b])=ofReal(b−a).",
+      "definitions": [
+        "D003",
+        "D011"
+      ],
+      "binders": [
+        {
+          "symbol": "a",
+          "type": "ℝ"
+        },
+        {
+          "symbol": "b",
+          "type": "ℝ"
+        }
+      ],
+      "objects": [
+        "a",
+        "b",
+        "volume",
+        "ofReal"
+      ],
+      "source_contract": {
+        "hypotheses": [],
+        "declaration": "Real.volume_Icc",
+        "signature": "@Real.volume_Icc : ∀ {a b : ℝ}, Eq.{1} (MeasureTheory.volume.{0} (Set.Icc.{0} a b)) (ENNReal.ofReal (HSub.hSub.{0, 0, 0} b a))"
+      }
+    },
+    {
+      "id": "M014",
+      "kind": "mathlib",
+      "statement": "For any measurable space Z, measure μ, countable index type T and f:T→Z→[0,∞], if each f_i is μ-almost-everywhere measurable then ∫⁻ (Σ_i f_i) dμ=Σ_i ∫⁻ f_i dμ.",
+      "definitions": [
+        "D013"
+      ],
+      "binders": [
+        {
+          "symbol": "Z",
+          "type": "measurable space"
+        },
+        {
+          "symbol": "μ",
+          "type": "measure on Z"
+        },
+        {
+          "symbol": "T",
+          "type": "countable type"
+        },
+        {
+          "symbol": "f",
+          "type": "T→Z→[0,∞]"
+        }
+      ],
+      "objects": [
+        "Z",
+        "μ",
+        "T",
+        "f",
+        "lintegral"
+      ],
+      "source_contract": {
+        "hypotheses": [
+          "Z is a measurable space and μ is a measure on it.",
+          "T is countable.",
+          "Every f_i is μ-a.e. measurable."
+        ],
+        "declaration": "MeasureTheory.lintegral_tsum",
+        "signature": "@MeasureTheory.lintegral_tsum : ∀ {α : Type u_1} {β : Type u_2} {m : MeasurableSpace.{u_1} α} {μ : MeasureTheory.Measure.{u_1} α}\n  [Countable.{u_2 + 1} β] {f : β → α → ENNReal},\n  (∀ (i : β), AEMeasurable.{u_1, 0} (f i) μ) →\n    Eq.{1} (∫⁻ (a : α), ∑' (i : β), f i a ∂μ) (∑' (i : β), ∫⁻ (a : α), f i a ∂μ)"
+      }
+    },
+    {
+      "id": "M015",
+      "kind": "mathlib",
+      "statement": "For any measurable space Z, measure μ and measurable B⊆Z, and every c∈[0,∞], ∫⁻ c1_B dμ=c·μ(B).",
+      "definitions": [
+        "D012",
+        "D013"
+      ],
+      "binders": [
+        {
+          "symbol": "Z",
+          "type": "measurable space"
+        },
+        {
+          "symbol": "μ",
+          "type": "measure on Z"
+        },
+        {
+          "symbol": "B",
+          "type": "measurable subset of Z"
+        },
+        {
+          "symbol": "c",
+          "type": "[0,∞]"
+        }
+      ],
+      "objects": [
+        "Z",
+        "μ",
+        "B",
+        "c",
+        "indicator",
+        "lintegral"
+      ],
+      "source_contract": {
+        "hypotheses": [
+          "Z is a measurable space and μ is a measure.",
+          "B is measurable."
+        ],
+        "declaration": "MeasureTheory.lintegral_indicator_const",
+        "signature": "@MeasureTheory.lintegral_indicator_const : ∀ {α : Type u_1} {m : MeasurableSpace.{u_1} α} {μ : MeasureTheory.Measure.{u_1} α} {s : Set.{u_1} α},\n  MeasurableSet.{u_1} s →\n    ∀ (c : ENNReal), Eq.{1} (∫⁻ (a : α), Set.indicator.{u_1, 0} s (fun x => c) a ∂μ) (HMul.hMul.{0, 0, 0} c (μ s))"
+      }
+    },
+    {
+      "id": "M016",
+      "kind": "mathlib",
+      "statement": "For any measurable space Z, measure μ and functions f,g:Z→[0,∞], pointwise f≤g implies ∫⁻ f dμ≤∫⁻ g dμ.",
+      "definitions": [
+        "D013"
+      ],
+      "binders": [
+        {
+          "symbol": "Z",
+          "type": "measurable space"
+        },
+        {
+          "symbol": "μ",
+          "type": "measure on Z"
+        },
+        {
+          "symbol": "f",
+          "type": "Z→[0,∞]"
+        },
+        {
+          "symbol": "g",
+          "type": "Z→[0,∞]"
+        }
+      ],
+      "objects": [
+        "Z",
+        "μ",
+        "f",
+        "g",
+        "lintegral"
+      ],
+      "source_contract": {
+        "hypotheses": [
+          "Z is a measurable space and μ is a measure.",
+          "f≤g pointwise."
+        ],
+        "declaration": "MeasureTheory.lintegral_mono",
+        "signature": "@MeasureTheory.lintegral_mono : ∀ {α : Type u_1} {m : MeasurableSpace.{u_1} α} {μ : MeasureTheory.Measure.{u_1} α} ⦃f g : α → ENNReal⦄,\n  LE.le.{u_1} f g → LE.le.{0} (∫⁻ (a : α), f a ∂μ) (∫⁻ (a : α), g a ∂μ)"
+      }
+    }
+  ],
+  "output": {
+    "id": "N102",
+    "kind": "internal",
+    "statement": "For every metric space X, subset A⊆X, real s>0 and finite real δ>0, C_s(δ,A)≤C_{s+1}(δ,A×I) in the maximum product metric MaxProd(X). Consequently H^s(A)≤H^{s+1}(A×I), including infinite values. The slicing constant is exactly one; neither compactness nor measurability of A or its covers is required.",
+    "definitions": [
+      "D002",
+      "D003",
+      "D004",
+      "D005",
+      "D006",
+      "D008",
+      "D009",
+      "D011",
+      "D012",
+      "D013",
+      "D014",
+      "D018"
+    ],
+    "binders": [
+      {
+        "symbol": "X",
+        "type": "metric space with Borel structure"
+      },
+      {
+        "symbol": "A",
+        "type": "subset of X"
+      },
+      {
+        "symbol": "s",
+        "type": "ℝ"
+      },
+      {
+        "symbol": "δ",
+        "type": "ℝ"
+      }
+    ],
+    "objects": [
+      "X",
+      "A",
+      "s",
+      "δ",
+      "C",
+      "H",
+      "I",
+      "MaxProd"
+    ]
+  },
+  "inference": {
+    "id": "R102",
+    "inputs": [
+      "N101",
+      "M021",
+      "M017",
+      "M018",
+      "M019",
+      "M014",
+      "M015",
+      "M016"
+    ],
+    "output": "N102",
+    "definitions": [
+      "D002",
+      "D003",
+      "D004",
+      "D005",
+      "D006",
+      "D008",
+      "D009",
+      "D011",
+      "D012",
+      "D013",
+      "D014",
+      "D018"
+    ],
+    "rules": [
+      "direct",
+      "forall_introduction",
+      "implication_introduction"
+    ],
+    "locals": [
+      {
+        "symbol": "X",
+        "type": "metric space with Borel structure",
+        "scope": "argument",
+        "start": "S001",
+        "end": "S006",
+        "kind": "arbitrary",
+        "declaration": "Fix any metric space X with its Borel sigma algebra.",
+        "objects": [],
+        "from_inputs": [],
+        "from_local": []
+      },
+      {
+        "symbol": "A",
+        "type": "subset of X",
+        "scope": "argument",
+        "start": "S001",
+        "end": "S006",
+        "kind": "arbitrary",
+        "declaration": "Fix any A⊆X.",
+        "objects": [
+          "X"
+        ],
+        "from_inputs": [],
+        "from_local": []
+      },
+      {
+        "symbol": "s",
+        "type": "ℝ",
+        "scope": "argument",
+        "start": "S001",
+        "end": "S006",
+        "kind": "arbitrary",
+        "declaration": "Fix a real exponent s.",
+        "objects": [],
+        "from_inputs": [],
+        "from_local": []
+      },
+      {
+        "symbol": "δ",
+        "type": "ℝ",
+        "scope": "argument",
+        "start": "S001",
+        "end": "S006",
+        "kind": "arbitrary",
+        "declaration": "Fix a finite real scale δ.",
+        "objects": [],
+        "from_inputs": [],
+        "from_local": []
+      },
+      {
+        "symbol": "V",
+        "type": "ℕ→Set(MaxProd X)",
+        "scope": "argument",
+        "start": "S001",
+        "end": "S005",
+        "kind": "arbitrary",
+        "declaration": "Fix an arbitrary sequence V of subsets of MaxProd X.",
+        "objects": [
+          "X",
+          "MaxProd"
+        ],
+        "from_inputs": [],
+        "from_local": []
+      },
+      {
+        "symbol": "ρ",
+        "type": "ℕ→ℝ",
+        "scope": "argument",
+        "start": "S001",
+        "end": "S005",
+        "kind": "definition",
+        "declaration": "Define ρ_i=(ediam V_i).toReal, including ρ_i=0 when V_i is empty.",
+        "objects": [
+          "V",
+          "ediam"
+        ],
+        "from_inputs": [],
+        "from_local": []
+      },
+      {
+        "symbol": "Aproj",
+        "type": "ℕ→Set X",
+        "scope": "argument",
+        "start": "S001",
+        "end": "S005",
+        "kind": "definition",
+        "declaration": "Define Aproj_i as the projection of V_i to X.",
+        "objects": [
+          "X",
+          "V"
+        ],
+        "from_inputs": [],
+        "from_local": []
+      },
+      {
+        "symbol": "Bproj",
+        "type": "ℕ→Set ℝ",
+        "scope": "argument",
+        "start": "S001",
+        "end": "S005",
+        "kind": "definition",
+        "declaration": "Define Bproj_i as the projection of V_i to ℝ.",
+        "objects": [
+          "V"
+        ],
+        "from_inputs": [],
+        "from_local": []
+      },
+      {
+        "symbol": "J",
+        "type": "ℕ→Set ℝ",
+        "scope": "argument",
+        "start": "S003",
+        "end": "S005",
+        "kind": "definition",
+        "declaration": "For each i define J_i=[inf Bproj_i,sup Bproj_i] if V_i is nonempty, and J_i=∅ otherwise.",
+        "objects": [
+          "V",
+          "Bproj"
+        ],
+        "from_inputs": [],
+        "from_local": []
+      },
+      {
+        "symbol": "c",
+        "type": "[0,∞]",
+        "scope": "argument",
+        "start": "S004",
+        "end": "S006",
+        "kind": "definition",
+        "declaration": "Define c=C_s(δ,A).",
+        "objects": [
+          "C",
+          "s",
+          "δ",
+          "A"
+        ],
+        "from_inputs": [],
+        "from_local": []
+      },
+      {
+        "symbol": "W",
+        "type": "ℝ→ℕ→Set X",
+        "scope": "argument",
+        "start": "S004",
+        "end": "S004",
+        "kind": "definition",
+        "declaration": "Define W(t)_i=Aproj_i if t∈J_i and ∅ otherwise.",
+        "objects": [
+          "X",
+          "Aproj",
+          "J"
+        ],
+        "from_inputs": [],
+        "from_local": []
+      },
+      {
+        "symbol": "g",
+        "type": "ℕ→ℝ→[0,∞]",
+        "scope": "argument",
+        "start": "S004",
+        "end": "S005",
+        "kind": "definition",
+        "declaration": "Define g_i(t)=ofReal(ρ_i^s)1_{J_i∩I}(t).",
+        "objects": [
+          "ρ",
+          "s",
+          "J",
+          "I",
+          "indicator",
+          "ofReal"
+        ],
+        "from_inputs": [],
+        "from_local": []
+      },
+      {
+        "symbol": "h",
+        "type": "ℝ→[0,∞]",
+        "scope": "argument",
+        "start": "S004",
+        "end": "S005",
+        "kind": "definition",
+        "declaration": "Define h(t)=c1_I(t).",
+        "objects": [
+          "c",
+          "I",
+          "indicator"
+        ],
+        "from_inputs": [],
+        "from_local": []
+      }
+    ],
+    "argument": [
+      {
+        "id": "S001",
+        "text": "Fix arbitrary X,A,s,δ and assume L1: s>0 and δ>0. Fix an arbitrary sequence V and assume L2: V covers A×I and ediam V_i≤ofReal δ for every i. Define ρ_i=(ediam V_i).toReal, Aproj_i=π_X(V_i), Bproj_i=π_ℝ(V_i). All ρ_i lie in [0,δ], and ediam V_i=ofReal ρ_i. The two coordinate projections are 1-Lipschitz, since each coordinate distance is bounded by their maximum, the source distance. Applying M021 to each projection therefore gives ediam Aproj_i≤ofReal ρ_i and ediam Bproj_i≤ofReal ρ_i. For empty V_i both projections and their diameters are empty and zero. This proves F001.",
+        "uses": [
+          "M021"
+        ],
+        "objects": [
+          "X",
+          "A",
+          "s",
+          "δ",
+          "V",
+          "ρ",
+          "Aproj",
+          "Bproj",
+          "I",
+          "MaxProd",
+          "ediam",
+          "ofReal",
+          "LipschitzWith"
+        ],
+        "uses_local": [],
+        "produces": [
+          {
+            "id": "F001",
+            "statement": "For every i, 0≤ρ_i≤δ, ediam V_i=ofReal ρ_i, ediam Aproj_i≤ofReal ρ_i, ediam Bproj_i≤ofReal ρ_i. Empty V_i have empty projections and ρ_i=0.",
+            "objects": [
+              "X",
+              "s",
+              "δ",
+              "V",
+              "ρ",
+              "Aproj",
+              "Bproj",
+              "ediam",
+              "ofReal"
+            ],
+            "assumptions": [
+              "L1",
+              "L2"
+            ],
+            "binders": []
+          }
+        ],
+        "introduces": [
+          "L1",
+          "L2"
+        ],
+        "discharges": []
+      },
+      {
+        "id": "S002",
+        "text": "Each Bproj_i is bounded in ℝ. If it is empty this is immediate. Otherwise, for any t_i∈Bproj_i, every t∈Bproj_i satisfies |t−t_i|≤ρ_i by F001 and the defining diameter bound. Thus Bproj_i⊆[t_i−ρ_i,t_i+ρ_i], a bounded interval. This proves the boundedness statement F002 without choosing any measurable projection or any uniform center.",
+        "uses": [],
+        "objects": [
+          "Bproj",
+          "ρ",
+          "ediam"
+        ],
+        "uses_local": [
+          "F001"
+        ],
+        "produces": [
+          {
+            "id": "F002",
+            "statement": "Every real projection Bproj_i is bounded.",
+            "objects": [
+              "Bproj"
+            ],
+            "assumptions": [
+              "L1",
+              "L2"
+            ],
+            "binders": []
+          }
+        ],
+        "introduces": [],
+        "discharges": []
+      },
+      {
+        "id": "S003",
+        "text": "Define J_i=[inf Bproj_i,sup Bproj_i] for nonempty V_i and J_i=∅ for empty V_i. For a nonempty index, M018 and F002 give Bproj_i⊆J_i, M017 gives ediam Bproj_i=ofReal(sup Bproj_i−inf Bproj_i), and M019 gives volume(J_i)=that same quantity≤ofReal ρ_i by F001. For empty indices inclusion and the zero volume bound are immediate. Every J_i is closed (or empty), hence Borel measurable; so is J_i∩I because I is closed. M019 at 0,1 also gives volume(I)=ofReal(1−0)=1. These are F003.",
+        "uses": [
+          "M017",
+          "M018",
+          "M019"
+        ],
+        "objects": [
+          "V",
+          "ρ",
+          "Bproj",
+          "J",
+          "I",
+          "volume",
+          "ediam",
+          "ofReal"
+        ],
+        "uses_local": [
+          "F001",
+          "F002"
+        ],
+        "produces": [
+          {
+            "id": "F003",
+            "statement": "For every i, Bproj_i⊆J_i, J_i and J_i∩I are Borel measurable, and volume(J_i)≤ofReal ρ_i. Also I is Borel measurable and volume(I)=1; empty V_i give J_i=∅.",
+            "objects": [
+              "V",
+              "ρ",
+              "Bproj",
+              "J",
+              "I",
+              "volume",
+              "ofReal"
+            ],
+            "assumptions": [
+              "L1",
+              "L2"
+            ],
+            "binders": []
+          }
+        ],
+        "introduces": [],
+        "discharges": []
+      },
+      {
+        "id": "S004",
+        "text": "Put c=C_s(δ,A) and W(t)_i=Aproj_i if t∈J_i, otherwise ∅. For each t∈I these sets cover A: for any x∈A, the cover V contains (x,t) in some V_i, hence x∈Aproj_i and t∈Bproj_i⊆J_i by F003. Each W(t)_i has extended diameter≤ofReal δ by F001, and its s-cost is at most ofReal(ρ_i^s)1_{J_i}(t), since s>0. N101's raw infimum formula yields c≤Σ_i ofReal(ρ_i^s)1_{J_i}(t). Define h=c1_I and g_i=ofReal(ρ_i^s)1_{J_i∩I}. On I the preceding inequality gives h≤Σ_i g_i; outside I both sides are zero. All g_i and h are Borel measurable: they take fixed constants on measurable sets and zero elsewhere, also when c=∞. This proves F004; we never require c to be finite.",
+        "uses": [
+          "N101"
+        ],
+        "objects": [
+          "X",
+          "A",
+          "s",
+          "δ",
+          "V",
+          "ρ",
+          "Aproj",
+          "Bproj",
+          "J",
+          "I",
+          "C",
+          "ediam",
+          "ofReal",
+          "c",
+          "W",
+          "g",
+          "h",
+          "indicator",
+          "rpow"
+        ],
+        "uses_local": [
+          "F001",
+          "F003"
+        ],
+        "produces": [
+          {
+            "id": "F004",
+            "statement": "h=c1_I and g_i=ofReal(ρ_i^s)1_{J_i∩I} are measurable nonnegative extended functions on ℝ, and h≤Σ_i g_i pointwise on ℝ.",
+            "objects": [
+              "c",
+              "ρ",
+              "s",
+              "I",
+              "J",
+              "h",
+              "g",
+              "indicator",
+              "ofReal"
+            ],
+            "assumptions": [
+              "L1",
+              "L2"
+            ],
+            "binders": []
+          }
+        ],
+        "introduces": [],
+        "discharges": []
+      },
+      {
+        "id": "S005",
+        "text": "Integrate the pointwise inequality of F004 with respect to volume on ℝ by M016. Apply M014 to the natural-indexed measurable family g, and M015 to h=c1_I and to each g_i. Using F003 and measure monotonicity gives\nc=c·volume(I)=∫⁻h≤∫⁻Σ_i g_i=Σ_i∫⁻g_i\n =Σ_i ofReal(ρ_i^s) volume(J_i∩I)\n ≤Σ_i ofReal(ρ_i^s) volume(J_i)\n ≤Σ_i ofReal(ρ_i^s) ofReal ρ_i\n =Σ_i ofReal(ρ_i^(s+1))=Σ_i(ediam V_i)^(s+1).\nFor ρ_i>0 the last power identity is ρ_i^s·ρ_i=ρ_i^(s+1); for ρ_i=0 both s and s+1 are positive so both sides are zero. Empty indices also contribute zero. Measure monotonicity needs no additional measurability condition. Nonnegative sums are compared by finite partial sums and their suprema. These operations hold in [0,∞], with 0·∞=0 as usual; c·1=c even for c=∞. Since V was arbitrary, discharge L2 and universally quantify V. This is F005.",
+        "uses": [
+          "M016",
+          "M014",
+          "M015"
+        ],
+        "objects": [
+          "X",
+          "A",
+          "s",
+          "δ",
+          "V",
+          "ρ",
+          "J",
+          "I",
+          "c",
+          "g",
+          "h",
+          "volume",
+          "lintegral",
+          "indicator",
+          "ediam",
+          "ofReal",
+          "rpow"
+        ],
+        "uses_local": [
+          "F001",
+          "F003",
+          "F004"
+        ],
+        "produces": [
+          {
+            "id": "F005",
+            "statement": "Every natural-indexed δ-cover V0 of A×I satisfies C_s(δ,A)≤Σ_i (ediam V0_i)^(s+1).",
+            "objects": [
+              "X",
+              "A",
+              "s",
+              "δ",
+              "C",
+              "I",
+              "ediam",
+              "V0"
+            ],
+            "assumptions": [
+              "L1"
+            ],
+            "binders": [
+              {
+                "symbol": "V0",
+                "type": "ℕ→Set(MaxProd X)"
+              }
+            ]
+          }
+        ],
+        "introduces": [],
+        "discharges": [
+          "L2"
+        ]
+      },
+      {
+        "id": "S006",
+        "text": "Take the infimum of the cover costs in F005. N101 applies to exponent s+1>0 and gives C_s(δ,A)≤C_{s+1}(δ,A×I). This infimum argument is valid even if no δ-cover exists, in which case its right-hand infimum is ∞. The argument holds for every real δ>0. Take the supremum over these scales, and use N101 for both spaces and positive exponents s and s+1, to obtain H^s(A)≤H^{s+1}(A×I). Discharge L1 and universally quantify X,A,s,δ. This proves the slicing inequality with constant one, for arbitrary subsets and without compactness.",
+        "uses": [
+          "N101"
+        ],
+        "objects": [
+          "X",
+          "A",
+          "s",
+          "δ",
+          "c",
+          "C",
+          "H",
+          "I",
+          "MaxProd"
+        ],
+        "uses_local": [
+          "F005"
+        ],
+        "produces": [],
+        "introduces": [],
+        "discharges": [
+          "L1"
+        ]
+      }
+    ],
+    "applications": [
+      {
+        "input": "M021",
+        "at": "S001",
+        "bindings": "Z=MaxProd X, W=X, K=1, f=the first coordinate projection, subset V_i, for each i.",
+        "hypothesis_checks": [
+          "The maximum metric and X are metric spaces, hence pseudo extended metric spaces; 1 is finite nonnegative.",
+          "For any pair of product points, their X-distance is at most the maximum of the two coordinate distances, so the projection is 1-Lipschitz."
+        ],
+        "id": "A001"
+      },
+      {
+        "input": "M021",
+        "at": "S001",
+        "bindings": "Z=MaxProd X, W=ℝ, K=1, f=the second coordinate projection, subset V_i, for each i.",
+        "hypothesis_checks": [
+          "The maximum metric and the ordinary real metric give the required pseudo extended metrics; 1≥0.",
+          "The real coordinate distance is at most the maximum source distance."
+        ],
+        "id": "A002"
+      },
+      {
+        "input": "M017",
+        "at": "S003",
+        "bindings": "B=Bproj_i for each nonempty V_i.",
+        "hypothesis_checks": [
+          "F002 proves boundedness of every Bproj_i from its finite diameter bound."
+        ]
+      },
+      {
+        "input": "M018",
+        "at": "S003",
+        "bindings": "Z=ℝ with its ordinary order and metric bornology, B=Bproj_i.",
+        "hypothesis_checks": [
+          "The real conditionally complete linear order and its metric bornology are order compatible.",
+          "F002 proves boundedness for each Bproj_i."
+        ]
+      },
+      {
+        "input": "M019",
+        "id": "A003",
+        "at": "S003",
+        "bindings": "a=inf Bproj_i and b=sup Bproj_i for each nonempty V_i.",
+        "hypothesis_checks": []
+      },
+      {
+        "input": "M019",
+        "id": "A004",
+        "at": "S003",
+        "bindings": "a=0 and b=1, so the interval is I.",
+        "hypothesis_checks": []
+      },
+      {
+        "input": "M016",
+        "at": "S005",
+        "bindings": "Z=ℝ, μ=volume, f=h, and the upper function t↦Σ_i g_i(t).",
+        "hypothesis_checks": [
+          "ℝ has its Borel measurable structure and volume is Lebesgue measure.",
+          "F004 proves the required pointwise inequality on all ℝ, including points outside I."
+        ]
+      },
+      {
+        "input": "M014",
+        "at": "S005",
+        "bindings": "Z=ℝ, μ=volume, T=ℕ, f_i=g_i.",
+        "hypothesis_checks": [
+          "The domain is Borel ℝ with Lebesgue measure.",
+          "The indices are natural numbers, a countable type.",
+          "F004 proves every g_i Borel measurable, hence volume-a.e. measurable."
+        ]
+      },
+      {
+        "input": "M015",
+        "id": "A005",
+        "at": "S005",
+        "bindings": "Z=ℝ, μ=volume, B=I and the source constant c equal to the local c=C_s(δ,A).",
+        "hypothesis_checks": [
+          "Borel ℝ and volume provide the measurable space and measure.",
+          "F003 proves I is Borel measurable; F004 defines h=c1_I."
+        ]
+      },
+      {
+        "input": "M015",
+        "id": "A006",
+        "at": "S005",
+        "bindings": "For every i, Z=ℝ, μ=volume, B=J_i∩I, and the source constant is ofReal(ρ_i^s).",
+        "hypothesis_checks": [
+          "Borel ℝ and volume provide the measurable space and measure.",
+          "F003 proves all J_i∩I Borel measurable; F004 defines their weighted indicator functions g_i."
+        ]
+      }
+    ]
+  },
+  "warning": "Direct inputs and fixed logic are supplied. Audit A may record mathematically checked routine background with actual conditions and justification; exact Lean bindings belong to nl02lean. No ancestor proof or extra H is available. A packet is not an audit certificate.",
+  "packet_sha256": "7017331107d70f6b61b7cc53fa0d9a93a92332464c24fcbf32b6a82cad628f41"
+}
