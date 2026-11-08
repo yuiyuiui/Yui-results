@@ -1,6 +1,6 @@
 # Shared entry support
 
-The six exercise directories each own their executable README, problem and
+The nine exercise directories each own their executable README, problem and
 settings. Start with that problem's README. This directory is mechanical
 support, not a proof source or a separate execution entry.
 
@@ -18,7 +18,7 @@ support, not a proof source or a separate execution entry.
 Run software checks from the repository root:
 
 ```sh
-python3 -B entry_support/run_checks.py entry_support/tests benchmark_cond/Yui/tests benchmark_uncond/Yui/tests benchmark_cond/pure-model-result/tests
+python3 -B entry_support/run_checks.py entry_support/tests benchmark_cond/Yui/tests benchmark_cond/pure-model-result/tests
 ```
 
 To also test neutral preparation against a local compatible Yui installation,

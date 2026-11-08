@@ -45,8 +45,8 @@ class ExerciseEntries(Fixture):
     def started(self,mode='unconditional'):
         self.mode(mode);run=Path(self.entry.begin()['run']);self.source_review(run);self.entry.prepare(run);return run
 
-    def test_checked_in_six_entries_have_pinned_source_and_exact_goals(self):
-        for family,mode in [('test_cond','conditional'),('test_uncond','unconditional')]:
+    def test_checked_in_entries_have_pinned_source_and_exact_goals(self):
+        for family,mode in [('test_cond','conditional'),('test_uncond','unconditional'),('test_uncond-test','unconditional')]:
             roots=sorted(p for p in (REPO/family).iterdir() if p.is_dir())
             self.assertEqual(len(roots),3)
             for root in roots:
@@ -62,11 +62,11 @@ class ExerciseEntries(Fixture):
 
     def test_hidden_finder_files_do_not_become_exercise_entries(self):
         checkout=self.base/'finder-checkout'
-        for family in ('test_cond','test_uncond'):
+        for family in ('test_cond','test_uncond','test_uncond-test'):
             shutil.copytree(REPO/family,checkout/family,ignore=shutil.ignore_patterns('rigorous-proof','__pycache__'))
             (checkout/family/'.DS_Store').write_bytes(b'Synthetic Finder metadata')
         with patch.object(sys.modules[__name__],'REPO',checkout):
-            self.test_checked_in_six_entries_have_pinned_source_and_exact_goals()
+            self.test_checked_in_entries_have_pinned_source_and_exact_goals()
 
     def test_unconditional_begin_freezes_only_current_source_without_dispatch(self):
         run=Path(self.entry.begin()['run']);r=json.loads((run/'TEST_RUN.json').read_text())
@@ -84,6 +84,65 @@ class ExerciseEntries(Fixture):
         p=self.install/'config.json';c=json.loads(p.read_text());c['timeouts']['stage_seconds']=60;p.write_text(json.dumps(c))
         with self.assertRaisesRegex(ValueError,'runtime limits'):self.entry.begin()
         self.assertFalse((self.entry_root/'rigorous-proof').exists());self.assertEqual(self.runtime_calls(),[])
+
+    def test_comparison_blocks_wrong_branch_commit_dirty_runtime_and_legacy_job(self):
+        comparison=self.base/'test_uncond-test'/self.entry_root.name
+        shutil.copytree(self.entry_root,comparison)
+        entry=Entry(comparison)
+        with self.assertRaisesRegex(ValueError,'settings'):
+            entry.config()
+        def git(*args):
+            return subprocess.check_output(['git','-C',str(self.install),*args],text=True,stderr=subprocess.PIPE).strip()
+        git('init','-b','uncond-test')
+        git('add','SKILL.md','config.json','toolchain','nl0','nl02lean')
+        git('-c','user.name=Fixture','-c','user.email=fixture@example.invalid','-c','commit.gpgsign=false','commit','-m','Synthetic Yui runtime')
+        commit=git('rev-parse','HEAD')
+        path=comparison/'settings.json'
+        settings=json.loads(path.read_text())
+        settings['yui_revision']={'branch':'uncond-test','commit':'0'*40}
+        path.write_text(json.dumps(settings))
+        with self.assertRaisesRegex(ValueError,'revision'):entry.begin()
+        settings['yui_revision']['commit']=commit
+        path.write_text(json.dumps(settings))
+        git('switch','-c','other')
+        with self.assertRaisesRegex(ValueError,'revision'):entry.begin()
+        git('switch','uncond-test')
+        script=self.install/'nl0/scripts/local-change.py'
+        script.write_text('changed = True')
+        with self.assertRaisesRegex(ValueError,'unpublished runtime changes'):entry.begin()
+        script.unlink()
+        self.assertFalse((comparison/'rigorous-proof').exists())
+        run=Path(entry.begin()['run'])
+        self.assertEqual(json.loads((run/'TEST_RUN.json').read_text())['bindings']['yui_revision'],settings['yui_revision'])
+        self.source_review(run)
+        with self.assertRaisesRegex(ValueError,'frozen public Yui workflow'):entry.prepare(run)
+        self.assertFalse((run/'dispatch-attempt.json').exists())
+
+    def test_public_delivery_checked_against_case_and_final_protocol(self):
+        run=self.started()
+        self.entry.launch(run)
+        self.terminal(run)
+        workflow=run/'workflow'
+        runtime=workflow/'runtime'
+        job=json.loads((workflow/'job.json').read_text())
+        job['workflow_protocol']='yui-workflow-1'
+        (workflow/'job.json').write_text(json.dumps(job))
+        case=json.loads((workflow/'case-result.json').read_text())
+        case['result']['public_result']='UNCONDITIONAL_LEAN'
+        (workflow/'case-result.json').write_text(json.dumps(case))
+        (runtime/'nl0/scripts/delivery.py').write_text(
+            "import json\ndef cleanup_anchor(root):\n return json.loads((root/'test-anchor.json').read_text())\n")
+        from common import terminal_check
+        with self.assertRaisesRegex(ValueError,'test-anchor'):terminal_check(runtime,workflow,'unconditional')
+        (workflow/'test-anchor.json').write_text(json.dumps({'run_sha256':'synthetic-hash'}))
+        (workflow/'delivery').mkdir()
+        record={'case_status':'WORKFLOW-PASSED','requested_goal':'unconditional','actual_result':'CONDITIONAL_LEAN'}
+        output=workflow/'delivery/run.json'
+        output.write_text(json.dumps(record))
+        with self.assertRaisesRegex(ValueError,'disagree'):terminal_check(runtime,workflow,'unconditional')
+        record['actual_result']='UNCONDITIONAL_LEAN'
+        output.write_text(json.dumps(record))
+        self.assertEqual(terminal_check(runtime,workflow,'unconditional')['public_delivery']['scope'],record['actual_result'])
 
     def test_conditional_works_with_legacy_runtime_and_no_mode_flag(self):
         self.mode('conditional');(self.install/'nl0/scripts/basis.py').unlink()
@@ -382,7 +441,7 @@ class InstalledExercisePreparation(unittest.TestCase):
         registered={'root':str(runtime),'skill_md':str(runtime/'SKILL.md'),'skill_sha256':digest(runtime/'SKILL.md')}
         with tempfile.TemporaryDirectory(prefix='entry-prepare-contract-') as directory:
             settings = sorted(REPO.glob('test_*/*/settings.json'))
-            self.assertEqual(len(settings), 6)
+            self.assertEqual(len(settings), 9)
             for path in settings:
                 source = path.parent
                 family = source.parent.name
@@ -394,6 +453,10 @@ class InstalledExercisePreparation(unittest.TestCase):
                     heading=config['target_heading']
                     (root/'problem.md').write_text(f'# Neutral source\n\n{heading}\n\nFor every n : Nat, n = n.\n\n## Fixed natural-language proof\n\nReflexivity.\n')
                     config['input_sha256']=digest(root/'problem.md')
+                    # Exercise both historical entry shapes against this installation.
+                    # The three branch-comparison entries keep their actual timeout and revision.
+                    if family!='test_uncond-test':
+                        config['limits']['native_seconds']=json.loads((runtime/'config.json').read_text())['timeouts']['native_seconds']
                     (root/'settings.json').write_text(json.dumps(config));entry=Entry(root)
                     with patch('exercise_entry.require_skill',return_value=registered):
                         run=Path(entry.begin()['run']);p=run/'preparation/source-review.json';review=json.loads(p.read_text())
@@ -407,6 +470,10 @@ class InstalledExercisePreparation(unittest.TestCase):
                     self.assertNotIn('--workers', argv)
                     self.assertIn('For every n : Nat',job['target_selection']['full_target'])
                     self.assertEqual(len(job['documents']),2)
+                    if family=='test_uncond-test':
+                        self.assertEqual(record['bindings']['yui_revision'],config['yui_revision'])
+                        self.assertEqual(job['workflow_protocol'],'yui-workflow-1')
+                        self.assertTrue((run/'workflow/runtime/workflow/workflow.json').is_file())
                     self.assertFalse((run/'dispatch-attempt.json').exists())
                     self.assertFalse((run/'workflow/execution-status.json').exists())
 

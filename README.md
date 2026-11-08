@@ -121,21 +121,26 @@ or second start message is required.
 | Unconditional Lean, full workflow | [test_uncond/geometry-product-dimension/README.md](test_uncond/geometry-product-dimension/README.md) |
 | Unconditional Lean, full workflow | [test_uncond/lie-module-irreducibility/README.md](test_uncond/lie-module-irreducibility/README.md) |
 | Unconditional Lean, full workflow | [test_uncond/wave-map-energy/README.md](test_uncond/wave-map-energy/README.md) |
+| Unconditional Lean, Yui `uncond-test` | [Hausdorff product dimension](test_uncond-test/geometry-product-dimension/README.md) |
+| Unconditional Lean, Yui `uncond-test` | [Irreducibility of the sl₂ module](test_uncond-test/lie-module-irreducibility/README.md) |
+| Unconditional Lean, Yui `uncond-test` | [Wave-map energy conservation](test_uncond-test/wave-map-energy/README.md) |
 
 For example:
 
 ```text
-Execute test_uncond/wave-map-energy/README.md.
+Execute test_uncond-test/wave-map-energy/README.md.
 ```
 
 The conditional benchmark has its existing entry at
 [benchmark_cond/Yui/README.md](benchmark_cond/Yui/README.md). Its current settings
 select NL0/Audit A only; the retained full-workflow numbers above are historical.
-The unconditional benchmark has a separate full-workflow entry at
-[benchmark_uncond/Yui/README.md](benchmark_uncond/Yui/README.md), with no bare-model
-arm. Both entries include terminal validation, reporting and owned resource
-cleanup. The bare-model arm remains exclusively under `benchmark_cond` with its
-existing reproduction procedure.
+The bare-model arm and its reproduction procedure also live under `benchmark_cond`.
+
+The three `test_uncond-test` entries use the same problem bytes and complete
+targets as their `test_uncond` counterparts. Each entry checks the registered
+Yui checkout against the branch and full commit in its settings, uses that
+revision's 360-second native limit, and writes fresh runs under its own
+`rigorous-proof/` directory.
 
 Every new run binds the current original input and creates a fresh target
 selection. Archived target selections, runtime snapshots and absolute paths in
@@ -145,7 +150,7 @@ while removing only owned disposable processes, caches and native scratch.
 
 ## Local setup
 
-Use macOS with an authenticated Codex CLI and follow [Yui's local setup guide](https://github.com/yuiyuiui/Yui/blob/main/docs/setup.md) for the matching Code Mode helper, Python, ripgrep and pinned Lean 4.32.2/Mathlib environment. Install the **complete Yui repository** as `$rigorous-proof`, not just `SKILL.md`. Historical results identify their original runtime. For a new run, install the complete intended Yui version; unconditional entries require its 2basis/b2lean support. Do not silently replace an installed runtime during a run. For example:
+Use macOS with an authenticated Codex CLI and follow [Yui's local setup guide](https://github.com/yuiyuiui/Yui/blob/main/docs/setup.md) for the matching Code Mode helper, Python, ripgrep and pinned Lean 4.32.2/Mathlib environment. Install the **complete Yui repository** as `$rigorous-proof`, not just `SKILL.md`. Historical results identify their original runtime. For a new run, install the complete intended Yui version; unconditional entries require its 2basis/b2lean support. Keep the registered checkout fixed during preparation and dispatch. For the three comparison entries, select the exact Yui `uncond-test` revision in their settings. The following setup example is for the original `test_uncond` family:
 
 ```text
 Install https://github.com/yuiyuiui/Yui from its uncond branch as the rigorous-proof skill in ~/.agents/skills/rigorous-proof, keeping the entire repository together. Check its README prerequisites and run its doctor check; do not start any proof jobs yet. If this exact skill is already installed, use that installation without creating a duplicate.

@@ -107,6 +107,14 @@ if mode=='unconditional':
   value['basis_closure']={k:final.get(k) for k in ('status','achieved_scope','closure','source_conditional')}
   if status=='WORKFLOW-PASSED' and (not final['closure'].get('unconditional') or final.get('achieved_scope')!='UNCONDITIONAL_LEAN'):
    raise ValueError('Conditional intermediate is not unconditional completion')
+if status in ('WORKFLOW-PASSED','WORKFLOW-CONDITIONAL') and json.loads((run/'job.json').read_text()).get('workflow_protocol')=='yui-workflow-1':
+ import delivery
+ anchor=delivery.cleanup_anchor(run)
+ record=json.loads((run/'delivery/run.json').read_text())
+ if (record['case_status']!=status or record['requested_goal']!=mode
+     or record['actual_result']!=result.get('public_result')):
+  raise ValueError('The public delivery and the recorded case result disagree')
+ value['public_delivery']={'path':str(run/'delivery'),'run_sha256':anchor['run_sha256'],'scope':record['actual_result']}
 print(json.dumps(value))
 '''
 

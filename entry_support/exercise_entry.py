@@ -19,15 +19,34 @@ from owner_monitor import record_monitor,validate_monitor
 def utc():return datetime.now(timezone.utc).isoformat()
 
 
-def runtime_binding(root):
+def runtime_binding(root, *, public_workflow=False):
     root=Path(root);rows={}
-    for name in ('SKILL.md','config.json','nl0','nl02lean','toolchain'):
+    names=('SKILL.md','config.json','nl0','nl02lean','toolchain')
+    if public_workflow:
+        names+=('workflow',)
+    for name in names:
         base=root/name
         for path in [base] if base.is_file() else base.rglob('*'):
-            if path.is_file() and '__pycache__' not in path.parts and path.suffix in {'.py','.json','.md','.lean','.mjs'}:
+            if path.is_file() and '__pycache__' not in path.parts and (path.suffix in {'.py','.json','.md','.lean','.mjs'} or path==root/'workflow/requirements.txt'):
                 rows[str(path.relative_to(root))]=digest(path)
     import hashlib
     return hashlib.sha256(json.dumps(rows,sort_keys=True).encode()).hexdigest()
+
+
+def verify_revision(root, expected):
+    root=Path(root).resolve()
+    def git(*args):
+        return subprocess.check_output(['git','-C',str(root),*args],text=True,stderr=subprocess.PIPE).strip()
+
+    if Path(git('rev-parse','--show-toplevel')).resolve()!=root:
+        raise ValueError('The registered Yui installation must be the pinned checkout')
+    actual={'branch':git('rev-parse','--abbrev-ref','HEAD'),'commit':git('rev-parse','HEAD')}
+    if actual!=expected:
+        raise ValueError(f'Registered Yui revision {actual} differs from the requested {expected}')
+    if git('status','--porcelain','--untracked-files=normal','--',
+           'SKILL.md','config.json','nl0','nl02lean','toolchain','library','workflow'):
+        raise ValueError('The registered Yui checkout has unpublished runtime changes')
+    return actual
 
 
 def target_section(text,heading):
@@ -46,8 +65,16 @@ class Entry:
         c=json.loads(local(self.root,'settings.json').read_text())
         fields={'schema','case_id','input','input_sha256','target_heading','formalization','track','policy',
             'profiles','results_directory','limits','monitor'}
+        if self.root.parent.name=='test_uncond-test':
+            fields.add('yui_revision')
         if not isinstance(c, dict) or set(c) - {'workers'} != fields or c['schema'] != 'yui-exercise-entry-1':
             raise ValueError('Unknown exercise settings')
+        if 'yui_revision' in c:
+            pin=c['yui_revision']
+            if (not isinstance(pin,dict) or set(pin)!={'branch','commit'} or pin['branch']!='uncond-test'
+                    or not isinstance(pin['commit'],str) or not re.fullmatch('[0-9a-f]{40}',pin['commit'])
+                    or c['formalization']!='unconditional'):
+                raise ValueError('The branch comparison requires a full unconditional run with a pinned Yui uncond-test commit')
         if c['case_id']!=self.root.name or c['input']!='problem.md' or c['results_directory']!='rigorous-proof':raise ValueError('Wrong exercise identity or local paths')
         headings={'geometry-product-dimension':'## Fixed interpretation and complete target',
             'lie-module-irreducibility':'## Definitions and complete target','wave-map-energy':'## Fixed interpretation and complete target'}
@@ -60,7 +87,11 @@ class Entry:
         for p in c['profiles'].values():
             if set(p)!={'id','reasoning_effort','speed','automatic_fallback'} or not all(isinstance(p[k],str) and p[k] for k in ('id','reasoning_effort','speed')) or p['automatic_fallback'] is not False:
                 raise ValueError('Use complete explicit profiles without fallback')
-        if c['limits']!={'case_seconds':None,'stage_seconds':None,'tokens':None,'model_calls':None,'native_seconds':180}:raise ValueError('Keep the configured unlimited total and 180-second native limits')
+        limits=c['limits']
+        if (not isinstance(limits,dict) or set(limits)!={'case_seconds','stage_seconds','tokens','model_calls','native_seconds'}
+                or any(limits[k] is not None for k in ('case_seconds','stage_seconds','tokens','model_calls'))
+                or type(limits['native_seconds']) is not int or limits['native_seconds']<=0):
+            raise ValueError('Keep unlimited total budgets and specify the native-call limit from the selected runtime')
         validate_monitor(c['monitor'])
         target_section(local(self.root,'problem.md').read_text(),c['target_heading'])
         return c
@@ -69,6 +100,7 @@ class Entry:
         c=self.config()
         if digest(local(self.root,c['input']))!=c['input_sha256']:raise ValueError('Problem changed; review and update its explicit input pin')
         installed=require_skill(cwd=self.root,codex=codex)
+        revision=verify_revision(installed['root'],c['yui_revision']) if 'yui_revision' in c else None
         program='''import json,sys
 from pathlib import Path
 root=Path(sys.argv[1]);c=json.load(sys.stdin)
@@ -77,16 +109,17 @@ from runtime_config import verify,native_timeout
 from entrypoint import preflight_profiles
 preflight_profiles({'track':'full','profiles':c['profiles']})
 runtime=json.loads((root/'config.json').read_text())
-if runtime['timeouts']!={'case_seconds':None,'stage_seconds':None,'native_seconds':180} or runtime['token_budget'] is not None:
+if runtime['timeouts']!={k:c['limits'][k] for k in ('case_seconds','stage_seconds','native_seconds')} or runtime['token_budget'] is not None:
  raise ValueError('Installed runtime limits differ from this entry')
-if native_timeout()!=180:raise ValueError('Wrong native-call limit')
+if native_timeout()!=c['limits']['native_seconds']:raise ValueError('Wrong native-call limit')
 print(json.dumps({'environment':verify()}))
 '''
         environment=runtime_call(installed['root'],program,data=c)
         capabilities=runtime_call(installed['root'],CAPABILITY_CHECK,c['formalization'])
         bindings={'startup':{n:digest(local(self.root,n)) for n in ('README.md','settings.json','run_test.py')},
-            'support':support_bindings(),'input':c['input_sha256'],'runtime':runtime_binding(installed['root']),
+            'support':support_bindings(),'input':c['input_sha256'],'runtime':runtime_binding(installed['root'],public_workflow=bool(revision)),
             'installed':{k:installed[k] for k in ('root','skill_md','skill_sha256')}}
+        if revision:bindings['yui_revision']=revision
         return {'status':'ENVIRONMENT-CHECKED','configuration':c,'installed':installed,'bindings':bindings,
             'capabilities':capabilities,'environment':environment,'model_started':False}
 
@@ -179,12 +212,16 @@ print(json.dumps(select(prep/'problem.md',[{'id':'complete-target','label':'Comp
             result=json_call(args,log=run/'prepare-result.json')
             if result.get('status')!='PREPARED_NOT_STARTED' or result.get('runs')!=[str(workflow)]:raise ValueError('Unexpected prepared workflow')
             self.validate_job(run,r)
-            self.save(run,r,'JOB_PREPARED',job_sha256=digest(workflow/'job.json'),frozen_runtime_sha256=runtime_binding(workflow/'runtime'))
+            self.save(run,r,'JOB_PREPARED',job_sha256=digest(workflow/'job.json'),
+                frozen_runtime_sha256=runtime_binding(workflow/'runtime',public_workflow='yui_revision' in c))
         except Exception as error:self.save(run,r,'JOB_PREPARATION_FAILED',error=str(error));raise
         return {'status':r['status'],'run':str(run),'workflow':str(workflow),'model_started':False}
 
     def validate_job(self,run,r):
         w=run/'workflow';job=json.loads(local(w,'job.json').read_text());c=r['configuration'];prep=run/'preparation'
+        if 'yui_revision' in c and (job.get('workflow_protocol')!='yui-workflow-1'
+                or not local(w,'runtime/workflow/workflow.json').is_file()):
+            raise ValueError('The prepared job lacks the frozen public Yui workflow')
         expected={'root':str(w),'problem':str(prep/'problem.md'),'track':'full','policy':'normal','profiles':c['profiles'],
             'max_concurrency':c.get('workers', 'auto'),'source':None,'audit':None,'time_budget_seconds':None}
         if any(job.get(k)!=v for k,v in expected.items()) or job.get('formalization','conditional')!=c['formalization'] or 'resume' in job:
@@ -203,7 +240,8 @@ print(json.dumps(select(prep/'problem.md',[{'id':'complete-target','label':'Comp
 
     def frozen(self,run,r):
         root=local(run,'workflow/runtime')
-        if runtime_binding(root)!=r['frozen_runtime_sha256']:raise ValueError('Frozen runtime changed')
+        if runtime_binding(root,public_workflow='yui_revision' in r['configuration'])!=r['frozen_runtime_sha256']:
+            raise ValueError('Frozen runtime changed')
         return root
 
     def launch(self,run,*,heartbeat_id=None):

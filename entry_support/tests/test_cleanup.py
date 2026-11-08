@@ -124,7 +124,7 @@ time.sleep(60)
         self.assertTrue(work.samefile(recorded))
         record=self.retain(recorded);before=record.read_bytes()
         evidence=work/'retained-evidence.txt';evidence.write_text('neutral stage evidence')
-        for entry in (SUPPORT,SUPPORT.parent/'benchmark_cond/Yui',SUPPORT.parent/'benchmark_uncond/Yui'):
+        for entry in (SUPPORT,SUPPORT.parent/'benchmark_cond/Yui'):
             result=self.clean(False,cleaner=entry/'resource_cleanup.py')
             self.assertEqual(result['status'],'CLEANUP_BLOCKED',entry)
             self.assertIn('Runtime must release',result['error'])
