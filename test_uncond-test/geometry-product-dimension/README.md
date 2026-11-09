@@ -29,7 +29,9 @@ monitoring mode allows this run to proceed through preparation and dispatch.
   read fresh from this run's copy. Use no old target-selection JSON.
 - Goal: **unconditional**, `full`, normal repair; 2basis → the same NL0/Audit A and Lean/Audit B → b2lean final closure.
 - Both phase profiles use **gpt-6.1-sol / high / Standard** with no model
-  fallback, an unlimited total budget and a 360-second native-call limit.
+  fallback and an unlimited total budget. Native translation checks start at six
+  minutes. A workload-only diagnosis permits one six-minute increase per wall
+  timeout, up to thirty minutes. A code repair keeps the current allowance.
 - Yui sizes the local review and Lean proof pools from the number of nodes
   in each phase.
 - The registered checkout must match the `uncond-test` branch and the full Git commit
@@ -37,7 +39,7 @@ monitoring mode allows this run to proceed through preparation and dispatch.
 - Use only the exact registered `$rigorous-proof` installation and its bundled
   operation/rules. Read its SKILL.md after discovery. Do not substitute a sibling
   checkout, another skill, a peer task or an owner-written proof.
-- Only Yui 2basis may change the proof route. Preserve the original target/H, quantifiers, parameter ranges and constant dependencies. Verify the final YuiClosed.P and b2lean receipt; intermediate Audit B is insufficient. Remaining class-4 dependencies require the actual user choice; never silently downgrade this goal.
+- Yui 2basis selects and freezes the foundations. NL0 may repair intermediate statements and dependency edges under those foundations. Preserve the original target/H, quantifiers, parameter ranges and constant dependencies. Verify the final YuiClosed.P and b2lean receipt; intermediate Audit B is insufficient. Remaining class-4 dependencies require the actual user choice; never silently downgrade this goal.
 - Old `rigorous-proof/` runs and `target-selection*.json` are historical evidence,
   never construction input. Conditional/unconditional siblings do not exchange
   proofs, target files, source caches or review judgments.
