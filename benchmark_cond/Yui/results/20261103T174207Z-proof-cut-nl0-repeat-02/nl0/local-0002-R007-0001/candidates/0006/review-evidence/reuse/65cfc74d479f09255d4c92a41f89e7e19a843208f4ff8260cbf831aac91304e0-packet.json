@@ -1,0 +1,855 @@
+{
+  "contract_version": 2,
+  "case_id": "benchmark",
+  "graph_sha256": "3e8aae8063fc05201729c176ceae319a1cca8449d169f688bc4c823f440a8623",
+  "spec_sha256": "390a02da5227070126f407a3e45c6820c635591eb8212172d8792612ad61e79d",
+  "parameters": [
+    {
+      "symbol": "T",
+      "type": "real"
+    },
+    {
+      "symbol": "gamma",
+      "type": "real"
+    },
+    {
+      "symbol": "R",
+      "type": "real"
+    }
+  ],
+  "logic": {
+    "classical": true,
+    "rules": [
+      "direct",
+      "forall_introduction",
+      "implication_introduction",
+      "natural_induction",
+      "contradiction_classical"
+    ],
+    "calculations": [
+      "equality: Equality reflexivity, symmetry, transitivity and substitution.",
+      "definitions: Unfold an explicitly supplied definition; this proves no extra property.",
+      "finite_algebra: Routine finite semiring/ring/field arithmetic, including zero/one laws, distributivity, associativity and finite polynomial identities. Correct elementary compression is permitted; a substantive missing argument is not.",
+      "finite_order: Routine ordered-field reasoning with actual signs/domains: order laws, adding inequalities, multiplication/division with sign conditions, and real square nonnegativity. Ordinary valid elementary inferences need no exhaustive displayed chain. Check that the conclusion follows; substantial named theorems still require inputs or verified-background admission.",
+      "finite_sums: Unfold and rearrange finite sums/products with explicitly given finite indices."
+    ],
+    "primitives": [
+      {
+        "symbol": "0",
+        "type": "typed numeral",
+        "meaning": "Zero of the explicitly specified mathematical type."
+      },
+      {
+        "symbol": "1",
+        "type": "typed numeral",
+        "meaning": "One of the explicitly specified mathematical type."
+      },
+      {
+        "symbol": "2",
+        "type": "typed numeral",
+        "meaning": "Two of the explicitly specified mathematical type, including an exponent two."
+      },
+      {
+        "symbol": "ℕ",
+        "type": "number system",
+        "meaning": "The natural numbers with their usual arithmetic."
+      },
+      {
+        "symbol": "ℤ",
+        "type": "number system",
+        "meaning": "The integers with their usual arithmetic."
+      },
+      {
+        "symbol": "ℚ",
+        "type": "number system",
+        "meaning": "The rational numbers with their usual ordered-field operations."
+      },
+      {
+        "symbol": "ℝ",
+        "type": "number system",
+        "meaning": "The real numbers with their usual ordered-field structure."
+      },
+      {
+        "symbol": "ℂ",
+        "type": "number system",
+        "meaning": "The complex numbers with their usual field structure."
+      },
+      {
+        "symbol": "∅",
+        "type": "typed set notation",
+        "meaning": "The empty set in the explicitly specified ambient type."
+      },
+      {
+        "symbol": "∞",
+        "type": "typed order notation",
+        "meaning": "The top element in an explicitly specified extended ordered codomain."
+      }
+    ]
+  },
+  "pins": {
+    "lean_version": "4.32.2",
+    "mathlib_commit": "905b95818eb32af7874a58b427f50c1711a5e96c",
+    "mathlib_root": "/Users/syyui/formalization-tools/lean-mathlib-v4.32.2/mathlib"
+  },
+  "foundation_profile": "elementary-language-4",
+  "standard_language": "Ordinary typed mathematical language: logical connectives, quantifiers, equality, sets, functions, tuples, finite indices and their usual notation. A type explicitly named natural numbers, integers, rationals, reals or complex numbers means that standard structure, with its usual numerals and arithmetic operations; these operation tokens need not be redeclared as project objects. The fixed finite calculation rules below, including a+0=a, are controller permissions, not an author claim. The core symbol table below is not a dictionary of all allowed mathematics. Objects and notation from any subject are introduced by this problem's parameters, D definitions or scoped locals, with their types and dependencies. Their properties need direct inputs or displayed local proofs; a familiar name or symbol supplies no theorem.",
+  "background_policy": "mathematical-background-v2-1",
+  "definitions": [
+    {
+      "id": "D001",
+      "symbol": "Ttor",
+      "type": "periodic measured domain",
+      "definition": "Ttor = reals/(2*pi*integers), with normalized measure dx/(2*pi); spatial products and integrals are on this domain.",
+      "depends_on": [],
+      "requires": [],
+      "binders": [],
+      "objects": []
+    },
+    {
+      "id": "D002",
+      "symbol": "Fourier",
+      "type": "Fourier coefficient transform",
+      "definition": "For an integrable periodic f, Fourier(f)(k)=hat f(k)=(2*pi)^(-1) integral_0^(2*pi) f(x) exp(-i*k*x) dx; the transform extends to distributions by duality.",
+      "depends_on": [
+        "D001"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "f",
+          "type": "periodic distribution"
+        },
+        {
+          "symbol": "k",
+          "type": "integer"
+        }
+      ],
+      "objects": [
+        "Ttor",
+        "f",
+        "k"
+      ]
+    },
+    {
+      "id": "D003",
+      "symbol": "H",
+      "type": "family of periodic Sobolev spaces",
+      "definition": "For every real s, H^s(Ttor) is the completion of trigonometric polynomials with ||f||_(H^s)^2=sum_(k in Z) <k>^(2*s)|hat f(k)|^2, <k>=(1+k^2)^(1/2). Negative spaces are interpreted as distributions. Homogeneous norms on zero-mean distributions are ||f||_(dot H^s)^2=sum_(k!=0)|k|^(2*s)|hat f(k)|^2. Real means hat f(-k)=conjugate(hat f(k)); mean zero means hat f(0)=0.",
+      "depends_on": [
+        "D001",
+        "D002"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "s",
+          "type": "real"
+        },
+        {
+          "symbol": "f",
+          "type": "periodic distribution"
+        }
+      ],
+      "objects": [
+        "Ttor",
+        "Fourier",
+        "s",
+        "f"
+      ]
+    },
+    {
+      "id": "D004",
+      "symbol": "L2",
+      "type": "normalized Hilbert space and norm",
+      "definition": "L2=H^0(Ttor), with ||f||_2^2=(2*pi)^(-1) integral |f|^2 dx. More generally L^p uses the same normalized measure; L^infinity is essential supremum. Sequence ell^2 uses counting measure on Z (or Z\\{0} when specified). Time suprema use continuous representatives; derivative norms are essential suprema.",
+      "depends_on": [
+        "D001",
+        "D003"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "f",
+          "type": "periodic L2 function"
+        },
+        {
+          "symbol": "p",
+          "type": "real exponent at least one"
+        }
+      ],
+      "objects": [
+        "Ttor",
+        "H",
+        "f",
+        "p"
+      ]
+    },
+    {
+      "id": "D005",
+      "symbol": "S",
+      "type": "Airy group indexed by real time",
+      "definition": "S_t=exp(-t*partial_x^3), hat(S_t f)(k)=exp(i*t*k^3) hat f(k).",
+      "depends_on": [
+        "D002",
+        "D003"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "t",
+          "type": "real"
+        },
+        {
+          "symbol": "f",
+          "type": "periodic distribution"
+        },
+        {
+          "symbol": "k",
+          "type": "integer"
+        }
+      ],
+      "objects": [
+        "Fourier",
+        "H",
+        "t",
+        "f",
+        "k"
+      ]
+    },
+    {
+      "id": "D006",
+      "symbol": "P0",
+      "type": "spatial mean projection",
+      "definition": "P0(f)=hat f(0), identified with a constant function.",
+      "depends_on": [
+        "D002"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "f",
+          "type": "periodic distribution"
+        }
+      ],
+      "objects": [
+        "Fourier",
+        "f"
+      ]
+    },
+    {
+      "id": "D007",
+      "symbol": "Pnz",
+      "type": "projection onto nonzero modes",
+      "definition": "Pnz=I-P0, denoted P in the supplied proof. Fourier projections P_leq(N) and P_gt(N) retain |k|<=N and |k|>N respectively, for N>=0.",
+      "depends_on": [
+        "D002",
+        "D006"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "N",
+          "type": "nonnegative real"
+        }
+      ],
+      "objects": [
+        "Fourier",
+        "P0",
+        "N"
+      ]
+    },
+    {
+      "id": "D008",
+      "symbol": "Dinv",
+      "type": "inverse derivative and its square",
+      "definition": "Dinv=partial_x^(-1) has Fourier multiplier (i*k)^(-1) at nonzero integer k and zero at k=0. Dinv2=(Dinv)^2 is denoted D^(-2).",
+      "depends_on": [
+        "D002"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "k",
+          "type": "integer"
+        }
+      ],
+      "objects": [
+        "Fourier",
+        "k"
+      ]
+    },
+    {
+      "id": "D009",
+      "symbol": "Ftau",
+      "type": "quadratic update family for positive timestep",
+      "definition": "For tau>0 and mean-zero f in L2, Ftau(f)=(1/6)*Pnz[(S_tau Dinv f)^2]-(1/6)*S_tau Pnz[(Dinv f)^2].",
+      "depends_on": [
+        "D004",
+        "D005",
+        "D007",
+        "D008"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "tau",
+          "type": "positive real"
+        },
+        {
+          "symbol": "f",
+          "type": "mean-zero L2 function"
+        }
+      ],
+      "objects": [
+        "S",
+        "Pnz",
+        "Dinv",
+        "L2",
+        "tau",
+        "f"
+      ]
+    },
+    {
+      "id": "D010",
+      "symbol": "Htau",
+      "type": "cubic update family for positive timestep",
+      "definition": "For tau>0 and mean-zero f in L2, Htau(f)=(1/3)*Pnz[(S_tau Dinv f)*Dinv Ftau(f)]+(tau/9)*(S_tau Dinv f)*P0(f^2)-(1/54)*[S_(tau-s) Dinv[(S_s Dinv f)^3]]_(s=0)^(s=tau)-(1/(27*tau))*[S_(tau-s) Dinv2[(S_(s-tau) Dinv2 Ftau(f))*(S_s Dinv f)]]_(s=0)^(s=tau). Brackets mean the value at tau minus the value at zero. All products are spatial products.",
+      "depends_on": [
+        "D004",
+        "D005",
+        "D006",
+        "D007",
+        "D008",
+        "D009"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "tau",
+          "type": "positive real"
+        },
+        {
+          "symbol": "f",
+          "type": "mean-zero L2 function"
+        }
+      ],
+      "objects": [
+        "L2",
+        "S",
+        "P0",
+        "Pnz",
+        "Dinv",
+        "Ftau",
+        "tau",
+        "f"
+      ]
+    },
+    {
+      "id": "D011",
+      "symbol": "Psi",
+      "type": "unfiltered numerical update and iterates",
+      "definition": "For every positive tau, Psi_tau(f)=S_tau f+Ftau(f)+Htau(f) on mean-zero L2 data. Given such tau, mean-zero u0 in L2 and an integer L>=1, set t_n=n*tau, u^0=u0 and u^(n+1)=Psi_tau(u^n) for 0<=n<L; write v^n=S_(-t_n)u^n. For the target with T>0, specialize tau=T/L. There is no spatial cutoff.",
+      "depends_on": [
+        "D004",
+        "D005",
+        "D009",
+        "D010"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "tau",
+          "type": "positive real"
+        },
+        {
+          "symbol": "f",
+          "type": "mean-zero L2 function"
+        },
+        {
+          "symbol": "u0",
+          "type": "mean-zero L2 function"
+        },
+        {
+          "symbol": "L",
+          "type": "positive integer"
+        }
+      ],
+      "objects": [
+        "T",
+        "S",
+        "L2",
+        "Ftau",
+        "Htau",
+        "tau",
+        "f",
+        "u0",
+        "L"
+      ]
+    },
+    {
+      "id": "D016",
+      "symbol": "Bop",
+      "type": "time-dependent bilinear KdV operator",
+      "definition": "Bop_t(f,g)=S_(-t)*partial_x[(S_t f)(S_t g)], initially for smooth periodic functions and by distributional product for L2 inputs.",
+      "depends_on": [
+        "D004",
+        "D005"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "t",
+          "type": "real"
+        },
+        {
+          "symbol": "f",
+          "type": "periodic L2 function"
+        },
+        {
+          "symbol": "g",
+          "type": "periodic L2 function"
+        }
+      ],
+      "objects": [
+        "S",
+        "L2",
+        "t",
+        "f",
+        "g"
+      ]
+    },
+    {
+      "id": "D017",
+      "symbol": "Jop",
+      "type": "time-dependent inverse-derivative bilinear operator",
+      "definition": "Jop_t(f,g)=S_(-t) Pnz[(S_t Dinv f)(S_t Dinv g)].",
+      "depends_on": [
+        "D005",
+        "D007",
+        "D008"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "t",
+          "type": "real"
+        },
+        {
+          "symbol": "f",
+          "type": "mean-zero L2 function"
+        },
+        {
+          "symbol": "g",
+          "type": "mean-zero L2 function"
+        }
+      ],
+      "objects": [
+        "S",
+        "Pnz",
+        "Dinv",
+        "t",
+        "f",
+        "g"
+      ]
+    },
+    {
+      "id": "D018",
+      "symbol": "Cop",
+      "type": "integrated trilinear operator",
+      "definition": "For a time interval I=[a,b], Cop_I(f,g,h)=integral_a^b S_(-t) Pnz{Pnz[(S_t f(t))(S_t g(t))]*(S_t Dinv h(t))} dt. Initially this is defined for smooth inputs; the continuous extensions in the source estimates are meant when used for rough inputs.",
+      "depends_on": [
+        "D005",
+        "D007",
+        "D008"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "I",
+          "type": "compact time interval"
+        },
+        {
+          "symbol": "f",
+          "type": "time-dependent periodic function"
+        },
+        {
+          "symbol": "g",
+          "type": "time-dependent periodic function"
+        },
+        {
+          "symbol": "h",
+          "type": "time-dependent periodic function"
+        }
+      ],
+      "objects": [
+        "S",
+        "Pnz",
+        "Dinv",
+        "I",
+        "f",
+        "g",
+        "h"
+      ]
+    },
+    {
+      "id": "D019",
+      "symbol": "pstar",
+      "type": "real exponent",
+      "definition": "pstar=23/14.",
+      "depends_on": [],
+      "requires": [],
+      "binders": [],
+      "objects": []
+    }
+  ],
+  "inputs": [],
+  "output": {
+    "id": "N005",
+    "kind": "internal",
+    "statement": "S_t is an isometry on every H^s and preserves real functions and zero mean; Fourier projections contract these norms. For mean-zero L2 inputs, ||Dinv f||_(H^1)+||Dinv f||_infinity<=C||f||_2, ||Bop_t(f,g)||_(H^(-pstar))<=C||f||_2||g||_2, ||Jop_t(f,g)||_(H^1)<=C||f||_2||g||_2 and ||Jop_t(A,B)||_2<=C||Dinv A||_2||B||_2, uniformly in t. For arbitrary L2 F,G, ||Dinv Pnz(FG)||_2<=C||F||_2||G||_2. For mean-zero A, ||A||_(H^(-pstar))<=||Dinv A||_2. H^1 embeds continuously into L^infinity and satisfies ||AB||_(H^1)<=C||A||_(H^1)||B||_(H^1). For time-smooth spatially smooth mean-zero f,g on [a,b], integral_a^b Bop_t(f,g)dt=(1/3)[Jop_t(f,g)]_a^b-(1/3)integral_a^b[Jop_t(f',g)+Jop_t(f,g')]dt. Also Jop is symmetric and integral_I Jop_t(Bop_t(f,g),h)dt=Cop_I(f,g,h). These identities hold piecewise in time and add across adjoining steps with their common endpoints. For every fixed tau>0, Ftau:L2_zero->H^1 and Psi_tau:L2_zero->L2_zero are continuous polynomial maps, preserve reality, and map smooth data to smooth data; all finite iterates are therefore well defined and continuous in L2.",
+    "definitions": [
+      "D002",
+      "D003",
+      "D004",
+      "D005",
+      "D006",
+      "D007",
+      "D008",
+      "D009",
+      "D010",
+      "D011",
+      "D016",
+      "D017",
+      "D018",
+      "D019"
+    ],
+    "binders": [
+      {
+        "symbol": "f",
+        "type": "periodic function in the quantified domain"
+      },
+      {
+        "symbol": "g",
+        "type": "periodic function in the quantified domain"
+      },
+      {
+        "symbol": "A",
+        "type": "periodic function in the quantified domain"
+      },
+      {
+        "symbol": "B",
+        "type": "periodic function in the quantified domain"
+      },
+      {
+        "symbol": "F",
+        "type": "periodic function in the quantified domain"
+      },
+      {
+        "symbol": "G",
+        "type": "periodic function in the quantified domain"
+      },
+      {
+        "symbol": "h",
+        "type": "periodic function in the quantified domain"
+      },
+      {
+        "symbol": "s",
+        "type": "real"
+      },
+      {
+        "symbol": "t",
+        "type": "real"
+      },
+      {
+        "symbol": "a",
+        "type": "real"
+      },
+      {
+        "symbol": "b",
+        "type": "real"
+      },
+      {
+        "symbol": "I",
+        "type": "time interval"
+      },
+      {
+        "symbol": "tau",
+        "type": "positive real"
+      }
+    ],
+    "objects": [
+      "Fourier",
+      "H",
+      "L2",
+      "S",
+      "P0",
+      "Pnz",
+      "Dinv",
+      "Ftau",
+      "Htau",
+      "Psi",
+      "Bop",
+      "Jop",
+      "Cop",
+      "pstar",
+      "f",
+      "g",
+      "A",
+      "B",
+      "F",
+      "G",
+      "h",
+      "s",
+      "t",
+      "a",
+      "b",
+      "I",
+      "tau"
+    ]
+  },
+  "inference": {
+    "id": "R005",
+    "inputs": [],
+    "output": "N005",
+    "definitions": [
+      "D002",
+      "D003",
+      "D004",
+      "D005",
+      "D006",
+      "D007",
+      "D008",
+      "D009",
+      "D010",
+      "D011",
+      "D016",
+      "D017",
+      "D018",
+      "D019"
+    ],
+    "rules": [
+      "direct",
+      "forall_introduction",
+      "implication_introduction"
+    ],
+    "locals": [],
+    "argument": [
+      {
+        "id": "S001",
+        "text": "All claims in this paragraph are universally quantified over the indicated functions and real times. S_t has multiplier of modulus one, conjugate-compatible at k and -k, and does not mix frequencies, proving the isometry, reality, mean and projection assertions. For mean-zero f, Cauchy–Schwarz gives ||Dinv f||_infinity<= (sum_(k!=0)k^(-2))^(1/2)||f||_2 and ||Dinv f||_(H^1)<=sqrt(2)||f||_2. For arbitrary A in H^1 its Fourier ell1 norm is bounded by (sum_k<k>^(-2))^(1/2)||A||_(H^1), giving H^1->L^infinity. The product rule and this embedding give ||AB||_(H^1)<=C||A||_(H^1)||B||_(H^1). Apply this to the two inverse derivatives in Jop for its H^1 bound. Bounding Dinv B in L^infinity and Dinv A in L2 gives the asymmetric Jop bound.",
+        "uses": [],
+        "uses_local": [],
+        "objects": [
+          "Fourier",
+          "H",
+          "L2",
+          "S",
+          "Dinv",
+          "Jop",
+          "Pnz"
+        ],
+        "produces": [
+          {
+            "id": "F001",
+            "statement": "For every real t, S_t is an isometry on every H^s, preserves reality and zero mean, and Fourier projections contract H^s norms. For mean-zero f in L2, ||Dinv f||_(H^1)+||Dinv f||_infinity<=C||f||_2. For A,B in H^1, ||A||_infinity<=C||A||_(H^1) and ||AB||_(H^1)<=C||A||_(H^1)||B||_(H^1). For mean-zero L2 f,g, ||Jop_t(f,g)||_(H^1)<=C||f||_2||g||_2; for mean-zero A,B with Dinv A in L2 and B in L2, ||Jop_t(A,B)||_2<=C||Dinv A||_2||B||_2.",
+            "binders": [
+              {
+                "symbol": "t",
+                "type": "real"
+              },
+              {
+                "symbol": "s",
+                "type": "real"
+              },
+              {
+                "symbol": "f",
+                "type": "mean-zero L2 function"
+              },
+              {
+                "symbol": "g",
+                "type": "mean-zero L2 function"
+              },
+              {
+                "symbol": "A",
+                "type": "periodic function in its specified Sobolev domain"
+              },
+              {
+                "symbol": "B",
+                "type": "periodic function in its specified Sobolev domain"
+              }
+            ],
+            "objects": [
+              "Fourier",
+              "H",
+              "L2",
+              "S",
+              "Dinv",
+              "Jop",
+              "Pnz",
+              "t",
+              "s",
+              "f",
+              "g",
+              "A",
+              "B"
+            ],
+            "assumptions": []
+          }
+        ],
+        "introduces": [],
+        "discharges": []
+      },
+      {
+        "id": "S002",
+        "text": "For any L2 F,G the coefficient of FG has absolute value at most ||F||_2||G||_2 by Cauchy–Schwarz in the convolution. Thus the squared H^(-pstar) norm of Bop_t(f,g) is <=||f||_2^2||g||_2^2 sum_(k!=0)k^2<k>^(-2*pstar), a finite sum because pstar=23/14>3/2. The same coefficient bound with sum_(k!=0)k^(-2) gives ||Dinv Pnz(FG)||_2<=C||F||_2||G||_2. For mean-zero A, <k>^(-pstar)<=|k|^(-1), proving ||A||_(H^(-pstar))<=||Dinv A||_2. Density extends all these continuous product bounds from polynomials; the product FG is an L1 function and Fourier convolution agrees with it by L2 approximation and the L1 product estimate.",
+        "uses": [],
+        "uses_local": [],
+        "objects": [
+          "Fourier",
+          "H",
+          "L2",
+          "Dinv",
+          "Pnz",
+          "Bop",
+          "pstar"
+        ],
+        "produces": [
+          {
+            "id": "F002",
+            "statement": "For mean-zero L2 f,g, ||Bop_t(f,g)||_(H^(-pstar))<=C||f||_2||g||_2. For L2 F,G, ||Dinv Pnz(FG)||_2<=C||F||_2||G||_2. For mean-zero A, ||A||_(H^(-pstar))<=||Dinv A||_2. Constants are uniform in real t.",
+            "binders": [
+              {
+                "symbol": "t",
+                "type": "real"
+              },
+              {
+                "symbol": "f",
+                "type": "periodic L2 function"
+              },
+              {
+                "symbol": "g",
+                "type": "periodic L2 function"
+              },
+              {
+                "symbol": "F",
+                "type": "periodic L2 function"
+              },
+              {
+                "symbol": "G",
+                "type": "periodic L2 function"
+              },
+              {
+                "symbol": "A",
+                "type": "mean-zero periodic distribution with Dinv A in L2"
+              }
+            ],
+            "objects": [
+              "H",
+              "L2",
+              "Dinv",
+              "Pnz",
+              "Bop",
+              "pstar",
+              "t",
+              "f",
+              "g",
+              "F",
+              "G",
+              "A"
+            ],
+            "assumptions": []
+          }
+        ],
+        "introduces": [],
+        "discharges": []
+      },
+      {
+        "id": "S003",
+        "text": "For any time-smooth spatially smooth mean-zero f,g, the k!=0 coefficient of Jop_t(f,g) is sum_(a+b=k) exp(-i*t*3*k*a*b)*(i*a)^(-1)*(i*b)^(-1)*hat f(a)*hat g(b). Differentiating its phase produces 3*i*k, so partial_t Jop_t(f,g)=3 Bop_t(f,g)+Jop_t(f',g)+Jop_t(f,g'). Smooth Fourier series and all derivatives here are absolutely convergent. Integrating yields the stated normal-form identity, with both endpoints. Symmetry follows from the product. Since Dinv partial_x=Pnz, substitution gives Jop_t(Bop_t(f,g),h)=S_(-t)Pnz{Pnz[(S_t f)(S_t g)]*(S_t Dinv h)}, whose integral is Cop. For piecewise smooth functions apply on each smooth time piece and add; continuous endpoint values telescope.",
+        "uses": [],
+        "uses_local": [],
+        "objects": [
+          "Fourier",
+          "S",
+          "Dinv",
+          "Pnz",
+          "Bop",
+          "Jop",
+          "Cop"
+        ],
+        "produces": [
+          {
+            "id": "F003",
+            "statement": "For smooth mean-zero f,g on [a,b], integral_a^b Bop_t(f,g)dt=(1/3)[Jop_t(f,g)]_a^b-(1/3)integral_a^b(Jop_t(f',g)+Jop_t(f,g'))dt. Jop_t(f,g)=Jop_t(g,f), and integral_I Jop_t(Bop_t(f,g),h)dt=Cop_I(f,g,h). Identities concatenate for continuous piecewise smooth inputs.",
+            "binders": [
+              {
+                "symbol": "a",
+                "type": "real"
+              },
+              {
+                "symbol": "b",
+                "type": "real"
+              },
+              {
+                "symbol": "I",
+                "type": "time interval"
+              },
+              {
+                "symbol": "f",
+                "type": "smooth mean-zero space-time function"
+              },
+              {
+                "symbol": "g",
+                "type": "smooth mean-zero space-time function"
+              },
+              {
+                "symbol": "h",
+                "type": "smooth mean-zero space-time function"
+              }
+            ],
+            "objects": [
+              "Bop",
+              "Jop",
+              "Cop",
+              "a",
+              "b",
+              "I",
+              "f",
+              "g",
+              "h"
+            ],
+            "assumptions": []
+          }
+        ],
+        "introduces": [],
+        "discharges": []
+      },
+      {
+        "id": "S004",
+        "text": "For fixed tau>0, each term in Ftau is an H^1 product of inverse derivatives, hence a continuous quadratic L2->H^1 map by F001. In Htau the first term is again an H^1 product. The bilinear mean P0(f^2) is continuous by the L2 product bound, so the second term is continuous. Its third term is an H^1 cubic product followed by Dinv, and its fourth term is a product of Dinv2 Ftau(f) and Dinv f followed by Dinv2. All group factors preserve Sobolev norms and all coefficients, including tau^(-1), are finite for fixed tau. This proves L2 continuity. Pnz and inverse derivatives force zero mean except in the second term; that term is a scalar multiple of S_tau Dinv f and also has zero mean. Each operation preserves reality; smooth functions remain smooth under all these operations. The recurrence therefore has well-defined continuous finite iterates and preserves real mean-zero data.",
+        "uses": [],
+        "uses_local": [
+          "F001",
+          "F002"
+        ],
+        "objects": [
+          "S",
+          "P0",
+          "Pnz",
+          "Dinv",
+          "Ftau",
+          "Htau",
+          "Psi",
+          "H",
+          "L2"
+        ],
+        "produces": [],
+        "introduces": [],
+        "discharges": []
+      }
+    ],
+    "applications": []
+  },
+  "warning": "Direct inputs and fixed logic are supplied. Audit A may record mathematically checked routine background with actual conditions and justification; exact Lean bindings belong to nl02lean. No ancestor proof or extra H is available. A packet is not an audit certificate.",
+  "packet_sha256": "4557391f033e3d3939bcdba8c9f6c9824ec7f90a6f3499a0005bde60cd953610"
+}

@@ -1,0 +1,29 @@
+{
+  "statement": "∀ s δ : ℝ, 0 < s → 0 < δ → GDContent s δ E < ⊤",
+  "proof": "classical\nintro s δ hs hδ\nhave hcover : E ⊆ ⋃ x : E, Metric.ball (x : GDVec n) (δ / 2) := by\n  intro x hx\n  exact Set.mem_iUnion.mpr ⟨⟨x, hx⟩, by simpa using (half_pos hδ)⟩\nobtain ⟨t, ht⟩ := h_H002.elim_finite_subcover\n  (fun x : E => Metric.ball (x : GDVec n) (δ / 2))\n  (fun _ => Metric.isOpen_ball) hcover\nlet e : t ≃ Fin (Fintype.card t) := Fintype.equivFin t\nlet U : ℕ → Set (GDVec n) := fun i =>\n  if hi : i < Fintype.card t then\n    Metric.ball (((e.symm ⟨i, hi⟩ : t) : E) : GDVec n) (δ / 2)\n  else ∅\nhave hUcover : E ⊆ ⋃ i, U i := by\n  intro x hx\n  obtain ⟨y, hy, hxy⟩ := Set.mem_iUnion₂.mp (ht hx)\n  let j : t := ⟨y, hy⟩\n  refine Set.mem_iUnion.mpr ⟨(e j).val, ?_⟩\n  dsimp only [U]\n  rw [dif_pos (e j).isLt]\n  simpa only [Fin.eta, Equiv.symm_apply_apply] using hxy\nhave hUdiam : ∀ i, Metric.ediam (U i) ≤ ENNReal.ofReal δ := by\n  intro i\n  dsimp only [U]\n  split_ifs with hi\n  · apply Metric.ediam_le_of_forall_dist_le\n    intro x hx y hy\n    have hx' : dist x (((e.symm ⟨i, hi⟩ : t) : E) : GDVec n) < δ / 2 := hx\n    have hy' : dist y (((e.symm ⟨i, hi⟩ : t) : E) : GDVec n) < δ / 2 := hy\n    calc\n      dist x y ≤ dist x (((e.symm ⟨i, hi⟩ : t) : E) : GDVec n) +\n        dist y (((e.symm ⟨i, hi⟩ : t) : E) : GDVec n) := dist_triangle_right _ _ _\n      _ ≤ δ := by linarith\n  · simp\nhave hcost : ∀ i, GDCost s (U i) < ⊤ := by\n  intro i\n  have hd : Metric.ediam (U i) ≠ ⊤ :=\n    ne_top_of_le_ne_top ENNReal.ofReal_ne_top (hUdiam i)\n  by_cases hi : (U i).Nonempty\n  · simpa [GDCost, hi] using ENNReal.rpow_lt_top_of_nonneg hs.le hd\n  · simp [GDCost, hi]\nhave hsum : (∑' i, GDCost s (U i)) < ⊤ := by\n  rw [tsum_eq_sum (s := Finset.range (Fintype.card t)) (fun i hi => ?_)]\n  · exact ENNReal.sum_lt_top.mpr (fun i _ => hcost i)\n  · have hi' : ¬ i < Fintype.card t := by simpa only [Finset.mem_range] using hi\n    have hUi : U i = ∅ := by\n      dsimp only [U]\n      exact dif_neg hi'\n    simp only [hUi, GDCost, Set.not_nonempty_empty, iSup_of_empty]\nexact lt_of_le_of_lt\n  (iInf_le_of_le U (iInf_le_of_le hUcover (iInf_le_of_le hUdiam le_rfl))) hsum\n",
+  "check": {
+    "exit_code": 1,
+    "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-7584d8_1/output/Auxiliary.lean:90:4: error: unsolved goals\nn : ℕ\nE : Set (GDVec n)\nh_H002 : IsCompact E\nh_T003 : Bornology.IsBounded E ∧ dimH E ≤ ↑n ∧ (n = 0 → E = Set.univ ∧ dimH E = 0)\ns δ : ℝ\nhs : 0 < s\nhδ : 0 < δ\nhcover : E ⊆ ⋃ x, Metric.ball (↑x) (δ / 2)\nt : Finset ↑E\nht : E ⊆ ⋃ i ∈ t, Metric.ball (↑i) (δ / 2)\ne : ↥t ≃ Fin (Fintype.card ↥t) := Fintype.equivFin ↥t\nU : ℕ → Set (GDVec n) := fun i => if hi : i < Fintype.card ↥t then Metric.ball (↑↑(e.symm ⟨i, hi⟩)) (δ / 2) else ∅\nhUcover : E ⊆ ⋃ i, U i\nhUdiam : ∀ (i : ℕ), Metric.ediam (U i) ≤ ENNReal.ofReal δ\nhcost : ∀ (i : ℕ), GDCost s (U i) < ∞\ni : ℕ\nhi : i ∉ Finset.range (Fintype.card ↥t)\nhi' : ¬i < Fintype.card ↥t\nhUi : U i = ∅\n⊢ ⊥ = 0\nchecked : ∀ (n : ℕ) (E : Set (GDVec n)),\n  IsCompact E →\n    Bornology.IsBounded E ∧ dimH E ≤ ↑n ∧ (n = 0 → E = Set.univ ∧ dimH E = 0) →\n      ∀ (s δ : ℝ), 0 < s → 0 < δ → GDContent s δ E < ∞\n'YuiAuxiliary.checked' depends on axioms: [propext, sorryAx, Classical.choice, Quot.sound]\n",
+    "stderr": "",
+    "wall_seconds": 3.5416109999641776,
+    "native_limits": {
+      "timeout_seconds": 180,
+      "max_heartbeats": 20000000
+    },
+    "source_path": "/Users/syyui/projects/Yui-results/test/geometry-product-dimension/rigorous-proof/20261101-fresh-full-18b3e2e0bf/native-checks/d55349ada4fd4dfa8aacf6aca2e217e7.lean",
+    "source_sha256": "dafcb3790a8e8a41230bf0b5c5f843d3396d90661766b82b82a880056f7c7654",
+    "auxiliary_valid": false,
+    "axioms": [
+      "Classical.choice",
+      "Quot.sound",
+      "propext",
+      "sorryAx"
+    ],
+    "lean_sha256": "dafcb3790a8e8a41230bf0b5c5f843d3396d90661766b82b82a880056f7c7654",
+    "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+    "context_port": "T004",
+    "candidate": 2,
+    "accepted": false,
+    "stage_complete": false
+  }
+}

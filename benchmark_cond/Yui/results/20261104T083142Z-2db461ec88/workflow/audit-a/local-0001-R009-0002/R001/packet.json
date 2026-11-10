@@ -1,0 +1,701 @@
+{
+  "contract_version": 2,
+  "case_id": "preparation",
+  "graph_sha256": "ad984460af049c9cd30d76eaaa0b57d0a386f706c8aefea6133fbed093b9600e",
+  "spec_sha256": "572cc1eef408bb067626aaa87a6315b9b9e83c49ff9a5a5f334b9ef037855fde",
+  "parameters": [
+    {
+      "symbol": "T",
+      "type": "real number"
+    },
+    {
+      "symbol": "gamma",
+      "type": "real number"
+    },
+    {
+      "symbol": "R",
+      "type": "real number"
+    },
+    {
+      "symbol": "u0",
+      "type": "periodic distribution on torus"
+    }
+  ],
+  "logic": {
+    "classical": true,
+    "rules": [
+      "direct",
+      "forall_introduction",
+      "implication_introduction",
+      "natural_induction",
+      "contradiction_classical"
+    ],
+    "calculations": [
+      "equality: Equality reflexivity, symmetry, transitivity and substitution.",
+      "definitions: Unfold an explicitly supplied definition; this proves no extra property.",
+      "finite_algebra: Routine finite semiring/ring/field arithmetic, including zero/one laws, distributivity, associativity and finite polynomial identities. Correct elementary compression is permitted; a substantive missing argument is not.",
+      "finite_order: Routine ordered-field reasoning with actual signs/domains: order laws, adding inequalities, multiplication/division with sign conditions, and real square nonnegativity. Ordinary valid elementary inferences need no exhaustive displayed chain. Check that the conclusion follows; substantial named theorems still require inputs or verified-background admission.",
+      "finite_sums: Unfold and rearrange finite sums/products with explicitly given finite indices."
+    ],
+    "primitives": [
+      {
+        "symbol": "0",
+        "type": "typed numeral",
+        "meaning": "Zero of the explicitly specified mathematical type."
+      },
+      {
+        "symbol": "1",
+        "type": "typed numeral",
+        "meaning": "One of the explicitly specified mathematical type."
+      },
+      {
+        "symbol": "2",
+        "type": "typed numeral",
+        "meaning": "Two of the explicitly specified mathematical type, including an exponent two."
+      },
+      {
+        "symbol": "ℕ",
+        "type": "number system",
+        "meaning": "The natural numbers with their usual arithmetic."
+      },
+      {
+        "symbol": "ℤ",
+        "type": "number system",
+        "meaning": "The integers with their usual arithmetic."
+      },
+      {
+        "symbol": "ℚ",
+        "type": "number system",
+        "meaning": "The rational numbers with their usual ordered-field operations."
+      },
+      {
+        "symbol": "ℝ",
+        "type": "number system",
+        "meaning": "The real numbers with their usual ordered-field structure."
+      },
+      {
+        "symbol": "ℂ",
+        "type": "number system",
+        "meaning": "The complex numbers with their usual field structure."
+      },
+      {
+        "symbol": "∅",
+        "type": "typed set notation",
+        "meaning": "The empty set in the explicitly specified ambient type."
+      },
+      {
+        "symbol": "∞",
+        "type": "typed order notation",
+        "meaning": "The top element in an explicitly specified extended ordered codomain."
+      }
+    ]
+  },
+  "pins": {
+    "lean_version": "4.32.2",
+    "mathlib_commit": "905b95818eb32af7874a58b427f50c1711a5e96c",
+    "mathlib_root": "/Users/syyui/formalization-tools/lean-mathlib-v4.32.2/mathlib"
+  },
+  "foundation_profile": "elementary-language-4",
+  "standard_language": "Ordinary typed mathematical language: logical connectives, quantifiers, equality, sets, functions, tuples, finite indices and their usual notation. A type explicitly named natural numbers, integers, rationals, reals or complex numbers means that standard structure, with its usual numerals and arithmetic operations; these operation tokens need not be redeclared as project objects. The fixed finite calculation rules below, including a+0=a, are controller permissions, not an author claim. The core symbol table below is not a dictionary of all allowed mathematics. Objects and notation from any subject are introduced by this problem's parameters, D definitions or scoped locals, with their types and dependencies. Their properties need direct inputs or displayed local proofs; a familiar name or symbol supplies no theorem.",
+  "background_policy": "mathematical-background-v2-1",
+  "definitions": [
+    {
+      "id": "D001",
+      "symbol": "torus",
+      "type": "compact additive group with normalized measure",
+      "definition": "torus=ℝ/(2πℤ), written \\mathbb T in formulas; integration uses dx/(2π). The parameter T denotes the time horizon.",
+      "depends_on": [],
+      "requires": [],
+      "binders": [],
+      "objects": []
+    },
+    {
+      "id": "D002",
+      "symbol": "Fourier",
+      "type": "Fourier coefficient map on the torus",
+      "definition": "For integrable f, Fourier(f)(k) = fhat(k) = (2 pi)^(-1) integral_0^{2 pi} f(x) exp(-ikx) dx; extend by distributional duality.",
+      "depends_on": [
+        "D001"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "f",
+          "type": "periodic distribution"
+        },
+        {
+          "symbol": "k",
+          "type": "integer"
+        }
+      ],
+      "objects": [
+        "torus"
+      ]
+    },
+    {
+      "id": "D003",
+      "symbol": "H",
+      "type": "Fourier Sobolev scale with norms",
+      "definition": "For real s, H^s is the completion of trigonometric polynomials with norm squared sum_{k in Z} <k>^(2s)|fhat(k)|^2, <k>=(1+k^2)^(1/2). Negative spaces are distributions. L2=H^0 with normalized measure. On mean-zero distributions dot H^s has squared norm sum_{k!=0}|k|^(2s)|fhat(k)|^2. Smooth means spatially C-infinity. Real means fhat(-k)=conjugate(fhat(k)), and mean-zero means fhat(0)=0. Sequence ell2 uses counting measure. Time L-infinity norms are essential suprema, except time suprema of continuous representatives. Generic constants C may change; C_M depends only on gamma,T,M, never on a Fourier support bound or timestep.",
+      "depends_on": [
+        "D001",
+        "D002"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "s",
+          "type": "real"
+        },
+        {
+          "symbol": "f",
+          "type": "periodic distribution"
+        }
+      ],
+      "objects": [
+        "torus",
+        "Fourier"
+      ]
+    },
+    {
+      "id": "D004",
+      "symbol": "S",
+      "type": "Airy group indexed by real times",
+      "definition": "S_t = exp(-t partial_x^3); Fourier(S_t f)(k)= exp(it k^3) fhat(k).",
+      "depends_on": [
+        "D003"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "t",
+          "type": "real"
+        },
+        {
+          "symbol": "f",
+          "type": "periodic distribution"
+        },
+        {
+          "symbol": "k",
+          "type": "integer"
+        }
+      ],
+      "objects": [
+        "Fourier",
+        "H"
+      ]
+    },
+    {
+      "id": "D017",
+      "symbol": "B",
+      "type": "time-indexed bilinear distributional operator",
+      "definition": "B_t(f,g)=mathcal B_t(f,g)=S_{-t} partial_x[(S_t f)(S_t g)].",
+      "depends_on": [
+        "D004"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "t",
+          "type": "real"
+        },
+        {
+          "symbol": "f",
+          "type": "L2 function"
+        },
+        {
+          "symbol": "g",
+          "type": "L2 function"
+        }
+      ],
+      "objects": [
+        "S"
+      ]
+    }
+  ],
+  "inputs": [
+    {
+      "id": "H001",
+      "kind": "hypothesis",
+      "statement": "T>0, 0<gamma<=1, and R>0.",
+      "definitions": [],
+      "binders": [],
+      "objects": [
+        "T",
+        "gamma",
+        "R"
+      ]
+    },
+    {
+      "id": "E001",
+      "kind": "external",
+      "statement": "Babin–Ilyin–Titi primary results in their normalized mean-zero homogeneous spaces on R/(2 pi Z): write U_t=U U_x+U_xxx, Uhat(k)=exp(-it k^3) z_k(t), so z'_k=(ik/2) sum_{k1+k2=k}exp(3it k k1 k2)z_{k1}z_{k2}. A weak solution satisfies this integrated equation at every nonzero k. For every s>=0, B0>=0, horizon b>0 and initial z0 in dot H^s with ||z0||_2<=B0, the Galerkin equations z'_k=Pi_m[(ik/2) sum_{k1+k2=k} exp(3it k k1 k2)(Pi_m z)_{k1}(Pi_m z)_{k2}], z(0)=z0, have a bound sup_{[0,b]}||z^(m)||_{dot H^s}<=K_s(b,B0,||z0||_{dot H^s}), uniformly in m; the proof supplies a bound uniform when the indicated initial norm is bounded. For s>0 and 0<sigma<s, a subsequence converges strongly in L^p([0,b];dot H^sigma), 1<p<infinity, and weak-star in L-infinity dot H^s to a weak solution with the same bound and L2 conservation a.e.. This solution is unique and C([0,b];dot H^s), with Lipschitz continuous dependence in dot H^s, and conserves L2 at every time: for s>1/2 by the regular-solution uniqueness theorem, for 0<s<=1/2 by the positive rough-solution uniqueness theorem. For s=0 there is likewise a unique C([0,b];L2) weak solution with Lipschitz dependence. For any theta in (-1,0], and any two flows with ||z0||_2+||w0||_2<=B0, sup_{[0,b]}||z-w||_{dot H^theta}<=C' C_{B0}^b ||z0-w0||_{dot H^theta}, where C',C_{B0} depend only on B0,theta. The real, zero-mean class and normalized measure are standing conditions throughout.",
+      "definitions": [
+        "D003",
+        "D002"
+      ],
+      "binders": [
+        {
+          "symbol": "s",
+          "type": "real Sobolev exponent >=0"
+        },
+        {
+          "symbol": "B0",
+          "type": "nonnegative real norm bound"
+        },
+        {
+          "symbol": "b",
+          "type": "positive real horizon"
+        },
+        {
+          "symbol": "sigma",
+          "type": "real exponent with 0<sigma<s"
+        },
+        {
+          "symbol": "p",
+          "type": "real time exponent with 1<p<infinity"
+        },
+        {
+          "symbol": "theta",
+          "type": "real exponent in (-1,0]"
+        },
+        {
+          "symbol": "m",
+          "type": "positive integer cutoff index"
+        },
+        {
+          "symbol": "k",
+          "type": "integer output mode"
+        },
+        {
+          "symbol": "k1",
+          "type": "integer summation mode"
+        },
+        {
+          "symbol": "k2",
+          "type": "integer summation mode"
+        },
+        {
+          "symbol": "z0",
+          "type": "real mean-zero initial Fourier sequence in dot H^s"
+        },
+        {
+          "symbol": "w0",
+          "type": "second real mean-zero initial Fourier sequence"
+        },
+        {
+          "symbol": "z",
+          "type": "source interaction-representation flow"
+        },
+        {
+          "symbol": "w",
+          "type": "second source interaction-representation flow"
+        },
+        {
+          "symbol": "U",
+          "type": "source physical real mean-zero solution"
+        },
+        {
+          "symbol": "Pi_m",
+          "type": "Fourier projection to |k|<=m"
+        },
+        {
+          "symbol": "K_s",
+          "type": "finite nonnegative uniform Sobolev bound function"
+        },
+        {
+          "symbol": "C'",
+          "type": "positive real constant depending on B0,theta"
+        },
+        {
+          "symbol": "C_B0",
+          "type": "positive real constant depending on B0,theta"
+        }
+      ],
+      "objects": [
+        "H",
+        "Fourier",
+        "torus",
+        "s",
+        "B0",
+        "b",
+        "sigma",
+        "p",
+        "theta",
+        "m",
+        "k",
+        "k1",
+        "k2",
+        "z0",
+        "w0",
+        "z",
+        "w",
+        "U",
+        "Pi_m",
+        "K_s",
+        "C'",
+        "C_B0"
+      ],
+      "source_contract": {
+        "hypotheses": [
+          "The initial data are real and mean-zero on the source torus, with the specified Sobolev regularity and finite L2 bound; b>0.",
+          "For the weaker-norm estimate, theta is in (-1,0] and the two initial L2 norms sum to at most B0."
+        ]
+      }
+    }
+  ],
+  "output": {
+    "id": "N001",
+    "kind": "internal",
+    "statement": "There is a finite A(T,gamma,R) uniform for every real mean-zero datum g with ||g||_{H^gamma}<=R. Its KdV equation u_t+u_xxx=(1/2)partial_x(u^2), u(0)=g, has a unique real mean-zero C([0,T];H^gamma) solution obtained by smooth approximation, solving the equation distributionally, with sup_t||u(t)||_{H^gamma}<=A. Smooth data give spatially smooth solutions. For v(t)=S_{-t}u(t), v'=B_t(v,v)/2 and all Sobolev norms of v and u agree. For two such exact flows with initial L2 norms summing to at most B0, sup_t||u-tilde u||_2<=C(T,B0)||g-tilde g||_2. In particular M=1+sup_t||v(t)||_{H^gamma}<=1+A uniformly.",
+    "definitions": [
+      "D003",
+      "D004",
+      "D017"
+    ],
+    "binders": [
+      {
+        "symbol": "g",
+        "type": "datum in the ball"
+      },
+      {
+        "symbol": "u",
+        "type": "exact solution"
+      },
+      {
+        "symbol": "v",
+        "type": "twisted solution"
+      },
+      {
+        "symbol": "A",
+        "type": "finite uniform bound"
+      },
+      {
+        "symbol": "M",
+        "type": "one plus exact Sobolev supremum"
+      },
+      {
+        "symbol": "B0",
+        "type": "initial L2 sum bound"
+      },
+      {
+        "symbol": "tilde u",
+        "type": "second flow"
+      },
+      {
+        "symbol": "tilde g",
+        "type": "second datum"
+      },
+      {
+        "symbol": "t",
+        "type": "time in [0,T]"
+      }
+    ],
+    "objects": [
+      "T",
+      "gamma",
+      "R",
+      "u0",
+      "H",
+      "S",
+      "B",
+      "g",
+      "u",
+      "v",
+      "A",
+      "M",
+      "B0",
+      "tilde u",
+      "tilde g",
+      "t"
+    ]
+  },
+  "inference": {
+    "id": "R001",
+    "inputs": [
+      "H001",
+      "E001"
+    ],
+    "output": "N001",
+    "definitions": [
+      "D003",
+      "D004",
+      "D017"
+    ],
+    "rules": [
+      "direct",
+      "forall_introduction"
+    ],
+    "locals": [
+      {
+        "symbol": "g",
+        "type": "real mean-zero initial datum with H^gamma norm bounded by R",
+        "scope": "R001/argument",
+        "start": "S001",
+        "end": "S002",
+        "kind": "arbitrary",
+        "declaration": "Fix g as an arbitrary real mean-zero initial datum with H^gamma norm bounded by R; its stated restrictions, if any, are temporary antecedents, not granted by this declaration.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": []
+      },
+      {
+        "symbol": "U",
+        "type": "source physical flow",
+        "scope": "R001/argument",
+        "start": "S002",
+        "end": "S002",
+        "kind": "witness",
+        "declaration": "For each g use the unique flow furnished in F001; U denotes that flow with initial value -g(-x).",
+        "from_inputs": [],
+        "from_local": [
+          "F001"
+        ],
+        "objects": [
+          "g"
+        ]
+      },
+      {
+        "symbol": "u",
+        "type": "physical flow",
+        "scope": "R001/argument",
+        "start": "S002",
+        "end": "S002",
+        "kind": "definition",
+        "declaration": "Define u(t,x)=-U(t,-x).",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "U"
+        ]
+      },
+      {
+        "symbol": "v",
+        "type": "twisted solution",
+        "scope": "R001/argument",
+        "start": "S002",
+        "end": "S002",
+        "kind": "definition",
+        "declaration": "Define v(t)=S_{-t}u(t).",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "u",
+          "S"
+        ]
+      },
+      {
+        "symbol": "A",
+        "type": "uniform bound",
+        "scope": "R001/argument",
+        "start": "S002",
+        "end": "S002",
+        "kind": "witness",
+        "declaration": "A denotes the source bound after multiplying by 2^(gamma/2); its existence is the assertion F001, and its value depends only on T,gamma,R.",
+        "from_inputs": [],
+        "from_local": [
+          "F001"
+        ],
+        "objects": [
+          "T",
+          "gamma",
+          "R"
+        ]
+      },
+      {
+        "symbol": "M",
+        "type": "real",
+        "scope": "R001/argument",
+        "start": "S002",
+        "end": "S002",
+        "kind": "definition",
+        "declaration": "Define M=1+sup_{0<=t<=T}||v(t)||_{H^gamma}.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "v",
+          "H",
+          "T",
+          "gamma"
+        ]
+      },
+      {
+        "symbol": "B0",
+        "type": "nonnegative bound for a pair of initial L2 norms",
+        "scope": "R001/argument",
+        "start": "S001",
+        "end": "S002",
+        "kind": "arbitrary",
+        "declaration": "Fix B0 as an arbitrary nonnegative bound for a pair of initial L2 norms; its stated restrictions, if any, are temporary antecedents, not granted by this declaration.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": []
+      },
+      {
+        "symbol": "t",
+        "type": "time",
+        "scope": "R001/argument",
+        "start": "S001",
+        "end": "S002",
+        "kind": "arbitrary",
+        "declaration": "Fix t as an arbitrary time; its stated restrictions, if any, are temporary antecedents, not granted by this declaration.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": []
+      },
+      {
+        "symbol": "x",
+        "type": "torus coordinate",
+        "scope": "R001/argument",
+        "start": "S001",
+        "end": "S002",
+        "kind": "arbitrary",
+        "declaration": "Fix x as an arbitrary torus coordinate; its stated restrictions, if any, are temporary antecedents, not granted by this declaration.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": []
+      },
+      {
+        "symbol": "k",
+        "type": "integer frequency",
+        "scope": "R001/argument",
+        "start": "S001",
+        "end": "S002",
+        "kind": "arbitrary",
+        "declaration": "Fix k as an arbitrary integer frequency; its stated restrictions, if any, are temporary antecedents, not granted by this declaration.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": []
+      }
+    ],
+    "argument": [
+      {
+        "id": "S001",
+        "text": "By H001, T>0 and 0<gamma<=1. For arbitrary real mean-zero g with ||g||_{H^gamma}<=R, reflection and sign give real mean-zero -g(-x) with the same Fourier norms. In particular its L2 and dot H^gamma norms are <=R. Instantiate E001 at s=gamma, b=T, B0=R and z0=-g(-x). Thus the equation U_t=U U_x+U_xxx admits a unique continuous dot H^gamma solution, and sup_{[0,T]}||U(t)||_{dot H^gamma}<=K_gamma(T,R,R), with K_gamma uniform over this ball. Smooth initial data belong to every positive integer Sobolev space; E001 at each such integer and uniqueness identify these regular solutions with the H^gamma solution, giving spatial smoothness. E001 at theta=0 and arbitrary two initial norms summing to at most B0 gives sup_{[0,T]}||U-Utilde||_2<=C(T,B0)||U(0)-Utilde(0)||_2. The source's dot H^gamma Lipschitz dependence also makes solutions of smooth Fourier approximations converge in C([0,T];dot H^gamma); coefficientwise norm comparison transfers this to H^gamma. The products converge in distributions since H^gamma convergence implies L2 convergence and squares then converge in L1.",
+        "uses": [
+          "H001",
+          "E001"
+        ],
+        "uses_local": [],
+        "objects": [
+          "H",
+          "S",
+          "B",
+          "g",
+          "B0",
+          "t",
+          "x",
+          "k",
+          "T",
+          "gamma",
+          "R",
+          "u0"
+        ],
+        "produces": [
+          {
+            "id": "F001",
+            "statement": "For every real mean-zero g with ||g||_{H^gamma}<=R, there exists a unique C([0,T];dot H^gamma) solution of (Uflow)_t=Uflow (Uflow)_x+(Uflow)_xxx with Uflow(0,x)=-g(-x), with a finite uniform homogeneous norm bound depending only on T,gamma,R. For smooth initial g this solution is spatially smooth. For any two real mean-zero initial data in this class whose initial L2 norms sum to at most B0, their corresponding source-sign flows satisfy sup_{[0,T]}||Ufirst-Usecond||_2<=C(T,B0)||Ufirst(0)-Usecond(0)||_2. Smooth Fourier approximations converge to these flows in C([0,T];dot H^gamma), so their equations pass distributionally to the limit.",
+            "binders": [
+              {
+                "symbol": "Uflow",
+                "type": "the unique source-sign flow with initial value -g(-x)"
+              },
+              {
+                "symbol": "Ufirst",
+                "type": "source-sign flow of the first comparison datum"
+              },
+              {
+                "symbol": "Usecond",
+                "type": "source-sign flow of the second comparison datum"
+              }
+            ],
+            "objects": [
+              "H",
+              "S",
+              "B",
+              "g",
+              "B0",
+              "t",
+              "x",
+              "k",
+              "T",
+              "gamma",
+              "R",
+              "u0",
+              "Uflow",
+              "Ufirst",
+              "Usecond"
+            ],
+            "assumptions": []
+          }
+        ],
+        "introduces": [],
+        "discharges": []
+      },
+      {
+        "id": "S002",
+        "text": "Define \\(u(t,x)=-U(t,-x)\\). Then \\(u_t=-U_t\\), \\(u_x=U_x\\), \\(u_{xxx}=U_{xxx}\\) at \\((t,-x)\\), and consequently \\(u_t+u_{xxx}=uu_x\\). Fourier coefficients become \\(\\widehat u(k)=-\\widehat U(-k)\\), preserving every Sobolev norm, reality and zero mean. This transforms the source equation to u_t+u_xxx=(1/2)partial_x(u^2). The norm comparison above transfers all bounds to our \\(H^\\gamma\\) norm. Hence there is \\(A(T,\\gamma,R)<\\infty\\) such that every smooth initial datum in the stated ball satisfies \\(\\sup_{[0,T]}\\|u(t)\\|_{H^\\gamma}\\le A\\). The same bound holds for the limiting solution: for each finite set of frequencies pass to the limit in its finite norm sum, then take the supremum over finite sets. Thus \\(M\\le1+A(T,\\gamma,R)\\) uniformly. Continuous dependence in \\(L^2\\) is precisely the input used in the final density passage. No change of torus length or amplitude scaling is needed. More explicitly, the physical change u(t,x)=-U(t,-x) maps initial data g to source initial data -g(-x), so preserves the whole initial-data ball. The homogeneous-to-inhomogeneous inequalities follow coefficientwise from |k|<=<k><=sqrt(2)|k| for k!=0. For a continuous limiting flow the finite-frequency sums and then their supremum give the bound at each time, with the same constant. Apply the source pair bound after this isometry; it gives the stated C(T,B0) bound. Twisting by S_{-t} differentiates away -partial_x^3 and gives v'=B_t(v,v)/2. This proves all clauses of the output, for arbitrary data in the ball.",
+        "uses": [],
+        "uses_local": [
+          "F001"
+        ],
+        "objects": [
+          "H",
+          "S",
+          "B",
+          "g",
+          "U",
+          "u",
+          "v",
+          "A",
+          "M",
+          "B0",
+          "t",
+          "x",
+          "k",
+          "T",
+          "gamma",
+          "R",
+          "u0"
+        ],
+        "produces": [],
+        "introduces": [],
+        "discharges": []
+      }
+    ],
+    "applications": [
+      {
+        "id": "A001",
+        "input": "E001",
+        "at": "S001",
+        "bindings": "Take s=gamma, b=T, B0=R, z0=-g(-x). Use positive-regularity existence, uniqueness, continuity and the uniform Sobolev bound.",
+        "hypothesis_checks": [
+          "H001 gives T>0 and gamma>0. Real mean-zero g in the H^gamma ball yields real mean-zero z0 with L2 and homogeneous H^gamma norms <=R by reflection and coefficientwise norm comparison.",
+          "The weaker-norm pair conclusion is not used in this instance."
+        ]
+      },
+      {
+        "id": "A002",
+        "input": "E001",
+        "at": "S001",
+        "bindings": "For smooth g apply the positive-regularity result for every positive integer s, b=T, z0=-g(-x), with its finite homogeneous H^s norm. Use uniqueness to identify the solutions.",
+        "hypothesis_checks": [
+          "Smooth real mean-zero g has finite Sobolev norms at every positive integer and L2 norm <=R. T>0 by H001; hence each source instance exists.",
+          "The pair conclusion is not used in this smooth-persistence instance."
+        ]
+      },
+      {
+        "id": "A003",
+        "input": "E001",
+        "at": "S001",
+        "bindings": "Take theta=0, b=T, and any two initial real mean-zero H^gamma data with L2 norms summing to <=B0; sign/reflection is applied to both. Identify their interaction flows and physical flows by Airy unitarity.",
+        "hypothesis_checks": [
+          "The two data are real mean-zero H^gamma, gamma>0 and T>0 by H001, so their unique continuous flows exist by the preceding source instance.",
+          "theta=0 is in (-1,0]; the pair condition explicitly bounds the sum of initial L2 norms by B0, and sign/reflection preserves this sum."
+        ]
+      }
+    ]
+  },
+  "warning": "Direct inputs and fixed logic are supplied. Audit A may record mathematically checked routine background with actual conditions and justification; exact Lean bindings belong to nl02lean. No ancestor proof or extra H is available. A packet is not an audit certificate.",
+  "packet_sha256": "a89e3275219dc74117071b4e3ea3e05e89108529824f2634b9ed970f60aac2d1"
+}

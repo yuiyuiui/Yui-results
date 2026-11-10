@@ -1,0 +1,113 @@
+diff --git a/nl0/references/nl0-authoring.md b/nl0/references/nl0-authoring.md
+index 2ccac603..250548f7 100644
+--- a/nl0/references/nl0-authoring.md
++++ b/nl0/references/nl0-authoring.md
+@@ -46,26 +46,9 @@ the object-using inference. A global list's textual order is not graph order.
+ 
+ ## 2. Design outputs from their consumers
+ 
+-Follow the existing proof phases to choose N/R units. Work backward from P:
+-what exact formulas, maps, parameter ranges and representation identifications
+-will each consumer actually use? Put those in its input proposition's exported
+-statement. Read that statement without the producer body. If the consumer
+-cannot reconstruct a needed fact from it, enlarge the producer's proved
+-output or give the consumer another genuine direct input. Then write the
+-producer under precisely its inputs. This implements `statement_closure`,
+-the grouped argument and applicability criteria; it is not permission to invent a stronger theorem.
+-
+-Start another S when the local parameters or purpose change; export a reused
+-result as N and a within-R result as a complete F. Avoid one giant copied S
+-followed by a long sequence of isolated symbol patches. Copy exact supplied
+-calculations through task-line text binding when helpful, then close the
+-copied unit's actual declarations and premises. Keep all required coefficients,
+-normalizations, limiting arguments and exceptional cases.
+-Retain every calculation needed for P and the supplied core route. An
+-independent optional comment/corollary outside that dependency may be omitted;
+-note a material omission in the existing context note. This never licenses
+-dropping a needed derivation or weakening an output. Any retained claim must
+-itself have its complete grounds.
++Use the [NL0 constructor](nl0_constructor.md) for N/R partitioning, complete
++consumer-facing exports, workload balance and local S/F organization. Apply it
++while constructing the actual arguments and factual grounds below.
+ 
+ ## 3. Construct the proof and its factual grounds together
+ 
+diff --git a/nl0/references/nl0-stage.md b/nl0/references/nl0-stage.md
+index 369ba372..b0e3e3fd 100644
+--- a/nl0/references/nl0-stage.md
++++ b/nl0/references/nl0-stage.md
+@@ -6,7 +6,8 @@ This is stage one of Yui. It may be used independently, or its accepted artifact
+ 
+ Read [the data contract](nl0-format.md),
+ [self-containment requirements](self-containment.md),
+-[authoring instructions](nl0-authoring.md), and
++[authoring instructions](nl0-authoring.md),
++[N/R construction](nl0_constructor.md), and
+ [Audit A](audit-a.md) before building or accepting an NL0.
+ For conditional proofs, contradiction, cases, quantifiers, or induction also
+ read [logical packaging](logical-rules.md).
+diff --git a/nl0/scripts/clean_stage.py b/nl0/scripts/clean_stage.py
+index 45728fb1..360ea8d3 100644
+--- a/nl0/scripts/clean_stage.py
++++ b/nl0/scripts/clean_stage.py
+@@ -37,6 +37,12 @@ class ArtifactStage(pilot.Stage):
+         for path in [CORE/'SKILL.md', *(CORE/'nl0/references').glob('*.md'), *(CORE/'nl0/templates').glob('*.md'),
+                      *(CORE/'nl02lean/references').glob('*.md'), *(CORE/'nl02lean/templates').glob('*.md')]:
+             self.rule_texts[str(path.resolve())] = path.read_text()
++        if arm == 'yui' and kind == 'nl0':
++            constructor = (CORE/'nl0/references/nl0_constructor.md').resolve()
++            if str(constructor) not in self.rule_texts:
++                raise FileNotFoundError('Required NL0 constructor rule is missing: '+str(constructor))
++            if not self.rule_texts[str(constructor)].strip():
++                raise ValueError('Required NL0 constructor rule is empty: '+str(constructor))
+         self.acceptance_authority=(AcceptanceContract(self.rule_texts[str((CORE/'nl0/references/audit-a.md').resolve())])
+             if arm=='yui' and (kind=='nl0' or phase.startswith('audit-a')) else None)
+         self.task_inputs = {}
+@@ -355,6 +361,7 @@ class ArtifactStage(pilot.Stage):
+                 index=['SKILL.md','nl0/references/audit-a.md','nl0/references/self-containment.md','nl0/references/external-theorems.md']
+             else:
+                 index=['SKILL.md','nl0/references/audit-a.md','nl0/references/nl0-format.md','nl0/references/nl0-authoring.md',
++                       'nl0/references/nl0_constructor.md',
+                        'nl0/references/self-containment.md','nl0/templates/authoring.md','nl0/templates/submission-example.md',
+                        'nl0/templates/source-application-example.md','nl0/references/logical-rules.md',
+                        'nl0/templates/quantified-implication-example.md']
+diff --git a/nl0/scripts/nl0_author.py b/nl0/scripts/nl0_author.py
+index 80019129..64a45190 100644
+--- a/nl0/scripts/nl0_author.py
++++ b/nl0/scripts/nl0_author.py
+@@ -13,6 +13,8 @@ compression; do not reconstruct standard theory or expand every arithmetic chain
+ Construct the actual proof, declarations and source applications together. Read
+ the relevant authoring/schema rules and complete the same-author packet closing
+ inspection before definitive submission. This is not independent Audit A.
++Read nl0/references/nl0_constructor.md when constructing or revising the N/R
++proof graph.
+ Submit the actual complete artifact, not a plan. Report a substantive gap only
+ for a concrete unsupported implication, not ordinary unfinished bookkeeping.
+ No previous results, other cases or hidden reference answers are supplied.
+diff --git a/nl0/templates/authoring.md b/nl0/templates/authoring.md
+index 1490c4cf..53aa4eaa 100644
+--- a/nl0/templates/authoring.md
++++ b/nl0/templates/authoring.md
+@@ -3,7 +3,8 @@
+ Use [Audit A's shared criteria](../references/audit-a.md#shared-mathematical-acceptance-requirements)
+ as the mathematical authority. This template explains data/tool construction;
+ it is not a parallel acceptance policy. Read the [schema](../references/nl0-format.md),
+-[construction guide](../references/nl0-authoring.md), and the complete neutral
++[construction guide](../references/nl0-authoring.md),
++[NL0 constructor](../references/nl0_constructor.md), and the complete neutral
+ [submission](submission-example.md), [source application](source-application-example.md)
+ and [quantified implication](quantified-implication-example.md) examples.
+ These examples show format and derivations, not certified benchmark answers.
+@@ -23,9 +24,9 @@ original domain. This pattern adds no new assumption or mathematical source.
+ 1. For `target` and `definitions`, extract the original H, ambient parameters
+    and global typed definitions. Preserve the original source locations. Do
+    not change a parameter's mathematical kind while fixing its metadata.
+-2. For `statement_closure`, design N/R interfaces from what their
+-   consumers actually need. Put the complete formulas, quantified conditions
+-   and space identifications into the exported statement, not only its body.
++2. For N/R partitioning and `statement_closure`, follow the
++   [NL0 constructor](../references/nl0_constructor.md). Build the actual nodes
++   and complete exports under its LLM-task and qualitative-workload guidance.
+ 3. For `dependency_closure` and `argument`, construct
+    each proof unit alongside its premises. List exact source inputs or display
+    a prior local derivation for every substantive fact beyond the fixed

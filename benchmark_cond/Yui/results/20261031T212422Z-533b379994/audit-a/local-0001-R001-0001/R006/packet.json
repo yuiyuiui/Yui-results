@@ -1,0 +1,1104 @@
+{
+  "contract_version": 2,
+  "case_id": "benchmark",
+  "graph_sha256": "3e28ec7ac018b004b8dd3a5d9dff040f5b3a38343b2eba0a3d13d0767bedee19",
+  "spec_sha256": "791c53dbac36e0a043c0e0e79679797dd4c0af6a24cd5c32dd0d594719e78229",
+  "parameters": [
+    {
+      "symbol": "T",
+      "type": "real number"
+    },
+    {
+      "symbol": "gamma",
+      "type": "real number"
+    },
+    {
+      "symbol": "R",
+      "type": "real number"
+    }
+  ],
+  "logic": {
+    "classical": true,
+    "rules": [
+      "direct",
+      "forall_introduction",
+      "implication_introduction",
+      "case_elimination",
+      "exists_elimination",
+      "natural_induction",
+      "contradiction_classical"
+    ],
+    "calculations": [
+      "equality: Equality reflexivity, symmetry, transitivity and substitution.",
+      "definitions: Unfold an explicitly supplied definition; this proves no extra property.",
+      "finite_algebra: Routine finite semiring/ring/field arithmetic, including zero/one laws, distributivity, associativity and finite polynomial identities. Correct elementary compression is permitted; a substantive missing argument is not.",
+      "finite_order: Routine ordered-field reasoning with actual signs/domains: order laws, adding inequalities, multiplication/division with sign conditions, and real square nonnegativity. Ordinary valid elementary inferences need no exhaustive displayed chain. Check that the conclusion follows; substantial named theorems still require inputs or verified-background admission.",
+      "finite_sums: Unfold and rearrange finite sums/products with explicitly given finite indices."
+    ],
+    "primitives": [
+      {
+        "symbol": "0",
+        "type": "typed numeral",
+        "meaning": "Zero of the explicitly specified mathematical type."
+      },
+      {
+        "symbol": "1",
+        "type": "typed numeral",
+        "meaning": "One of the explicitly specified mathematical type."
+      },
+      {
+        "symbol": "2",
+        "type": "typed numeral",
+        "meaning": "Two of the explicitly specified mathematical type, including an exponent two."
+      },
+      {
+        "symbol": "ℕ",
+        "type": "number system",
+        "meaning": "The natural numbers with their usual arithmetic."
+      },
+      {
+        "symbol": "ℤ",
+        "type": "number system",
+        "meaning": "The integers with their usual arithmetic."
+      },
+      {
+        "symbol": "ℚ",
+        "type": "number system",
+        "meaning": "The rational numbers with their usual ordered-field operations."
+      },
+      {
+        "symbol": "ℝ",
+        "type": "number system",
+        "meaning": "The real numbers with their usual ordered-field structure."
+      },
+      {
+        "symbol": "ℂ",
+        "type": "number system",
+        "meaning": "The complex numbers with their usual field structure."
+      },
+      {
+        "symbol": "∅",
+        "type": "typed set notation",
+        "meaning": "The empty set in the explicitly specified ambient type."
+      },
+      {
+        "symbol": "∞",
+        "type": "typed order notation",
+        "meaning": "The top element in an explicitly specified extended ordered codomain."
+      }
+    ]
+  },
+  "pins": {
+    "lean_version": "4.32.2",
+    "mathlib_commit": "905b95818eb32af7874a58b427f50c1711a5e96c",
+    "mathlib_root": "/Users/syyui/formalization-tools/lean-mathlib-v4.32.2/mathlib"
+  },
+  "foundation_profile": "elementary-language-4",
+  "standard_language": "Ordinary typed mathematical language: logical connectives, quantifiers, equality, sets, functions, tuples, finite indices and their usual notation. A type explicitly named natural numbers, integers, rationals, reals or complex numbers means that standard structure, with its usual numerals and arithmetic operations; these operation tokens need not be redeclared as project objects. The fixed finite calculation rules below, including a+0=a, are controller permissions, not an author claim. The core symbol table below is not a dictionary of all allowed mathematics. Objects and notation from any subject are introduced by this problem's parameters, D definitions or scoped locals, with their types and dependencies. Their properties need direct inputs or displayed local proofs; a familiar name or symbol supplies no theorem.",
+  "background_policy": "mathematical-background-v2-1",
+  "definitions": [
+    {
+      "id": "D001",
+      "symbol": "Torus",
+      "type": "compact measure space",
+      "definition": "Torus=ℝ/(2*pi*ℤ), with measure dx/(2*pi) on [0,2*pi). Here ℝ denotes the real number system, distinct from the radius parameter R.",
+      "binders": [],
+      "objects": [],
+      "depends_on": [],
+      "requires": []
+    },
+    {
+      "id": "D002",
+      "symbol": "Fourier",
+      "type": "Fourier coefficient map",
+      "definition": "For a periodic integrable f and k in Z, Fourier(f)(k)=(2*pi)^(-1) integral_0^(2*pi) f(x) exp(-i*k*x) dx; write hat f(k). Extend by completion and distribution duality.",
+      "binders": [
+        {
+          "symbol": "f",
+          "type": "periodic integrable function or distribution"
+        },
+        {
+          "symbol": "k",
+          "type": "integer"
+        }
+      ],
+      "objects": [
+        "Torus"
+      ],
+      "depends_on": [
+        "D001"
+      ],
+      "requires": []
+    },
+    {
+      "id": "D003",
+      "symbol": "H",
+      "type": "family of complex Hilbert spaces",
+      "definition": "For real s, H^s(Torus) is the completion of trigonometric polynomials for ||f||_(H^s)^2=sum_(k in Z)(1+k^2)^s |hat f(k)|^2. Negative spaces are periodic distributions. L^2=H^0 with the normalized measure. Real means hat f(-k)=overline(hat f(k)); mean-zero means hat f(0)=0. Write ||.||_2 for ||.||_(L^2).",
+      "binders": [
+        {
+          "symbol": "s",
+          "type": "real"
+        },
+        {
+          "symbol": "f",
+          "type": "periodic function or distribution"
+        }
+      ],
+      "objects": [
+        "Torus",
+        "Fourier"
+      ],
+      "depends_on": [
+        "D001",
+        "D002"
+      ],
+      "requires": []
+    },
+    {
+      "id": "D005",
+      "symbol": "S",
+      "type": "one-parameter group of Fourier multipliers",
+      "definition": "S_t=exp(-t*partial_x^3), hat(S_t f)(k)=exp(i*t*k^3)*hat f(k). Thus S_(t+r)=S_t S_r, S_0=I and each S_t is an isometry on every H^s by its unit-modulus multiplier.",
+      "binders": [
+        {
+          "symbol": "t",
+          "type": "real"
+        },
+        {
+          "symbol": "r",
+          "type": "real"
+        },
+        {
+          "symbol": "f",
+          "type": "periodic distribution"
+        },
+        {
+          "symbol": "k",
+          "type": "integer"
+        },
+        {
+          "symbol": "s",
+          "type": "real"
+        }
+      ],
+      "objects": [
+        "Fourier",
+        "H"
+      ],
+      "depends_on": [
+        "D002",
+        "D003"
+      ],
+      "requires": []
+    },
+    {
+      "id": "D006",
+      "symbol": "P0",
+      "type": "projection onto the constant functions",
+      "definition": "P0 f=hat f(0), the mean, identified with a constant function.",
+      "binders": [
+        {
+          "symbol": "f",
+          "type": "periodic distribution"
+        }
+      ],
+      "objects": [
+        "Fourier"
+      ],
+      "depends_on": [
+        "D002"
+      ],
+      "requires": []
+    },
+    {
+      "id": "D007",
+      "symbol": "P",
+      "type": "projection onto the mean-zero functions",
+      "definition": "P=I-P0.",
+      "binders": [],
+      "objects": [
+        "P0"
+      ],
+      "depends_on": [
+        "D006"
+      ],
+      "requires": []
+    },
+    {
+      "id": "D008",
+      "symbol": "Dinv",
+      "type": "inverse spatial derivative Fourier multiplier",
+      "definition": "Dinv=partial_x^(-1); hat(Dinv f)(k)=(i*k)^(-1)hat f(k) for k!=0 and zero for k=0. Dinv2=(Dinv)^2=partial_x^(-2). These formulas define maps H^s -> H^(s+1) and H^s -> H^(s+2), respectively.",
+      "binders": [
+        {
+          "symbol": "f",
+          "type": "periodic distribution"
+        },
+        {
+          "symbol": "k",
+          "type": "integer"
+        },
+        {
+          "symbol": "s",
+          "type": "real"
+        }
+      ],
+      "objects": [
+        "Fourier",
+        "H"
+      ],
+      "depends_on": [
+        "D002",
+        "D003"
+      ],
+      "requires": []
+    },
+    {
+      "id": "D016",
+      "symbol": "pstar",
+      "type": "positive real",
+      "definition": "pstar=23/14.",
+      "binders": [],
+      "objects": [],
+      "depends_on": [],
+      "requires": []
+    },
+    {
+      "id": "D017",
+      "symbol": "X",
+      "type": "space-time norm on intervals",
+      "definition": "For an interval I with length at most one, X(I) consists of L^infinity(I;L^2) functions with weak time derivative in L^infinity(I;H^(-pstar)); ||f||_(X(I))=||f||_(L^infinity(I;L^2))+||f'||_(L^infinity(I;H^(-pstar))). All time suprema of continuous functions use their continuous representatives; derivatives and L^infinity norms use essential suprema.",
+      "binders": [
+        {
+          "symbol": "I",
+          "type": "compact real interval"
+        },
+        {
+          "symbol": "f",
+          "type": "time-dependent periodic distribution"
+        }
+      ],
+      "objects": [
+        "H",
+        "pstar"
+      ],
+      "depends_on": [
+        "D003",
+        "D016"
+      ],
+      "requires": []
+    },
+    {
+      "id": "D018",
+      "symbol": "B",
+      "type": "time-dependent symmetric bilinear operator",
+      "definition": "B_t(f,g)=S_(-t) partial_x[(S_t f)(S_t g)], initially for smooth periodic inputs, and in H^(-pstar) for L^2 inputs by the bound proved below.",
+      "binders": [
+        {
+          "symbol": "t",
+          "type": "real"
+        },
+        {
+          "symbol": "f",
+          "type": "periodic function"
+        },
+        {
+          "symbol": "g",
+          "type": "periodic function"
+        }
+      ],
+      "objects": [
+        "S",
+        "H",
+        "pstar"
+      ],
+      "depends_on": [
+        "D003",
+        "D005",
+        "D016"
+      ],
+      "requires": []
+    },
+    {
+      "id": "D020",
+      "symbol": "Ctri",
+      "type": "time-integrated trilinear operator",
+      "definition": "Ctri_I(f,g,h)=integral_I S_(-t)P{P[(S_t f(t))(S_t g(t))]*(S_t Dinv h(t))} dt. For time-independent inputs suppress their t dependence. Initially use smooth spatial inputs, with piecewise smooth continuous time dependence; bounded extensions are justified by the explicit sources or estimates below.",
+      "binders": [
+        {
+          "symbol": "I",
+          "type": "compact real interval"
+        },
+        {
+          "symbol": "f",
+          "type": "time-dependent periodic function"
+        },
+        {
+          "symbol": "g",
+          "type": "time-dependent periodic function"
+        },
+        {
+          "symbol": "h",
+          "type": "time-dependent periodic function"
+        },
+        {
+          "symbol": "t",
+          "type": "real integration variable"
+        }
+      ],
+      "objects": [
+        "S",
+        "P",
+        "Dinv"
+      ],
+      "depends_on": [
+        "D005",
+        "D007",
+        "D008"
+      ],
+      "requires": []
+    },
+    {
+      "id": "D021",
+      "symbol": "Fstage",
+      "type": "bilinear first-stage integral family",
+      "definition": "Fstage_(a,t)(f,g)=(1/2) integral_a^t B_s(f,g) ds for time-independent smooth mean-zero f,g and a<=t. Fstage_(a,t)(f) abbreviates Fstage_(a,t)(f,f).",
+      "binders": [
+        {
+          "symbol": "a",
+          "type": "real"
+        },
+        {
+          "symbol": "t",
+          "type": "real with t>=a"
+        },
+        {
+          "symbol": "f",
+          "type": "smooth mean-zero periodic function"
+        },
+        {
+          "symbol": "g",
+          "type": "smooth mean-zero periodic function"
+        },
+        {
+          "symbol": "s",
+          "type": "real integration variable"
+        }
+      ],
+      "objects": [
+        "B"
+      ],
+      "depends_on": [
+        "D018"
+      ],
+      "requires": []
+    }
+  ],
+  "inputs": [
+    {
+      "id": "H002",
+      "kind": "hypothesis",
+      "statement": "0<gamma<=1.",
+      "definitions": [],
+      "binders": [],
+      "objects": [
+        "gamma"
+      ]
+    },
+    {
+      "id": "E003",
+      "kind": "external",
+      "statement": "Use the unnormalized source norms |f|_(s)=sqrt(2*pi)||f||_(H^s), |f|_2=sqrt(2*pi)||f||_2, and |f|_(Xsrc(I))=|f|_(L^infinity L^2)+|f'|_(L^infinity H^(-23/14)). For 0<=alpha<=1, 0<=a<=b, b-a<=1, and f_j in L^infinity([a,b];H^alpha) with f_j' in L^infinity([a,b];H^(-23/14)), j=1,2,3, the operator Ctri_[a,b] obeys |Ctri(f_1,f_2,f_3)|_2<=c*(b-a)*product_j |f_j|_(Xsrc)+c*|f_i|_(L^infinity H^(-23/14))*product_(j!=i)|f_j|_(L^infinity L^2) for each i=1,2,3. If the three inputs are time-independent then |Ctri(f_1,f_2,f_3)|_2<=c_alpha*(b-a)^alpha*product_j |f_j|_(alpha). The constants are independent of a,b and the inputs.",
+      "definitions": [
+        "D003",
+        "D017",
+        "D020"
+      ],
+      "binders": [
+        {
+          "symbol": "alpha",
+          "type": "real in [0,1]"
+        },
+        {
+          "symbol": "a",
+          "type": "nonnegative real"
+        },
+        {
+          "symbol": "b",
+          "type": "real with a<=b<=a+1"
+        },
+        {
+          "symbol": "f_1",
+          "type": "time-dependent periodic function"
+        },
+        {
+          "symbol": "f_2",
+          "type": "time-dependent periodic function"
+        },
+        {
+          "symbol": "f_3",
+          "type": "time-dependent periodic function"
+        },
+        {
+          "symbol": "i",
+          "type": "integer in {1,2,3}"
+        }
+      ],
+      "objects": [
+        "alpha",
+        "a",
+        "b",
+        "f_1",
+        "f_2",
+        "f_3",
+        "i",
+        "Ctri",
+        "X",
+        "H"
+      ],
+      "source_contract": {
+        "hypotheses": [
+          "0<=alpha<=1, 0<=a<=b and b-a<=1.",
+          "Each f_j belongs to L^infinity H^alpha and has time derivative in L^infinity H^(-23/14).",
+          "For the second conclusion all inputs are time-independent."
+        ]
+      }
+    },
+    {
+      "id": "E004",
+      "kind": "external",
+      "statement": "Use the unnormalized source norms |f|_(s)=sqrt(2*pi)||f||_(H^s), |f|_2=sqrt(2*pi)||f||_2, and |f|_(Xsrc(I))=|f|_(L^infinity L^2)+|f'|_(L^infinity H^(-23/14)). For 0<sigma<=1, tau>0, t_n=n*tau with n>=0 an integer, t_n<=s<=t_n+tau, and time-independent mean-zero f,g in H^sigma, the bilinear Fstage_(t_n,s)(f,g) satisfies |Fstage_(t_n,s)(f,g)|_(beta)<=c_(sigma,epsilon,beta)*tau^((1+sigma-beta)/(1+sigma-beta0))*|f|_(sigma)*|g|_(sigma), for every beta in [beta0,1+sigma], where beta0=2*sigma-3/2 for 0<sigma<1/2, beta0=-1/2-epsilon for sigma=1/2 (any sufficiently small fixed epsilon>0), and beta0=sigma-1 for 1/2<sigma<=1. Constants are uniform in n,tau,s.",
+      "definitions": [
+        "D003",
+        "D021"
+      ],
+      "binders": [
+        {
+          "symbol": "sigma",
+          "type": "real in (0,1]"
+        },
+        {
+          "symbol": "tau",
+          "type": "positive real"
+        },
+        {
+          "symbol": "n",
+          "type": "nonnegative integer"
+        },
+        {
+          "symbol": "s",
+          "type": "real in [n*tau,(n+1)*tau]"
+        },
+        {
+          "symbol": "f",
+          "type": "time-independent mean-zero H^sigma function"
+        },
+        {
+          "symbol": "g",
+          "type": "time-independent mean-zero H^sigma function"
+        },
+        {
+          "symbol": "beta",
+          "type": "real in [beta0,1+sigma]"
+        },
+        {
+          "symbol": "beta0",
+          "type": "real given by the stated piecewise formula"
+        },
+        {
+          "symbol": "epsilon",
+          "type": "sufficiently small positive real"
+        }
+      ],
+      "objects": [
+        "sigma",
+        "tau",
+        "n",
+        "s",
+        "f",
+        "g",
+        "beta",
+        "beta0",
+        "epsilon",
+        "Fstage",
+        "H"
+      ],
+      "source_contract": {
+        "hypotheses": [
+          "0<sigma<=1 and f,g are time-independent mean-zero H^sigma functions.",
+          "tau>0, n>=0 is an integer and n*tau<=s<=(n+1)*tau.",
+          "beta lies in [beta0,1+sigma]; at sigma=1/2 fix a permitted positive epsilon."
+        ]
+      }
+    },
+    {
+      "id": "E005",
+      "kind": "external",
+      "statement": "Use the unnormalized source norms |f|_(s)=sqrt(2*pi)||f||_(H^s), |f|_2=sqrt(2*pi)||f||_2, and |f|_(Xsrc(I))=|f|_(L^infinity L^2)+|f'|_(L^infinity H^(-23/14)). For 0<=sigma<=1, |f*g|_2<=c_(sigma,epsilon)*|f|_(sigma)*|g|_(a(sigma)), where f in H^sigma, g in H^(a(sigma)), and a(0)=1/2+epsilon, a(sigma)=1/2-sigma for 0<sigma<1/2, a(1/2)=epsilon, a(sigma)=0 for 1/2<sigma<=1; any sufficiently small positive epsilon is allowed in the endpoint conventions.",
+      "definitions": [
+        "D003"
+      ],
+      "binders": [
+        {
+          "symbol": "sigma",
+          "type": "real in [0,1]"
+        },
+        {
+          "symbol": "epsilon",
+          "type": "fixed sufficiently small positive real"
+        },
+        {
+          "symbol": "f",
+          "type": "H^sigma periodic function"
+        },
+        {
+          "symbol": "g",
+          "type": "H^(a(sigma)) periodic function"
+        }
+      ],
+      "objects": [
+        "sigma",
+        "epsilon",
+        "f",
+        "g",
+        "H"
+      ],
+      "source_contract": {
+        "hypotheses": [
+          "0<=sigma<=1, with positive endpoint epsilon where required.",
+          "f and g have precisely the displayed Sobolev regularities."
+        ]
+      }
+    }
+  ],
+  "output": {
+    "id": "N006",
+    "kind": "internal",
+    "statement": "With normalized norms, for every interval I=[a,b] with 0<=a<=b<=a+1 and continuous piecewise smooth mean-zero paths f_j, ||Ctri_I(f_1,f_2,f_3)||_2<=C|I|product_j||f_j||_(X(I))+C||f_i||_(L^infinity(I;H^(-pstar)))product_(j!=i)||f_j||_(L^infinity(I;L^2)), for each slot i=1,2,3. For time-independent mean-zero H^sigma inputs, 0<=sigma<=1, ||Ctri_I(f_1,f_2,f_3)||_2<=C_sigma|I|^sigma product_j||f_j||_(H^sigma). For 0<gamma<=1 set a_gamma=1/2-gamma when gamma<1/2, a_gamma=1/8 when gamma=1/2, and a_gamma=0 when gamma>1/2. Then a_gamma in [0,1), ||f*g||_2<=C_gamma||f||_(H^gamma)||g||_(H^(a_gamma)). For every M0>=0, mean-zero w with ||w||_(H^gamma)<=M0, 0<tau<=1, a>=0, and a<=t<=a+tau, ||Fstage_(a,t)(w)||_(H^(a_gamma))<=C_(gamma,M0)*tau^gamma and ||Fstage_(a,t)(w)||_(H^(1+gamma))<=C_(gamma,M0). Constants are uniform in a,t,tau and Fourier support. Ctri and stages extend by their stated bounds.",
+    "definitions": [
+      "D003",
+      "D005",
+      "D016",
+      "D017",
+      "D020",
+      "D021"
+    ],
+    "binders": [
+      {
+        "symbol": "I",
+        "type": "interval [a,b]"
+      },
+      {
+        "symbol": "a",
+        "type": "nonnegative real"
+      },
+      {
+        "symbol": "b",
+        "type": "real in [a,a+1]"
+      },
+      {
+        "symbol": "f_1",
+        "type": "path or H^sigma input with the specified regularity"
+      },
+      {
+        "symbol": "f_2",
+        "type": "path or H^sigma input with the specified regularity"
+      },
+      {
+        "symbol": "f_3",
+        "type": "path or H^sigma input with the specified regularity"
+      },
+      {
+        "symbol": "i",
+        "type": "slot index in {1,2,3}"
+      },
+      {
+        "symbol": "sigma",
+        "type": "real in [0,1]"
+      },
+      {
+        "symbol": "a_gamma",
+        "type": "real exponent specified in the statement"
+      },
+      {
+        "symbol": "f",
+        "type": "H^gamma function"
+      },
+      {
+        "symbol": "g",
+        "type": "H^(a_gamma) function"
+      },
+      {
+        "symbol": "w",
+        "type": "mean-zero H^gamma function"
+      },
+      {
+        "symbol": "M0",
+        "type": "nonnegative norm bound"
+      },
+      {
+        "symbol": "tau",
+        "type": "real in (0,1]"
+      },
+      {
+        "symbol": "t",
+        "type": "real in [a,a+tau]"
+      }
+    ],
+    "objects": [
+      "gamma",
+      "I",
+      "a",
+      "b",
+      "f_1",
+      "f_2",
+      "f_3",
+      "i",
+      "sigma",
+      "a_gamma",
+      "f",
+      "g",
+      "w",
+      "M0",
+      "tau",
+      "t",
+      "Ctri",
+      "X",
+      "H",
+      "pstar",
+      "Fstage"
+    ]
+  },
+  "inference": {
+    "id": "R006",
+    "inputs": [
+      "H002",
+      "E003",
+      "E004",
+      "E005"
+    ],
+    "output": "N006",
+    "definitions": [
+      "D003",
+      "D005",
+      "D016",
+      "D017",
+      "D018",
+      "D020",
+      "D021"
+    ],
+    "locals": [
+      {
+        "symbol": "a_gamma",
+        "type": "real exponent",
+        "kind": "definition",
+        "declaration": "Use a_gamma=1/2-gamma for gamma<1/2, 1/8 for gamma=1/2, and 0 for gamma>1/2.",
+        "scope": "argument",
+        "start": "S002",
+        "end": "S004",
+        "objects": [
+          "gamma"
+        ],
+        "from_inputs": [],
+        "from_local": []
+      },
+      {
+        "symbol": "a",
+        "type": "nonnegative real",
+        "kind": "arbitrary",
+        "declaration": "Fix any interval start a>=0.",
+        "scope": "argument",
+        "start": "S001",
+        "end": "S004",
+        "objects": [],
+        "from_inputs": [],
+        "from_local": []
+      },
+      {
+        "symbol": "b",
+        "type": "real with a<=b<=a+1",
+        "kind": "arbitrary",
+        "declaration": "Fix b in [a,a+1].",
+        "scope": "argument",
+        "start": "S001",
+        "end": "S001",
+        "objects": [
+          "a"
+        ],
+        "from_inputs": [],
+        "from_local": []
+      },
+      {
+        "symbol": "f_1",
+        "type": "path, constant input where so specified",
+        "kind": "arbitrary",
+        "declaration": "Fix f_1 in the spaces required for the Ctri assertion.",
+        "scope": "argument",
+        "start": "S001",
+        "end": "S001",
+        "objects": [],
+        "from_inputs": [],
+        "from_local": []
+      },
+      {
+        "symbol": "f_2",
+        "type": "path, constant input where so specified",
+        "kind": "arbitrary",
+        "declaration": "Fix f_2 in the spaces required for the Ctri assertion.",
+        "scope": "argument",
+        "start": "S001",
+        "end": "S001",
+        "objects": [],
+        "from_inputs": [],
+        "from_local": []
+      },
+      {
+        "symbol": "f_3",
+        "type": "path, constant input where so specified",
+        "kind": "arbitrary",
+        "declaration": "Fix f_3 in the spaces required for the Ctri assertion.",
+        "scope": "argument",
+        "start": "S001",
+        "end": "S001",
+        "objects": [],
+        "from_inputs": [],
+        "from_local": []
+      },
+      {
+        "symbol": "w",
+        "type": "mean-zero H^gamma function",
+        "kind": "arbitrary",
+        "declaration": "Fix w in mean-zero H^gamma.",
+        "scope": "argument",
+        "start": "S003",
+        "end": "S004",
+        "objects": [
+          "gamma"
+        ],
+        "from_inputs": [],
+        "from_local": []
+      },
+      {
+        "symbol": "M0",
+        "type": "nonnegative real",
+        "kind": "arbitrary",
+        "declaration": "Fix a proposed bound M0.",
+        "scope": "argument",
+        "start": "S003",
+        "end": "S004",
+        "objects": [],
+        "from_inputs": [],
+        "from_local": []
+      },
+      {
+        "symbol": "tau",
+        "type": "real in (0,1]",
+        "kind": "arbitrary",
+        "declaration": "Fix 0<tau<=1.",
+        "scope": "argument",
+        "start": "S003",
+        "end": "S004",
+        "objects": [],
+        "from_inputs": [],
+        "from_local": []
+      },
+      {
+        "symbol": "t",
+        "type": "real in [a,a+tau]",
+        "kind": "arbitrary",
+        "declaration": "Fix a<=t<=a+tau.",
+        "scope": "argument",
+        "start": "S003",
+        "end": "S004",
+        "objects": [
+          "a",
+          "tau"
+        ],
+        "from_inputs": [],
+        "from_local": []
+      },
+      {
+        "symbol": "wshift",
+        "type": "mean-zero H^gamma function",
+        "kind": "definition",
+        "declaration": "Put wshift=S_a w.",
+        "scope": "argument",
+        "start": "S003",
+        "end": "S004",
+        "objects": [
+          "S",
+          "a",
+          "w"
+        ],
+        "from_inputs": [],
+        "from_local": []
+      },
+      {
+        "symbol": "c0",
+        "type": "positive real",
+        "kind": "definition",
+        "declaration": "Set c0=sqrt(2*pi), the fixed source-to-normalized norm factor.",
+        "scope": "argument",
+        "start": "S001",
+        "end": "S004",
+        "objects": [],
+        "from_inputs": [],
+        "from_local": []
+      }
+    ],
+    "argument": [
+      {
+        "id": "S001",
+        "text": "Apply E003 on I=[a,b]. For the time-dependent assertion take its alpha=0: each smooth spatial path is in L^infinity L^2 and its piecewise derivative is in H^(-pstar); time continuity removes jump masses. The source allows each choice of negative-norm slot. For the time-independent assertion use arbitrary 0<=sigma<=1 as its alpha and constant H^sigma inputs, whose derivatives are zero. Put c0=sqrt(2*pi). Every source spatial norm and every source X norm is c0 times ours, so dividing its inequalities by c0 changes their constants by c0^2 and leaves all time powers and uniformities unchanged. This proves both normalized Ctri bounds, first for the stated paths and then by their bounded extensions.",
+        "uses": [
+          "E003"
+        ],
+        "uses_local": [],
+        "objects": [
+          "a",
+          "b",
+          "f_1",
+          "f_2",
+          "f_3",
+          "Ctri",
+          "X",
+          "H",
+          "pstar"
+        ],
+        "produces": [
+          {
+            "id": "F001",
+            "statement": "For every nonnegative-time interval I0 of length <=1 and continuous piecewise smooth mean-zero paths z_1,z_2,z_3, ||Ctri_I0(z_1,z_2,z_3)||_2<=C|I0|product_j||z_j||_(X(I0))+C||z_i||_(L^infinity H^(-pstar))product_(j!=i)||z_j||_(L^infinity L^2), for every i=1,2,3. For time-independent mean-zero H^rho inputs g_1,g_2,g_3 and 0<=rho<=1, ||Ctri_I0(g_1,g_2,g_3)||_2<=C_rho|I0|^rho product_j||g_j||_(H^rho), uniformly over these intervals.",
+            "objects": [
+              "Ctri",
+              "X",
+              "H",
+              "pstar"
+            ],
+            "assumptions": [],
+            "binders": [
+              {
+                "symbol": "I0",
+                "type": "compact interval in [0,infinity) of length at most 1"
+              },
+              {
+                "symbol": "z_1",
+                "type": "continuous piecewise smooth mean-zero path on I0"
+              },
+              {
+                "symbol": "z_2",
+                "type": "continuous piecewise smooth mean-zero path on I0"
+              },
+              {
+                "symbol": "z_3",
+                "type": "continuous piecewise smooth mean-zero path on I0"
+              },
+              {
+                "symbol": "i",
+                "type": "index in {1,2,3}"
+              },
+              {
+                "symbol": "rho",
+                "type": "real in [0,1]"
+              },
+              {
+                "symbol": "g_1",
+                "type": "mean-zero H^rho input"
+              },
+              {
+                "symbol": "g_2",
+                "type": "mean-zero H^rho input"
+              },
+              {
+                "symbol": "g_3",
+                "type": "mean-zero H^rho input"
+              }
+            ]
+          }
+        ],
+        "introduces": [],
+        "discharges": []
+      },
+      {
+        "id": "S002",
+        "text": "H002 gives 0<gamma<=1. Define a_gamma as stated. E005 with source sigma=gamma, choosing endpoint epsilon=1/8 when gamma=1/2, gives the product estimate; division by c0 changes its constant by c0. The three cases give a_gamma in [0,1). The gamma=0 product case of E005 is not needed.",
+        "uses": [
+          "H002",
+          "E005"
+        ],
+        "uses_local": [],
+        "objects": [
+          "gamma",
+          "a_gamma",
+          "H"
+        ],
+        "produces": [
+          {
+            "id": "F002",
+            "statement": "a_gamma is in [0,1) and ||f*g||_2<=C_gamma||f||_(H^gamma)||g||_(H^(a_gamma)) for all such f,g.",
+            "objects": [
+              "gamma",
+              "a_gamma",
+              "H"
+            ],
+            "assumptions": [],
+            "binders": [
+              {
+                "symbol": "f",
+                "type": "H^gamma function"
+              },
+              {
+                "symbol": "g",
+                "type": "H^(a_gamma) function"
+              }
+            ]
+          }
+        ],
+        "introduces": [],
+        "discharges": []
+      },
+      {
+        "id": "S003",
+        "text": "Fix a,tau,t,w,M0 and assume L1: ||w||_(H^gamma)<=M0. Set wshift=S_a w. It is mean-zero and has the same H^gamma norm. From the definitions B_(a+r)(f,g)=S_(-a)B_r(S_a f,S_a g), hence Fstage_(a,t)(w)=S_(-a)Fstage_(0,t-a)(wshift). Apply E004 with source n=0, timestep tau, s=t-a, sigma=gamma, f=g=wshift and beta=a_gamma; take epsilon=1/8 in the middle case. All are in its interval: beta0<=a_gamma<=1+gamma in each of the three cases. The exponents are (1/2+2*gamma)/(5/2-gamma) for gamma<1/2, 11/17 for gamma=1/2, and (1+gamma)/2 for gamma>1/2. They are at least gamma: in the first case the numerator minus gamma times its denominator is 1/2-gamma/2+gamma^2>0; in the second 11/17>1/2; in the third 1>=gamma. Since tau<=1 these source powers are <=tau^gamma. Divide by c0 and use the S isometry to obtain the first stage bound.",
+        "uses": [
+          "E004"
+        ],
+        "uses_local": [
+          "F002"
+        ],
+        "objects": [
+          "gamma",
+          "a_gamma",
+          "a",
+          "tau",
+          "t",
+          "w",
+          "wshift",
+          "M0",
+          "S",
+          "B",
+          "Fstage",
+          "H"
+        ],
+        "produces": [
+          {
+            "id": "F003",
+            "statement": "Under L1, sup_(a<=t<=a+tau)||Fstage_(a,t)(w)||_(H^(a_gamma))<=C_(gamma,M0)*tau^gamma.",
+            "objects": [
+              "gamma",
+              "a_gamma",
+              "a",
+              "tau",
+              "w",
+              "M0",
+              "Fstage",
+              "H"
+            ],
+            "assumptions": [
+              "L1"
+            ],
+            "binders": []
+          }
+        ],
+        "introduces": [
+          "L1"
+        ],
+        "discharges": []
+      },
+      {
+        "id": "S004",
+        "text": "Apply E004 again to the same wshift and time parameters with beta=1+gamma, which is the upper permitted endpoint. Its exponent is zero, giving ||Fstage_(0,t-a)(wshift)||_(H^(1+gamma))<=C_gamma||wshift||_(H^gamma)^2 after the same norm conversion. Use the S isometry to obtain the uniform second bound. Discharge L1 and quantify the inputs and interval. With F001-F003 this proves the output assertion.",
+        "uses": [
+          "E004"
+        ],
+        "uses_local": [
+          "F001",
+          "F002",
+          "F003"
+        ],
+        "objects": [
+          "gamma",
+          "a_gamma",
+          "a",
+          "tau",
+          "t",
+          "w",
+          "wshift",
+          "M0",
+          "S",
+          "Fstage",
+          "H"
+        ],
+        "produces": [],
+        "introduces": [],
+        "discharges": [
+          "L1"
+        ]
+      }
+    ],
+    "applications": [
+      {
+        "id": "A001",
+        "input": "E003",
+        "at": "S001",
+        "bindings": "Source alpha=0, endpoints a,b and the three time-dependent paths f_j. Invoke part (1), including its full choice of any right-hand-side negative-norm slot.",
+        "hypothesis_checks": [
+          "The local endpoints satisfy 0<=a<=b<=a+1, and alpha=0 lies in the allowed source interval.",
+          "The declared paths belong to L^infinity L^2 and have weak derivative in H^(-pstar); continuity removes jump masses.",
+          "Only part (1) is invoked in this use; its conclusion requires no time-independence."
+        ]
+      },
+      {
+        "id": "A002",
+        "input": "E005",
+        "at": "S002",
+        "bindings": "source sigma=gamma, source a(sigma)=a_gamma; epsilon=1/8 when gamma=1/2; arbitrary f in H^gamma,g in H^(a_gamma).",
+        "hypothesis_checks": [
+          "H002 supplies 0<gamma<=1 and 1/8 is positive in the stated endpoint convention.",
+          "The product assertion fixes precisely f in H^gamma and g in H^(a_gamma); it introduces no stronger input condition."
+        ]
+      },
+      {
+        "id": "A003",
+        "input": "E004",
+        "at": "S003",
+        "bindings": "source sigma=gamma,n=0,s=t-a, timestep=tau,f=g=wshift=S_a w,beta=a_gamma; middle-case epsilon=1/8.",
+        "hypothesis_checks": [
+          "H002 and the local mean-zero H^gamma w give the source regularity; S_a preserves the norm and mean.",
+          "tau>0, n=0 is a nonnegative integer and t-a is in [0,tau].",
+          "The displayed case calculation shows beta0<=a_gamma<=1+gamma; epsilon=1/8 is the fixed positive middle-case value."
+        ]
+      },
+      {
+        "id": "A004",
+        "input": "E004",
+        "at": "S004",
+        "bindings": "Same source data and parameters as A003, now beta=1+gamma.",
+        "hypothesis_checks": [
+          "The same H002, mean-zero w and unitary wshift provide the source input regularity.",
+          "The same timestep and shifted time stay in [0,tau].",
+          "beta is the permitted upper endpoint 1+gamma; at gamma=1/2 retain epsilon=1/8."
+        ]
+      },
+      {
+        "id": "A005",
+        "input": "E003",
+        "at": "S001",
+        "bindings": "Source alpha=sigma in [0,1], endpoints a,b, time-independent inputs f_1,f_2,f_3 in H^sigma; invoke part (2).",
+        "hypothesis_checks": [
+          "The endpoints satisfy 0<=a<=b<=a+1 and the exponent sigma is in [0,1].",
+          "The three constant H^sigma inputs are L^infinity H^sigma paths and their derivatives vanish in H^(-pstar).",
+          "All three inputs in this instance are explicitly time-independent."
+        ]
+      }
+    ],
+    "rules": [
+      "direct",
+      "forall_introduction",
+      "implication_introduction"
+    ]
+  },
+  "warning": "Direct inputs and fixed logic are supplied. Audit A may record mathematically checked routine background with actual conditions and justification; exact Lean bindings belong to nl02lean. No ancestor proof or extra H is available. A packet is not an audit certificate.",
+  "packet_sha256": "20850805778c4c5e1e2eabd630c5ad47b21afab255b3fcc895ad484ebeffbfdd"
+}

@@ -1,0 +1,4 @@
+**Mathematical verdict: ACCEPTED** for unchanged candidate 002. My prior T4 criterion was too broad: the paper selects the smooth-approximation flow. All 33 mandatory gates now pass; prior evidence remains unchanged.
+
+- Scope audit: [Markdown](/Users/syyui/projects/Yui-results/benchmark/pure-model-supplement/20261101T114606Z-5d3193f6/review-003-output/scope-concordance-report.md) · [JSON](/Users/syyui/projects/Yui-results/benchmark/pure-model-supplement/20261101T114606Z-5d3193f6/review-003-output/scope-concordance-report.json)
+- Revised acceptance: [Markdown](/Users/syyui/projects/Yui-results/benchmark/pure-model-supplement/20261101T114606Z-5d3193f6/review-003-output/acceptance-report.md) · [JSON](/Users/syyui/projects/Yui-results/benchmark/pure-model-supplement/20261101T114606Z-5d3193f6/review-003-output/acceptance-report.json)

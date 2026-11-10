@@ -1,0 +1,218 @@
+[
+  {
+    "name": "yui_aux_0001",
+    "statement": "∀ q r ε : ℝ, dimH E < ENNReal.ofReal q → 0 < r → 0 < ε → 0 < q ∧ ∃ W : ℕ → Set (GDVec n), E ⊆ ⋃ i, W i ∧ (∀ i, Metric.ediam (W i) ≤ ENNReal.ofReal r) ∧ (∑' i, GDCost q (W i)) < ENNReal.ofReal (ε / 2)",
+    "proof": "intro q r ε hq hr hε\nhave hqp : 0 < q := by\n  by_contra h\n  have : ENNReal.ofReal q = 0 := ENNReal.ofReal_eq_zero.mpr (le_of_not_gt h)\n  rw [this] at hq\n  exact (not_lt_of_ge bot_le hq)\nhave hm : GDMeasure q E = 0 := ((h_T002 n E).2 q hqp).2.2.1 hq\nhave hc : GDContent q r E = 0 := by\n  apply le_antisymm _ bot_le\n  calc\n    GDContent q r E ≤ GDMeasure q E := le_iSup_of_le r (le_iSup_of_le hr le_rfl)\n    _ = 0 := hm\nhave ht : GDContent q r E < ENNReal.ofReal (ε / 2) := by rw [hc]; positivity\nsimp only [GDContent, iInf_lt_iff] at ht\nrcases ht with ⟨W, hW, hd, hs⟩\nexact ⟨hqp, W, hW, hd, hs⟩",
+    "dependencies": [],
+    "context_sha256": "fcbca369472c1916abb6cb9b8a45352ce9eb48fa7c4d164a0b8330b999896d78",
+    "sha256": "efeab5fab2cb496d2587b361e33a116d66ca2f531cfa931c56feccb134431005",
+    "check": {
+      "exit_code": 0,
+      "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-imvrs6h3/output/Auxiliary.lean:52:54: warning: Variable name `h_T004` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (n : ℕ) (E : Set (GDVec n)),\n  (∀ (m : ℕ) (A : Set (GDVec m)),\n      0 ≤ dimH A ∧\n        ∀ (s : ℝ),\n          0 < s →\n            GDMeasure s A = (MeasureTheory.Measure.hausdorffMeasure s) A ∧\n              (ENNReal.ofReal s < dimH A → GDMeasure s A = ∞) ∧\n                (dimH A < ENNReal.ofReal s → GDMeasure s A = 0) ∧\n                  (GDMeasure s A < ∞ → dimH A ≤ ENNReal.ofReal s) ∧\n                    (GDMeasure s A = 0 → dimH A ≤ ENNReal.ofReal s) ∧ (GDMeasure s A = ∞ → ENNReal.ofReal s ≤ dimH A)) →\n    Bornology.IsBounded E ∧\n        0 ≤ dimH E ∧\n          dimH E ≤ ↑n ∧\n            dimH E < ∞ ∧ (∀ (s δ : ℝ), 0 < s → 0 < δ → GDContent s δ E < ∞) ∧ (n = 0 → E = Set.univ ∧ dimH E = 0) →\n      ∀ (q r ε : ℝ),\n        dimH E < ENNReal.ofReal q →\n          0 < r →\n            0 < ε →\n              0 < q ∧\n                ∃ W,\n                  E ⊆ ⋃ i, W i ∧\n                    (∀ (i : ℕ), Metric.ediam (W i) ≤ ENNReal.ofReal r) ∧\n                      ∑' (i : ℕ), GDCost q (W i) < ENNReal.ofReal (ε / 2)\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+      "stderr": "",
+      "wall_seconds": 3.5322434161789715,
+      "native_limits": {
+        "timeout_seconds": 180,
+        "max_heartbeats": 20000000
+      },
+      "source_path": "/Users/syyui/projects/Yui-results/test/geometry-product-dimension/rigorous-proof/20261101-fresh-full-18b3e2e0bf/native-checks/c99c79040f034693a7bc621c6962fd4c.lean",
+      "source_sha256": "62dac84962c591224fad9b1d15925bab8a97ad72a254423536b4f0abb2b6bc7b",
+      "auxiliary_valid": true,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "lean_sha256": "62dac84962c591224fad9b1d15925bab8a97ad72a254423536b4f0abb2b6bc7b",
+      "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+      "context_port": "T008",
+      "candidate": 1
+    }
+  },
+  {
+    "name": "yui_aux_0002",
+    "statement": "1 ≤ n → ∀ (x : GDVec n) (d : ℝ), 0 < d → (Metric.ball x (d / 2)).Nonempty ∧ Metric.ediam (Metric.ball x (d / 2)) = ENNReal.ofReal d",
+    "proof": "intro hn x d hd\nletI : NeZero n := ⟨by omega⟩\nconstructor\n· exact ⟨x, Metric.mem_ball_self (by positivity)⟩\n· have hb : Metric.ediam (Metric.ball x (d / 2)) ≠ ⊤ := Metric.isBounded_ball.ediam_ne_top\n  calc\n    Metric.ediam (Metric.ball x (d / 2)) = ENNReal.ofReal (Metric.diam (Metric.ball x (d / 2))) := (ENNReal.ofReal_toReal hb).symm\n    _ = ENNReal.ofReal d := by rw [Metric.diam_ball_eq x (by positivity)]; congr 1; ring",
+    "dependencies": [],
+    "context_sha256": "fcbca369472c1916abb6cb9b8a45352ce9eb48fa7c4d164a0b8330b999896d78",
+    "sha256": "4d0232fb2c71ada434020c86fe6dc7e4b8fb38900ad0f38a7c6facddda9d7222",
+    "check": {
+      "exit_code": 0,
+      "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-0n7qic9c/output/Auxiliary.lean:52:54: warning: Variable name `h_T004` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-0n7qic9c/output/Auxiliary.lean:73:45: warning: Variable name `h_T002` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-0n7qic9c/output/Auxiliary.lean:81:54: warning: Variable name `h_T004` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (n : ℕ) (E : Set (GDVec n)),\n  (∀ (m : ℕ) (A : Set (GDVec m)),\n      0 ≤ dimH A ∧\n        ∀ (s : ℝ),\n          0 < s →\n            GDMeasure s A = (MeasureTheory.Measure.hausdorffMeasure s) A ∧\n              (ENNReal.ofReal s < dimH A → GDMeasure s A = ∞) ∧\n                (dimH A < ENNReal.ofReal s → GDMeasure s A = 0) ∧\n                  (GDMeasure s A < ∞ → dimH A ≤ ENNReal.ofReal s) ∧\n                    (GDMeasure s A = 0 → dimH A ≤ ENNReal.ofReal s) ∧ (GDMeasure s A = ∞ → ENNReal.ofReal s ≤ dimH A)) →\n    Bornology.IsBounded E ∧\n        0 ≤ dimH E ∧\n          dimH E ≤ ↑n ∧\n            dimH E < ∞ ∧ (∀ (s δ : ℝ), 0 < s → 0 < δ → GDContent s δ E < ∞) ∧ (n = 0 → E = Set.univ ∧ dimH E = 0) →\n      1 ≤ n →\n        ∀ (x : GDVec n) (d : ℝ),\n          0 < d → (Metric.ball x (d / 2)).Nonempty ∧ Metric.ediam (Metric.ball x (d / 2)) = ENNReal.ofReal d\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+      "stderr": "",
+      "wall_seconds": 5.208495708182454,
+      "native_limits": {
+        "timeout_seconds": 180,
+        "max_heartbeats": 20000000
+      },
+      "source_path": "/Users/syyui/projects/Yui-results/test/geometry-product-dimension/rigorous-proof/20261101-fresh-full-18b3e2e0bf/native-checks/c95492d5fd634f89b530bae43c1cfe59.lean",
+      "source_sha256": "f24612feef4b024e962bed09962544a7c440ed01c127484d45f64b6f280b9c8a",
+      "auxiliary_valid": true,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "lean_sha256": "f24612feef4b024e962bed09962544a7c440ed01c127484d45f64b6f280b9c8a",
+      "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+      "context_port": "T008",
+      "candidate": 2
+    }
+  },
+  {
+    "name": "yui_aux_0003",
+    "statement": "∀ q r a : ℝ, 0 < q → 0 < r → 0 < a → 0 < min r (a ^ (1 / q)) ∧ min r (a ^ (1 / q)) ≤ r ∧ (ENNReal.ofReal (min r (a ^ (1 / q)))) ^ q ≤ ENNReal.ofReal a",
+    "proof": "intro q r a hq hr ha\nhave hp : 0 < a ^ (1 / q) := Real.rpow_pos_of_pos ha _\nhave hd : 0 < min r (a ^ (1 / q)) := lt_min hr hp\nrefine ⟨hd, min_le_left _ _, ?_⟩\nrw [ENNReal.ofReal_rpow_of_pos hd]\napply ENNReal.ofReal_le_ofReal\ncalc\n  (min r (a ^ (1 / q))) ^ q ≤ (a ^ (1 / q)) ^ q := Real.rpow_le_rpow hd.le (min_le_right _ _) hq.le\n  _ = a := by rw [one_div, Real.rpow_inv_rpow ha.le hq.ne']",
+    "dependencies": [],
+    "context_sha256": "fcbca369472c1916abb6cb9b8a45352ce9eb48fa7c4d164a0b8330b999896d78",
+    "sha256": "5ae837f0e7859d69011dd22501590786b20fbe8534ff8fa4083b44ad94e9df87",
+    "check": {
+      "exit_code": 0,
+      "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-c0l_58ls/output/Auxiliary.lean:52:54: warning: Variable name `h_T004` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-c0l_58ls/output/Auxiliary.lean:73:50: warning: Variable name `h_T002` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-c0l_58ls/output/Auxiliary.lean:81:54: warning: Variable name `h_T004` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-c0l_58ls/output/Auxiliary.lean:94:45: warning: Variable name `h_T002` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-c0l_58ls/output/Auxiliary.lean:102:54: warning: Variable name `h_T004` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (n : ℕ) (E : Set (GDVec n)),\n  (∀ (m : ℕ) (A : Set (GDVec m)),\n      0 ≤ dimH A ∧\n        ∀ (s : ℝ),\n          0 < s →\n            GDMeasure s A = (MeasureTheory.Measure.hausdorffMeasure s) A ∧\n              (ENNReal.ofReal s < dimH A → GDMeasure s A = ∞) ∧\n                (dimH A < ENNReal.ofReal s → GDMeasure s A = 0) ∧\n                  (GDMeasure s A < ∞ → dimH A ≤ ENNReal.ofReal s) ∧\n                    (GDMeasure s A = 0 → dimH A ≤ ENNReal.ofReal s) ∧ (GDMeasure s A = ∞ → ENNReal.ofReal s ≤ dimH A)) →\n    Bornology.IsBounded E ∧\n        0 ≤ dimH E ∧\n          dimH E ≤ ↑n ∧\n            dimH E < ∞ ∧ (∀ (s δ : ℝ), 0 < s → 0 < δ → GDContent s δ E < ∞) ∧ (n = 0 → E = Set.univ ∧ dimH E = 0) →\n      ∀ (q r a : ℝ),\n        0 < q →\n          0 < r →\n            0 < a →\n              0 < min r (a ^ (1 / q)) ∧\n                min r (a ^ (1 / q)) ≤ r ∧ ENNReal.ofReal (min r (a ^ (1 / q))) ^ q ≤ ENNReal.ofReal a\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+      "stderr": "",
+      "wall_seconds": 3.124474999960512,
+      "native_limits": {
+        "timeout_seconds": 180,
+        "max_heartbeats": 20000000
+      },
+      "source_path": "/Users/syyui/projects/Yui-results/test/geometry-product-dimension/rigorous-proof/20261101-fresh-full-18b3e2e0bf/native-checks/6d8492a3ab024f0fa255552778bae900.lean",
+      "source_sha256": "5e9aacec7d6c909396663b72e6bdd412ca7e82f501410873288a88f7db46c224",
+      "auxiliary_valid": true,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "lean_sha256": "5e9aacec7d6c909396663b72e6bdd412ca7e82f501410873288a88f7db46c224",
+      "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+      "context_port": "T008",
+      "candidate": 4
+    }
+  },
+  {
+    "name": "yui_aux_0004",
+    "statement": "∀ ε : ℝ, 0 < ε → (∀ i : ℕ, 0 < ε / 4 / 2 / (2 : ℝ) ^ i) ∧ (∑' i : ℕ, ENNReal.ofReal (ε / 4 / 2 / (2 : ℝ) ^ i)) = ENNReal.ofReal (ε / 4)",
+    "proof": "intro ε hε\nconstructor\n· intro i; positivity\n· rw [← ENNReal.ofReal_tsum_of_nonneg (fun i => by positivity) (summable_geometric_two' (ε / 4)), tsum_geometric_two']",
+    "dependencies": [],
+    "context_sha256": "fcbca369472c1916abb6cb9b8a45352ce9eb48fa7c4d164a0b8330b999896d78",
+    "sha256": "05e17aedbea47b4bc80e104e876c1a64e2601b3f930b14fcca8eeae90584bb5d",
+    "check": {
+      "exit_code": 0,
+      "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-hlnlu2i7/output/Auxiliary.lean:52:54: warning: Variable name `h_T004` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-hlnlu2i7/output/Auxiliary.lean:73:50: warning: Variable name `h_T002` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-hlnlu2i7/output/Auxiliary.lean:81:54: warning: Variable name `h_T004` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-hlnlu2i7/output/Auxiliary.lean:94:50: warning: Variable name `h_T002` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-hlnlu2i7/output/Auxiliary.lean:102:54: warning: Variable name `h_T004` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-hlnlu2i7/output/Auxiliary.lean:116:45: warning: Variable name `h_T002` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-hlnlu2i7/output/Auxiliary.lean:124:54: warning: Variable name `h_T004` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (n : ℕ) (E : Set (GDVec n)),\n  (∀ (m : ℕ) (A : Set (GDVec m)),\n      0 ≤ dimH A ∧\n        ∀ (s : ℝ),\n          0 < s →\n            GDMeasure s A = (MeasureTheory.Measure.hausdorffMeasure s) A ∧\n              (ENNReal.ofReal s < dimH A → GDMeasure s A = ∞) ∧\n                (dimH A < ENNReal.ofReal s → GDMeasure s A = 0) ∧\n                  (GDMeasure s A < ∞ → dimH A ≤ ENNReal.ofReal s) ∧\n                    (GDMeasure s A = 0 → dimH A ≤ ENNReal.ofReal s) ∧ (GDMeasure s A = ∞ → ENNReal.ofReal s ≤ dimH A)) →\n    Bornology.IsBounded E ∧\n        0 ≤ dimH E ∧\n          dimH E ≤ ↑n ∧\n            dimH E < ∞ ∧ (∀ (s δ : ℝ), 0 < s → 0 < δ → GDContent s δ E < ∞) ∧ (n = 0 → E = Set.univ ∧ dimH E = 0) →\n      ∀ (ε : ℝ),\n        0 < ε →\n          (∀ (i : ℕ), 0 < ε / 4 / 2 / 2 ^ i) ∧ ∑' (i : ℕ), ENNReal.ofReal (ε / 4 / 2 / 2 ^ i) = ENNReal.ofReal (ε / 4)\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+      "stderr": "",
+      "wall_seconds": 4.965262125246227,
+      "native_limits": {
+        "timeout_seconds": 180,
+        "max_heartbeats": 20000000
+      },
+      "source_path": "/Users/syyui/projects/Yui-results/test/geometry-product-dimension/rigorous-proof/20261101-fresh-full-18b3e2e0bf/native-checks/89560ddf5ddc4fce9a9ca4a0066ee57d.lean",
+      "source_sha256": "a2fb7b813a409459527a57e3d21e19669e1040ec8be31bcb8886565a6376f6bc",
+      "auxiliary_valid": true,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "lean_sha256": "a2fb7b813a409459527a57e3d21e19669e1040ec8be31bcb8886565a6376f6bc",
+      "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+      "context_port": "T008",
+      "candidate": 5
+    }
+  },
+  {
+    "name": "yui_aux_0005",
+    "statement": "1 ≤ n → ∀ (q r a : ℝ) (W : Set (GDVec n)), 0 < q → 0 < r → 0 < a → W.Nonempty → Metric.ediam W ≤ ENNReal.ofReal r → ∃ U : Set (GDVec n), W ⊆ U ∧ U.Nonempty ∧ 0 < Metric.ediam U ∧ Metric.ediam U ≤ ENNReal.ofReal r ∧ (Metric.ediam U) ^ q ≤ GDCost q W + ENNReal.ofReal a",
+    "proof": "intro hn q r a W hq hr ha hW hWr\nclassical\nby_cases hz : Metric.ediam W = 0\n· obtain ⟨x, hx⟩ := hW\n  let d : ℝ := min r (a ^ (1 / q))\n  have hd := @yui_aux_0003 n E h_T002 h_T004 q r a hq hr ha\n  have hb := @yui_aux_0002 n E h_T002 h_T004 hn x d hd.1\n  refine ⟨Metric.ball x (d / 2), ?_, hb.1, ?_, ?_, ?_⟩\n  · intro y hy\n    have hyx : y = x := (Metric.ediam_eq_zero_iff.mp hz) hy hx\n    subst y\n    exact Metric.mem_ball_self (by dsimp [d]; positivity)\n  · rw [hb.2]; exact ENNReal.ofReal_pos.mpr hd.1\n  · rw [hb.2]; exact ENNReal.ofReal_le_ofReal hd.2.1\n  · rw [hb.2]\n    exact hd.2.2.trans (le_add_left le_rfl)\n· refine ⟨W, Set.Subset.rfl, hW, pos_iff_ne_zero.mpr hz, hWr, ?_⟩\n  have hc : GDCost q W = (Metric.ediam W) ^ q := by simp [GDCost, hW]\n  rw [hc]\n  exact le_add_right le_rfl",
+    "dependencies": [
+      "yui_aux_0002",
+      "yui_aux_0003"
+    ],
+    "context_sha256": "fcbca369472c1916abb6cb9b8a45352ce9eb48fa7c4d164a0b8330b999896d78",
+    "sha256": "fa1e26a386c1ff899ae2b0d12f3e3bdb748fd23856886735d07d7223f3fbc7cb",
+    "check": {
+      "exit_code": 0,
+      "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-9o0m7_nn/output/Auxiliary.lean:52:54: warning: Variable name `h_T004` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-9o0m7_nn/output/Auxiliary.lean:73:50: warning: Variable name `h_T002` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-9o0m7_nn/output/Auxiliary.lean:81:54: warning: Variable name `h_T004` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-9o0m7_nn/output/Auxiliary.lean:94:50: warning: Variable name `h_T002` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-9o0m7_nn/output/Auxiliary.lean:102:54: warning: Variable name `h_T004` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-9o0m7_nn/output/Auxiliary.lean:116:50: warning: Variable name `h_T002` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-9o0m7_nn/output/Auxiliary.lean:124:54: warning: Variable name `h_T004` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (n : ℕ) (E : Set (GDVec n)),\n  (∀ (m : ℕ) (A : Set (GDVec m)),\n      0 ≤ dimH A ∧\n        ∀ (s : ℝ),\n          0 < s →\n            GDMeasure s A = (MeasureTheory.Measure.hausdorffMeasure s) A ∧\n              (ENNReal.ofReal s < dimH A → GDMeasure s A = ∞) ∧\n                (dimH A < ENNReal.ofReal s → GDMeasure s A = 0) ∧\n                  (GDMeasure s A < ∞ → dimH A ≤ ENNReal.ofReal s) ∧\n                    (GDMeasure s A = 0 → dimH A ≤ ENNReal.ofReal s) ∧ (GDMeasure s A = ∞ → ENNReal.ofReal s ≤ dimH A)) →\n    Bornology.IsBounded E ∧\n        0 ≤ dimH E ∧\n          dimH E ≤ ↑n ∧\n            dimH E < ∞ ∧ (∀ (s δ : ℝ), 0 < s → 0 < δ → GDContent s δ E < ∞) ∧ (n = 0 → E = Set.univ ∧ dimH E = 0) →\n      1 ≤ n →\n        ∀ (q r a : ℝ) (W : Set (GDVec n)),\n          0 < q →\n            0 < r →\n              0 < a →\n                W.Nonempty →\n                  Metric.ediam W ≤ ENNReal.ofReal r →\n                    ∃ U,\n                      W ⊆ U ∧\n                        U.Nonempty ∧\n                          0 < Metric.ediam U ∧\n                            Metric.ediam U ≤ ENNReal.ofReal r ∧ Metric.ediam U ^ q ≤ GDCost q W + ENNReal.ofReal a\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+      "stderr": "",
+      "wall_seconds": 5.119843875057995,
+      "native_limits": {
+        "timeout_seconds": 180,
+        "max_heartbeats": 20000000
+      },
+      "source_path": "/Users/syyui/projects/Yui-results/test/geometry-product-dimension/rigorous-proof/20261101-fresh-full-18b3e2e0bf/native-checks/d409d450f6e54429964fbb308603f66c.lean",
+      "source_sha256": "19a5059cd163a3a3bf00ccd75f1a0d510927027e56132fb2886800f910786497",
+      "auxiliary_valid": true,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "lean_sha256": "19a5059cd163a3a3bf00ccd75f1a0d510927027e56132fb2886800f910786497",
+      "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+      "context_port": "T008",
+      "candidate": 6
+    }
+  },
+  {
+    "name": "yui_aux_0006",
+    "statement": "∀ a b c : ℝ≥0∞, a ≤ b → a + c ≤ b + c",
+    "proof": "intro a b c h\nexact add_le_add h le_rfl",
+    "dependencies": [],
+    "context_sha256": "fcbca369472c1916abb6cb9b8a45352ce9eb48fa7c4d164a0b8330b999896d78",
+    "sha256": "c78907eb2003e979e1c4e973266e35a10eee0101196e4d470aaa7347f7213d74",
+    "check": {
+      "exit_code": 0,
+      "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-f5zlziim/output/Auxiliary.lean:52:54: warning: Variable name `h_T004` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-f5zlziim/output/Auxiliary.lean:73:50: warning: Variable name `h_T002` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-f5zlziim/output/Auxiliary.lean:81:54: warning: Variable name `h_T004` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-f5zlziim/output/Auxiliary.lean:94:50: warning: Variable name `h_T002` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-f5zlziim/output/Auxiliary.lean:102:54: warning: Variable name `h_T004` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-f5zlziim/output/Auxiliary.lean:116:50: warning: Variable name `h_T002` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-f5zlziim/output/Auxiliary.lean:124:54: warning: Variable name `h_T004` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-f5zlziim/output/Auxiliary.lean:166:45: warning: Variable name `h_T002` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-f5zlziim/output/Auxiliary.lean:174:54: warning: Variable name `h_T004` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (n : ℕ) (E : Set (GDVec n)),\n  (∀ (m : ℕ) (A : Set (GDVec m)),\n      0 ≤ dimH A ∧\n        ∀ (s : ℝ),\n          0 < s →\n            GDMeasure s A = (MeasureTheory.Measure.hausdorffMeasure s) A ∧\n              (ENNReal.ofReal s < dimH A → GDMeasure s A = ∞) ∧\n                (dimH A < ENNReal.ofReal s → GDMeasure s A = 0) ∧\n                  (GDMeasure s A < ∞ → dimH A ≤ ENNReal.ofReal s) ∧\n                    (GDMeasure s A = 0 → dimH A ≤ ENNReal.ofReal s) ∧ (GDMeasure s A = ∞ → ENNReal.ofReal s ≤ dimH A)) →\n    Bornology.IsBounded E ∧\n        0 ≤ dimH E ∧\n          dimH E ≤ ↑n ∧\n            dimH E < ∞ ∧ (∀ (s δ : ℝ), 0 < s → 0 < δ → GDContent s δ E < ∞) ∧ (n = 0 → E = Set.univ ∧ dimH E = 0) →\n      ∀ (a b c : ℝ≥0∞), a ≤ b → a + c ≤ b + c\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+      "stderr": "",
+      "wall_seconds": 3.799643374979496,
+      "native_limits": {
+        "timeout_seconds": 180,
+        "max_heartbeats": 20000000
+      },
+      "source_path": "/Users/syyui/projects/Yui-results/test/geometry-product-dimension/rigorous-proof/20261101-fresh-full-18b3e2e0bf/native-checks/227ea094eb5e4074bb5e6b75f1d52269.lean",
+      "source_sha256": "11b84e16e2799aaf8284eeeb2e6ec643c5acfa1af96db6112522c7e042837ce2",
+      "auxiliary_valid": true,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "lean_sha256": "11b84e16e2799aaf8284eeeb2e6ec643c5acfa1af96db6112522c7e042837ce2",
+      "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+      "context_port": "T008",
+      "candidate": 8
+    }
+  },
+  {
+    "name": "yui_aux_0007",
+    "statement": "∀ (ε : ℝ) (K : Set ℕ) (a : ℕ → ℝ≥0∞) (b : K → ℝ≥0∞), 0 < ε → (∑' i, a i) < ENNReal.ofReal (ε / 2) → (∀ i, b i ≤ a i + ENNReal.ofReal (ε / 4 / 2 / (2 : ℝ) ^ (i : ℕ))) → (∑' i, b i) < ENNReal.ofReal ε",
+    "proof": "intro ε K a b hε ha hb\nhave hsum := (@yui_aux_0004 n E h_T002 h_T004 ε hε).2\ncalc\n  (∑' i, b i) ≤ ∑' i : K, (a i + ENNReal.ofReal (ε / 4 / 2 / (2 : ℝ) ^ (i : ℕ))) := ENNReal.tsum_le_tsum hb\n  _ ≤ ∑' i : ℕ, (a i + ENNReal.ofReal (ε / 4 / 2 / (2 : ℝ) ^ i)) := ENNReal.tsum_comp_le_tsum_of_injective Subtype.val_injective _\n  _ = (∑' i, a i) + ENNReal.ofReal (ε / 4) := by rw [ENNReal.tsum_add, hsum]\n  _ ≤ ENNReal.ofReal (ε / 2) + ENNReal.ofReal (ε / 4) := @yui_aux_0006 n E h_T002 h_T004 _ _ _ ha.le\n  _ = ENNReal.ofReal (ε / 2 + ε / 4) := (ENNReal.ofReal_add (by positivity) (by positivity)).symm\n  _ < ENNReal.ofReal ε := (ENNReal.ofReal_lt_ofReal_iff hε).mpr (by linarith)",
+    "dependencies": [
+      "yui_aux_0004",
+      "yui_aux_0006"
+    ],
+    "context_sha256": "fcbca369472c1916abb6cb9b8a45352ce9eb48fa7c4d164a0b8330b999896d78",
+    "sha256": "2a42ef01ea483b1c116e6a3853a42470a2efe2ee3b5d950d226b7c045ba87c54",
+    "check": {
+      "exit_code": 0,
+      "stdout": "/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-idiwzn39/output/Auxiliary.lean:52:54: warning: Variable name `h_T004` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-idiwzn39/output/Auxiliary.lean:73:50: warning: Variable name `h_T002` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-idiwzn39/output/Auxiliary.lean:81:54: warning: Variable name `h_T004` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-idiwzn39/output/Auxiliary.lean:94:50: warning: Variable name `h_T002` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-idiwzn39/output/Auxiliary.lean:102:54: warning: Variable name `h_T004` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-idiwzn39/output/Auxiliary.lean:116:50: warning: Variable name `h_T002` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-idiwzn39/output/Auxiliary.lean:124:54: warning: Variable name `h_T004` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-idiwzn39/output/Auxiliary.lean:166:50: warning: Variable name `h_T002` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\n/private/var/folders/rh/238ty32j2fd87j0xms57ry900000gn/T/yui-auxiliary-idiwzn39/output/Auxiliary.lean:174:54: warning: Variable name `h_T004` is not explicitly referenced.\n\nThe binding can be removed (if unused) or named `_` (if used implicitly).\n\nNote: This linter can be disabled with `set_option linter.unusedVariables false`\nchecked : ∀ (n : ℕ) (E : Set (GDVec n)),\n  (∀ (m : ℕ) (A : Set (GDVec m)),\n      0 ≤ dimH A ∧\n        ∀ (s : ℝ),\n          0 < s →\n            GDMeasure s A = (MeasureTheory.Measure.hausdorffMeasure s) A ∧\n              (ENNReal.ofReal s < dimH A → GDMeasure s A = ∞) ∧\n                (dimH A < ENNReal.ofReal s → GDMeasure s A = 0) ∧\n                  (GDMeasure s A < ∞ → dimH A ≤ ENNReal.ofReal s) ∧\n                    (GDMeasure s A = 0 → dimH A ≤ ENNReal.ofReal s) ∧ (GDMeasure s A = ∞ → ENNReal.ofReal s ≤ dimH A)) →\n    Bornology.IsBounded E ∧\n        0 ≤ dimH E ∧\n          dimH E ≤ ↑n ∧\n            dimH E < ∞ ∧ (∀ (s δ : ℝ), 0 < s → 0 < δ → GDContent s δ E < ∞) ∧ (n = 0 → E = Set.univ ∧ dimH E = 0) →\n      ∀ (ε : ℝ) (K : Set ℕ) (a : ℕ → ℝ≥0∞) (b : ↑K → ℝ≥0∞),\n        0 < ε →\n          ∑' (i : ℕ), a i < ENNReal.ofReal (ε / 2) →\n            (∀ (i : ↑K), b i ≤ a ↑i + ENNReal.ofReal (ε / 4 / 2 / 2 ^ ↑i)) → ∑' (i : ↑K), b i < ENNReal.ofReal ε\n'YuiAuxiliary.checked' depends on axioms: [propext, Classical.choice, Quot.sound]\n",
+      "stderr": "",
+      "wall_seconds": 5.05106145888567,
+      "native_limits": {
+        "timeout_seconds": 180,
+        "max_heartbeats": 20000000
+      },
+      "source_path": "/Users/syyui/projects/Yui-results/test/geometry-product-dimension/rigorous-proof/20261101-fresh-full-18b3e2e0bf/native-checks/7539fc479051439dbdaf106cb3fb1077.lean",
+      "source_sha256": "57a67c93fd1e5963fe36d147f2a6ff5a967eafee02c012b027e357e93f282dec",
+      "auxiliary_valid": true,
+      "axioms": [
+        "Classical.choice",
+        "Quot.sound",
+        "propext"
+      ],
+      "lean_sha256": "57a67c93fd1e5963fe36d147f2a6ff5a967eafee02c012b027e357e93f282dec",
+      "scope": "AUXILIARY_ONLY_NOT_ADDED_TO_PREMISES_OR_ACCEPTED_TARGET",
+      "context_port": "T008",
+      "candidate": 9
+    }
+  }
+]

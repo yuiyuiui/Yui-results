@@ -1,0 +1,885 @@
+{
+  "contract_version": 2,
+  "case_id": "preparation",
+  "graph_sha256": "af3de71103702aff9aa9af1d72fb762264af4e5ce6c1ae796cc3e8eee70cc04b",
+  "spec_sha256": "b2a26c073d89f6f3a75a7d2dcbb3f4a11aa69ed3172e8f9454863039418bebfa",
+  "parameters": [
+    {
+      "symbol": "n",
+      "type": "natural number"
+    },
+    {
+      "symbol": "m",
+      "type": "natural number"
+    },
+    {
+      "symbol": "u",
+      "type": "function ℝ^n×(0,∞)→ℝ^m"
+    },
+    {
+      "symbol": "q",
+      "type": "vector in ℝ^m"
+    }
+  ],
+  "logic": {
+    "classical": true,
+    "rules": [
+      "direct",
+      "forall_introduction",
+      "exists_elimination"
+    ],
+    "calculations": [
+      "equality: Equality reflexivity, symmetry, transitivity and substitution.",
+      "definitions: Unfold an explicitly supplied definition; this proves no extra property.",
+      "finite_algebra: Routine finite semiring/ring/field arithmetic, including zero/one laws, distributivity, associativity and finite polynomial identities. Correct elementary compression is permitted; a substantive missing argument is not.",
+      "finite_order: Routine ordered-field reasoning with actual signs/domains: order laws, adding inequalities, multiplication/division with sign conditions, and real square nonnegativity. Ordinary valid elementary inferences need no exhaustive displayed chain. Check that the conclusion follows; substantial named theorems still require inputs or verified-background admission.",
+      "finite_sums: Unfold and rearrange finite sums/products with explicitly given finite indices."
+    ],
+    "primitives": [
+      {
+        "symbol": "0",
+        "type": "typed numeral",
+        "meaning": "Zero of the explicitly specified mathematical type."
+      },
+      {
+        "symbol": "1",
+        "type": "typed numeral",
+        "meaning": "One of the explicitly specified mathematical type."
+      },
+      {
+        "symbol": "2",
+        "type": "typed numeral",
+        "meaning": "Two of the explicitly specified mathematical type, including an exponent two."
+      },
+      {
+        "symbol": "ℕ",
+        "type": "number system",
+        "meaning": "The natural numbers with their usual arithmetic."
+      },
+      {
+        "symbol": "ℤ",
+        "type": "number system",
+        "meaning": "The integers with their usual arithmetic."
+      },
+      {
+        "symbol": "ℚ",
+        "type": "number system",
+        "meaning": "The rational numbers with their usual ordered-field operations."
+      },
+      {
+        "symbol": "ℝ",
+        "type": "number system",
+        "meaning": "The real numbers with their usual ordered-field structure."
+      },
+      {
+        "symbol": "ℂ",
+        "type": "number system",
+        "meaning": "The complex numbers with their usual field structure."
+      },
+      {
+        "symbol": "∅",
+        "type": "typed set notation",
+        "meaning": "The empty set in the explicitly specified ambient type."
+      },
+      {
+        "symbol": "∞",
+        "type": "typed order notation",
+        "meaning": "The top element in an explicitly specified extended ordered codomain."
+      }
+    ]
+  },
+  "pins": {
+    "lean_version": "4.32.2",
+    "mathlib_commit": "905b95818eb32af7874a58b427f50c1711a5e96c",
+    "mathlib_root": "/Users/syyui/formalization-tools/lean-mathlib-v4.32.2/mathlib"
+  },
+  "foundation_profile": "elementary-language-4",
+  "standard_language": "Ordinary typed mathematical language: logical connectives, quantifiers, equality, sets, functions, tuples, finite indices and their usual notation. A type explicitly named natural numbers, integers, rationals, reals or complex numbers means that standard structure, with its usual numerals and arithmetic operations; these operation tokens need not be redeclared as project objects. The fixed finite calculation rules below, including a+0=a, are controller permissions, not an author claim. The core symbol table below is not a dictionary of all allowed mathematics. Objects and notation from any subject are introduced by this problem's parameters, D definitions or scoped locals, with their types and dependencies. Their properties need direct inputs or displayed local proofs; a familiar name or symbol supplies no theorem.",
+  "background_policy": "mathematical-background-v2-1",
+  "definitions": [
+    {
+      "id": "D001",
+      "symbol": "Xn",
+      "type": "real Euclidean vector space",
+      "definition": "Xn=ℝ^n with the standard orthonormal coordinates indexed by j=1,…,n, its Euclidean norm and inner product, and its standard topology.",
+      "depends_on": [],
+      "requires": [],
+      "binders": [],
+      "objects": [
+        "n",
+        "ℝ"
+      ]
+    },
+    {
+      "id": "D002",
+      "symbol": "Ym",
+      "type": "real Euclidean vector space",
+      "definition": "Ym=ℝ^m with its standard Euclidean norm |y|=sqrt(Σ_k y_k²) and real inner product ⟨y,z⟩=Σ_k y_k z_k; k runs from 1 to m. All inner products and vector norms below use the corresponding standard real Euclidean structures.",
+      "depends_on": [],
+      "requires": [],
+      "binders": [],
+      "objects": [
+        "m",
+        "ℝ"
+      ]
+    },
+    {
+      "id": "D004",
+      "symbol": "Ω",
+      "type": "open positive-time domain in Xn×ℝ",
+      "definition": "Ω={(x,t)∈Xn×ℝ : t>0}. Positive-time differentiation means ordinary differentiation in this open domain, with no assertion at t=0.",
+      "depends_on": [
+        "D001"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "x",
+          "type": "Xn"
+        },
+        {
+          "symbol": "t",
+          "type": "ℝ"
+        }
+      ],
+      "objects": [
+        "Xn",
+        "ℝ",
+        "0"
+      ]
+    },
+    {
+      "id": "D005",
+      "symbol": "ũ",
+      "type": "total function Xn×ℝ→Ym",
+      "definition": "ũ(x,t)=u(x,t) when t>0 and ũ(x,t)=q when t≤0. This only specifies a total representation of u; no regularity at nonpositive times is asserted.",
+      "depends_on": [
+        "D001",
+        "D002",
+        "D004"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "x",
+          "type": "Xn"
+        },
+        {
+          "symbol": "t",
+          "type": "ℝ"
+        }
+      ],
+      "objects": [
+        "u",
+        "q",
+        "Xn",
+        "Ym",
+        "ℝ",
+        "0"
+      ]
+    },
+    {
+      "id": "D006",
+      "symbol": "D_v",
+      "type": "real directional Fréchet derivative notation",
+      "definition": "For real normed spaces A,B, a function f:A→B, a point z∈A and a direction v∈A, write D_v f(z)=Df(z)[v]=fderiv ℝ f z v. Here Df(z) is the continuous linear Fréchet derivative when it exists, and the total fderiv convention gives the zero continuous linear map otherwise. This notation alone asserts no differentiability.",
+      "depends_on": [],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "A",
+          "type": "real normed vector space"
+        },
+        {
+          "symbol": "B",
+          "type": "real normed vector space"
+        },
+        {
+          "symbol": "f",
+          "type": "A→B"
+        },
+        {
+          "symbol": "z",
+          "type": "A"
+        },
+        {
+          "symbol": "v",
+          "type": "A"
+        }
+      ],
+      "objects": [
+        "ℝ"
+      ]
+    },
+    {
+      "id": "D007",
+      "symbol": "b_std",
+      "type": "standard orthonormal basis of Xn",
+      "definition": "b_std is the standard orthonormal basis; its jth vector, written b_j for j=1,…,n, has jth coordinate 1 and other coordinates 0. Fin n indices 0,…,n−1 are an equivalent relabeling with the same Euclidean structures and volume.",
+      "depends_on": [
+        "D001"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "j",
+          "type": "coordinate index 1,…,n"
+        }
+      ],
+      "objects": [
+        "n",
+        "Xn",
+        "0",
+        "1"
+      ]
+    },
+    {
+      "id": "D008",
+      "symbol": "T",
+      "type": "constant time direction in Xn×ℝ",
+      "definition": "T=(0,1) in Xn×ℝ.",
+      "depends_on": [
+        "D001"
+      ],
+      "requires": [],
+      "binders": [],
+      "objects": [
+        "Xn",
+        "ℝ",
+        "0",
+        "1"
+      ]
+    },
+    {
+      "id": "D009",
+      "symbol": "S",
+      "type": "family of constant spatial directions in Xn×ℝ",
+      "definition": "For j=1,…,n, S_j=(b_j,0) in Xn×ℝ.",
+      "depends_on": [
+        "D001",
+        "D007"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "j",
+          "type": "coordinate index 1,…,n"
+        }
+      ],
+      "objects": [
+        "n",
+        "Xn",
+        "b_std",
+        "ℝ",
+        "0"
+      ]
+    },
+    {
+      "id": "D010",
+      "symbol": "partials",
+      "type": "partial derivative and Laplacian notation",
+      "definition": "On Ω set u_t=D_T ũ, u_tt=D_T(D_T ũ), ∂_{x_j}u=D_{S_j}ũ, ∂_{x_jx_j}u=D_{S_j}(D_{S_j}ũ), and ∂_{x_j}u_t=D_{S_j}(D_T ũ). For any scalar or vector field h on Ω use the same total extension convention (arbitrary off Ω) and write ∂_t h=D_T h and ∂_{x_j}h=D_{S_j}h on Ω. These are derivatives of the original germs wherever differentiable. Δ_xu=Σ_{j=1}^n ∂_{x_jx_j}u componentwise, and |D_xu|²=Σ_{j=1}^n |∂_{x_j}u|² is the Frobenius square.",
+      "depends_on": [
+        "D004",
+        "D005",
+        "D006",
+        "D007",
+        "D008",
+        "D009"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "j",
+          "type": "coordinate index 1,…,n"
+        },
+        {
+          "symbol": "h",
+          "type": "scalar or vector field on Ω"
+        }
+      ],
+      "objects": [
+        "u",
+        "ũ",
+        "Ω",
+        "D_v",
+        "T",
+        "S",
+        "b_std",
+        "n"
+      ]
+    },
+    {
+      "id": "D011",
+      "symbol": "e",
+      "type": "real energy density on Ω",
+      "definition": "For (x,t)∈Ω, e(x,t)=|u_t(x,t)|²+Σ_{j=1}^n |∂_{x_j}u(x,t)|². The normalization contains no factor 1/2. When a total time function is needed extend e by zero at t≤0.",
+      "depends_on": [
+        "D002",
+        "D004",
+        "D010"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "x",
+          "type": "Xn"
+        },
+        {
+          "symbol": "t",
+          "type": "ℝ"
+        }
+      ],
+      "objects": [
+        "u",
+        "partials",
+        "Ω",
+        "n",
+        "ℝ",
+        "0"
+      ]
+    },
+    {
+      "id": "D012",
+      "symbol": "flux",
+      "type": "family of real flux functions on Ω",
+      "definition": "flux is the family denoted g_j: for j=1,…,n and (x,t)∈Ω, g_j(x,t)=⟨u_t(x,t),∂_{x_j}u(x,t)⟩. Extend by zero at nonpositive times when total functions are needed.",
+      "depends_on": [
+        "D002",
+        "D004",
+        "D010"
+      ],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "x",
+          "type": "Xn"
+        },
+        {
+          "symbol": "t",
+          "type": "ℝ"
+        },
+        {
+          "symbol": "j",
+          "type": "coordinate index 1,…,n"
+        }
+      ],
+      "objects": [
+        "u",
+        "partials",
+        "Ω",
+        "n",
+        "ℝ",
+        "0"
+      ]
+    },
+    {
+      "id": "D014",
+      "symbol": "tsupport",
+      "type": "topological support operator",
+      "definition": "For a scalar or vector function f on a topological space A with a distinguished zero in its codomain, tsupport f is the closure in A of {z : f(z)≠0}. Compact topological support means that this closed set is compact.",
+      "depends_on": [],
+      "requires": [],
+      "binders": [
+        {
+          "symbol": "A",
+          "type": "topological space"
+        },
+        {
+          "symbol": "f",
+          "type": "function on A with zero in its codomain"
+        },
+        {
+          "symbol": "z",
+          "type": "A"
+        }
+      ],
+      "objects": [
+        "0"
+      ]
+    }
+  ],
+  "inputs": [
+    {
+      "id": "H001",
+      "kind": "hypothesis",
+      "statement": "The integers n,m satisfy n≥1 and m≥1, and u:R^n×(0,∞)→R^m is jointly smooth.",
+      "definitions": [
+        "D001",
+        "D002",
+        "D004"
+      ],
+      "binders": [],
+      "objects": [
+        "n",
+        "m",
+        "u",
+        "Xn",
+        "Ym",
+        "Ω"
+      ]
+    },
+    {
+      "id": "H005",
+      "kind": "hypothesis",
+      "statement": "For every pair of real times 0<s<t there is a compact set C⊂R^n such that u(x,r)=q for all x∉C and every r∈[s,t].",
+      "definitions": [
+        "D001",
+        "D002"
+      ],
+      "binders": [
+        {
+          "symbol": "s",
+          "type": "real lower time"
+        },
+        {
+          "symbol": "t",
+          "type": "positive real time"
+        },
+        {
+          "symbol": "C",
+          "type": "compact subset of ℝ^n, existentially quantified after s,t"
+        },
+        {
+          "symbol": "x",
+          "type": "ℝ^n"
+        },
+        {
+          "symbol": "r",
+          "type": "real time in [s,t]"
+        }
+      ],
+      "objects": [
+        "n",
+        "m",
+        "u",
+        "q",
+        "s",
+        "t",
+        "C",
+        "x",
+        "r",
+        "Xn",
+        "Ym"
+      ]
+    },
+    {
+      "id": "M008",
+      "kind": "mathlib",
+      "statement": "For real normed vector spaces X,Y, an open set s⊆X and a smooth f:X→Y on s, the derivative field x↦fderiv R f x is smooth on s.",
+      "definitions": [],
+      "binders": [
+        {
+          "symbol": "X",
+          "type": "real normed space"
+        },
+        {
+          "symbol": "Y",
+          "type": "real normed space"
+        },
+        {
+          "symbol": "s",
+          "type": "subset of X"
+        },
+        {
+          "symbol": "f",
+          "type": "X→Y"
+        },
+        {
+          "symbol": "x",
+          "type": "X"
+        }
+      ],
+      "objects": [
+        "X",
+        "Y",
+        "s",
+        "f",
+        "x",
+        "ℝ"
+      ],
+      "source_contract": {
+        "hypotheses": [
+          "X,Y are real normed vector spaces.",
+          "s is open.",
+          "f is smooth on s. The conclusion is the derivative-field conjunct of the forward implication of the native equivalence."
+        ],
+        "declaration": "contDiffOn_infty_iff_fderiv_of_isOpen",
+        "signature": "@contDiffOn_infty_iff_fderiv_of_isOpen : ∀ {𝕜 : Type u} [inst : NontriviallyNormedField.{u} 𝕜] {E : Type uE} [inst_1 : NormedAddCommGroup.{uE} E]\n  [inst_2 : NormedSpace.{u, uE} 𝕜 E] {F : Type uF} [inst_3 : NormedAddCommGroup.{uF} F]\n  [inst_4 : NormedSpace.{u, uF} 𝕜 F] {s : Set.{uE} E} {f : E → F},\n  IsOpen.{uE} s →\n    (ContDiffOn.{u, uE, uF} 𝕜 (↑Top.top.{0}) f s ↔\n      DifferentiableOn.{u, uE, uF} 𝕜 f s ∧ ContDiffOn.{u, uE, max uF uE} 𝕜 (↑Top.top.{0}) (fderiv.{u, uE, uF} 𝕜 f) s)"
+      }
+    },
+    {
+      "id": "M009",
+      "kind": "mathlib",
+      "statement": "For real normed vector spaces X,Y and f,g:X→Y, if f and g agree throughout some neighborhood of x, then their Frechet derivatives at x agree.",
+      "definitions": [
+        "D006"
+      ],
+      "binders": [
+        {
+          "symbol": "X",
+          "type": "real normed space"
+        },
+        {
+          "symbol": "Y",
+          "type": "real normed space"
+        },
+        {
+          "symbol": "f",
+          "type": "X→Y"
+        },
+        {
+          "symbol": "g",
+          "type": "X→Y"
+        },
+        {
+          "symbol": "x",
+          "type": "X"
+        }
+      ],
+      "objects": [
+        "X",
+        "Y",
+        "f",
+        "g",
+        "x",
+        "ℝ",
+        "D_v"
+      ],
+      "source_contract": {
+        "hypotheses": [
+          "X,Y are real normed vector spaces.",
+          "f and g agree on some neighborhood of x."
+        ],
+        "declaration": "Filter.EventuallyEq.fderiv_eq",
+        "signature": "@Filter.EventuallyEq.fderiv_eq : ∀ {𝕜 : Type u_1} [inst : NontriviallyNormedField.{u_1} 𝕜] {E : Type u_2} [inst_1 : AddCommGroup.{u_2} E]\n  [inst_2 : _root_.Module.{u_1, u_2} 𝕜 E] [inst_3 : TopologicalSpace.{u_2} E] {F : Type u_3}\n  [inst_4 : AddCommGroup.{u_3} F] [inst_5 : _root_.Module.{u_1, u_3} 𝕜 F] [inst_6 : TopologicalSpace.{u_3} F]\n  {f f₁ : E → F} {x : E},\n  Filter.EventuallyEq.{u_2, u_3} (nhds.{u_2} x) f₁ f →\n    Eq.{max (u_2 + 1) (u_3 + 1)} (fderiv.{u_1, u_2, u_3} 𝕜 f₁ x) (fderiv.{u_1, u_2, u_3} 𝕜 f x)"
+      }
+    }
+  ],
+  "output": {
+    "id": "N002",
+    "kind": "internal",
+    "statement": "Define e(x,t)=|u_t(x,t)|²+Σ_{j=1}^n |∂_{x_j}u(x,t)|² and g_j(x,t)=⟨u_t(x,t),∂_{x_j}u(x,t)⟩. The real functions e, ∂_t e, g_j and ∂_{x_j}g_j are jointly smooth on R^n×(0,∞). For every t0>0 there exists a compact C⊂R^n such that, for every r∈(t0/2,3t0/2), all these functions vanish at (x,r) whenever x∉C, and their spatial topological supports are contained in C. This conclusion also holds for each inner-product term ⟨u_t,u_tt⟩, ⟨∂_{x_j}u,∂_{x_j}u_t⟩ and ⟨u_t,∂_{x_jx_j}u⟩. Indices j range from 1 to n.",
+    "definitions": [
+      "D010",
+      "D011",
+      "D012",
+      "D014"
+    ],
+    "binders": [
+      {
+        "symbol": "x",
+        "type": "ℝ^n"
+      },
+      {
+        "symbol": "t",
+        "type": "positive real time"
+      },
+      {
+        "symbol": "j",
+        "type": "spatial coordinate index 1,…,n"
+      },
+      {
+        "symbol": "t0",
+        "type": "positive real time"
+      },
+      {
+        "symbol": "C",
+        "type": "compact subset of ℝ^n, existential after t0"
+      },
+      {
+        "symbol": "r",
+        "type": "real time in (t0/2,3t0/2)"
+      }
+    ],
+    "objects": [
+      "n",
+      "m",
+      "u",
+      "x",
+      "t",
+      "j",
+      "t0",
+      "C",
+      "r",
+      "partials",
+      "e",
+      "flux",
+      "tsupport"
+    ]
+  },
+  "inference": {
+    "id": "R002",
+    "inputs": [
+      "H001",
+      "H005",
+      "M008",
+      "M009"
+    ],
+    "output": "N002",
+    "definitions": [
+      "D001",
+      "D002",
+      "D004",
+      "D005",
+      "D006",
+      "D007",
+      "D008",
+      "D009",
+      "D010",
+      "D011",
+      "D012",
+      "D014"
+    ],
+    "rules": [
+      "direct",
+      "forall_introduction",
+      "exists_elimination"
+    ],
+    "locals": [
+      {
+        "symbol": "tau",
+        "type": "positive real time",
+        "scope": "whole inference within the indicated steps",
+        "start": "S002",
+        "end": "S004",
+        "kind": "arbitrary",
+        "declaration": "Fix an arbitrary real tau>0.",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "ℝ"
+        ]
+      },
+      {
+        "symbol": "Cwin",
+        "type": "subset of Xn",
+        "scope": "whole inference within the indicated steps",
+        "start": "S003",
+        "end": "S004",
+        "kind": "witness",
+        "declaration": "Choose Cwin compact with u(x,r)=q outside Cwin for all r∈[tau/2,3tau/2], using F002.",
+        "from_inputs": [],
+        "from_local": [
+          "F002"
+        ],
+        "objects": [
+          "Xn",
+          "tau",
+          "u",
+          "q"
+        ]
+      },
+      {
+        "symbol": "Owin",
+        "type": "subset of Xn×ℝ",
+        "scope": "whole inference within the indicated steps",
+        "start": "S003",
+        "end": "S004",
+        "kind": "definition",
+        "declaration": "Set Owin=(Xn∖Cwin)×(tau/2,3tau/2).",
+        "from_inputs": [],
+        "from_local": [],
+        "objects": [
+          "Xn",
+          "Cwin",
+          "tau",
+          "ℝ"
+        ]
+      }
+    ],
+    "argument": [
+      {
+        "id": "S001",
+        "text": "By H001, ũ is smooth on the open set Ω. Apply M008 with this domain and map to obtain smoothness of its Fréchet derivative field. Evaluation at each fixed direction T or S_j is continuous linear, so composition preserves smoothness and gives smoothness of u_t and ∂_{x_j}u. Apply M008 again to these smooth fields on the same open domain and evaluate at the fixed directions to get smoothness of u_tt, ∂_{x_j}u_t and ∂_{x_jx_j}u. These assertions use only positive-time germs of D005. In the finite-dimensional real Euclidean codomain, inner products and norm squares are finite sums of products of smooth coordinate functions. Finite sums and products preserve smoothness; thus e, each g_j, and all three inner-product terms in the claimed output are smooth. Applying M008 to e and g_j and evaluating at T and S_j also proves smoothness of ∂_t e and ∂_{x_j}g_j. Fixed-time spatial sections of each function are smooth by composition with the affine inclusion of Xn.",
+        "uses": [
+          "H001",
+          "M008"
+        ],
+        "uses_local": [],
+        "objects": [
+          "u",
+          "ũ",
+          "Ω",
+          "Xn",
+          "Ym",
+          "T",
+          "S",
+          "partials",
+          "e",
+          "flux",
+          "n"
+        ],
+        "produces": [
+          {
+            "id": "F001",
+            "statement": "All of e, ∂_t e, g_j, ∂_{x_j}g_j, ⟨u_t,u_tt⟩, ⟨∂_{x_j}u,∂_{x_j}u_t⟩ and ⟨u_t,∂_{x_jx_j}u⟩ are jointly smooth on Ω and have smooth fixed-positive-time spatial sections, for every j=1,…,n.",
+            "binders": [
+              {
+                "symbol": "j",
+                "type": "coordinate index 1,…,n"
+              }
+            ],
+            "objects": [
+              "u",
+              "partials",
+              "e",
+              "flux",
+              "Ω",
+              "n"
+            ],
+            "assumptions": []
+          }
+        ],
+        "introduces": [],
+        "discharges": []
+      },
+      {
+        "id": "S002",
+        "text": "Fix tau>0. Since 0<tau/2<3tau/2, H005 at these two endpoints supplies a compact spatial set with u=q outside it at every time in the closed interval.",
+        "uses": [
+          "H005"
+        ],
+        "uses_local": [],
+        "objects": [
+          "tau",
+          "u",
+          "q",
+          "Xn"
+        ],
+        "produces": [
+          {
+            "id": "F002",
+            "statement": "There exists a compact C⊂Xn such that u(x,r)=q for all x∉C and r∈[tau/2,3tau/2].",
+            "binders": [
+              {
+                "symbol": "C",
+                "type": "subset of Xn, existential"
+              },
+              {
+                "symbol": "x",
+                "type": "Xn"
+              },
+              {
+                "symbol": "r",
+                "type": "real time"
+              }
+            ],
+            "objects": [
+              "tau",
+              "u",
+              "q",
+              "Xn"
+            ],
+            "assumptions": []
+          }
+        ],
+        "introduces": [],
+        "discharges": []
+      },
+      {
+        "id": "S003",
+        "text": "Choose Cwin from F002 and define Owin. A compact subset of the Euclidean space Xn is closed, so Owin is open and contained in Ω. On Owin, ũ is identically q. Apply M009 at each point of Owin to ũ and the constant map q, whose derivative is zero. Thus its whole derivative field is zero on Owin. Apply M009 again, now to that derivative field and the zero continuous-linear-map-valued function, to obtain zero second derivative there. Evaluation in T and S_j shows that u_t, ∂_{x_j}u, u_tt, ∂_{x_j}u_t and ∂_{x_jx_j}u all vanish on Owin. Consequently e, g_j and the three listed inner-product terms vanish there by their definitions. Since e and g_j are identically zero on this open set, further applications of M009 to e and g_j and the constant scalar zero give ∂_t e=0 and ∂_{x_j}g_j=0 throughout Owin. No conclusion about derivatives at the time endpoints is needed.",
+        "uses": [
+          "M009"
+        ],
+        "uses_local": [
+          "F002"
+        ],
+        "objects": [
+          "Cwin",
+          "Owin",
+          "tau",
+          "ũ",
+          "u",
+          "q",
+          "Ω",
+          "Xn",
+          "T",
+          "S",
+          "partials",
+          "e",
+          "flux",
+          "n"
+        ],
+        "produces": [
+          {
+            "id": "F003",
+            "statement": "Cwin is compact and closed. All of e, ∂_t e, g_j, ∂_{x_j}g_j, ⟨u_t,u_tt⟩, ⟨∂_{x_j}u,∂_{x_j}u_t⟩ and ⟨u_t,∂_{x_jx_j}u⟩ vanish at (x,r) for every x∉Cwin and r∈(tau/2,3tau/2), for every coordinate index j=1,…,n.",
+            "binders": [
+              {
+                "symbol": "x",
+                "type": "Xn"
+              },
+              {
+                "symbol": "r",
+                "type": "real time"
+              },
+              {
+                "symbol": "j",
+                "type": "coordinate index 1,…,n"
+              }
+            ],
+            "objects": [
+              "Cwin",
+              "tau",
+              "u",
+              "partials",
+              "e",
+              "flux",
+              "n"
+            ],
+            "assumptions": []
+          }
+        ],
+        "introduces": [],
+        "discharges": []
+      },
+      {
+        "id": "S004",
+        "text": "For every interior time r, F003 puts the nonzero set of each spatial section inside Cwin. Closure of that nonzero set is still contained in Cwin since Cwin is closed; this closure is tsupport by D014. It is compact as a closed subset of the compact Cwin. Combine this with the joint smoothness in F001. Cwin witnesses all support assertions simultaneously for this tau. The conclusion no longer depends on its private identity; existential elimination and universal introduction for arbitrary tau prove the full claimed output, including all three inner-product terms.",
+        "uses": [],
+        "uses_local": [
+          "F001",
+          "F003"
+        ],
+        "objects": [
+          "tau",
+          "Cwin",
+          "tsupport",
+          "u",
+          "partials",
+          "e",
+          "flux",
+          "n"
+        ],
+        "produces": [],
+        "introduces": [],
+        "discharges": []
+      }
+    ],
+    "applications": [
+      {
+        "input": "M008",
+        "at": "S001",
+        "bindings": "Use domain Xn×ℝ, open set Ω, and codomain Ym first with f=ũ; repeat for f=u_t and f=∂_{x_j}u. Also use codomain ℝ with f=e and f=g_j after their smoothness has been derived in S001.",
+        "hypothesis_checks": [
+          "The domain and each codomain (including spaces of continuous linear maps when iterated) are real normed spaces.",
+          "Ω is open as the inverse image of (0,∞) by the continuous time projection.",
+          "H001 and agreement on Ω give smoothness of ũ; evaluation of its smooth derivative gives the smooth fields for the subsequent instances. Finite coordinate products and sums give smoothness of e and g_j before the final instances. Each application uses the derivative-field conjunct of the forward equivalence."
+        ]
+      },
+      {
+        "input": "M009",
+        "at": "S003",
+        "bindings": "For each point of Owin use domain Xn×ℝ. First compare ũ with the constant q (codomain Ym); then compare its derivative field with zero in the continuous-linear-map codomain; finally compare e and g_j with scalar zero.",
+        "hypothesis_checks": [
+          "The domain, Ym, the derivative-map space and ℝ are real normed spaces.",
+          "F002 and the definition of Owin give equality of ũ and q on an open neighborhood of each point. The first instance gives a derivative field zero throughout Owin for the next instance. The definitions then give e=g_j=0 throughout Owin for the scalar instances."
+        ]
+      }
+    ]
+  },
+  "warning": "Direct inputs and fixed logic are supplied. Audit A may record mathematically checked routine background with actual conditions and justification; exact Lean bindings belong to nl02lean. No ancestor proof or extra H is available. A packet is not an audit certificate.",
+  "packet_sha256": "40e3df580ee6bad278176d1d21b850b31a35e05e3a2757bf7e75d08962394127"
+}

@@ -1,0 +1,5039 @@
+{
+  "spec": {
+    "format_version": 2,
+    "case_id": "benchmark",
+    "full_target": "The complete Theorem 1 (Logarithm-free convergence), with its Section 2 standing definitions and fixed scheme, on PDF page 2.\n\nUse the periodic domain mathbbT = reals/(2*pi*integers) with normalized measure dx/(2*pi). For a periodic function f, hat f(k) = (2*pi)^(-1) integral_0^(2*pi) f(x) exp(-i*k*x) dx and <k> = (1+k^2)^(1/2). The Sobolev norm is ||f||_(H^s)^2 = sum_(k in Z) <k>^(2*s) |hat f(k)|^2. These spaces are completions of trigonometric polynomials in these norms, with negative-order spaces interpreted as distributions. Reality means hat f(-k) = conjugate(hat f(k)); mean zero means hat f(0) = 0. Time suprema use continuous representatives; derivative norms use essential suprema.\n\nLet S_t = exp(-t*partial_x^3), with Fourier multiplier exp(i*t*k^3). Let P0 be the spatial mean and P = I-P0. Let D^(-1) = partial_x^(-1) have multiplier (i*k)^(-1) for k != 0 and zero at k=0, and D^(-2) = (D^(-1))^2. The equation is\n  u_t + u_xxx = (1/2)*partial_x(u^2), u(0)=u0.\nThe exact solution is the unique real mean-zero C([0,T];H^gamma) distributional solution obtained by smooth approximation.\n\nFor timestep tau=T/L, the time-semidiscrete scheme is exactly\n  u^0 = u0,\n  u^(n+1) = S_tau u^n + F_tau(u^n) + H_tau(u^n),\nwhere all products below are spatial products and [G(s)]_(s=0)^(s=tau) means G(tau)-G(0):\n  F_tau(f) = (1/6)*P[(S_tau D^(-1) f)^2]\n             - (1/6)*S_tau P[(D^(-1) f)^2],\n  H_tau(f) = (1/3)*P[(S_tau D^(-1) f)*D^(-1) F_tau(f)]\n             + (tau/9)*(S_tau D^(-1) f)*P0(f^2)\n             - (1/54)*[S_(tau-s) D^(-1)[(S_s D^(-1) f)^3]]_(s=0)^(s=tau)\n             - (1/(27*tau))*[S_(tau-s) D^(-2)[(S_(s-tau) D^(-2) F_tau(f))*(S_s D^(-1) f)]]_(s=0)^(s=tau).\nThis is the source scheme (2), with no spatial frequency cutoff.\n\nFor every T>0, 0<gamma<=1 and R>0, there exist C>0 and tau0>0 depending only on T,gamma,R such that, for every real mean-zero u0 in H^gamma(mathbbT) with ||u0||_(H^gamma)<=R and every positive integer L with tau=T/L<=tau0, this fixed scheme satisfies\n  max_(0<=n<=L) ||u(n*tau)-u^n||_(L^2) <= C*tau^gamma.\nThe constants are uniform over the entire stated initial-data ball and all permitted timesteps, with no Fourier-support restriction. The target includes all the hypotheses, quantifiers, endpoints, solution convention and method above.",
+    "conclusion": "There exist C>0 and tau0>0, depending only on T,gamma,R, such that for every real mean-zero u0 in H^gamma(mathbbT) with ||u0||_(H^gamma)<=R, the unique distributional solution u in C([0,T];H^gamma) obtained by smooth approximation and the fixed unfiltered iterates of Psi satisfy max_(0<=n<=L)||u(n*tau)-u^n||_L2<=C*tau^gamma for every positive integer L with tau=T/L<=tau0. The constants are uniform over that entire datum ball and all these L; no Fourier-support restriction is imposed.",
+    "parameters": [
+      {
+        "symbol": "T",
+        "type": "real number"
+      },
+      {
+        "symbol": "gamma",
+        "type": "real number"
+      },
+      {
+        "symbol": "R",
+        "type": "real number"
+      }
+    ],
+    "hypotheses": [
+      {
+        "id": "H001",
+        "statement": "T>0.",
+        "origin": "problem.md:88; target-selection.json/full_target"
+      },
+      {
+        "id": "H002",
+        "statement": "0<gamma<=1.",
+        "origin": "problem.md:88; target-selection.json/full_target"
+      },
+      {
+        "id": "H003",
+        "statement": "R>0.",
+        "origin": "problem.md:88; target-selection.json/full_target"
+      }
+    ],
+    "definitions": [
+      {
+        "id": "D001",
+        "symbol": "mathbbT",
+        "type": "measured periodic domain",
+        "definition": "mathbbT=ℝ/(2*pi*ℤ), with normalized measure dx/(2*pi).",
+        "depends_on": [],
+        "requires": [],
+        "binders": [],
+        "objects": [
+          "ℝ",
+          "ℤ"
+        ]
+      },
+      {
+        "id": "D002",
+        "symbol": "Fourier",
+        "type": "Fourier coefficient transform",
+        "definition": "For a periodic integrable f, hat f(k)=(2*pi)^(-1) integral_0^(2*pi) f(x) exp(-i*k*x) dx. The transform extends by completion to Sobolev spaces and by distributional duality. Reality means hat f(-k)=conjugate(hat f(k)); mean zero means hat f(0)=0.",
+        "depends_on": [
+          "D001"
+        ],
+        "requires": [],
+        "binders": [
+          {
+            "symbol": "f",
+            "type": "periodic integrable function"
+          },
+          {
+            "symbol": "k",
+            "type": "integer"
+          },
+          {
+            "symbol": "x",
+            "type": "spatial integration variable"
+          }
+        ],
+        "objects": [
+          "mathbbT"
+        ]
+      },
+      {
+        "id": "D003",
+        "symbol": "H",
+        "type": "family of Fourier Sobolev spaces and norms",
+        "definition": "For real s, <k>=(1+k^2)^(1/2), ||f||_(H^s)^2=sum_(k in Z) <k>^(2*s)|hat f(k)|^2. H^s is the completion of trigonometric polynomials, interpreted as distributions for negative s; L2=H^0 with the normalized spatial norm. On mean-zero functions ||f||_(dot H^s)^2=sum_(k!=0)|k|^(2*s)|hat f(k)|^2. Time suprema use continuous representatives and derivative norms essential suprema. For sequences x, ||x||_(ell2)^2=sum_k |x(k)|^2; ell1 uses sum_k |x(k)|. Frequency projections P_{<=A}, P_{>A} retain respectively |k|<=A and |k|>A.",
+        "depends_on": [
+          "D001",
+          "D002"
+        ],
+        "requires": [],
+        "binders": [
+          {
+            "symbol": "s",
+            "type": "real number"
+          },
+          {
+            "symbol": "f",
+            "type": "periodic distribution"
+          },
+          {
+            "symbol": "k",
+            "type": "integer"
+          },
+          {
+            "symbol": "x",
+            "type": "complex sequence"
+          },
+          {
+            "symbol": "A",
+            "type": "nonnegative real threshold"
+          }
+        ],
+        "objects": [
+          "mathbbT",
+          "Fourier"
+        ]
+      },
+      {
+        "id": "D004",
+        "symbol": "S",
+        "type": "one-parameter Fourier multiplier group",
+        "definition": "S_t=exp(-t*partial_x^3), hat(S_t f)(k)=exp(i*t*k^3)*hat f(k), for every real t.",
+        "depends_on": [
+          "D002",
+          "D003"
+        ],
+        "requires": [],
+        "binders": [
+          {
+            "symbol": "t",
+            "type": "real number"
+          },
+          {
+            "symbol": "f",
+            "type": "periodic distribution"
+          },
+          {
+            "symbol": "k",
+            "type": "integer"
+          }
+        ],
+        "objects": [
+          "Fourier",
+          "H"
+        ]
+      },
+      {
+        "id": "D005",
+        "symbol": "P0",
+        "type": "spatial mean projection",
+        "definition": "P0 f=hat f(0), identified with the constant function.",
+        "depends_on": [
+          "D002"
+        ],
+        "requires": [],
+        "binders": [
+          {
+            "symbol": "f",
+            "type": "periodic distribution"
+          }
+        ],
+        "objects": [
+          "Fourier"
+        ]
+      },
+      {
+        "id": "D006",
+        "symbol": "P",
+        "type": "mean-zero projection",
+        "definition": "P=I-P0.",
+        "depends_on": [
+          "D005"
+        ],
+        "requires": [],
+        "binders": [],
+        "objects": [
+          "P0"
+        ]
+      },
+      {
+        "id": "D007",
+        "symbol": "Dinv",
+        "type": "inverse spatial derivative Fourier multiplier",
+        "definition": "Dinv=D^(-1)=partial_x^(-1): its multiplier is (i*k)^(-1) at k!=0 and zero at k=0. D^(-2)=Dinv composed with Dinv. Spatial derivatives use multiplier i*k.",
+        "depends_on": [
+          "D002",
+          "D003"
+        ],
+        "requires": [],
+        "binders": [
+          {
+            "symbol": "k",
+            "type": "integer"
+          }
+        ],
+        "objects": [
+          "Fourier",
+          "H"
+        ]
+      },
+      {
+        "id": "D008",
+        "symbol": "F_tau",
+        "type": "family of quadratic spatial maps",
+        "definition": "For tau>0 and periodic f in L2, F_tau(f)=(1/6)*P[(S_tau Dinv f)^2]-(1/6)*S_tau P[(Dinv f)^2].",
+        "depends_on": [
+          "D004",
+          "D006",
+          "D007"
+        ],
+        "requires": [],
+        "binders": [
+          {
+            "symbol": "tau",
+            "type": "positive real number"
+          },
+          {
+            "symbol": "f",
+            "type": "periodic L2 function"
+          }
+        ],
+        "objects": [
+          "P",
+          "S",
+          "Dinv"
+        ]
+      },
+      {
+        "id": "D009",
+        "symbol": "H_tau",
+        "type": "family of cubic spatial maps",
+        "definition": "For tau>0 and periodic f in L2, H_tau(f)=(1/3)*P[(S_tau Dinv f)*Dinv F_tau(f)]+(tau/9)*(S_tau Dinv f)*P0(f^2)-(1/54)*[S_(tau-s) Dinv[(S_s Dinv f)^3]]_(s=0)^(s=tau)-(1/(27*tau))*[S_(tau-s) D^(-2)[(S_(s-tau) D^(-2) F_tau(f))*(S_s Dinv f)]]_(s=0)^(s=tau). Every product is spatial and [G(s)]_0^tau=G(tau)-G(0).",
+        "depends_on": [
+          "D004",
+          "D005",
+          "D006",
+          "D007",
+          "D008"
+        ],
+        "requires": [],
+        "binders": [
+          {
+            "symbol": "tau",
+            "type": "positive real number"
+          },
+          {
+            "symbol": "f",
+            "type": "periodic L2 function"
+          },
+          {
+            "symbol": "s",
+            "type": "endpoint evaluation variable"
+          }
+        ],
+        "objects": [
+          "S",
+          "P0",
+          "P",
+          "Dinv",
+          "F_tau"
+        ]
+      },
+      {
+        "id": "D010",
+        "symbol": "Psi",
+        "type": "unfiltered time-step map and its iterates",
+        "definition": "Psi_tau(f)=S_tau f+F_tau(f)+H_tau(f). For positive integer L set tau=T/L and t_n=n*tau. Define u^0=u0 and u^(n+1)=Psi_tau(u^n) for 0<=n<L. There is no spatial cutoff in this recurrence.",
+        "depends_on": [
+          "D004",
+          "D008",
+          "D009"
+        ],
+        "requires": [],
+        "binders": [
+          {
+            "symbol": "tau",
+            "type": "positive real number"
+          },
+          {
+            "symbol": "f",
+            "type": "periodic L2 function"
+          },
+          {
+            "symbol": "L",
+            "type": "positive integer"
+          },
+          {
+            "symbol": "n",
+            "type": "integer index"
+          },
+          {
+            "symbol": "u0",
+            "type": "periodic L2 datum"
+          }
+        ],
+        "objects": [
+          "T",
+          "S",
+          "F_tau",
+          "H_tau"
+        ]
+      },
+      {
+        "id": "D011",
+        "symbol": "eta",
+        "type": "average phase covariance",
+        "definition": "For tau>0, M_tau g=tau^(-1) integral_0^tau g(s)ds and eta_tau(alpha,beta)=M_tau(exp(-i*s*(alpha+beta)))-M_tau(exp(-i*s*alpha))*M_tau(exp(-i*s*beta)).",
+        "depends_on": [],
+        "requires": [],
+        "binders": [
+          {
+            "symbol": "tau",
+            "type": "positive real number"
+          },
+          {
+            "symbol": "alpha",
+            "type": "real phase"
+          },
+          {
+            "symbol": "beta",
+            "type": "real phase"
+          },
+          {
+            "symbol": "g",
+            "type": "continuous function on [0,tau]"
+          },
+          {
+            "symbol": "s",
+            "type": "time integration variable"
+          }
+        ],
+        "objects": []
+      },
+      {
+        "id": "D012",
+        "symbol": "R2",
+        "type": "averaged cubic Fourier remainder family",
+        "definition": "For tau>0, t_n=n*tau and k!=0, hat(R2_(n,tau)(f1,f2,f3))(k)= -tau/(18*i*k) sum_(a+b+c=k,a+b!=0) exp(-i*t_n*Phi)*eta_tau(alpha,beta)*hat f1(a)*hat f2(b)*hat f3(c), with p=a+b, alpha=3*a*b*p, beta=3*k*c*p, Phi=alpha+beta=k^3-a^3-b^3-c^3. Output at k=0 is zero. Initially this formula is on Fourier polynomials; bounded extension is proved below. Terms with a zero input frequency vanish since one phase is zero.",
+        "depends_on": [
+          "D002",
+          "D011"
+        ],
+        "requires": [],
+        "binders": [
+          {
+            "symbol": "tau",
+            "type": "positive real number"
+          },
+          {
+            "symbol": "n",
+            "type": "nonnegative integer"
+          },
+          {
+            "symbol": "f1",
+            "type": "Fourier polynomial"
+          },
+          {
+            "symbol": "f2",
+            "type": "Fourier polynomial"
+          },
+          {
+            "symbol": "f3",
+            "type": "Fourier polynomial"
+          },
+          {
+            "symbol": "k",
+            "type": "integer output frequency"
+          },
+          {
+            "symbol": "a",
+            "type": "integer summation frequency"
+          },
+          {
+            "symbol": "b",
+            "type": "integer summation frequency"
+          },
+          {
+            "symbol": "c",
+            "type": "integer summation frequency"
+          },
+          {
+            "symbol": "p",
+            "type": "integer pair sum"
+          },
+          {
+            "symbol": "alpha",
+            "type": "real phase"
+          },
+          {
+            "symbol": "beta",
+            "type": "real phase"
+          },
+          {
+            "symbol": "Phi",
+            "type": "real total phase"
+          }
+        ],
+        "objects": [
+          "Fourier",
+          "eta"
+        ]
+      },
+      {
+        "id": "D013",
+        "symbol": "B",
+        "type": "time-dependent bilinear differential operator",
+        "definition": "B_t(f,g)=S_(-t) partial_x[(S_t f)(S_t g)].",
+        "depends_on": [
+          "D004",
+          "D007"
+        ],
+        "requires": [],
+        "binders": [
+          {
+            "symbol": "t",
+            "type": "real number"
+          },
+          {
+            "symbol": "f",
+            "type": "smooth periodic function"
+          },
+          {
+            "symbol": "g",
+            "type": "smooth periodic function"
+          }
+        ],
+        "objects": [
+          "S",
+          "Dinv"
+        ]
+      },
+      {
+        "id": "D014",
+        "symbol": "J",
+        "type": "time-dependent bilinear normal-form operator",
+        "definition": "J_t(f,g)=S_(-t) P[(S_t Dinv f)(S_t Dinv g)].",
+        "depends_on": [
+          "D004",
+          "D006",
+          "D007"
+        ],
+        "requires": [],
+        "binders": [
+          {
+            "symbol": "t",
+            "type": "real number"
+          },
+          {
+            "symbol": "f",
+            "type": "periodic L2 function"
+          },
+          {
+            "symbol": "g",
+            "type": "periodic L2 function"
+          }
+        ],
+        "objects": [
+          "S",
+          "P",
+          "Dinv"
+        ]
+      },
+      {
+        "id": "D015",
+        "symbol": "Cint",
+        "type": "time-integrated trilinear operator",
+        "definition": "For I=[a,b] with 0<=a<=b, Cint_I(f,g,h)=integral_I S_(-t) P{P[(S_t f(t))(S_t g(t))]*(S_t Dinv h(t))}dt; time-independent inputs are read as constant paths.",
+        "depends_on": [
+          "D004",
+          "D006",
+          "D007"
+        ],
+        "requires": [],
+        "binders": [
+          {
+            "symbol": "I",
+            "type": "closed nonnegative time interval"
+          },
+          {
+            "symbol": "a",
+            "type": "left endpoint"
+          },
+          {
+            "symbol": "b",
+            "type": "right endpoint"
+          },
+          {
+            "symbol": "t",
+            "type": "time integration variable"
+          },
+          {
+            "symbol": "f",
+            "type": "smooth periodic time path"
+          },
+          {
+            "symbol": "g",
+            "type": "smooth periodic time path"
+          },
+          {
+            "symbol": "h",
+            "type": "smooth periodic time path"
+          }
+        ],
+        "objects": [
+          "S",
+          "P",
+          "Dinv"
+        ]
+      },
+      {
+        "id": "D016",
+        "symbol": "X",
+        "type": "time-path norm",
+        "definition": "p_star=23/14. For an interval I of length at most one, ||f||_X(I)=||f||_(L^infty(I;L2))+||partial_t f||_(L^infty(I;H^(-p_star))).",
+        "depends_on": [
+          "D003"
+        ],
+        "requires": [],
+        "binders": [
+          {
+            "symbol": "I",
+            "type": "time interval"
+          },
+          {
+            "symbol": "f",
+            "type": "time path with the displayed norms finite"
+          }
+        ],
+        "objects": [
+          "H"
+        ]
+      },
+      {
+        "id": "D017",
+        "symbol": "a_gamma",
+        "type": "product and stage exponent",
+        "definition": "For 0<gamma<=1, a_gamma=1/2-gamma if gamma<1/2; a_gamma=1/8 if gamma=1/2; and a_gamma=0 if gamma>1/2.",
+        "depends_on": [],
+        "requires": [
+          "H002"
+        ],
+        "binders": [],
+        "objects": [
+          "gamma"
+        ]
+      },
+      {
+        "id": "D018",
+        "symbol": "Stage",
+        "type": "quadratic twisted stage",
+        "definition": "For tau>0, nonnegative integer n, t_n=n*tau and t in [t_n,t_n+tau], Stage_(n,tau)(t;f)= (1/2) integral_(t_n)^t B_s(f,f)ds, initially for a time-independent smooth mean-zero f; the endpoint normal form below gives its L2 extension.",
+        "depends_on": [
+          "D013"
+        ],
+        "requires": [],
+        "binders": [
+          {
+            "symbol": "tau",
+            "type": "positive real number"
+          },
+          {
+            "symbol": "n",
+            "type": "nonnegative integer"
+          },
+          {
+            "symbol": "t",
+            "type": "stage time"
+          },
+          {
+            "symbol": "f",
+            "type": "smooth mean-zero periodic function"
+          },
+          {
+            "symbol": "s",
+            "type": "integration variable"
+          }
+        ],
+        "objects": [
+          "B"
+        ]
+      },
+      {
+        "id": "D019",
+        "symbol": "Interp",
+        "type": "step interpolation and residual construction",
+        "definition": "For smooth mean-zero step data f at t_n=n*tau, write F_n(t)=Stage_(n,tau)(t;f), z_n=f+F_n, C_n(t)=integral_(t_n)^t B_s(f,F_n(s))ds, Q_n(t)=(1/2)integral_(t_n)^t B_s(F_n(s),F_n(s))ds, W_n=Q_n(t_n+tau)+R2_(n,tau)(f,f,f), V_n(t)=f+F_n(t)+C_n(t)+Q_n(t)-(t-t_n)*W_n/tau, Y_n=V_n-z_n, rho_n(t)=-integral_(t_n)^t B_s(Y_n,z_n)ds-(1/2)integral_(t_n)^t B_s(Y_n,Y_n)ds-(t-t_n)*W_n/tau. For f=S_(-t_n)u^n, concatenate V_n as V and the increments rho_n as Rres, with Rres(0)=0. Continuity of V at grid points is a proved property, not an assumption.",
+        "depends_on": [
+          "D004",
+          "D010",
+          "D012",
+          "D013",
+          "D018"
+        ],
+        "requires": [],
+        "binders": [
+          {
+            "symbol": "tau",
+            "type": "positive real number"
+          },
+          {
+            "symbol": "n",
+            "type": "nonnegative step index"
+          },
+          {
+            "symbol": "t",
+            "type": "time in the step"
+          },
+          {
+            "symbol": "f",
+            "type": "smooth mean-zero periodic function"
+          },
+          {
+            "symbol": "s",
+            "type": "time integration variable"
+          }
+        ],
+        "objects": [
+          "S",
+          "Psi",
+          "R2",
+          "B",
+          "Stage"
+        ]
+      }
+    ],
+    "logic": {
+      "classical": true,
+      "rules": [
+        "direct",
+        "forall_introduction",
+        "implication_introduction",
+        "case_elimination",
+        "contradiction_classical",
+        "natural_induction",
+        "exists_elimination"
+      ],
+      "calculations": [
+        "equality",
+        "definitions",
+        "finite_algebra",
+        "finite_order",
+        "finite_sums"
+      ],
+      "primitives": [
+        {
+          "symbol": "0",
+          "type": "typed numeral",
+          "meaning": "Zero of the explicitly specified mathematical type."
+        },
+        {
+          "symbol": "1",
+          "type": "typed numeral",
+          "meaning": "One of the explicitly specified mathematical type."
+        },
+        {
+          "symbol": "2",
+          "type": "typed numeral",
+          "meaning": "Two of the explicitly specified mathematical type, including an exponent two."
+        },
+        {
+          "symbol": "ℕ",
+          "type": "number system",
+          "meaning": "The natural numbers with their usual arithmetic."
+        },
+        {
+          "symbol": "ℤ",
+          "type": "number system",
+          "meaning": "The integers with their usual arithmetic."
+        },
+        {
+          "symbol": "ℚ",
+          "type": "number system",
+          "meaning": "The rational numbers with their usual ordered-field operations."
+        },
+        {
+          "symbol": "ℝ",
+          "type": "number system",
+          "meaning": "The real numbers with their usual ordered-field structure."
+        },
+        {
+          "symbol": "ℂ",
+          "type": "number system",
+          "meaning": "The complex numbers with their usual field structure."
+        },
+        {
+          "symbol": "∅",
+          "type": "typed set notation",
+          "meaning": "The empty set in the explicitly specified ambient type."
+        },
+        {
+          "symbol": "∞",
+          "type": "typed order notation",
+          "meaning": "The top element in an explicitly specified extended ordered codomain."
+        }
+      ]
+    },
+    "pins": {
+      "lean_version": "4.32.2",
+      "mathlib_commit": "905b95818eb32af7874a58b427f50c1711a5e96c",
+      "mathlib_root": "/Users/syyui/formalization-tools/lean-mathlib-v4.32.2/mathlib"
+    },
+    "inputs": [
+      {
+        "path": "inputs/problem.md",
+        "sha256": "72a065cefb860c435bbe9843e8ba935fbb2040446e9e571c99818e10735bd070"
+      },
+      {
+        "path": "inputs/target-selection.json",
+        "sha256": "801050d48a9f7ca78ed976af4458122443e917e1b5a50a366605cdc4d2898bea"
+      }
+    ]
+  },
+  "graph": {
+    "format_version": 2,
+    "case_id": "benchmark",
+    "spec_sha256": "7567d4f1e076545ba58a1ee9e0f68db5d604757fd5930e9c9faa9729193ad829",
+    "propositions": [
+      {
+        "id": "H001",
+        "kind": "hypothesis",
+        "definitions": [],
+        "binders": [],
+        "objects": [
+          "T"
+        ],
+        "statement": "T>0."
+      },
+      {
+        "id": "H002",
+        "kind": "hypothesis",
+        "definitions": [],
+        "binders": [],
+        "objects": [
+          "gamma"
+        ],
+        "statement": "0<gamma<=1."
+      },
+      {
+        "id": "H003",
+        "kind": "hypothesis",
+        "definitions": [],
+        "binders": [],
+        "objects": [
+          "R"
+        ],
+        "statement": "R>0."
+      },
+      {
+        "id": "E001",
+        "kind": "external",
+        "statement": "For the real mean-zero 2*pi-periodic source equation U_t=U U_x+U_xxx, with normalized homogeneous norms, the following results hold in its norm-preserving twisted representation. For every s>=0, time horizon A>0 and L2 upper bound B0, Galerkin solutions with datum q in dot H^s and ||q||_2<=B0 obey sup_[0,A]||U_m||_(dot H^s)<=M_s, uniformly in m, with M_s depending only on s,A,B0,||q||_(dot H^s). For s>0 and 0<sigma<s, a subsequence converges strongly in L^p([0,A];H^sigma), 1<p<infinity, and weak-star in L^infty dot H^s to a distributional solution with the same bound and L2 conservation a.e.. This solution is unique, is C([0,A];dot H^s), preserves L2 at every time and depends Lipschitz continuously on the datum for s>1/2, and also for 0<s<=1/2. At s=0 there is a unique C([0,A];L2) solution with Lipschitz dependence obtained by smoothing. For theta in (-1,0] and two data q,r in L2 whose norms sum to at most B0, the two twisted flows satisfy sup_[0,A]||Utw-Vtw||_(dot H^theta)<=C' C_(B0)^A ||q-r||_(dot H^theta), where C',C_(B0) depend only on B0,theta.",
+        "definitions": [
+          "D001",
+          "D002",
+          "D003"
+        ],
+        "binders": [
+          {
+            "symbol": "s",
+            "type": "nonnegative Sobolev exponent"
+          },
+          {
+            "symbol": "sigma",
+            "type": "intermediate positive Sobolev exponent"
+          },
+          {
+            "symbol": "A",
+            "type": "positive time horizon"
+          },
+          {
+            "symbol": "B0",
+            "type": "L2 upper bound"
+          },
+          {
+            "symbol": "q",
+            "type": "real mean-zero datum"
+          },
+          {
+            "symbol": "r",
+            "type": "second real mean-zero datum"
+          },
+          {
+            "symbol": "theta",
+            "type": "negative or zero exponent"
+          },
+          {
+            "symbol": "p",
+            "type": "finite time integrability exponent"
+          }
+        ],
+        "objects": [
+          "mathbbT",
+          "Fourier",
+          "H"
+        ],
+        "source": {
+          "author": "Anatoli V. Babin, Alexei A. Ilyin and Edriss S. Titi",
+          "title": "On the regularization mechanism for the periodic Korteweg-de Vries equation",
+          "version": "arXiv:0910.1389v2, 23 October 2010, 42 pages",
+          "identifier": "arXiv:0910.1389v2",
+          "locator": "Sections 3-6; Theorems 4.2-4.3 pp.13-15, 5.1 pp.19-21, 6.3-6.5 pp.27-28",
+          "notation_map": "Source U_t=U U_x+U_xxx; its twisted variable has Fourier phase exp(+i*k^3*t). Source dot H^s and L2 use normalized measure on the same 2*pi torus. Reflection and sign conversion are proved in N001.",
+          "errata": "No correction or withdrawal affecting the selected statements was found in the primary text and available version metadata inspected on 2026-11-03; this is limited to those inspected records.",
+          "source_kind": "arxiv_preprint",
+          "origin": "problem.md:825-827",
+          "retrieved_at": "2026-11-03T15:52:03.928388+00:00",
+          "source_statement": "Theorem 4.2. Let M0 be given and let s0 ≥ 0. Assume that v(m)(0) = v0 ∈ ˙H s0 and\nsuppose further that ∥v(m)(0)∥ ˙H 0 ≤ M0. Let T > 0 and let v(m)(t) be a solution of (4.1)\nover [0,T ]. Then v(m)(t) solves (4.10) and, uniformly in m, satisﬁes the estimate\n∥v(m)(t)∥ ˙H s0 ≤Ms0 for 0 ≤t ≤T, (4.13)\nwhereMs0 depends only on M0, T , ∥v(0)∥ ˙H s0 and s0.\n\n\nTheorem 4.3. Let s0 > 0, v(0) ∈ ˙H s0 and let T > 0 be ﬁxed. Let σ be ﬁxed so that\n0 < σ < s0. Then there exists a subsequence of v(m)(t) ( which we still label by (m))\nof solutions of (4.1), with the same initial data v(0) ∈ ˙H s0, such that v(m)(t) converges\nstrongly in Lp([0,T ];H σ), for any ﬁxed 1 < p <∞, and ∗-weakly in L∞([0,T ]; ˙H s0) to\nv∞(t); and v∞(t) is a solution of (3.8) in the sense of Deﬁnition 3.1 and is bounded in\nL∞([0,T ], ˙H s0) with norm\n∥v∞∥L∞([0,T ], ˙H s0 ) ≤Ms0, (4.20)\nwhereMs0 is as in (4.13). Moreover,\n∥v∞(t)∥ ˙H 0 = ∥v0∥ ˙H 0 a.e. in [0,T ]. (4.21)\n\n\nTheorem 5.1. Let s >1/2, v(0) = v0 ∈ ˙H s, and let T > 0 be ﬁxed. Then the solution\nv = v∞ of (3.9), in the sense of Deﬁnition 3.1, which was constructed in Theo rem 4.3\nis unique. Moreover, the solution is of the class C([0,T ]; ˙H s), and depends Lipschitz\ncontinuously on the initial data in the sense that is describ ed in (5.18) below. Furthermore,\n∥v∞(t)∥ ˙H 0 = ∥v(0)∥ ˙H 0 for all t ∈ [0,T ].\n\n20 REGULARIZATION MECHANISM FOR THE PERIODIC KDV EQUATION\n\n\nTheorem 6.3. Let s ∈ (0, 1/2] and T > 0. For any initial data v(0) = v0 ∈ ˙H s the\nsolution v = v∞ of equation (3.9), constructed in Theorem 4.3, is unique on the interval\nt ∈ [0,T ], is of the class C([0,T ], ˙H s) and depends Lipschitz continuously on the initial\ndata in the sense of (6.7).\n\n\nTheorem 6.4. Let s = 0 and T > 0. For any initial data v(0) = v0 ∈ ˙H 0 the equa-\ntion (3.9) has on t ∈ [0,T ] a unique solution of class C([0,T ], ˙H 0), which depends Lipschitz\ncontinuously on the initial data.\n\n\nTheorem 6.5. Let T > 0 be given, and θ ∈ (−1, 0]. If ∥v0∥ ˙H 0 + ∥w0∥ ˙H 0 ≤M, then the\ntwo solutions v(t) and w(t) of equation (3.9), with v(0) = v0 and w(0) = w0, satisfy the\nestimate\n∥v −w∥L∞([0,T ], ˙H θ ) ≤C ′C T\nM ∥v0 −w0∥ ˙H θ, (6.22)\nwhereC ′,C M depend only on M and θ.\n",
+          "context": "Section 3, equations (3.1)-(3.9), Definition 3.1 and norm convention (3.4) concern real mean-zero periodic solutions; the twist is norm preserving. Theorems 4.2-4.3 give uniform Galerkin bounds and limiting solutions; Sections 5-6 give uniqueness, strong continuity and dependence.",
+          "qualification": "Primary mathematical research text giving proved results independent of the target theorem; imported only with its stated hypotheses.",
+          "version_check": "2026-11-03: read exact v2 PDF and arXiv version page, whose history ends at v2 (23 October 2010); 42-page text, authors, equation signs and theorem labels agree with the supplied bibliography.",
+          "evidence": [
+            {
+              "path": "external-sources/access-be108e4eebdd412194c11666bd9b2e67.json",
+              "sha256": "8bb1c1a41f47c849fff5010b626b3fd8a3cf4989a1b8a1c2521cf8fa5c95e2ad"
+            },
+            {
+              "path": "external-sources/access-be108e4eebdd412194c11666bd9b2e67.pdf",
+              "sha256": "b6958c0b155bb8463f85900c4beaf75b1cf399382101a720cc39edf82cfac52e"
+            },
+            {
+              "path": "external-sources/access-be108e4eebdd412194c11666bd9b2e67.txt",
+              "sha256": "3a37d646c752a691c70b1b58bcd3525e413905f83cb9f3e988c1174871108683"
+            }
+          ],
+          "primary_evidence": [
+            {
+              "path": "external-sources/access-be108e4eebdd412194c11666bd9b2e67.pdf",
+              "sha256": "b6958c0b155bb8463f85900c4beaf75b1cf399382101a720cc39edf82cfac52e"
+            },
+            {
+              "path": "external-sources/access-be108e4eebdd412194c11666bd9b2e67.txt",
+              "sha256": "3a37d646c752a691c70b1b58bcd3525e413905f83cb9f3e988c1174871108683"
+            }
+          ],
+          "hypotheses": [
+            "Data are real, mean zero and in the stated homogeneous spaces on the 2*pi torus.",
+            "The horizon is positive, exponent ranges are as stated, and the L2 upper bounds hold."
+          ],
+          "statement": "For the real mean-zero 2*pi-periodic source equation U_t=U U_x+U_xxx, with normalized homogeneous norms, the following results hold in its norm-preserving twisted representation. For every s>=0, time horizon A>0 and L2 upper bound B0, Galerkin solutions with datum q in dot H^s and ||q||_2<=B0 obey sup_[0,A]||U_m||_(dot H^s)<=M_s, uniformly in m, with M_s depending only on s,A,B0,||q||_(dot H^s). For s>0 and 0<sigma<s, a subsequence converges strongly in L^p([0,A];H^sigma), 1<p<infinity, and weak-star in L^infty dot H^s to a distributional solution with the same bound and L2 conservation a.e.. This solution is unique, is C([0,A];dot H^s), preserves L2 at every time and depends Lipschitz continuously on the datum for s>1/2, and also for 0<s<=1/2. At s=0 there is a unique C([0,A];L2) solution with Lipschitz dependence obtained by smoothing. For theta in (-1,0] and two data q,r in L2 whose norms sum to at most B0, the two twisted flows satisfy sup_[0,A]||Utw-Vtw||_(dot H^theta)<=C' C_(B0)^A ||q-r||_(dot H^theta), where C',C_(B0) depend only on B0,theta."
+        }
+      },
+      {
+        "id": "E002",
+        "kind": "external",
+        "statement": "In the Li-Wu unnormalized norms, for alpha in [0,1] and I=[s0,s1] with 0<=s0<=s1 and |I|<=1, let f_j in L^infty(I;H^alpha) with partial_t f_j in L^infty(I;H^(-23/14)), j=1,2,3. Then ||Cint_I(f1,f2,f3)||_2 <= C |I| product_j ||f_j||_X(I)+C ||f_i||_(L^infty H^(-23/14)) product_(j!=i)||f_j||_(L^infty L2), for each i=1,2,3. If the inputs are time independent, ||Cint_I(f1,f2,f3)||_2<=C_alpha |I|^alpha product_j||f_j||_(H^alpha). Constants are independent of interval position and length for |I|<=1.",
+        "definitions": [
+          "D003",
+          "D015",
+          "D016"
+        ],
+        "binders": [
+          {
+            "symbol": "alpha",
+            "type": "Sobolev exponent"
+          },
+          {
+            "symbol": "I",
+            "type": "time interval"
+          },
+          {
+            "symbol": "s0",
+            "type": "left time endpoint"
+          },
+          {
+            "symbol": "s1",
+            "type": "right time endpoint"
+          },
+          {
+            "symbol": "f1",
+            "type": "periodic time path"
+          },
+          {
+            "symbol": "f2",
+            "type": "periodic time path"
+          },
+          {
+            "symbol": "f3",
+            "type": "periodic time path"
+          },
+          {
+            "symbol": "i",
+            "type": "input index"
+          }
+        ],
+        "objects": [
+          "H",
+          "Cint",
+          "X"
+        ],
+        "source": {
+          "author": "Buyang Li and Yifei Wu",
+          "title": "An Unfiltered Low-Regularity Integrator for the KdV Equation with Solutions Below H1",
+          "version": "50-page author manuscript FoCM-3.pdf, the edition explicitly cited in problem.md:824",
+          "identifier": "DOI 10.1007/s10208-025-09702-0; cited author-manuscript edition",
+          "locator": "Proposition 3.4, pp.14-19, definition (3.13) p.12",
+          "notation_map": "Source e^(t*partial_x^3)=S_(-t); Fourier coefficients have the same normalization. Source L2 and H^s norms are sqrt(2*pi) times our norms. The source operator C is Cint, and X^0 is X. Norm conversion is proved in N006.",
+          "errata": "No correction or withdrawal affecting the selected statements was found in the primary text and available version metadata inspected on 2026-11-03; this is limited to those inspected records.",
+          "source_kind": "author_manuscript",
+          "origin": "problem.md:821-824",
+          "retrieved_at": "2026-11-03T15:52:14.074352+00:00",
+          "source_statement": "Proposition 3.4. Let α ∈ [0, 1] and s ≥ s0 ≥ 0 with |s − s0| ≲ 1. Suppose that vj ∈\nL∞(s0, s; H α) and ∂tvj ∈ L∞(s0, s; H − 23\n14 ) for j = 1, 2, 3. Then the trilinear operator defined\nin (3.13) has the following properties :\n(1) \n\nC(v1, v2, v3)\n\n\nL2\n≲ |s − s0|\n3Y\nj=1\n∥vj∥X 0([s0,s]) + ∥v1∥L∞(s0,s;H − 23\n14 )∥v2∥L∞(s0,s;L2)∥v3∥L∞(s0,s;L2),\nwhere\n∥v∥X 0([s0,s]) := ∥v∥L∞(s0,s;L2) +\n\n\n∂tv\n\n\nL∞(s0,s;H − 23\n14 ).\nMoreover, the inequality still holds when v1, v2, v3 are permuted on the right-hand side.\n(2) If vj, j= 1, 2, 3 are time-independent, then\n\n\nC(v1, v2, v3)\n\n\nL2 ≲ |s − s0|α\n3Y\nj=1\n∥vj∥H α.\n",
+          "context": "Sections 2.2-2.5 define the periodic Fourier transform, unnormalized norms, zero-mode projections and inverse derivatives; Section 3.3 defines C in (3.13); Sections 4-5 use mean-zero twisted data. Locators refer only to the 50-page manuscript, not journal pagination.",
+          "qualification": "Primary mathematical research text giving proved results independent of the target theorem; imported only with its stated hypotheses.",
+          "version_check": "2026-11-03: read the exact author URL named in the supplied bibliography; title/authors, 50-page content and all selected labels agree. Publisher DOI metadata confirms authors/title and publication in FoCM 26 (2026), 1321-1380. The manuscript remains the selected edition; no journal page locators are substituted.",
+          "evidence": [
+            {
+              "path": "external-sources/access-ccd4a4ebaf9c42fc8d9514123dd6da1e.json",
+              "sha256": "7930bd863123a75c3e690c4cf081d64163b31743be076b12ea3943c9ad23494e"
+            },
+            {
+              "path": "external-sources/access-ccd4a4ebaf9c42fc8d9514123dd6da1e.pdf",
+              "sha256": "e71452d13d7d54b902c6d79a08bbcd68edab795f0a59366fff14399b98192f9b"
+            },
+            {
+              "path": "external-sources/access-ccd4a4ebaf9c42fc8d9514123dd6da1e.txt",
+              "sha256": "0f444ea8653c6f0f1f46b8446362060aa1ffafb328148f88bab72154fc62e22d"
+            }
+          ],
+          "primary_evidence": [
+            {
+              "path": "external-sources/access-ccd4a4ebaf9c42fc8d9514123dd6da1e.pdf",
+              "sha256": "e71452d13d7d54b902c6d79a08bbcd68edab795f0a59366fff14399b98192f9b"
+            },
+            {
+              "path": "external-sources/access-ccd4a4ebaf9c42fc8d9514123dd6da1e.txt",
+              "sha256": "0f444ea8653c6f0f1f46b8446362060aa1ffafb328148f88bab72154fc62e22d"
+            }
+          ],
+          "hypotheses": [
+            "alpha is in [0,1], 0<=s0<=s1 and s1-s0<=1.",
+            "The input functions have the displayed spatial and temporal regularity; time-independent clause requires constant paths."
+          ],
+          "statement": "In the Li-Wu unnormalized norms, for alpha in [0,1] and I=[s0,s1] with 0<=s0<=s1 and |I|<=1, let f_j in L^infty(I;H^alpha) with partial_t f_j in L^infty(I;H^(-23/14)), j=1,2,3. Then ||Cint_I(f1,f2,f3)||_2 <= C |I| product_j ||f_j||_X(I)+C ||f_i||_(L^infty H^(-23/14)) product_(j!=i)||f_j||_(L^infty L2), for each i=1,2,3. If the inputs are time independent, ||Cint_I(f1,f2,f3)||_2<=C_alpha |I|^alpha product_j||f_j||_(H^alpha). Constants are independent of interval position and length for |I|<=1."
+        }
+      },
+      {
+        "id": "E003",
+        "kind": "external",
+        "statement": "In Li-Wu unnormalized periodic norms, for sigma in [0,1], ||f*g||_L2<=C_sigma ||f||_(H^sigma)||g||_(H^a(sigma)), for f in H^sigma and g in H^a(sigma). Here a(0)=1/2+epsilon, a(sigma)=1/2-sigma for 0<sigma<1/2, a(1/2)=epsilon, and a(sigma)=0 for 1/2<sigma<=1, with any fixed epsilon>0.",
+        "definitions": [
+          "D003"
+        ],
+        "binders": [
+          {
+            "symbol": "sigma",
+            "type": "Sobolev exponent"
+          },
+          {
+            "symbol": "epsilon",
+            "type": "positive number"
+          },
+          {
+            "symbol": "f",
+            "type": "periodic function"
+          },
+          {
+            "symbol": "g",
+            "type": "periodic function"
+          }
+        ],
+        "objects": [
+          "H"
+        ],
+        "source": {
+          "author": "Buyang Li and Yifei Wu",
+          "title": "An Unfiltered Low-Regularity Integrator for the KdV Equation with Solutions Below H1",
+          "version": "50-page author manuscript FoCM-3.pdf, the edition explicitly cited in problem.md:824",
+          "identifier": "DOI 10.1007/s10208-025-09702-0; cited author-manuscript edition",
+          "locator": "Section 2.4, equations (2.2)-(2.3), p.8",
+          "notation_map": "Source e^(t*partial_x^3)=S_(-t); Fourier coefficients have the same normalization. Source L2 and H^s norms are sqrt(2*pi) times our norms. The source operator C is Cint, and X^0 is X. Norm conversion is proved in N006.",
+          "errata": "No correction or withdrawal affecting the selected statements was found in the primary text and available version metadata inspected on 2026-11-03; this is limited to those inspected records.",
+          "source_kind": "author_manuscript",
+          "origin": "problem.md:821-824",
+          "retrieved_at": "2026-11-03T15:52:14.074352+00:00",
+          "source_statement": "In addition to the Kato–Ponce inequality, we will also use the following basic inequality\n(as a result of the H¨ older and Sobolev embedding inequalities):\n∥f g∥L2 ≲ ∥f ∥H γ ∥g∥H a(γ) for f ∈ H γ and g ∈ H a(γ), with γ ∈ [0, 1], (2.2)\nwhere\na(γ) =\n\n\n\n1\n2 + when γ = 0,\n1\n2 − γ when γ ∈ (0, 1\n2 ),\n0+ when γ = 1\n2 ,\n0 when γ ∈ ( 1\n2 , 1].\n(2.3)\n",
+          "context": "Sections 2.2-2.5 define the periodic Fourier transform, unnormalized norms, zero-mode projections and inverse derivatives; Section 3.3 defines C in (3.13); Sections 4-5 use mean-zero twisted data. Locators refer only to the 50-page manuscript, not journal pagination.",
+          "qualification": "Primary mathematical research text giving proved results independent of the target theorem; imported only with its stated hypotheses.",
+          "version_check": "2026-11-03: read the exact author URL named in the supplied bibliography; title/authors, 50-page content and all selected labels agree. Publisher DOI metadata confirms authors/title and publication in FoCM 26 (2026), 1321-1380. The manuscript remains the selected edition; no journal page locators are substituted.",
+          "evidence": [
+            {
+              "path": "external-sources/access-ccd4a4ebaf9c42fc8d9514123dd6da1e.json",
+              "sha256": "7930bd863123a75c3e690c4cf081d64163b31743be076b12ea3943c9ad23494e"
+            },
+            {
+              "path": "external-sources/access-ccd4a4ebaf9c42fc8d9514123dd6da1e.pdf",
+              "sha256": "e71452d13d7d54b902c6d79a08bbcd68edab795f0a59366fff14399b98192f9b"
+            },
+            {
+              "path": "external-sources/access-ccd4a4ebaf9c42fc8d9514123dd6da1e.txt",
+              "sha256": "0f444ea8653c6f0f1f46b8446362060aa1ffafb328148f88bab72154fc62e22d"
+            }
+          ],
+          "primary_evidence": [
+            {
+              "path": "external-sources/access-ccd4a4ebaf9c42fc8d9514123dd6da1e.pdf",
+              "sha256": "e71452d13d7d54b902c6d79a08bbcd68edab795f0a59366fff14399b98192f9b"
+            },
+            {
+              "path": "external-sources/access-ccd4a4ebaf9c42fc8d9514123dd6da1e.txt",
+              "sha256": "0f444ea8653c6f0f1f46b8446362060aa1ffafb328148f88bab72154fc62e22d"
+            }
+          ],
+          "hypotheses": [
+            "sigma is in [0,1] and epsilon>0 where used.",
+            "The two factors belong to the displayed Sobolev spaces."
+          ],
+          "statement": "In Li-Wu unnormalized periodic norms, for sigma in [0,1], ||f*g||_L2<=C_sigma ||f||_(H^sigma)||g||_(H^a(sigma)), for f in H^sigma and g in H^a(sigma). Here a(0)=1/2+epsilon, a(sigma)=1/2-sigma for 0<sigma<1/2, a(1/2)=epsilon, and a(sigma)=0 for 1/2<sigma<=1, with any fixed epsilon>0."
+        }
+      },
+      {
+        "id": "E004",
+        "kind": "external",
+        "statement": "For Li-Wu's bilinear stage Stage_(n,tau)(t;f,g)=(1/2)integral_(n*tau)^t B_s(f,g)ds, for time-independent mean-zero f,g in H^sigma, sigma in (0,1], t in [n*tau,(n+1)*tau], one has ||Stage(t;f,g)||_(H^beta)<=C tau^((1+sigma-beta)/(1+sigma-beta0))||f||_(H^sigma)||g||_(H^sigma), for beta in [beta0,1+sigma]. Here beta0=2*sigma-3/2 for sigma<1/2; beta0=-1/2-epsilon with any fixed sufficiently small epsilon>0 for sigma=1/2; beta0=sigma-1 for sigma>1/2. Norms are the unnormalized source norms. The diagonal stage is Stage(t;f).",
+        "definitions": [
+          "D003",
+          "D013",
+          "D018"
+        ],
+        "binders": [
+          {
+            "symbol": "sigma",
+            "type": "Sobolev exponent"
+          },
+          {
+            "symbol": "epsilon",
+            "type": "positive small exponent"
+          },
+          {
+            "symbol": "tau",
+            "type": "positive timestep"
+          },
+          {
+            "symbol": "n",
+            "type": "nonnegative step index"
+          },
+          {
+            "symbol": "t",
+            "type": "stage time"
+          },
+          {
+            "symbol": "f",
+            "type": "periodic mean-zero function"
+          },
+          {
+            "symbol": "g",
+            "type": "periodic mean-zero function"
+          },
+          {
+            "symbol": "beta",
+            "type": "stage norm exponent"
+          },
+          {
+            "symbol": "beta0",
+            "type": "piecewise lower exponent"
+          }
+        ],
+        "objects": [
+          "H",
+          "B",
+          "Stage"
+        ],
+        "source": {
+          "author": "Buyang Li and Yifei Wu",
+          "title": "An Unfiltered Low-Regularity Integrator for the KdV Equation with Solutions Below H1",
+          "version": "50-page author manuscript FoCM-3.pdf, the edition explicitly cited in problem.md:824",
+          "identifier": "DOI 10.1007/s10208-025-09702-0; cited author-manuscript edition",
+          "locator": "Lemma 7.2, pp.32-34, equations (7.2)-(7.4)",
+          "notation_map": "Source e^(t*partial_x^3)=S_(-t); Fourier coefficients have the same normalization. Source L2 and H^s norms are sqrt(2*pi) times our norms. The source operator C is Cint, and X^0 is X. Norm conversion is proved in N006.",
+          "errata": "No correction or withdrawal affecting the selected statements was found in the primary text and available version metadata inspected on 2026-11-03; this is limited to those inspected records.",
+          "source_kind": "author_manuscript",
+          "origin": "problem.md:821-824",
+          "retrieved_at": "2026-11-03T15:52:14.074352+00:00",
+          "source_statement": "Lemma 7.2. For v1, v2 ∈ H γ with γ ∈ (0, 1], and s ∈ [tn, tn+1], the following result holds:\n\n\nF n\u0002\ns; v1, v2\n\u0003\n\nH β ≲ τ\n1+γ−β\n1+γ−β0(γ) ∥v1∥H γ ∥v2∥H γ for β ∈ [β0(γ), 1 + γ],\n\n33\nwhere\nβ0(γ) =\n\n\n\n2γ − 3\n2 when γ ∈\n\u0010\n0, 1\n2\n\u0011\n− 1\n2 − when γ = 1\n2\nγ − 1 when γ ∈\n\u0010 1\n2 , 1\ni\n.\n",
+          "context": "Sections 2.2-2.5 define the periodic Fourier transform, unnormalized norms, zero-mode projections and inverse derivatives; Section 3.3 defines C in (3.13); Sections 4-5 use mean-zero twisted data. Locators refer only to the 50-page manuscript, not journal pagination.",
+          "qualification": "Primary mathematical research text giving proved results independent of the target theorem; imported only with its stated hypotheses.",
+          "version_check": "2026-11-03: read the exact author URL named in the supplied bibliography; title/authors, 50-page content and all selected labels agree. Publisher DOI metadata confirms authors/title and publication in FoCM 26 (2026), 1321-1380. The manuscript remains the selected edition; no journal page locators are substituted.",
+          "evidence": [
+            {
+              "path": "external-sources/access-ccd4a4ebaf9c42fc8d9514123dd6da1e.json",
+              "sha256": "7930bd863123a75c3e690c4cf081d64163b31743be076b12ea3943c9ad23494e"
+            },
+            {
+              "path": "external-sources/access-ccd4a4ebaf9c42fc8d9514123dd6da1e.pdf",
+              "sha256": "e71452d13d7d54b902c6d79a08bbcd68edab795f0a59366fff14399b98192f9b"
+            },
+            {
+              "path": "external-sources/access-ccd4a4ebaf9c42fc8d9514123dd6da1e.txt",
+              "sha256": "0f444ea8653c6f0f1f46b8446362060aa1ffafb328148f88bab72154fc62e22d"
+            }
+          ],
+          "primary_evidence": [
+            {
+              "path": "external-sources/access-ccd4a4ebaf9c42fc8d9514123dd6da1e.pdf",
+              "sha256": "e71452d13d7d54b902c6d79a08bbcd68edab795f0a59366fff14399b98192f9b"
+            },
+            {
+              "path": "external-sources/access-ccd4a4ebaf9c42fc8d9514123dd6da1e.txt",
+              "sha256": "0f444ea8653c6f0f1f46b8446362060aa1ffafb328148f88bab72154fc62e22d"
+            }
+          ],
+          "hypotheses": [
+            "0<sigma<=1, tau>0, n>=0 and t lies in its step.",
+            "The inputs are time-independent mean-zero H^sigma functions and beta lies in the stated interval; epsilon>0 where required."
+          ],
+          "statement": "For Li-Wu's bilinear stage Stage_(n,tau)(t;f,g)=(1/2)integral_(n*tau)^t B_s(f,g)ds, for time-independent mean-zero f,g in H^sigma, sigma in (0,1], t in [n*tau,(n+1)*tau], one has ||Stage(t;f,g)||_(H^beta)<=C tau^((1+sigma-beta)/(1+sigma-beta0))||f||_(H^sigma)||g||_(H^sigma), for beta in [beta0,1+sigma]. Here beta0=2*sigma-3/2 for sigma<1/2; beta0=-1/2-epsilon with any fixed sufficiently small epsilon>0 for sigma=1/2; beta0=sigma-1 for sigma>1/2. Norms are the unnormalized source norms. The diagonal stage is Stage(t;f)."
+        }
+      },
+      {
+        "id": "E005",
+        "kind": "external",
+        "statement": "For every smooth mean-zero f, tau>0 and nonnegative integer n, let t_n=n*tau and let q=S_(t_n)f. With the displayed Li-Wu maps F_tau,H_tau, its algebraic step identity is S_(-t_n-tau)[S_tau q+F_tau(q)+H_tau(q)]=f+Stage_(n,tau)(t_n+tau;f)+integral_(t_n)^(t_n+tau) B_s(f,Stage_(n,tau)(s;f))ds-R2_(n,tau)(f,f,f). The R2 has exactly the Fourier phase covariance, sign and coefficient of D012, including zero output.",
+        "definitions": [
+          "D004",
+          "D008",
+          "D009",
+          "D012",
+          "D013",
+          "D018"
+        ],
+        "binders": [
+          {
+            "symbol": "f",
+            "type": "smooth mean-zero periodic function"
+          },
+          {
+            "symbol": "tau",
+            "type": "positive timestep"
+          },
+          {
+            "symbol": "n",
+            "type": "nonnegative integer"
+          },
+          {
+            "symbol": "q",
+            "type": "untwisted step datum"
+          },
+          {
+            "symbol": "s",
+            "type": "time integration variable"
+          }
+        ],
+        "objects": [
+          "S",
+          "F_tau",
+          "H_tau",
+          "R2",
+          "B",
+          "Stage"
+        ],
+        "source": {
+          "author": "Buyang Li and Yifei Wu",
+          "title": "An Unfiltered Low-Regularity Integrator for the KdV Equation with Solutions Below H1",
+          "version": "50-page author manuscript FoCM-3.pdf, the edition explicitly cited in problem.md:824",
+          "identifier": "DOI 10.1007/s10208-025-09702-0; cited author-manuscript edition",
+          "locator": "Equations (1.4), (4.15)-(4.23), (5.2)-(5.4), (6.1), pp.4,22-27",
+          "notation_map": "Source e^(t*partial_x^3)=S_(-t); Fourier coefficients have the same normalization. Source L2 and H^s norms are sqrt(2*pi) times our norms. The source operator C is Cint, and X^0 is X. Norm conversion is proved in N006.",
+          "errata": "No correction or withdrawal affecting the selected statements was found in the primary text and available version metadata inspected on 2026-11-03; this is limited to those inspected records.",
+          "source_kind": "author_manuscript",
+          "origin": "problem.md:821-824",
+          "retrieved_at": "2026-11-03T15:52:14.074352+00:00",
+          "source_statement": "where we have used the notation Mτ (f ) = τ −1 R τ\n0 f (t)dt defined in Section 3.2, with\nη(τ, k, k1, k2, k3) := Mτ (e−isϕ1e−isϕ2) − Mτ\n\u0000\ne−isϕ1\n\u0001\nMτ\n\u0000\ne−isϕ2\n\u0001\n. (4.15)\nSubstituting (4.14) into the expression of Sn[v(tn)], we obtain\nSn[v(tn)] = − 1\n18 τ ∂−1\nx v(tn) P0\n\u0002\nv(tn)2\u0003\n− F−1\nk\nX\nk1+k2+k3=k\nk1+k2̸=0\nτ\n18ik Mτ\n\u0000\ne−isϕ1\n\u0001\nMτ\n\u0000\ne−isϕ2\n\u0001\ne−itnϕ1e−itnϕ2 ˆvk1(tn) ˆvk2(tn) ˆvk3(tn)\n+ Rn\n2 [v(tn)], (4.16)\nwhere the remainder Rn\n2 [v(tn)] is given by\nRn\n2 [v(tn)] = −F −1\nk\nX\nk1+k2+k3=k\nk1+k2̸=0\nτ\n18ik e−itnϕη(τ, k, k1, k2, k3)ˆvk1(tn)ˆvk2(tn)ˆvk3(tn)ds, (4.17)\nwhich will be dropped in the numerical scheme. The other terms on the right-hand side of\n(4.16) will be kept in the numerical scheme.\n\nCombining the expressions of An[v(tn)], Bn[v(tn)] and Sn[v(tn)] in (4.12), (4.13) and (4.19),\nrespectively, we obtain\nAn[v(tn)] = H n[v(tn)] + Rn\n2 [v(tn)], (4.20)\nwith\nH n[v(tn)] = 1\n3 etn+1∂3\nxP\n\u0010\ne−tn+1∂3\nx∂−1\nx v(tn) e−tn+1∂3\nx∂−1\nx F n\u0002\ntn+1; v(tn)\n\u0003\u0011\n+ 1\n9 τ ∂−1\nx v(tn) P0\n\u0002\nv(tn)2\u0003\n− 1\n54 es∂3\nx∂−1\nx\nh\u0010\ne−s∂3\nx∂−1\nx v(tn)\n\u00113i\f\f\f\ns=tn+1\ns=tn\n− 1\n27τ es∂3\nx∂−2\nx\nh\ne−s∂3\nx∂−2\nx F n\u0002\ntn+1; v(tn)\n\u0003\ne−s∂3\nx∂−1\nx v(tn)\ni\f\f\f\ns=tn+1\ns=tn\n.\nThen, substituting (4.20) into (4.9), we obtain\nv(tn+1) = v(tn) + F n[tn+1; v(tn)] + H n[v(tn)] + Rn\n1 [v] + Rn\n2 [v(tn)]. (4.21)\nBy dropping the remainders Rn\n1 [v] and Rn\n2 [v(tn)] in (4.21), we obtain the following time-\nstepping method:\nvn+1 = vn + F n[tn+1; vn] + H n[vn], (4.22)\n\n24\nwhere vn denotes the numerical approximation to v(tn). After substituting vn = etn∂3\nxun into\n(4.22), we obtain\nun+1 = e−τ ∂3\nxun + e−tn+1∂3\nxF n\u0002\ntn+1; etn∂3\nxun\u0003\n+ e−tn+1∂3\nxH n[etn∂3\nxun], (4.23)\nwhich is equivalent to the numerical scheme in (1.4), where\nF [un] = e−tn+1∂3\nxF n\u0002\ntn+1; etn∂3\nxun\u0003\nand H[un] = e−tn+1∂3\nxH n[etn∂3\nxun].\n",
+          "context": "Sections 2.2-2.5 define the periodic Fourier transform, unnormalized norms, zero-mode projections and inverse derivatives; Section 3.3 defines C in (3.13); Sections 4-5 use mean-zero twisted data. Locators refer only to the 50-page manuscript, not journal pagination.",
+          "qualification": "Primary mathematical research text giving proved results independent of the target theorem; imported only with its stated hypotheses.",
+          "version_check": "2026-11-03: read the exact author URL named in the supplied bibliography; title/authors, 50-page content and all selected labels agree. Publisher DOI metadata confirms authors/title and publication in FoCM 26 (2026), 1321-1380. The manuscript remains the selected edition; no journal page locators are substituted.",
+          "evidence": [
+            {
+              "path": "external-sources/access-ccd4a4ebaf9c42fc8d9514123dd6da1e.json",
+              "sha256": "7930bd863123a75c3e690c4cf081d64163b31743be076b12ea3943c9ad23494e"
+            },
+            {
+              "path": "external-sources/access-ccd4a4ebaf9c42fc8d9514123dd6da1e.pdf",
+              "sha256": "e71452d13d7d54b902c6d79a08bbcd68edab795f0a59366fff14399b98192f9b"
+            },
+            {
+              "path": "external-sources/access-ccd4a4ebaf9c42fc8d9514123dd6da1e.txt",
+              "sha256": "0f444ea8653c6f0f1f46b8446362060aa1ffafb328148f88bab72154fc62e22d"
+            }
+          ],
+          "primary_evidence": [
+            {
+              "path": "external-sources/access-ccd4a4ebaf9c42fc8d9514123dd6da1e.pdf",
+              "sha256": "e71452d13d7d54b902c6d79a08bbcd68edab795f0a59366fff14399b98192f9b"
+            },
+            {
+              "path": "external-sources/access-ccd4a4ebaf9c42fc8d9514123dd6da1e.txt",
+              "sha256": "0f444ea8653c6f0f1f46b8446362060aa1ffafb328148f88bab72154fc62e22d"
+            }
+          ],
+          "hypotheses": [
+            "The step datum is smooth and mean zero, tau>0 and n>=0.",
+            "The step map and Fourier remainder use the same torus, Fourier signs, projections and inverse derivatives as the source."
+          ],
+          "statement": "For every smooth mean-zero f, tau>0 and nonnegative integer n, let t_n=n*tau and let q=S_(t_n)f. With the displayed Li-Wu maps F_tau,H_tau, its algebraic step identity is S_(-t_n-tau)[S_tau q+F_tau(q)+H_tau(q)]=f+Stage_(n,tau)(t_n+tau;f)+integral_(t_n)^(t_n+tau) B_s(f,Stage_(n,tau)(s;f))ds-R2_(n,tau)(f,f,f). The R2 has exactly the Fourier phase covariance, sign and coefficient of D012, including zero output."
+        }
+      },
+      {
+        "id": "N001",
+        "kind": "internal",
+        "statement": "For T>0, 0<gamma<=1 and R>0 there is A=A(T,gamma,R)<infinity such that every real mean-zero datum q in H^gamma with ||q||_(H^gamma)<=R has a unique real mean-zero C([0,T];H^gamma) distributional solution u of u_t+u_xxx=u*u_x, obtained by smooth approximation, and sup_[0,T]||u||_(H^gamma)<=A. Smooth data give spatially smooth solutions on [0,T]. For two real mean-zero L2 data q,r of norms summing to at most B0, the exact solutions satisfy sup_[0,T]||u_q-u_r||_2<=C(T,B0)||q-r||_2. Twisting v(t)=S_(-t)u(t) preserves all Sobolev norms and for smooth data v'=B_t(v,v)/2. Consequently M=1+sup_[0,T]||v||_(H^gamma)<=1+A uniformly on the datum ball.",
+        "definitions": [
+          "D001",
+          "D002",
+          "D003",
+          "D004",
+          "D013"
+        ],
+        "binders": [
+          {
+            "symbol": "q",
+            "type": "real mean-zero H^gamma datum"
+          },
+          {
+            "symbol": "r",
+            "type": "real mean-zero L2 datum"
+          },
+          {
+            "symbol": "B0",
+            "type": "nonnegative L2 bound"
+          },
+          {
+            "symbol": "u",
+            "type": "exact solution path"
+          },
+          {
+            "symbol": "v",
+            "type": "twisted exact solution"
+          },
+          {
+            "symbol": "M",
+            "type": "exact trajectory bound"
+          },
+          {
+            "symbol": "A",
+            "type": "ball-uniform bound"
+          }
+        ],
+        "objects": [
+          "T",
+          "gamma",
+          "R",
+          "mathbbT",
+          "Fourier",
+          "H",
+          "S",
+          "B"
+        ],
+        "origin": "problem.md:105-122; sign and homogeneous-norm bridge"
+      },
+      {
+        "id": "N002",
+        "kind": "internal",
+        "statement": "For every tau>0 and real alpha,beta, eta_tau=0 if either phase is zero. Otherwise |eta_tau(alpha,beta)|<=2 min(|alpha/beta|,|beta/alpha|) and |eta_tau(alpha,beta)|<=tau min(|alpha|,|beta|). For nonzero integers a,b,c,d with a+b+c+d=0 let N1>=N2>=N3>=N4 be the ordered absolute values, A=|ab| and B0=|cd|. Then N1<=3*N2, |d|^(-1)min(A/B0,B0/A)<=3/N3 and |a+b|/max(A,B0)<=6/N3.",
+        "definitions": [
+          "D011"
+        ],
+        "binders": [
+          {
+            "symbol": "tau",
+            "type": "positive real number"
+          },
+          {
+            "symbol": "alpha",
+            "type": "real phase"
+          },
+          {
+            "symbol": "beta",
+            "type": "real phase"
+          },
+          {
+            "symbol": "a",
+            "type": "nonzero integer frequency"
+          },
+          {
+            "symbol": "b",
+            "type": "nonzero integer frequency"
+          },
+          {
+            "symbol": "c",
+            "type": "nonzero integer frequency"
+          },
+          {
+            "symbol": "d",
+            "type": "nonzero integer frequency"
+          },
+          {
+            "symbol": "N1",
+            "type": "ordered positive frequency magnitude"
+          },
+          {
+            "symbol": "N2",
+            "type": "ordered positive frequency magnitude"
+          },
+          {
+            "symbol": "N3",
+            "type": "ordered positive frequency magnitude"
+          },
+          {
+            "symbol": "N4",
+            "type": "ordered positive frequency magnitude"
+          },
+          {
+            "symbol": "A",
+            "type": "positive pair product"
+          },
+          {
+            "symbol": "B0",
+            "type": "positive pair product"
+          }
+        ],
+        "objects": [
+          "eta"
+        ],
+        "origin": "problem.md:126-203; covariance and the two pointwise majorants"
+      },
+      {
+        "id": "N003",
+        "kind": "internal",
+        "statement": "For arbitrary nonnegative x1,x2,x3,x4 in ell2(Z\\{0}), sum_(a+b+c+d=0,abcd!=0) x1(a)x2(b)x3(c)x4(d)/N3(a,b,c,d)<=C product_(j=1)^4||x_j||_ell2, where N3 is the third largest of |a|,|b|,|c|,|d|. The same bound holds upon restricting the positive sum to any subset; C is absolute.",
+        "definitions": [
+          "D003"
+        ],
+        "binders": [
+          {
+            "symbol": "x1",
+            "type": "nonnegative square-summable sequence"
+          },
+          {
+            "symbol": "x2",
+            "type": "nonnegative square-summable sequence"
+          },
+          {
+            "symbol": "x3",
+            "type": "nonnegative square-summable sequence"
+          },
+          {
+            "symbol": "x4",
+            "type": "nonnegative square-summable sequence"
+          }
+        ],
+        "objects": [
+          "H"
+        ],
+        "origin": "problem.md:204-251; dyadic four-linear estimate"
+      },
+      {
+        "id": "N004",
+        "kind": "internal",
+        "statement": "For every exponent s in [0,1], tau>0, nonnegative n and mean-zero f_j in H^s, R2_(n,tau) extends uniquely from polynomials to a trilinear map into L2 with ||R2_(n,tau)(f1,f2,f3)||_2<=C_s*tau^(1+s) product_j ||f_j||_(H^s), uniformly in n,tau and spectral support. The same estimate holds with any multiplier of modulus at most one in the defining sum, including separate restrictions to Phi=0 and Phi!=0. In particular, for 0<gamma<=1, ||w||_(H^gamma)<=M, f mean zero in L2, delta=||f-w||_2<=1 and 0<tau<=1, ||R2_(n,tau)(f,f,f)||_2<=C_(M,gamma)*tau*(tau^gamma+delta), with no H^gamma assumption on f.",
+        "definitions": [
+          "D003",
+          "D012"
+        ],
+        "binders": [
+          {
+            "symbol": "s",
+            "type": "exponent in [0,1]"
+          },
+          {
+            "symbol": "tau",
+            "type": "positive timestep"
+          },
+          {
+            "symbol": "n",
+            "type": "nonnegative step index"
+          },
+          {
+            "symbol": "f1",
+            "type": "mean-zero H^s input"
+          },
+          {
+            "symbol": "f2",
+            "type": "mean-zero H^s input"
+          },
+          {
+            "symbol": "f3",
+            "type": "mean-zero H^s input"
+          },
+          {
+            "symbol": "w",
+            "type": "mean-zero H^gamma comparison state"
+          },
+          {
+            "symbol": "f",
+            "type": "mean-zero L2 state"
+          },
+          {
+            "symbol": "M",
+            "type": "Sobolev norm bound"
+          },
+          {
+            "symbol": "delta",
+            "type": "L2 difference"
+          }
+        ],
+        "objects": [
+          "gamma",
+          "H",
+          "R2"
+        ],
+        "origin": "problem.md:252-299; mixed remainder and numerical-state estimate"
+      },
+      {
+        "id": "N005",
+        "kind": "internal",
+        "statement": "S_t is unitary in every H^s, preserves reality and zero mean. On mean-zero inputs, uniformly in real t: ||Dinv f||_(H^1)+||Dinv f||_infty<=C||f||_2; ||B_t(f,g)||_(H^(-23/14))<=C||f||_2||g||_2; ||J_t(f,g)||_(H^1)<=C||f||_2||g||_2. For every A0 in H^1, ||A0||_infty<=C||A0||_(H^1). For A0,B0 in H^1, ||A0 B0||_(H^1)<=C||A0||_(H^1)||B0||_(H^1). Also ||Dinv P(FG)||_2<=C||F||_2||G||_2, ||A0||_(H^(-23/14))<=||Dinv A0||_2 for mean-zero A0, and ||J_t(A0,B0)||_2<=C||Dinv A0||_2||B0||_2 whenever the right side is defined. For smooth mean-zero paths f,g on [a,b], integral_a^b B_t(f,g)dt=(1/3)[J_t(f,g)]_a^b-(1/3)integral_a^b[J_t(f',g)+J_t(f,g')]dt. Moreover J is symmetric and integral_I J_t(B_t(f,g),h)dt=Cint_I(f,g,h). These identities hold stepwise for piecewise smooth paths, and Stage_(n,tau)(t;f)=[J_s(f,f)]_(s=n*tau)^t/6.",
+        "definitions": [
+          "D003",
+          "D004",
+          "D006",
+          "D007",
+          "D013",
+          "D014",
+          "D015",
+          "D018"
+        ],
+        "binders": [
+          {
+            "symbol": "t",
+            "type": "real time"
+          },
+          {
+            "symbol": "s",
+            "type": "Sobolev exponent"
+          },
+          {
+            "symbol": "f",
+            "type": "mean-zero input or smooth path"
+          },
+          {
+            "symbol": "g",
+            "type": "mean-zero input or smooth path"
+          },
+          {
+            "symbol": "h",
+            "type": "mean-zero smooth path"
+          },
+          {
+            "symbol": "A0",
+            "type": "periodic function or mean-zero distribution as stated"
+          },
+          {
+            "symbol": "B0",
+            "type": "periodic function"
+          },
+          {
+            "symbol": "F",
+            "type": "L2 function"
+          },
+          {
+            "symbol": "G",
+            "type": "L2 function"
+          },
+          {
+            "symbol": "a",
+            "type": "left endpoint"
+          },
+          {
+            "symbol": "b",
+            "type": "right endpoint"
+          },
+          {
+            "symbol": "I",
+            "type": "time interval"
+          },
+          {
+            "symbol": "n",
+            "type": "nonnegative step index"
+          },
+          {
+            "symbol": "tau",
+            "type": "positive timestep"
+          }
+        ],
+        "objects": [
+          "H",
+          "S",
+          "P",
+          "Dinv",
+          "B",
+          "J",
+          "Cint",
+          "Stage"
+        ],
+        "origin": "problem.md:301-333,369-398; elementary products and normal forms"
+      },
+      {
+        "id": "N006",
+        "kind": "internal",
+        "statement": "For 0<gamma<=1, a_gamma belongs to [0,1). In the normalized norms, for every interval I=[a,b] contained in [0,infinity) with |I|<=1 and L2 paths f1,f2,f3 with weak derivatives in L^infty(I;H^(-23/14)), ||Cint_I(f1,f2,f3)||_2<=C|I| product_j||f_j||_X(I)+C||f_i||_(L^infty H^(-23/14)) product_(j!=i)||f_j||_(L^infty L2), for each i. For time-independent H^s inputs, 0<=s<=1, ||Cint_I(f1,f2,f3)||_2<=C_s |I|^s product_j||f_j||_(H^s). Furthermore ||fg||_2<=C_gamma||f||_(H^gamma)||g||_(H^a_gamma). For every mean-zero w in H^gamma of norm <=M, 0<tau<=1 and n>=0, sup_step||Stage(t;w)||_(H^a_gamma)<=C_(M,gamma)tau^gamma and sup_step||Stage(t;w)||_(H^(1+gamma))<=C_(M,gamma). Constants are independent of interval position, step and spectral support.",
+        "definitions": [
+          "D003",
+          "D015",
+          "D016",
+          "D017",
+          "D018"
+        ],
+        "binders": [
+          {
+            "symbol": "I",
+            "type": "time interval"
+          },
+          {
+            "symbol": "a",
+            "type": "nonnegative left endpoint"
+          },
+          {
+            "symbol": "b",
+            "type": "right endpoint"
+          },
+          {
+            "symbol": "f1",
+            "type": "periodic time path"
+          },
+          {
+            "symbol": "f2",
+            "type": "periodic time path"
+          },
+          {
+            "symbol": "f3",
+            "type": "periodic time path"
+          },
+          {
+            "symbol": "i",
+            "type": "input index"
+          },
+          {
+            "symbol": "s",
+            "type": "exponent"
+          },
+          {
+            "symbol": "f",
+            "type": "H^gamma function"
+          },
+          {
+            "symbol": "g",
+            "type": "H^a_gamma function"
+          },
+          {
+            "symbol": "w",
+            "type": "mean-zero H^gamma state"
+          },
+          {
+            "symbol": "M",
+            "type": "norm bound"
+          },
+          {
+            "symbol": "tau",
+            "type": "positive timestep"
+          },
+          {
+            "symbol": "n",
+            "type": "nonnegative index"
+          }
+        ],
+        "objects": [
+          "gamma",
+          "H",
+          "Cint",
+          "X",
+          "a_gamma",
+          "Stage"
+        ],
+        "origin": "problem.md:334-369; source specialization and norm bridge"
+      },
+      {
+        "id": "N007",
+        "kind": "internal",
+        "statement": "For every smooth real mean-zero u0, tau>0 and finite number of steps, the iterates Psi_tau(u^n) remain smooth real and mean zero. With v^n=S_(-n*tau)u^n and Interp constructed from f=v^n, V is a continuous piecewise smooth path satisfying V(t_n)=v^n for every grid point, Y_n(t_n)=0, and on each step V'=B_t(V,V)/2+Rres', where Rres'=-B_t(Y_n,z_n)-B_t(Y_n,Y_n)/2-W_n/tau. The concatenated Rres starts at zero and has increment rho_n on the step.",
+        "definitions": [
+          "D004",
+          "D010",
+          "D013",
+          "D019"
+        ],
+        "binders": [
+          {
+            "symbol": "u0",
+            "type": "smooth real mean-zero datum"
+          },
+          {
+            "symbol": "tau",
+            "type": "positive timestep"
+          },
+          {
+            "symbol": "n",
+            "type": "nonnegative index"
+          },
+          {
+            "symbol": "v",
+            "type": "twisted discrete trajectory"
+          },
+          {
+            "symbol": "V",
+            "type": "concatenated interpolant"
+          },
+          {
+            "symbol": "Rres",
+            "type": "concatenated residual"
+          }
+        ],
+        "objects": [
+          "S",
+          "Psi",
+          "B",
+          "Interp"
+        ],
+        "origin": "problem.md:399-431,501-514; exact interpolation endpoints and residual identity"
+      },
+      {
+        "id": "N008",
+        "kind": "internal",
+        "statement": "For 0<gamma<=1, for every M>=1, smooth mean-zero f,w with ||w||_(H^gamma)<=M and delta=||f-w||_2<=1, 0<tau<=1 and n>=0, set q=tau^gamma+delta and use the step tuple Interp(n,tau,f). Uniformly over its step: ||F_n||_(H^1)<=C_M, ||F_n-Stage(t;w)||_(H^1)<=C_M delta, ||F_n||_(H^a_gamma)+||F_n||_2<=C_M q, ||z_n||_X<=C_M, ||B_t(F_n,F_n)||_2<=C_M q, ||Q_n||_2+||W_n||_2<=C_M tau q, ||Dinv Y_n||_2<=C_M tau q, ||Dinv Y_n'||_2<=C_M q, ||Y_n||_2<=C_M q, ||Y_n||_X<=C_M q and ||Y_n||_(H^(-23/14))<=C_M tau q. Constants may depend on M,gamma, never on n,tau or spectral support.",
+        "definitions": [
+          "D003",
+          "D007",
+          "D013",
+          "D014",
+          "D015",
+          "D016",
+          "D017",
+          "D018",
+          "D019"
+        ],
+        "binders": [
+          {
+            "symbol": "M",
+            "type": "bound at least one"
+          },
+          {
+            "symbol": "f",
+            "type": "smooth mean-zero step state"
+          },
+          {
+            "symbol": "w",
+            "type": "smooth mean-zero comparison state"
+          },
+          {
+            "symbol": "delta",
+            "type": "L2 error"
+          },
+          {
+            "symbol": "q",
+            "type": "nonnegative stage size"
+          },
+          {
+            "symbol": "tau",
+            "type": "positive timestep"
+          },
+          {
+            "symbol": "n",
+            "type": "nonnegative index"
+          }
+        ],
+        "objects": [
+          "gamma",
+          "H",
+          "Dinv",
+          "B",
+          "J",
+          "Cint",
+          "X",
+          "a_gamma",
+          "Stage",
+          "Interp"
+        ],
+        "origin": "problem.md:432-499; stage and interpolation-defect estimates"
+      },
+      {
+        "id": "N009",
+        "kind": "internal",
+        "statement": "For 0<gamma<=1, every nonnegative integer n, M>=1, 0<tau<=1 and smooth mean-zero f,w with ||w||_(H^gamma)<=M and delta=||f-w||_2<=1, set q=tau^gamma+delta. The step tuple Interp(n,tau,f) satisfies sup_step||rho_n||_2<=C_(M,gamma)*tau*q and ||Rres'||_(L^infty(step;H^(-23/14)))<=C_(M,gamma)*q, uniformly in n,tau and Fourier support.",
+        "definitions": [
+          "D003",
+          "D013",
+          "D015",
+          "D016",
+          "D019"
+        ],
+        "binders": [
+          {
+            "symbol": "M",
+            "type": "bound at least one"
+          },
+          {
+            "symbol": "f",
+            "type": "smooth mean-zero step state"
+          },
+          {
+            "symbol": "w",
+            "type": "smooth mean-zero comparison state"
+          },
+          {
+            "symbol": "delta",
+            "type": "L2 error"
+          },
+          {
+            "symbol": "q",
+            "type": "stage size"
+          },
+          {
+            "symbol": "tau",
+            "type": "positive timestep"
+          },
+          {
+            "symbol": "n",
+            "type": "nonnegative index"
+          }
+        ],
+        "objects": [
+          "gamma",
+          "H",
+          "B",
+          "Cint",
+          "X",
+          "Interp"
+        ],
+        "origin": "problem.md:501-530; stepwise residual bounds"
+      },
+      {
+        "id": "N010",
+        "kind": "internal",
+        "statement": "For T>0 and 0<gamma<=1, let v be a smooth real mean-zero exact twisted KdV solution on [0,T] with M=1+sup||v||_(H^gamma), and let V,Rres be the Interp paths of the fixed scheme initialized by v(0). Put e=v-V. For 0<tau<=1, every I=[a,b] subset [0,T] starting at a grid point, with h=b-a<=1 and E_I=sup_I||e||_2<=1, satisfies for every real N>=2: E_I<=||e(a)||_2+C_M(h+tau)tau^gamma+C_M(N^2 h+h+tau+N^(-1)+N^(-23/14))E_I. The same constants work for intervals ending inside a step and are independent of Fourier support and higher Sobolev norms.",
+        "definitions": [
+          "D003",
+          "D004",
+          "D013",
+          "D014",
+          "D015",
+          "D016",
+          "D019"
+        ],
+        "binders": [
+          {
+            "symbol": "v",
+            "type": "smooth exact twisted path"
+          },
+          {
+            "symbol": "M",
+            "type": "trajectory bound"
+          },
+          {
+            "symbol": "V",
+            "type": "numerical interpolation"
+          },
+          {
+            "symbol": "Rres",
+            "type": "actual residual"
+          },
+          {
+            "symbol": "e",
+            "type": "error path"
+          },
+          {
+            "symbol": "tau",
+            "type": "positive timestep"
+          },
+          {
+            "symbol": "I",
+            "type": "time interval"
+          },
+          {
+            "symbol": "a",
+            "type": "grid left endpoint"
+          },
+          {
+            "symbol": "b",
+            "type": "right endpoint"
+          },
+          {
+            "symbol": "h",
+            "type": "interval length"
+          },
+          {
+            "symbol": "E_I",
+            "type": "error supremum"
+          },
+          {
+            "symbol": "N",
+            "type": "frequency threshold"
+          }
+        ],
+        "objects": [
+          "T",
+          "gamma",
+          "H",
+          "S",
+          "B",
+          "J",
+          "Cint",
+          "X",
+          "Interp"
+        ],
+        "origin": "problem.md:531-614; restarted low-high stability"
+      },
+      {
+        "id": "N011",
+        "kind": "internal",
+        "statement": "For T>0, 0<gamma<=1 and R>0 there are C>0,tau0>0 depending only on T,gamma,R such that for every smooth real mean-zero datum u0 of H^gamma norm <=R and every positive integer L with tau=T/L<=tau0, the fixed scheme and its Interp path satisfy sup_[0,T]||S_(-t)u(t)-V(t)||_2<=C*tau^gamma, hence max_(0<=n<=L)||u(n*tau)-u^n||_2<=C*tau^gamma. Constants are independent of every higher Sobolev norm and of spectral support.",
+        "definitions": [
+          "D003",
+          "D004",
+          "D010",
+          "D019"
+        ],
+        "binders": [
+          {
+            "symbol": "u0",
+            "type": "smooth real mean-zero datum"
+          },
+          {
+            "symbol": "L",
+            "type": "positive integer"
+          },
+          {
+            "symbol": "tau",
+            "type": "timestep"
+          },
+          {
+            "symbol": "u",
+            "type": "exact solution"
+          },
+          {
+            "symbol": "V",
+            "type": "numerical interpolation"
+          }
+        ],
+        "objects": [
+          "T",
+          "gamma",
+          "R",
+          "H",
+          "S",
+          "Psi",
+          "Interp"
+        ],
+        "origin": "problem.md:615-631; uniform smooth bootstrap"
+      },
+      {
+        "id": "P",
+        "kind": "target",
+        "definitions": [
+          "D001",
+          "D003",
+          "D004",
+          "D010"
+        ],
+        "binders": [
+          {
+            "symbol": "u0",
+            "type": "real mean-zero H^gamma datum"
+          },
+          {
+            "symbol": "L",
+            "type": "positive integer"
+          },
+          {
+            "symbol": "tau",
+            "type": "timestep"
+          },
+          {
+            "symbol": "u",
+            "type": "exact solution"
+          }
+        ],
+        "objects": [
+          "T",
+          "gamma",
+          "R",
+          "mathbbT",
+          "H",
+          "S",
+          "Psi"
+        ],
+        "statement": "There exist C>0 and tau0>0, depending only on T,gamma,R, such that for every real mean-zero u0 in H^gamma(mathbbT) with ||u0||_(H^gamma)<=R, the unique distributional solution u in C([0,T];H^gamma) obtained by smooth approximation and the fixed unfiltered iterates of Psi satisfy max_(0<=n<=L)||u(n*tau)-u^n||_L2<=C*tau^gamma for every positive integer L with tau=T/L<=tau0. The constants are uniform over that entire datum ball and all these L; no Fourier-support restriction is imposed."
+      }
+    ],
+    "inferences": [
+      {
+        "id": "R001",
+        "inputs": [
+          "H001",
+          "H002",
+          "H003",
+          "E001"
+        ],
+        "output": "N001",
+        "definitions": [
+          "D001",
+          "D002",
+          "D003",
+          "D004",
+          "D013"
+        ],
+        "rules": [
+          "direct",
+          "forall_introduction",
+          "implication_introduction",
+          "case_elimination",
+          "exists_elimination"
+        ],
+        "locals": [
+          {
+            "symbol": "q",
+            "type": "periodic H^gamma datum",
+            "scope": "R001/argument",
+            "start": "S001",
+            "end": "S002",
+            "kind": "arbitrary",
+            "declaration": "Fix arbitrary real mean-zero q.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "U0",
+            "type": "source datum",
+            "scope": "R001/argument",
+            "start": "S001",
+            "end": "S002",
+            "kind": "definition",
+            "declaration": "Define U0(x)=-q(-x).",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "q"
+            ]
+          },
+          {
+            "symbol": "U",
+            "type": "source solution path",
+            "scope": "R001/argument",
+            "start": "S002",
+            "end": "S002",
+            "kind": "witness",
+            "declaration": "Choose the unique source flow whose existence is F001.",
+            "from_inputs": [],
+            "from_local": [
+              "F001"
+            ],
+            "objects": [
+              "U0"
+            ]
+          },
+          {
+            "symbol": "u",
+            "type": "solution path",
+            "scope": "R001/argument",
+            "start": "S002",
+            "end": "S002",
+            "kind": "definition",
+            "declaration": "Define u(t,x)=-U(t,-x).",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "U"
+            ]
+          },
+          {
+            "symbol": "A",
+            "type": "positive uniform norm bound",
+            "scope": "R001/argument",
+            "start": "S002",
+            "end": "S002",
+            "kind": "definition",
+            "declaration": "Set A to the bound obtained from the source bound and norm comparison.",
+            "from_inputs": [],
+            "from_local": [
+              "F001"
+            ],
+            "objects": [
+              "T",
+              "gamma",
+              "R"
+            ]
+          },
+          {
+            "symbol": "q1",
+            "type": "real mean-zero L2 datum",
+            "scope": "R001/argument",
+            "start": "S003",
+            "end": "S003",
+            "kind": "arbitrary",
+            "declaration": "Fix arbitrary first L2 datum.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "q2",
+            "type": "real mean-zero L2 datum",
+            "scope": "R001/argument",
+            "start": "S003",
+            "end": "S003",
+            "kind": "arbitrary",
+            "declaration": "Fix arbitrary second L2 datum.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "B0",
+            "type": "nonnegative real bound",
+            "scope": "R001/argument",
+            "start": "S003",
+            "end": "S003",
+            "kind": "arbitrary",
+            "declaration": "Fix arbitrary B0>=0.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "v",
+            "type": "twisted exact path",
+            "scope": "R001/argument",
+            "start": "S002",
+            "end": "S002",
+            "kind": "definition",
+            "declaration": "Define v(t)=S_(-t)u(t).",
+            "objects": [
+              "S",
+              "u"
+            ],
+            "from_inputs": [],
+            "from_local": []
+          },
+          {
+            "symbol": "M",
+            "type": "exact trajectory bound",
+            "scope": "R001/argument",
+            "start": "S002",
+            "end": "S002",
+            "kind": "definition",
+            "declaration": "Define M=1+sup_[0,T]||v||_(H^gamma).",
+            "objects": [
+              "T",
+              "gamma",
+              "v",
+              "H"
+            ],
+            "from_inputs": [],
+            "from_local": []
+          }
+        ],
+        "argument": [
+          {
+            "id": "S001",
+            "text": "Fix a real mean-zero q in H^gamma and assume L1: ||q||_(H^gamma)<=R. H001-H003 give T>0, 0<gamma<=1 and R>0. Use E001 for source datum U0(x)=-q(-x), exponent s=gamma and horizon T. Reflection and sign preserve the Fourier Sobolev and L2 norms, so ||U0||_(dot H^gamma)<=R and ||U0||_2<=R. The source yields a global unique continuous flow, its uniform Sobolev bound, and smooth flows when the datum is smooth (apply its positive regularity statements for each integer exponent in that case). Its Galerkin bound and limiting-solution bound are uniform for the prescribed norm bounds.",
+            "uses": [
+              "H001",
+              "H002",
+              "H003",
+              "E001"
+            ],
+            "uses_local": [],
+            "objects": [
+              "T",
+              "gamma",
+              "R",
+              "q",
+              "U0",
+              "H",
+              "Fourier"
+            ],
+            "produces": [
+              {
+                "id": "F001",
+                "statement": "For the source datum U0(x)=-q(-x) there is a unique continuous homogeneous H^gamma source flow U on [0,T], with uniform bound determined only by T,gamma,R; for smooth q it has every Sobolev regularity.",
+                "binders": [
+                  {
+                    "symbol": "U",
+                    "type": "source solution path whose existence is asserted"
+                  }
+                ],
+                "objects": [
+                  "T",
+                  "gamma",
+                  "R",
+                  "q",
+                  "U0",
+                  "H"
+                ],
+                "assumptions": [
+                  "L1"
+                ]
+              }
+            ],
+            "introduces": [
+              "L1"
+            ],
+            "discharges": []
+          },
+          {
+            "id": "S002",
+            "text": "Take that source flow U and set u(t,x)=-U(t,-x). At (t,-x), u_t=-U_t, u_x=U_x and u_xxx=U_xxx, so u_t+u_xxx=-U U_x=u*u_x. Fourier coefficients are hat u(k)=-hat U(-k), preserving reality, zero mean and every Fourier norm. On mean-zero functions and s>=0, |k|<=<k><=sqrt(2)|k|, hence ||f||_(dot H^s)<=||f||_(H^s)<=2^(s/2)||f||_(dot H^s); for s<0 the inequalities reverse as in the supplied norm convention. The source bound therefore gives some A(T,gamma,R) in our norm. It also holds for a smooth-approximation limit by passing first in each finite Fourier norm sum and then taking the supremum over finite sets. The sign-reflection map is invertible, so uniqueness and continuous dependence transfer. Finally differentiation of v=S_(-t)u cancels the linear KdV term and yields v'=B_t(v,v)/2 for smooth data; the unimodular Fourier symbol of S preserves all norms. Thus M=1+sup||v||_(H^gamma)<=1+A as asserted. This proves the asserted existence, bound, twist identity and solution convention for arbitrary q under L1; discharge L1.",
+            "uses": [],
+            "uses_local": [
+              "F001"
+            ],
+            "objects": [
+              "T",
+              "gamma",
+              "R",
+              "q",
+              "U0",
+              "U",
+              "u",
+              "A",
+              "Fourier",
+              "H",
+              "v",
+              "M",
+              "S",
+              "B"
+            ],
+            "produces": [],
+            "introduces": [],
+            "discharges": [
+              "L1"
+            ]
+          },
+          {
+            "id": "S003",
+            "text": "For arbitrary real mean-zero L2 data q1,q2 and B0>=0, temporarily assume L2: ||q1||_2+||q2||_2<=B0. Apply E001's theta=0 dependence statement at time horizon T to -q1(-x),-q2(-x). Their norms and their difference norm are unchanged. The source twists are unitary, so its dependence bound gives sup_[0,T]||u_q1-u_q2||_2<=C(T,B0)||q1-q2||_2 in physical variables after sign-reflection. Discharge L2.",
+            "uses": [
+              "H001",
+              "E001"
+            ],
+            "uses_local": [],
+            "objects": [
+              "T",
+              "B0",
+              "q1",
+              "q2",
+              "H",
+              "S",
+              "B"
+            ],
+            "produces": [],
+            "introduces": [
+              "L2"
+            ],
+            "discharges": [
+              "L2"
+            ]
+          }
+        ],
+        "applications": [
+          {
+            "id": "A001",
+            "input": "E001",
+            "at": "S001",
+            "bindings": "Set s=gamma, horizon=T, source datum=-q(-x), and its L2 bound B0=R; for smooth q also use each positive integer s.",
+            "hypothesis_checks": [
+              "The local datum is real and mean zero; sign-reflection preserves each norm. Smoothness supplies each integer regularity in the smooth case.",
+              "H001-H003 and L1 give the positive horizon, 0<gamma<=1, and both norm upper bounds."
+            ]
+          },
+          {
+            "id": "A002",
+            "input": "E001",
+            "at": "S003",
+            "bindings": "Set theta=0, horizon=T, source data=-q1(-x),-q2(-x), L2 sum bound=B0.",
+            "hypothesis_checks": [
+              "q1,q2 are arbitrary real mean-zero L2 data; sign-reflection preserves these conditions.",
+              "H001 gives T>0, theta=0 belongs to (-1,0], and L2 is exactly the required sum bound."
+            ]
+          }
+        ]
+      },
+      {
+        "id": "R002",
+        "inputs": [],
+        "output": "N002",
+        "definitions": [
+          "D011"
+        ],
+        "rules": [
+          "direct",
+          "forall_introduction",
+          "implication_introduction",
+          "case_elimination"
+        ],
+        "locals": [
+          {
+            "symbol": "tau",
+            "type": "positive real timestep",
+            "scope": "R002/argument",
+            "start": "S001",
+            "end": "S001",
+            "kind": "arbitrary",
+            "declaration": "Fix arbitrary tau>0.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "alpha",
+            "type": "real phase",
+            "scope": "R002/argument",
+            "start": "S001",
+            "end": "S001",
+            "kind": "arbitrary",
+            "declaration": "Fix arbitrary alpha.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "beta",
+            "type": "real phase",
+            "scope": "R002/argument",
+            "start": "S001",
+            "end": "S001",
+            "kind": "arbitrary",
+            "declaration": "Fix arbitrary beta.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "h",
+            "type": "smooth scalar function on [0,tau]",
+            "scope": "R002/argument",
+            "start": "S001",
+            "end": "S001",
+            "kind": "definition",
+            "declaration": "Define h(s)=exp(-i alpha s)-its time average.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "tau",
+              "alpha",
+              "eta"
+            ]
+          },
+          {
+            "symbol": "a",
+            "type": "nonzero integer frequency",
+            "scope": "R002/argument",
+            "start": "S002",
+            "end": "S002",
+            "kind": "arbitrary",
+            "declaration": "Fix arbitrary a, with a+b+c+d=0 in this paragraph.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "b",
+            "type": "nonzero integer frequency",
+            "scope": "R002/argument",
+            "start": "S002",
+            "end": "S002",
+            "kind": "arbitrary",
+            "declaration": "Fix arbitrary b, with a+b+c+d=0 in this paragraph.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "c",
+            "type": "nonzero integer frequency",
+            "scope": "R002/argument",
+            "start": "S002",
+            "end": "S002",
+            "kind": "arbitrary",
+            "declaration": "Fix arbitrary c, with a+b+c+d=0 in this paragraph.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "d",
+            "type": "nonzero integer frequency",
+            "scope": "R002/argument",
+            "start": "S002",
+            "end": "S002",
+            "kind": "arbitrary",
+            "declaration": "Fix arbitrary d, with a+b+c+d=0 in this paragraph.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "N1",
+            "type": "positive ordered magnitude",
+            "scope": "R002/argument",
+            "start": "S002",
+            "end": "S002",
+            "kind": "definition",
+            "declaration": "Define N1 as the corresponding ordered magnitude of the four frequencies.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "a",
+              "b",
+              "c",
+              "d"
+            ]
+          },
+          {
+            "symbol": "N2",
+            "type": "positive ordered magnitude",
+            "scope": "R002/argument",
+            "start": "S002",
+            "end": "S002",
+            "kind": "definition",
+            "declaration": "Define N2 as the corresponding ordered magnitude of the four frequencies.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "a",
+              "b",
+              "c",
+              "d"
+            ]
+          },
+          {
+            "symbol": "N3",
+            "type": "positive ordered magnitude",
+            "scope": "R002/argument",
+            "start": "S002",
+            "end": "S002",
+            "kind": "definition",
+            "declaration": "Define N3 as the corresponding ordered magnitude of the four frequencies.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "a",
+              "b",
+              "c",
+              "d"
+            ]
+          },
+          {
+            "symbol": "N4",
+            "type": "positive ordered magnitude",
+            "scope": "R002/argument",
+            "start": "S002",
+            "end": "S002",
+            "kind": "definition",
+            "declaration": "Define N4 as the corresponding ordered magnitude of the four frequencies.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "a",
+              "b",
+              "c",
+              "d"
+            ]
+          },
+          {
+            "symbol": "A",
+            "type": "positive pair product",
+            "scope": "R002/argument",
+            "start": "S002",
+            "end": "S002",
+            "kind": "definition",
+            "declaration": "Define A=|ab|.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "a",
+              "b"
+            ]
+          },
+          {
+            "symbol": "B0",
+            "type": "positive pair product",
+            "scope": "R002/argument",
+            "start": "S002",
+            "end": "S002",
+            "kind": "definition",
+            "declaration": "Define B0=|cd|.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "c",
+              "d"
+            ]
+          }
+        ],
+        "argument": [
+          {
+            "id": "S001",
+            "text": "Fix tau>0 and real alpha,beta. If either phase is zero, substitution in eta shows exact cancellation. Otherwise put h(s)=exp(-i*alpha*s)-M_tau(exp(-i*alpha*s)). The covariance is tau^(-1)integral_0^tau h(s)exp(-i*beta*s)ds. By the fundamental theorem of calculus, |exp(-i*alpha*s)-exp(-i*alpha*r)|<=|alpha||s-r|. Averaging in r gives |h(s)|<=tau|alpha|, and consequently |eta|<=tau|alpha|. Interchange alpha,beta to obtain the minimum. Also |h(0)|+|h(tau)|<=tau|alpha| and integral_0^tau|h'(s)|ds=tau|alpha|. Integrating the beta exponential once by parts gives |eta|<=(|h(0)|+|h(tau)|+integral|h'|)/(tau|beta|)<=2|alpha/beta|. Interchanging phases proves the other ratio. These arguments apply to smooth scalar exponentials, so the calculus identities have no limiting issue.",
+            "uses": [],
+            "uses_local": [],
+            "objects": [
+              "tau",
+              "alpha",
+              "beta",
+              "h",
+              "eta"
+            ],
+            "produces": [],
+            "introduces": [],
+            "discharges": []
+          },
+          {
+            "id": "S002",
+            "text": "Fix nonzero integer frequencies a,b,c,d with sum zero, order their magnitudes N1>=N2>=N3>=N4, and put A=|ab|, B0=|cd|. Triangle inequality gives N1<=3N2. For the first majorant, if d is among the largest two, min(A/B0,B0/A)<=1 and 1/|d|<=1/N3. Otherwise the two largest are among a,b,c. If they are a,b, use (B0/A)/|d|=|c|/|ab|<=1/N3. If they are a,c, their ratio lies in [1/3,3], giving (1/|d|)min(A/B0,B0/A)<=3 min(|b|/|d|^2,1/|b|)<=3/max(|b|,|d|)=3/N3; the last inequality follows by dividing into |b|<=|d| and its complement. The b,c case is the identical exchange of a,b. For the second majorant, if the largest two lie in a single pair (a,b) or (c,d), the other pair sum has magnitude <=2N3, whereas max(A,B0)>=N1N2>=N3^2. Since a+b=-(c+d), the ratio is <=2/N3. If they lie in different pairs, the third largest is paired with one of them, so max(A,B0)>=N2N3 while |a+b|<=2N1<=6N2. This gives 6/N3. Ties admit any ordering and the cases still exhaust all possibilities.",
+            "uses": [],
+            "uses_local": [],
+            "objects": [
+              "a",
+              "b",
+              "c",
+              "d",
+              "N1",
+              "N2",
+              "N3",
+              "N4",
+              "A",
+              "B0"
+            ],
+            "produces": [],
+            "introduces": [],
+            "discharges": []
+          }
+        ],
+        "applications": []
+      },
+      {
+        "id": "R003",
+        "inputs": [],
+        "output": "N003",
+        "definitions": [
+          "D003"
+        ],
+        "rules": [
+          "direct",
+          "forall_introduction",
+          "implication_introduction",
+          "case_elimination"
+        ],
+        "locals": [
+          {
+            "symbol": "x1",
+            "type": "nonnegative sequence on Z\\{0}",
+            "scope": "R003/argument",
+            "start": "S001",
+            "end": "S002",
+            "kind": "arbitrary",
+            "declaration": "Fix arbitrary x1, first finitely supported and then arbitrary in ell2.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "x2",
+            "type": "nonnegative sequence on Z\\{0}",
+            "scope": "R003/argument",
+            "start": "S001",
+            "end": "S002",
+            "kind": "arbitrary",
+            "declaration": "Fix arbitrary x2, first finitely supported and then arbitrary in ell2.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "x3",
+            "type": "nonnegative sequence on Z\\{0}",
+            "scope": "R003/argument",
+            "start": "S001",
+            "end": "S002",
+            "kind": "arbitrary",
+            "declaration": "Fix arbitrary x3, first finitely supported and then arbitrary in ell2.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "x4",
+            "type": "nonnegative sequence on Z\\{0}",
+            "scope": "R003/argument",
+            "start": "S001",
+            "end": "S002",
+            "kind": "arbitrary",
+            "declaration": "Fix arbitrary x4, first finitely supported and then arbitrary in ell2.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "Xr",
+            "type": "array of shell norms",
+            "scope": "R003/argument",
+            "start": "S001",
+            "end": "S002",
+            "kind": "definition",
+            "declaration": "Define X_(r,j) as the shell ell2 norm of sequence r, with negative shell norms zero.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "x1",
+              "x2",
+              "x3",
+              "x4",
+              "H"
+            ]
+          }
+        ],
+        "argument": [
+          {
+            "id": "S001",
+            "text": "Fix four finitely supported nonnegative sequences x1,x2,x3,x4 on Z\\{0}. Decompose each into shells 2^j<=|k|<2^(j+1), j>=0, and let X_(r,j) be its ell2 norm on shell j. Fix one ordering of shell indices j1>=j2>=j3>=j4 (and correspondingly permute the input labels). Any zero-sum interaction has j1-j2<=2: the largest magnitude is at most three times the second largest, while a gap >=3 would give a ratio greater than four. For each fixed pair of the smaller frequencies, the sum over the two larger frequencies is bounded by the product of their ell2 norms, since one is a translated reflection of the other. Each small shell contains 2^(j+1) integers. Cauchy-Schwarz on the smaller shells therefore bounds the unweighted four-frequency sum by C*2^((j3+j4)/2)*product_r X_(r,jr). Division by N3>=2^j3 leaves C*2^(-(j3-j4)/2).",
+            "uses": [],
+            "uses_local": [],
+            "objects": [
+              "x1",
+              "x2",
+              "x3",
+              "x4",
+              "Xr",
+              "H"
+            ],
+            "produces": [
+              {
+                "id": "F001",
+                "statement": "For all j1>=j2>=j3>=j4>=0, with j1-j2<=2, the sum over zero-sum frequencies in the respective four shells of product_r x_r(k_r)/N3(k1,k2,k3,k4) is at most C*2^(-(j3-j4)/2)*product_r X_(r,jr), where N3 is the third largest magnitude.",
+                "binders": [
+                  {
+                    "symbol": "j1",
+                    "type": "nonnegative shell index"
+                  },
+                  {
+                    "symbol": "j2",
+                    "type": "nonnegative shell index"
+                  },
+                  {
+                    "symbol": "j3",
+                    "type": "nonnegative shell index"
+                  },
+                  {
+                    "symbol": "j4",
+                    "type": "nonnegative shell index"
+                  }
+                ],
+                "objects": [
+                  "Xr",
+                  "x1",
+                  "x2",
+                  "x3",
+                  "x4"
+                ],
+                "assumptions": []
+              }
+            ],
+            "introduces": [],
+            "discharges": []
+          },
+          {
+            "id": "S002",
+            "text": "Sum F001 with the offset q=j1-j2 in {0,1,2}. Dropping the upper restriction on the small shell indices only increases this positive sum, leaving at most C*(sum_J X_(1,J)X_(2,J-q))*(sum_(ell>=m)2^(-(ell-m)/2)X_(3,ell)X_(4,m)). Interpret negative shell subscripts as zero. Cauchy-Schwarz bounds the first factor by ||X_1||_ell2||X_2||_ell2. In the second set r=ell-m, apply Cauchy-Schwarz to each shifted scalar product, and sum the geometric series: its bound is ||X_3||_ell2||X_4||_ell2/(1-2^(-1/2)). Sum over at most 24 shell orderings and three offsets. Since sum_j X_(r,j)^2=||x_r||_ell2^2, this proves the finite estimate. For arbitrary nonnegative square-summable inputs, restrict all four to |k|<=m. The positive sum is the increasing supremum of these finite sums and the restricted norms are bounded by the original norms; taking the supremum proves the infinite estimate. Restricting the positive summation set can only decrease it.",
+            "uses": [],
+            "uses_local": [
+              "F001"
+            ],
+            "objects": [
+              "x1",
+              "x2",
+              "x3",
+              "x4",
+              "Xr",
+              "H"
+            ],
+            "produces": [],
+            "introduces": [],
+            "discharges": []
+          }
+        ],
+        "applications": []
+      },
+      {
+        "id": "R004",
+        "inputs": [
+          "H002",
+          "N002",
+          "N003"
+        ],
+        "output": "N004",
+        "definitions": [
+          "D003",
+          "D011",
+          "D012"
+        ],
+        "rules": [
+          "direct",
+          "forall_introduction",
+          "implication_introduction",
+          "case_elimination"
+        ],
+        "locals": [
+          {
+            "symbol": "s",
+            "type": "real exponent",
+            "scope": "R004/argument",
+            "start": "S001",
+            "end": "S002",
+            "kind": "arbitrary",
+            "declaration": "Fix arbitrary s in [0,1].",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "tau",
+            "type": "positive timestep",
+            "scope": "R004/argument",
+            "start": "S001",
+            "end": "S003",
+            "kind": "arbitrary",
+            "declaration": "Fix arbitrary tau>0; restrict tau<=1 in the numerical-state application.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "n",
+            "type": "nonnegative integer",
+            "scope": "R004/argument",
+            "start": "S001",
+            "end": "S003",
+            "kind": "arbitrary",
+            "declaration": "Fix arbitrary step index n.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "f1",
+            "type": "mean-zero H^s input",
+            "scope": "R004/argument",
+            "start": "S001",
+            "end": "S002",
+            "kind": "arbitrary",
+            "declaration": "Fix f1, initially a Fourier polynomial and then by completion in H^s.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "f2",
+            "type": "mean-zero H^s input",
+            "scope": "R004/argument",
+            "start": "S001",
+            "end": "S002",
+            "kind": "arbitrary",
+            "declaration": "Fix f2, initially a Fourier polynomial and then by completion in H^s.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "f3",
+            "type": "mean-zero H^s input",
+            "scope": "R004/argument",
+            "start": "S001",
+            "end": "S002",
+            "kind": "arbitrary",
+            "declaration": "Fix f3, initially a Fourier polynomial and then by completion in H^s.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "M",
+            "type": "nonnegative bound",
+            "scope": "R004/argument",
+            "start": "S003",
+            "end": "S003",
+            "kind": "arbitrary",
+            "declaration": "Fix an arbitrary comparison norm bound M.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "w",
+            "type": "mean-zero H^gamma function",
+            "scope": "R004/argument",
+            "start": "S003",
+            "end": "S003",
+            "kind": "arbitrary",
+            "declaration": "Fix comparison state w with norm <=M.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "f",
+            "type": "mean-zero L2 function",
+            "scope": "R004/argument",
+            "start": "S003",
+            "end": "S003",
+            "kind": "arbitrary",
+            "declaration": "Fix arbitrary f with ||f-w||_2<=1.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "delta",
+            "type": "nonnegative error",
+            "scope": "R004/argument",
+            "start": "S003",
+            "end": "S003",
+            "kind": "definition",
+            "declaration": "Define delta=||f-w||_2.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "f",
+              "w",
+              "H"
+            ]
+          }
+        ],
+        "argument": [
+          {
+            "id": "S001",
+            "text": "Fix s in [0,1], tau>0, nonnegative n and mean-zero polynomial inputs f1,f2,f3. In each nonzero term of R2 put d=-k, p=a+b, A=|ab|, B0=|cd| and order the four magnitudes. The phase ratios are A/B0 and B0/A. N002 yields |eta|/|k|<=6/N3. Its small-time bound also gives |eta|/(tau|abck|)<=3|p|*min(A,B0)/(A B0)=3|p|/max(A,B0)<=18/N3. The geometric mean with weights 1-s and s is |eta|/(|k|*|abc|^s)<=6^(1-s)*18^s*tau^s/N3. Terms with zero phase or input, or with zero output, contribute zero, so no division by zero is used.",
+            "uses": [
+              "N002"
+            ],
+            "uses_local": [],
+            "objects": [
+              "s",
+              "tau",
+              "n",
+              "f1",
+              "f2",
+              "f3",
+              "eta",
+              "R2",
+              "H"
+            ],
+            "produces": [
+              {
+                "id": "F001",
+                "statement": "For every nonzero admissible Fourier term, |eta|/(|k|*|abc|^s)<=6^(1-s)*18^s*tau^s/N3(a,b,c,-k). Here a+b+c=k, a*b*c*k*(a+b)!=0 and N3 is the third largest of |a|,|b|,|c|,|k|, with eta evaluated at the phases in R2.",
+                "binders": [
+                  {
+                    "symbol": "a",
+                    "type": "integer summation frequency"
+                  },
+                  {
+                    "symbol": "b",
+                    "type": "integer summation frequency"
+                  },
+                  {
+                    "symbol": "c",
+                    "type": "integer summation frequency"
+                  },
+                  {
+                    "symbol": "k",
+                    "type": "integer output frequency"
+                  }
+                ],
+                "objects": [
+                  "s",
+                  "tau",
+                  "eta",
+                  "R2"
+                ],
+                "assumptions": []
+              }
+            ],
+            "introduces": [],
+            "discharges": []
+          },
+          {
+            "id": "S002",
+            "text": "Dualize the R2 formula against an arbitrary ell2 coefficient sequence of norm one, take absolute values and use F001. Apply N003 with the first three sequences |a|^s|hat f1(a)|, |b|^s|hat f2(b)|, |c|^s|hat f3(c)| and the fourth the reflected absolute dual coefficients. Their norms are at most the H^s input norms and one. The prefactor tau/18 gives the asserted tau^(1+s) bound. The time phase and any inserted multiplier of modulus <=1 cannot increase this majorant. This includes each resonant restriction. Trilinearity and the estimate make polynomial approximations Cauchy in L2 and make the limit independent of approximating sequences; this gives the unique bounded trilinear extension.",
+            "uses": [
+              "N003"
+            ],
+            "uses_local": [
+              "F001"
+            ],
+            "objects": [
+              "s",
+              "tau",
+              "n",
+              "f1",
+              "f2",
+              "f3",
+              "Fourier",
+              "R2",
+              "H"
+            ],
+            "produces": [
+              {
+                "id": "F002",
+                "statement": "For every exponent sigma in [0,1], positive timestep tau1, nonnegative index m and mean-zero g1,g2,g3 in H^sigma, the unique trilinear extension satisfies ||R2_(m,tau1)(g1,g2,g3)||_2<=C_sigma*tau1^(1+sigma)*product_j||g_j||_(H^sigma), also with any inserted multiplier of modulus <=1.",
+                "binders": [
+                  {
+                    "symbol": "sigma",
+                    "type": "real exponent"
+                  },
+                  {
+                    "symbol": "tau1",
+                    "type": "positive real timestep"
+                  },
+                  {
+                    "symbol": "m",
+                    "type": "nonnegative step index"
+                  },
+                  {
+                    "symbol": "g1",
+                    "type": "mean-zero H^sigma function"
+                  },
+                  {
+                    "symbol": "g2",
+                    "type": "mean-zero H^sigma function"
+                  },
+                  {
+                    "symbol": "g3",
+                    "type": "mean-zero H^sigma function"
+                  }
+                ],
+                "objects": [
+                  "R2",
+                  "H"
+                ],
+                "assumptions": []
+              }
+            ],
+            "introduces": [],
+            "discharges": []
+          },
+          {
+            "id": "S003",
+            "text": "Now H002 gives 0<gamma<=1. Fix mean-zero w in H^gamma with norm <=M, mean-zero f in L2, delta=||f-w||_2<=1 and 0<tau<=1. F002 with sigma=gamma controls R2(w,w,w) by C M^3 tau^(1+gamma). Telescope R2(f,f,f)-R2(w,w,w) into three trilinear terms with one slot f-w and other slots chosen from f,w. F002 with sigma=0 controls their sum by C tau delta (||f||_2+||w||_2)^2. Since ||f||_2<=M+1, this is at most C_M tau delta, proving the numerical-state estimate. The argument introduces no Sobolev regularity for f.",
+            "uses": [
+              "H002"
+            ],
+            "uses_local": [
+              "F002"
+            ],
+            "objects": [
+              "gamma",
+              "M",
+              "w",
+              "f",
+              "delta",
+              "tau",
+              "R2",
+              "H"
+            ],
+            "produces": [],
+            "introduces": [],
+            "discharges": []
+          }
+        ],
+        "applications": []
+      },
+      {
+        "id": "R005",
+        "inputs": [],
+        "output": "N005",
+        "definitions": [
+          "D003",
+          "D004",
+          "D006",
+          "D007",
+          "D013",
+          "D014",
+          "D015",
+          "D018",
+          "D016"
+        ],
+        "rules": [
+          "direct",
+          "forall_introduction",
+          "implication_introduction",
+          "case_elimination"
+        ],
+        "locals": [
+          {
+            "symbol": "f",
+            "type": "mean-zero spatial input, allowed to vary smoothly with time",
+            "scope": "R005/argument",
+            "start": "S001",
+            "end": "S002",
+            "kind": "arbitrary",
+            "declaration": "Fix arbitrary mean-zero f, first on polynomials for the norm estimates and as a smooth path for the identities.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "g",
+            "type": "mean-zero spatial input, allowed to vary smoothly with time",
+            "scope": "R005/argument",
+            "start": "S001",
+            "end": "S002",
+            "kind": "arbitrary",
+            "declaration": "Fix arbitrary mean-zero g, first on polynomials for the norm estimates and as a smooth path for the identities.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "A0",
+            "type": "periodic spatial input in the normed spaces stated in S001",
+            "scope": "R005/argument",
+            "start": "S001",
+            "end": "S001",
+            "kind": "arbitrary",
+            "declaration": "Universally fix A0 in each stated norm inequality; A0 is mean zero when its inverse-derivative comparison is used.",
+            "objects": [],
+            "from_inputs": [],
+            "from_local": []
+          },
+          {
+            "symbol": "B0",
+            "type": "periodic spatial input in the normed spaces stated in S001",
+            "scope": "R005/argument",
+            "start": "S001",
+            "end": "S001",
+            "kind": "arbitrary",
+            "declaration": "Universally fix B0 in each stated norm inequality; A0 is mean zero when its inverse-derivative comparison is used.",
+            "objects": [],
+            "from_inputs": [],
+            "from_local": []
+          },
+          {
+            "symbol": "F",
+            "type": "periodic spatial input in the normed spaces stated in S001",
+            "scope": "R005/argument",
+            "start": "S001",
+            "end": "S001",
+            "kind": "arbitrary",
+            "declaration": "Universally fix F in each stated norm inequality; A0 is mean zero when its inverse-derivative comparison is used.",
+            "objects": [],
+            "from_inputs": [],
+            "from_local": []
+          },
+          {
+            "symbol": "G",
+            "type": "periodic spatial input in the normed spaces stated in S001",
+            "scope": "R005/argument",
+            "start": "S001",
+            "end": "S001",
+            "kind": "arbitrary",
+            "declaration": "Universally fix G in each stated norm inequality; A0 is mean zero when its inverse-derivative comparison is used.",
+            "objects": [],
+            "from_inputs": [],
+            "from_local": []
+          },
+          {
+            "symbol": "t",
+            "type": "real time",
+            "scope": "R005/argument",
+            "start": "S001",
+            "end": "S001",
+            "kind": "arbitrary",
+            "declaration": "Fix arbitrary real time t for the norm estimates.",
+            "objects": [],
+            "from_inputs": [],
+            "from_local": []
+          },
+          {
+            "symbol": "h",
+            "type": "smooth mean-zero path",
+            "scope": "R005/argument",
+            "start": "S002",
+            "end": "S002",
+            "kind": "arbitrary",
+            "declaration": "Fix arbitrary third path h for the cubic identity.",
+            "objects": [],
+            "from_inputs": [],
+            "from_local": []
+          },
+          {
+            "symbol": "a",
+            "type": "real time endpoint",
+            "scope": "R005/argument",
+            "start": "S002",
+            "end": "S002",
+            "kind": "arbitrary",
+            "declaration": "Fix a with a<=b for the integrated identity.",
+            "objects": [],
+            "from_inputs": [],
+            "from_local": []
+          },
+          {
+            "symbol": "b",
+            "type": "real time endpoint",
+            "scope": "R005/argument",
+            "start": "S002",
+            "end": "S002",
+            "kind": "arbitrary",
+            "declaration": "Fix b with a<=b for the integrated identity.",
+            "objects": [],
+            "from_inputs": [],
+            "from_local": []
+          }
+        ],
+        "argument": [
+          {
+            "id": "S001",
+            "text": "Orthogonality of exp(i*k*x) in normalized measure gives the L2 Fourier norm identity on polynomials; completion gives it on L2. Unimodularity and conjugate symmetry of exp(i*t*k^3) give unitarity, reality and mean preservation of S directly in Fourier coefficients. Cauchy-Schwarz gives ||Dinv f||_infty<=(sum_(k!=0)k^(-2))^(1/2)||f||_2, and ||Dinv f||_(H^1)<=sqrt(2)||f||_2. More generally H^1 embeds in L^infty by the same summable reciprocal weights. For A0,B0 in H^1, the product rule together with this embedding gives ||A0 B0||_(H^1)<=C||A0||_(H^1)||B0||_(H^1), first on polynomials and then by density. Apply this to the two inverse derivatives to obtain the J bound. The Fourier coefficient of a product of two L2 functions is bounded by the product of their L2 norms by Cauchy-Schwarz. Therefore ||B_t(f,g)||_(H^(-p_star))^2<=||f||_2^2||g||_2^2 sum_(k!=0) k^2<k>^(-2*p_star), and this series converges because p_star=23/14>3/2. The same coefficient bound with sum k^(-2) gives ||Dinv P(FG)||_2<=C||F||_2||G||_2. On mean-zero coefficients <k>^(-p_star)<=|k|^(-1), so the negative-norm comparison follows. In J_t(A0,B0), bound its first inverse derivative in L2 and its second in L^infty to get the asymmetric bound. All constants are uniform in t since S is an isometry. Bounded-product extensions follow by the displayed estimates and density.",
+            "uses": [],
+            "uses_local": [],
+            "objects": [
+              "H",
+              "S",
+              "P",
+              "Dinv",
+              "B",
+              "J",
+              "f",
+              "g",
+              "A0",
+              "B0",
+              "F",
+              "G",
+              "t",
+              "X"
+            ],
+            "produces": [],
+            "introduces": [],
+            "discharges": []
+          },
+          {
+            "id": "S002",
+            "text": "For smooth mean-zero paths f,g the nonzero kth Fourier coefficient of J_t(f,g) is sum_(a+b=k) exp(-i*3*k*a*b*t)(i*a)^(-1)(i*b)^(-1) hat f(a)hat g(b). Differentiating the phase contributes 3*i*k times the product coefficient. Thus partial_t J_t(f,g)=3 B_t(f,g)+J_t(f',g)+J_t(f,g'). Integrate in time and divide by three to obtain the normal-form identity with both endpoints. Smooth spatial Fourier series and their derivatives converge absolutely, justifying the differentiation. J is symmetric. In J_t(B_t(f,g),h), Dinv B_t(f,g)=S_(-t)P[(S_t f)(S_t g)], since Dinv*partial_x=P. Substitution, without commuting any operator through a product, gives the stated Cint identity after integration. The calculation holds on each smooth time piece, so summing preserves both external endpoints. For time-independent f set g=f and divide the integral by two; this yields Stage(t;f)=[J_s(f,f)]/6.",
+            "uses": [],
+            "uses_local": [],
+            "objects": [
+              "f",
+              "g",
+              "H",
+              "Fourier",
+              "S",
+              "P",
+              "Dinv",
+              "B",
+              "J",
+              "Cint",
+              "Stage",
+              "h",
+              "a",
+              "b"
+            ],
+            "produces": [],
+            "introduces": [],
+            "discharges": []
+          }
+        ],
+        "applications": []
+      },
+      {
+        "id": "R006",
+        "inputs": [
+          "H002",
+          "E002",
+          "E003",
+          "E004"
+        ],
+        "output": "N006",
+        "definitions": [
+          "D003",
+          "D015",
+          "D016",
+          "D017",
+          "D018"
+        ],
+        "rules": [
+          "direct",
+          "forall_introduction",
+          "implication_introduction",
+          "case_elimination"
+        ],
+        "locals": [
+          {
+            "symbol": "w",
+            "type": "mean-zero H^gamma function",
+            "scope": "R006/argument",
+            "start": "S003",
+            "end": "S003",
+            "kind": "arbitrary",
+            "declaration": "Fix arbitrary w.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "M",
+            "type": "nonnegative norm bound",
+            "scope": "R006/argument",
+            "start": "S003",
+            "end": "S003",
+            "kind": "arbitrary",
+            "declaration": "Fix M>=||w||_(H^gamma).",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "tau",
+            "type": "positive timestep",
+            "scope": "R006/argument",
+            "start": "S003",
+            "end": "S003",
+            "kind": "arbitrary",
+            "declaration": "Fix 0<tau<=1.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "n",
+            "type": "nonnegative index",
+            "scope": "R006/argument",
+            "start": "S003",
+            "end": "S003",
+            "kind": "arbitrary",
+            "declaration": "Fix arbitrary n.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "I",
+            "type": "closed nonnegative time interval",
+            "scope": "R006/argument",
+            "start": "S001",
+            "end": "S001",
+            "kind": "arbitrary",
+            "declaration": "Fix I=[a,b] with 0<=a<=b and b-a<=1.",
+            "objects": [],
+            "from_inputs": [],
+            "from_local": []
+          },
+          {
+            "symbol": "a",
+            "type": "nonnegative time endpoint",
+            "scope": "R006/argument",
+            "start": "S001",
+            "end": "S001",
+            "kind": "arbitrary",
+            "declaration": "Fix the stated endpoint a of I.",
+            "objects": [],
+            "from_inputs": [],
+            "from_local": []
+          },
+          {
+            "symbol": "b",
+            "type": "nonnegative time endpoint",
+            "scope": "R006/argument",
+            "start": "S001",
+            "end": "S001",
+            "kind": "arbitrary",
+            "declaration": "Fix the stated endpoint b of I.",
+            "objects": [],
+            "from_inputs": [],
+            "from_local": []
+          },
+          {
+            "symbol": "f1",
+            "type": "periodic time path",
+            "scope": "R006/argument",
+            "start": "S001",
+            "end": "S001",
+            "kind": "arbitrary",
+            "declaration": "Fix arbitrary f1 in X, or as a constant H^s path for that clause.",
+            "objects": [],
+            "from_inputs": [],
+            "from_local": []
+          },
+          {
+            "symbol": "f2",
+            "type": "periodic time path",
+            "scope": "R006/argument",
+            "start": "S001",
+            "end": "S001",
+            "kind": "arbitrary",
+            "declaration": "Fix arbitrary f2 in X, or as a constant H^s path for that clause.",
+            "objects": [],
+            "from_inputs": [],
+            "from_local": []
+          },
+          {
+            "symbol": "f3",
+            "type": "periodic time path",
+            "scope": "R006/argument",
+            "start": "S001",
+            "end": "S001",
+            "kind": "arbitrary",
+            "declaration": "Fix arbitrary f3 in X, or as a constant H^s path for that clause.",
+            "objects": [],
+            "from_inputs": [],
+            "from_local": []
+          },
+          {
+            "symbol": "s",
+            "type": "real Sobolev exponent",
+            "scope": "R006/argument",
+            "start": "S001",
+            "end": "S001",
+            "kind": "arbitrary",
+            "declaration": "Fix arbitrary s in [0,1] for the constant-path clause.",
+            "objects": [],
+            "from_inputs": [],
+            "from_local": []
+          },
+          {
+            "symbol": "f",
+            "type": "H^gamma function",
+            "scope": "R006/argument",
+            "start": "S002",
+            "end": "S002",
+            "kind": "arbitrary",
+            "declaration": "Fix arbitrary f in H^gamma for the product bound.",
+            "objects": [],
+            "from_inputs": [],
+            "from_local": []
+          },
+          {
+            "symbol": "g",
+            "type": "H^a_gamma function",
+            "scope": "R006/argument",
+            "start": "S002",
+            "end": "S002",
+            "kind": "arbitrary",
+            "declaration": "Fix arbitrary g in H^a_gamma for the product bound.",
+            "objects": [],
+            "from_inputs": [],
+            "from_local": []
+          }
+        ],
+        "argument": [
+          {
+            "id": "S001",
+            "text": "Apply E002 with alpha=0 to arbitrary X paths on I=[a,b], 0<=a<=b, |I|<=1. This is exactly its L^infty L2 and derivative H^(-23/14) hypothesis, and any slot may carry the negative norm. For constant H^s inputs apply its time-independent clause with alpha=s in [0,1]. The source operator C is exactly Cint: e^(t partial_x^3)=S_(-t) and Fourier coefficients, projections and inverse derivatives agree. Every source L2 and H^r norm, and hence X norm, equals sqrt(2*pi) times ours. Dividing the trilinear inequalities by sqrt(2*pi) changes only their constants by 2*pi. Thus both normalized inequalities follow, also for continuous piecewise smooth paths with their weak derivatives.",
+            "uses": [
+              "E002"
+            ],
+            "uses_local": [],
+            "objects": [
+              "H",
+              "Cint",
+              "X",
+              "I",
+              "a",
+              "b",
+              "f1",
+              "f2",
+              "f3",
+              "s"
+            ],
+            "produces": [],
+            "introduces": [],
+            "discharges": []
+          },
+          {
+            "id": "S002",
+            "text": "H002 gives 0<gamma<=1. Apply E003 with sigma=gamma, using epsilon=1/8 at gamma=1/2. Its a(sigma) equals a_gamma; all three cases give 0<=a_gamma<1. This gives ||fg||_2<=C_gamma||f||_(H^gamma)||g||_(H^a_gamma). The bilinear conversion of source norms only changes the constant by sqrt(2*pi).",
+            "uses": [
+              "H002",
+              "E003"
+            ],
+            "uses_local": [],
+            "objects": [
+              "gamma",
+              "H",
+              "a_gamma",
+              "f",
+              "g"
+            ],
+            "produces": [],
+            "introduces": [],
+            "discharges": []
+          },
+          {
+            "id": "S003",
+            "text": "Fix mean-zero w in H^gamma with ||w||_(H^gamma)<=M, 0<tau<=1 and n>=0. Apply E004 with f=g=w, sigma=gamma. For beta=a_gamma the lower exponents beta0 are respectively 2*gamma-3/2, -1/2-1/8, gamma-1. Each a_gamma belongs to [beta0,1+gamma]. The time powers are (1/2+2*gamma)/(5/2-gamma), 11/17 and (1+gamma)/2, all at least gamma. In the first case the difference from gamma has numerator gamma^2-gamma/2+1/2>0 and positive denominator 5/2-gamma; the other two comparisons are immediate in their stated ranges. Because tau<=1, this yields the tau^gamma stage bound. Apply E004 again at beta=1+gamma: the time power is zero, giving the uniform H^(1+gamma) bound. The norm conversion is again only a fixed factor, and no regularity beyond H^gamma on w has been used.",
+            "uses": [
+              "H002",
+              "E004"
+            ],
+            "uses_local": [],
+            "objects": [
+              "gamma",
+              "w",
+              "M",
+              "tau",
+              "n",
+              "a_gamma",
+              "H",
+              "Stage"
+            ],
+            "produces": [],
+            "introduces": [],
+            "discharges": []
+          }
+        ],
+        "applications": [
+          {
+            "id": "A001",
+            "input": "E002",
+            "at": "S001",
+            "bindings": "Set alpha=0 and I to the arbitrary interval, choosing each negative-norm slot i.",
+            "hypothesis_checks": [
+              "The interval has nonnegative endpoints and length <=1.",
+              "The arbitrary paths have finite X norm, exactly the source alpha=0 regularity."
+            ]
+          },
+          {
+            "id": "A002",
+            "input": "E002",
+            "at": "S001",
+            "bindings": "Set alpha=s in [0,1] and use arbitrary constant H^s inputs.",
+            "hypothesis_checks": [
+              "s and I have the stated ranges.",
+              "Constant H^s paths have zero time derivatives and satisfy the source time-independent clause."
+            ]
+          },
+          {
+            "id": "A003",
+            "input": "E003",
+            "at": "S002",
+            "bindings": "Set sigma=gamma, epsilon=1/8 at the midpoint, and use arbitrary H^gamma and H^a_gamma factors.",
+            "hypothesis_checks": [
+              "H002 gives the exponent range and 1/8>0.",
+              "The factors are universally fixed in precisely the required two spaces."
+            ]
+          },
+          {
+            "id": "A004",
+            "input": "E004",
+            "at": "S003",
+            "bindings": "Set sigma=gamma, f=g=w, beta=a_gamma, epsilon=1/8 at gamma=1/2.",
+            "hypothesis_checks": [
+              "H002 and the local choices supply all exponent, timestep and index ranges.",
+              "w is time independent and mean-zero H^gamma; the displayed case check places beta in the allowed interval."
+            ]
+          },
+          {
+            "id": "A005",
+            "input": "E004",
+            "at": "S003",
+            "bindings": "Keep sigma=gamma, f=g=w and take beta=1+gamma.",
+            "hypothesis_checks": [
+              "H002 and the same local choices supply all ranges.",
+              "w has the required regularity and beta is the included upper endpoint."
+            ]
+          }
+        ]
+      },
+      {
+        "id": "R007",
+        "inputs": [
+          "E005"
+        ],
+        "output": "N007",
+        "definitions": [
+          "D003",
+          "D004",
+          "D005",
+          "D006",
+          "D007",
+          "D008",
+          "D009",
+          "D010",
+          "D012",
+          "D013",
+          "D018",
+          "D019"
+        ],
+        "rules": [
+          "direct",
+          "forall_introduction",
+          "implication_introduction",
+          "case_elimination"
+        ],
+        "locals": [
+          {
+            "symbol": "tau",
+            "type": "positive timestep",
+            "scope": "R007/argument",
+            "start": "S001",
+            "end": "S002",
+            "kind": "arbitrary",
+            "declaration": "Fix arbitrary tau>0.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "f",
+            "type": "smooth mean-zero twisted step input",
+            "scope": "R007/argument",
+            "start": "S001",
+            "end": "S002",
+            "kind": "definition",
+            "declaration": "On each arbitrary step define f=S_(-n*tau)u^n.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "S",
+              "Psi"
+            ]
+          },
+          {
+            "symbol": "u0",
+            "type": "smooth real mean-zero datum",
+            "scope": "R007/argument",
+            "start": "S001",
+            "end": "S002",
+            "kind": "arbitrary",
+            "declaration": "Fix arbitrary initial datum u0.",
+            "objects": [],
+            "from_inputs": [],
+            "from_local": []
+          },
+          {
+            "symbol": "n",
+            "type": "nonnegative step index",
+            "scope": "R007/argument",
+            "start": "S001",
+            "end": "S002",
+            "kind": "arbitrary",
+            "declaration": "For each arbitrary step fix its index n.",
+            "objects": [],
+            "from_inputs": [],
+            "from_local": []
+          },
+          {
+            "symbol": "v",
+            "type": "twisted discrete trajectory",
+            "scope": "R007/argument",
+            "start": "S001",
+            "end": "S002",
+            "kind": "definition",
+            "declaration": "Define v^n=S_(-n*tau)u^n from the iterates.",
+            "objects": [
+              "S",
+              "Psi",
+              "u0",
+              "tau"
+            ],
+            "from_inputs": [],
+            "from_local": []
+          }
+        ],
+        "argument": [
+          {
+            "id": "S001",
+            "text": "Fix a smooth real mean-zero initial datum and tau>0. All products and Fourier multipliers preserve smoothness and reality. F_tau has P in both terms. H_tau has P in its first term, its second is a scalar mean times S_tau Dinv f, and both endpoint terms have an outer inverse derivative. Thus every iterate stays smooth real and mean zero. At each step take f=S_(-t_n)u^n. Apply E005: v^(n+1)=f+F_n(t_n+tau)+C_n(t_n+tau)-R2_(n,tau)(f,f,f). Here source e^(t partial_x^3)=S_(-t), source A^n=C_n(t_n+tau), and source R2 is D012 with the identical -tau/(18*i*k), covariance and phases. The source physical step agrees term by term with D008-D009, including S_(s-tau) in the last endpoint product.",
+            "uses": [
+              "E005"
+            ],
+            "uses_local": [],
+            "objects": [
+              "tau",
+              "f",
+              "S",
+              "P0",
+              "P",
+              "Dinv",
+              "F_tau",
+              "H_tau",
+              "Psi",
+              "R2",
+              "B",
+              "Stage",
+              "Interp",
+              "u0",
+              "n",
+              "v"
+            ],
+            "produces": [
+              {
+                "id": "F001",
+                "statement": "For each step, v^(n+1)=f+F_n(t_n+tau)+C_n(t_n+tau)-R2_(n,tau)(f,f,f), for f=S_(-t_n)u^n.",
+                "binders": [],
+                "objects": [
+                  "tau",
+                  "f",
+                  "S",
+                  "Psi",
+                  "R2",
+                  "Interp",
+                  "u0",
+                  "n",
+                  "v"
+                ],
+                "assumptions": []
+              }
+            ],
+            "introduces": [],
+            "discharges": []
+          },
+          {
+            "id": "S002",
+            "text": "The Interp formula gives V_n(t_n)=f. At the other endpoint Q_n cancels its part of W_n, leaving F001, so V_n(t_n+tau)=v^(n+1). Thus V is continuous and piecewise smooth and Y_n(t_n)=0. Differentiate the formula: V_n'=B_t(f+F_n,f+F_n)/2-W_n/tau=B_t(z_n,z_n)/2-W_n/tau. Expanding V_n=z_n+Y_n by bilinearity gives V_n'-B_t(V_n,V_n)/2=-B_t(Y_n,z_n)-B_t(Y_n,Y_n)/2-W_n/tau=rho_n'. Concatenating these increments gives the asserted equation and Rres(0)=0.",
+            "uses": [],
+            "uses_local": [
+              "F001"
+            ],
+            "objects": [
+              "tau",
+              "f",
+              "Psi",
+              "B",
+              "Interp",
+              "u0",
+              "n",
+              "v"
+            ],
+            "produces": [],
+            "introduces": [],
+            "discharges": []
+          }
+        ],
+        "applications": [
+          {
+            "id": "A001",
+            "input": "E005",
+            "at": "S001",
+            "bindings": "At every step use f=S_(-n*tau)u^n, source q=u^n and the current tau,n.",
+            "hypothesis_checks": [
+              "The induction in S001 proves every datum is smooth mean zero; tau>0 and n>=0.",
+              "S001 explicitly matches every multiplier, endpoint, phase and zero-mode convention with D008-D012."
+            ]
+          }
+        ]
+      },
+      {
+        "id": "R008",
+        "inputs": [
+          "H002",
+          "N004",
+          "N005",
+          "N006"
+        ],
+        "output": "N008",
+        "definitions": [
+          "D003",
+          "D007",
+          "D012",
+          "D013",
+          "D014",
+          "D015",
+          "D016",
+          "D017",
+          "D018",
+          "D019"
+        ],
+        "rules": [
+          "direct",
+          "forall_introduction",
+          "implication_introduction",
+          "case_elimination"
+        ],
+        "locals": [
+          {
+            "symbol": "M",
+            "type": "real bound",
+            "scope": "R008/argument",
+            "start": "S001",
+            "end": "S004",
+            "kind": "arbitrary",
+            "declaration": "Fix M>=1.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "f",
+            "type": "smooth mean-zero function",
+            "scope": "R008/argument",
+            "start": "S001",
+            "end": "S004",
+            "kind": "arbitrary",
+            "declaration": "Fix arbitrary f.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "w",
+            "type": "smooth mean-zero function",
+            "scope": "R008/argument",
+            "start": "S001",
+            "end": "S004",
+            "kind": "arbitrary",
+            "declaration": "Fix arbitrary w.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "tau",
+            "type": "positive timestep",
+            "scope": "R008/argument",
+            "start": "S001",
+            "end": "S004",
+            "kind": "arbitrary",
+            "declaration": "Fix 0<tau<=1.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "n",
+            "type": "nonnegative index",
+            "scope": "R008/argument",
+            "start": "S001",
+            "end": "S004",
+            "kind": "arbitrary",
+            "declaration": "Fix arbitrary n.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "delta",
+            "type": "L2 error",
+            "scope": "R008/argument",
+            "start": "S001",
+            "end": "S004",
+            "kind": "definition",
+            "declaration": "Define delta=||f-w||_2.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "f",
+              "w",
+              "H"
+            ]
+          },
+          {
+            "symbol": "q",
+            "type": "stage size",
+            "scope": "R008/argument",
+            "start": "S001",
+            "end": "S004",
+            "kind": "definition",
+            "declaration": "Define q=tau^gamma+delta.",
+            "from_inputs": [
+              "H002"
+            ],
+            "from_local": [],
+            "objects": [
+              "tau",
+              "gamma",
+              "delta"
+            ]
+          },
+          {
+            "symbol": "A0",
+            "type": "exact-data stage",
+            "scope": "R008/argument",
+            "start": "S002",
+            "end": "S002",
+            "kind": "definition",
+            "declaration": "At each t define A0=Stage_(n,tau)(t;w).",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "Stage",
+              "n",
+              "tau",
+              "w"
+            ]
+          },
+          {
+            "symbol": "D0",
+            "type": "stage difference",
+            "scope": "R008/argument",
+            "start": "S002",
+            "end": "S002",
+            "kind": "definition",
+            "declaration": "Define D0=F_n-A0.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "Interp",
+              "A0"
+            ]
+          }
+        ],
+        "argument": [
+          {
+            "id": "S001",
+            "text": "Fix M>=1, smooth mean-zero f,w and 0<tau<=1, n>=0; assume L1: ||w||_(H^gamma)<=M and delta=||f-w||_2<=1. Put q=tau^gamma+delta<=2. N005 gives F_n(t)=[J_s(f,f)]/6 and hence sup||F_n||_(H^1)<=C_M and sup||F_n-Stage(t;w)||_(H^1)<=C_M delta, by bilinearity and ||f||_2<=M+1. N006 and a_gamma<1 then give ||F_n||_(H^a_gamma)+||F_n||_2<=C_M q. Since z_n'=B_t(f,f)/2, N005 also gives ||z_n||_X<=C_M.",
+            "uses": [
+              "H002",
+              "N005",
+              "N006"
+            ],
+            "uses_local": [],
+            "objects": [
+              "gamma",
+              "M",
+              "f",
+              "w",
+              "tau",
+              "n",
+              "delta",
+              "q",
+              "H",
+              "J",
+              "Stage",
+              "Interp",
+              "X"
+            ],
+            "produces": [
+              {
+                "id": "F001",
+                "statement": "On the step, ||F_n||_(H^1)<=C_M, ||F_n-Stage(t;w)||_(H^1)<=C_M delta, ||F_n||_(H^a_gamma)+||F_n||_2<=C_M q, and ||z_n||_X<=C_M.",
+                "binders": [],
+                "objects": [
+                  "M",
+                  "f",
+                  "w",
+                  "tau",
+                  "n",
+                  "delta",
+                  "q",
+                  "H",
+                  "a_gamma",
+                  "Interp",
+                  "X"
+                ],
+                "assumptions": [
+                  "L1"
+                ]
+              }
+            ],
+            "introduces": [
+              "L1"
+            ],
+            "discharges": []
+          },
+          {
+            "id": "S002",
+            "text": "Set A0=Stage(t;w) and D0=F_n-A0. The exact-data square satisfies ||partial_x[(S_t A0)^2]||_2<=2 C_gamma ||A0||_(H^(1+gamma))||A0||_(H^a_gamma)<=C_M tau^gamma, by N006 and the product rule. The difference of squares is (S_t D0) S_t(F_n+A0). Its derivative is bounded in L2 by the H^1 algebra bound of N005 and F001, giving C_M delta. Thus sup||B_t(F_n,F_n)||_2<=C_M q and sup||Q_n||_2<=C_M tau q. Apply the numerical-state clause of N004 to f,w to control R2(f,f,f) by C_M tau q. Therefore ||W_n||_2<=C_M tau q.",
+            "uses": [
+              "N004",
+              "N005",
+              "N006"
+            ],
+            "uses_local": [
+              "F001"
+            ],
+            "objects": [
+              "M",
+              "f",
+              "w",
+              "tau",
+              "n",
+              "delta",
+              "q",
+              "A0",
+              "D0",
+              "H",
+              "S",
+              "B",
+              "R2",
+              "Interp"
+            ],
+            "produces": [
+              {
+                "id": "F002",
+                "statement": "sup_step||B_t(F_n,F_n)||_2<=C_M q and sup_step||Q_n||_2+||W_n||_2<=C_M tau q.",
+                "binders": [],
+                "objects": [
+                  "M",
+                  "tau",
+                  "q",
+                  "B",
+                  "Interp",
+                  "H"
+                ],
+                "assumptions": [
+                  "L1"
+                ]
+              }
+            ],
+            "introduces": [],
+            "discharges": []
+          },
+          {
+            "id": "S003",
+            "text": "Use Dinv B_t(f,F_n)=S_(-t)P[(S_t f)(S_t F_n)]. Split f=w+(f-w). N006 bounds the w-product by C_gamma||w||_(H^gamma)||F_n||_(H^a_gamma)<=C_M q; the other product is <=delta||S_t F_n||_infty<=C_M delta by F001 and N005's H^1 embedding. Hence ||Dinv B_t(f,F_n)||_2<=C_M q. Differentiation gives Y_n'=B_t(f,F_n)+B_t(F_n,F_n)/2-W_n/tau. F002 and boundedness of Dinv on mean-zero L2 yield ||Dinv Y_n'||_2<=C_M q. Integrating from Y_n(t_n)=0 gives ||Dinv Y_n||_2<=C_M tau q.",
+            "uses": [
+              "N005",
+              "N006"
+            ],
+            "uses_local": [
+              "F001",
+              "F002"
+            ],
+            "objects": [
+              "M",
+              "f",
+              "w",
+              "tau",
+              "q",
+              "delta",
+              "H",
+              "S",
+              "P",
+              "Dinv",
+              "B",
+              "Interp"
+            ],
+            "produces": [
+              {
+                "id": "F003",
+                "statement": "sup_step||Dinv Y_n'||_2<=C_M q and sup_step||Dinv Y_n||_2<=C_M tau q.",
+                "binders": [],
+                "objects": [
+                  "M",
+                  "tau",
+                  "q",
+                  "Dinv",
+                  "Interp",
+                  "H"
+                ],
+                "assumptions": [
+                  "L1"
+                ]
+              }
+            ],
+            "introduces": [],
+            "discharges": []
+          },
+          {
+            "id": "S004",
+            "text": "Apply N005's normal form to C_n with f constant and F_n'=B_t(f,f)/2. As F_n(t_n)=0, C_n(t)=J_t(f,F_n(t))/3-Cint_[t_n,t](f,f,f)/6. The first term is O(q) by F001 and N005. In the cubic integral telescope f around w. N006 with exponent gamma on (w,w,w) gives O(tau^gamma) and with exponent zero on the three difference terms gives O(delta). Therefore ||C_n||_2<=C_M q. F002 and Y_n=C_n+Q_n-(t-t_n)W_n/tau now give ||Y_n||_2<=C_M q. From F003 and the mean-zero comparison ||Y_n||_(H^(-p_star))<=||Dinv Y_n||_2, also applied to Y_n', obtain ||Y_n||_X<=C_M q and ||Y_n||_(H^(-p_star))<=C_M tau q. All output clauses hold under L1. Discharge L1 and universally quantify the data.",
+            "uses": [
+              "N005",
+              "N006"
+            ],
+            "uses_local": [
+              "F001",
+              "F002",
+              "F003"
+            ],
+            "objects": [
+              "M",
+              "f",
+              "w",
+              "tau",
+              "n",
+              "delta",
+              "q",
+              "H",
+              "Dinv",
+              "B",
+              "J",
+              "Cint",
+              "X",
+              "Interp"
+            ],
+            "produces": [],
+            "introduces": [],
+            "discharges": [
+              "L1"
+            ]
+          }
+        ],
+        "applications": []
+      },
+      {
+        "id": "R009",
+        "inputs": [
+          "H002",
+          "N005",
+          "N006",
+          "N008"
+        ],
+        "output": "N009",
+        "definitions": [
+          "D003",
+          "D007",
+          "D013",
+          "D014",
+          "D015",
+          "D016",
+          "D019"
+        ],
+        "rules": [
+          "direct",
+          "forall_introduction",
+          "implication_introduction",
+          "case_elimination"
+        ],
+        "locals": [
+          {
+            "symbol": "M",
+            "type": "real bound",
+            "scope": "R009/argument",
+            "start": "S001",
+            "end": "S002",
+            "kind": "arbitrary",
+            "declaration": "Fix arbitrary M>=1.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "f",
+            "type": "smooth mean-zero step input",
+            "scope": "R009/argument",
+            "start": "S001",
+            "end": "S002",
+            "kind": "arbitrary",
+            "declaration": "Fix arbitrary f.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "w",
+            "type": "smooth mean-zero comparison input",
+            "scope": "R009/argument",
+            "start": "S001",
+            "end": "S002",
+            "kind": "arbitrary",
+            "declaration": "Fix arbitrary w.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "tau",
+            "type": "positive timestep",
+            "scope": "R009/argument",
+            "start": "S001",
+            "end": "S002",
+            "kind": "arbitrary",
+            "declaration": "Fix 0<tau<=1.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "n",
+            "type": "nonnegative index",
+            "scope": "R009/argument",
+            "start": "S001",
+            "end": "S002",
+            "kind": "arbitrary",
+            "declaration": "Fix arbitrary n.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "delta",
+            "type": "L2 error",
+            "scope": "R009/argument",
+            "start": "S001",
+            "end": "S002",
+            "kind": "definition",
+            "declaration": "Define delta=||f-w||_2.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "f",
+              "w",
+              "H"
+            ]
+          },
+          {
+            "symbol": "q",
+            "type": "step parameter",
+            "scope": "R009/argument",
+            "start": "S001",
+            "end": "S002",
+            "kind": "definition",
+            "declaration": "Define q=tau^gamma+delta.",
+            "from_inputs": [
+              "H002"
+            ],
+            "from_local": [],
+            "objects": [
+              "tau",
+              "gamma",
+              "delta"
+            ]
+          }
+        ],
+        "argument": [
+          {
+            "id": "S001",
+            "text": "Fix arbitrary step data M,f,w,tau,n and assume L1: M>=1, 0<tau<=1, ||w||_(H^gamma)<=M and delta=||f-w||_2<=1. Set q=tau^gamma+delta. Apply N008 to this same Interp tuple. In the first integral of rho_n apply N005's normal form to (Y_n,z_n). The boundary is O(tau q) by ||Dinv Y_n||_2<=C_M tau q, ||z_n||_2<=C_M and the asymmetric J bound. The integral with Y_n' is O(tau q) by ||Dinv Y_n'||_2<=C_M q. In the remaining term z_n'=B_t(f,f)/2, symmetry of J and N005's cubic identity give a constant multiple of Cint(f,f,Y_n). By N006 with the negative norm on Y_n its bound is C tau||f||_X^2||Y_n||_X+C||f||_2^2||Y_n||_(L^infty H^(-p_star))<=C_M tau q; f is constant so ||f||_X=||f||_2<=M+1.",
+            "uses": [
+              "H002",
+              "N005",
+              "N006",
+              "N008"
+            ],
+            "uses_local": [],
+            "objects": [
+              "gamma",
+              "M",
+              "f",
+              "w",
+              "tau",
+              "n",
+              "delta",
+              "q",
+              "H",
+              "Dinv",
+              "B",
+              "J",
+              "Cint",
+              "X",
+              "Interp"
+            ],
+            "produces": [],
+            "introduces": [
+              "L1"
+            ],
+            "discharges": []
+          },
+          {
+            "id": "S002",
+            "text": "For the second integral apply N005's normal form to (Y_n,Y_n). Its boundary is <=C||Dinv Y_n||_2||Y_n||_2<=C_M tau q^2, and its differentiated terms have integrals <=C tau||Dinv Y_n'||_2||Y_n||_2<=C_M tau q^2. Since q<=2 this is O(tau q). The affine W_n term is O(tau q) by N008. Thus sup||rho_n||_2<=C_M tau q. Directly in Rres'=-B(Y_n,z_n)-B(Y_n,Y_n)/2-W_n/tau, apply N005's negative-norm product bound and N008's strong bounds and W_n bound, giving ||Rres'||_(L^infty H^(-p_star))<=C_M(q+q^2)<=C_M q. Both output inequalities hold under L1; discharge L1.",
+            "uses": [
+              "N005",
+              "N008"
+            ],
+            "uses_local": [],
+            "objects": [
+              "M",
+              "tau",
+              "q",
+              "H",
+              "Dinv",
+              "B",
+              "J",
+              "Interp"
+            ],
+            "produces": [],
+            "introduces": [],
+            "discharges": [
+              "L1"
+            ]
+          }
+        ],
+        "applications": []
+      },
+      {
+        "id": "R010",
+        "inputs": [
+          "H001",
+          "H002",
+          "N005",
+          "N006",
+          "N007",
+          "N008",
+          "N009"
+        ],
+        "output": "N010",
+        "definitions": [
+          "D003",
+          "D004",
+          "D007",
+          "D013",
+          "D014",
+          "D015",
+          "D016",
+          "D019"
+        ],
+        "rules": [
+          "direct",
+          "forall_introduction",
+          "implication_introduction",
+          "case_elimination"
+        ],
+        "locals": [
+          {
+            "symbol": "v",
+            "type": "smooth real mean-zero exact twisted solution",
+            "scope": "R010/argument",
+            "start": "S001",
+            "end": "S004",
+            "kind": "arbitrary",
+            "declaration": "Fix arbitrary exact twisted v.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "V",
+            "type": "continuous numerical interpolation",
+            "scope": "R010/argument",
+            "start": "S001",
+            "end": "S004",
+            "kind": "definition",
+            "declaration": "Take the interpolation of the fixed scheme initialized by v(0).",
+            "from_inputs": [
+              "N007"
+            ],
+            "from_local": [],
+            "objects": [
+              "v",
+              "Interp"
+            ]
+          },
+          {
+            "symbol": "Rres",
+            "type": "actual concatenated residual",
+            "scope": "R010/argument",
+            "start": "S001",
+            "end": "S004",
+            "kind": "definition",
+            "declaration": "Take the residual of this interpolation.",
+            "from_inputs": [
+              "N007"
+            ],
+            "from_local": [],
+            "objects": [
+              "Interp",
+              "V"
+            ]
+          },
+          {
+            "symbol": "M",
+            "type": "exact norm bound",
+            "scope": "R010/argument",
+            "start": "S001",
+            "end": "S004",
+            "kind": "definition",
+            "declaration": "Define M=1+sup_[0,T]||v||_(H^gamma).",
+            "from_inputs": [
+              "H001",
+              "H002"
+            ],
+            "from_local": [],
+            "objects": [
+              "T",
+              "gamma",
+              "v",
+              "H"
+            ]
+          },
+          {
+            "symbol": "e",
+            "type": "continuous error path",
+            "scope": "R010/argument",
+            "start": "S001",
+            "end": "S004",
+            "kind": "definition",
+            "declaration": "Define e=v-V.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "v",
+              "V"
+            ]
+          },
+          {
+            "symbol": "tau",
+            "type": "positive timestep",
+            "scope": "R010/argument",
+            "start": "S001",
+            "end": "S004",
+            "kind": "arbitrary",
+            "declaration": "Fix 0<tau<=1.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "I",
+            "type": "closed interval",
+            "scope": "R010/argument",
+            "start": "S001",
+            "end": "S004",
+            "kind": "arbitrary",
+            "declaration": "Fix I=[a,b] subset [0,T], starting at a grid point.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "a",
+            "type": "grid left endpoint",
+            "scope": "R010/argument",
+            "start": "S001",
+            "end": "S004",
+            "kind": "arbitrary",
+            "declaration": "Let a be the left endpoint.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "b",
+            "type": "right endpoint",
+            "scope": "R010/argument",
+            "start": "S001",
+            "end": "S004",
+            "kind": "arbitrary",
+            "declaration": "Let b be the right endpoint.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "h",
+            "type": "interval length",
+            "scope": "R010/argument",
+            "start": "S001",
+            "end": "S004",
+            "kind": "definition",
+            "declaration": "Define h=b-a<=1.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "a",
+              "b"
+            ]
+          },
+          {
+            "symbol": "E_I",
+            "type": "error supremum",
+            "scope": "R010/argument",
+            "start": "S001",
+            "end": "S004",
+            "kind": "definition",
+            "declaration": "Define E_I=sup_I||e||_2.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "I",
+              "e",
+              "H"
+            ]
+          },
+          {
+            "symbol": "N",
+            "type": "real threshold",
+            "scope": "R010/argument",
+            "start": "S002",
+            "end": "S004",
+            "kind": "arbitrary",
+            "declaration": "Fix arbitrary N>=2.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "FI",
+            "type": "bilinear error integral",
+            "scope": "R010/argument",
+            "start": "S002",
+            "end": "S004",
+            "kind": "definition",
+            "declaration": "Define FI(t)=integral_a^t B_s(e,v-e/2)ds.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "a",
+              "e",
+              "v",
+              "B"
+            ]
+          },
+          {
+            "symbol": "g",
+            "type": "smooth comparison path",
+            "scope": "R010/argument",
+            "start": "S002",
+            "end": "S004",
+            "kind": "definition",
+            "declaration": "Define g=v-e/2.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "v",
+              "e"
+            ]
+          },
+          {
+            "symbol": "f1",
+            "type": "path of finite X norm on I",
+            "scope": "R010/argument",
+            "start": "S003",
+            "end": "S003",
+            "kind": "arbitrary",
+            "declaration": "Fix arbitrary f1 in X(I) for the projection estimate.",
+            "objects": [],
+            "from_inputs": [],
+            "from_local": []
+          },
+          {
+            "symbol": "f2",
+            "type": "path of finite X norm on I",
+            "scope": "R010/argument",
+            "start": "S003",
+            "end": "S003",
+            "kind": "arbitrary",
+            "declaration": "Fix arbitrary f2 in X(I) for the projection estimate.",
+            "objects": [],
+            "from_inputs": [],
+            "from_local": []
+          },
+          {
+            "symbol": "f3",
+            "type": "path of finite X norm on I",
+            "scope": "R010/argument",
+            "start": "S003",
+            "end": "S003",
+            "kind": "arbitrary",
+            "declaration": "Fix arbitrary f3 in X(I) for the projection estimate.",
+            "objects": [],
+            "from_inputs": [],
+            "from_local": []
+          }
+        ],
+        "argument": [
+          {
+            "id": "S001",
+            "text": "Fix a smooth exact twisted path v on [0,T] and its numerical interpolation V with residual Rres. Put M=1+sup||v||_(H^gamma), e=v-V and fix I=[a,b] starting at a grid point, h=b-a<=1, 0<tau<=1. Assume L1: E_I=sup_I||e||_2<=1. At each step intersecting I use f=v^n=V(t_n), w=v(t_n), delta_n=||f-w||_2<=E_I and q_n=tau^gamma+delta_n. N007 supplies the actual residual identity and grid values, and N009 gives sup||rho_n||_2<=C_M tau q_n and ||Rres'||_(L^infty H^(-p_star))<=C_M q_n. There are at most h/tau+1 intersected steps (including a final partial step). Hence sup_(a<=t<=b)||Rres(t)-Rres(a)||_2<=C_M(h+tau)(tau^gamma+E_I). Differentiating the twisted exact equation gives v'=B(v,v)/2. Subtract N007 to get e'=B_t(e,v-e/2)-Rres'. N005 then gives ||e||_X(I)<=C_M(tau^gamma+E_I), and ||v||_X(I)+||V||_X(I)<=C_M. Here V=v-e, and the exact solution has L2 norm <=M throughout.",
+            "uses": [
+              "H001",
+              "H002",
+              "N005",
+              "N007",
+              "N009"
+            ],
+            "uses_local": [],
+            "objects": [
+              "T",
+              "gamma",
+              "v",
+              "V",
+              "Rres",
+              "M",
+              "e",
+              "I",
+              "a",
+              "b",
+              "h",
+              "tau",
+              "E_I",
+              "H",
+              "B",
+              "X",
+              "Interp"
+            ],
+            "produces": [
+              {
+                "id": "F001",
+                "statement": "sup_I||Rres(t)-Rres(a)||_2<=C_M(h+tau)(tau^gamma+E_I), ||e||_X(I)<=C_M(tau^gamma+E_I), and ||v||_X(I)+||V||_X(I)<=C_M.",
+                "binders": [],
+                "objects": [
+                  "M",
+                  "h",
+                  "tau",
+                  "gamma",
+                  "E_I",
+                  "Rres",
+                  "a",
+                  "e",
+                  "v",
+                  "V",
+                  "I",
+                  "H",
+                  "X"
+                ],
+                "assumptions": [
+                  "L1"
+                ]
+              }
+            ],
+            "introduces": [
+              "L1"
+            ],
+            "discharges": []
+          },
+          {
+            "id": "S002",
+            "text": "Define FI(t)=integral_a^t B_s(e,v-e/2)ds. Integration gives e(t)=e(a)+FI(t)-(Rres(t)-Rres(a)). Fix N>=2 only for analysis. For low frequencies N005's bound ||Dinv P(FG)||_2<=C||F||_2||G||_2, followed by two powers of frequency on |k|<=N, gives sup_I||P_(<=N)FI||_2<=C_M N^2 h E_I. For high frequencies apply the normal form in N005 with g=v-e/2, retaining both endpoints. Since e'=B(e,g)-Rres' and g'=B(v,v)/2-B(e,g)/2+Rres'/2, symmetry of J and the cubic identity give exactly FI(t)=[J_s(e,g)]_a^t/3-Cint_[a,t](e,g,V)/3-Cint_[a,t](v,v,e)/6+(1/3)integral_a^t J_s(Rres',V)ds. Indeed g-e/2=V combines the first differentiated pair, and -J(Rres',g)+J(e,Rres')/2=-J(Rres',V) before multiplication by -1/3. N005's H^1 bound on J bounds both high-output endpoints by C_M N^(-1)E_I. This includes the initial endpoint when e(a)!=0.",
+            "uses": [
+              "N005"
+            ],
+            "uses_local": [
+              "F001"
+            ],
+            "objects": [
+              "v",
+              "V",
+              "Rres",
+              "M",
+              "e",
+              "I",
+              "a",
+              "b",
+              "h",
+              "tau",
+              "E_I",
+              "N",
+              "FI",
+              "g",
+              "H",
+              "Dinv",
+              "B",
+              "J",
+              "Cint"
+            ],
+            "produces": [
+              {
+                "id": "F002",
+                "statement": "e(t)=e(a)+FI(t)-(Rres(t)-Rres(a)); sup_I||P_(<=N)FI||_2<=C_M N^2 h E_I; FI(t)=[J_s(e,g)]_a^t/3-Cint_[a,t](e,g,V)/3-Cint_[a,t](v,v,e)/6+(1/3)integral_a^t J_s(Rres',V)ds, with g=v-e/2, and the high-output endpoint norm is <=C_M N^(-1)E_I.",
+                "binders": [],
+                "objects": [
+                  "e",
+                  "a",
+                  "FI",
+                  "Rres",
+                  "I",
+                  "M",
+                  "N",
+                  "h",
+                  "E_I",
+                  "g",
+                  "v",
+                  "V",
+                  "J",
+                  "Cint",
+                  "H"
+                ],
+                "assumptions": [
+                  "L1"
+                ]
+              }
+            ],
+            "introduces": [],
+            "discharges": []
+          },
+          {
+            "id": "S003",
+            "text": "Let f1,f2,f3 be any three paths of finite X norm on I. For each path decompose frequencies at N/3. If all three input frequencies have modulus <=N/3, their sum has modulus <=N, so that cubic contribution vanishes after P_(>N). Multilinearity writes the remaining contribution as the sum of Cint(P_(>N/3)f1,f2,f3), Cint(P_(<=N/3)f1,P_(>N/3)f2,f3), and Cint(P_(<=N/3)f1,P_(<=N/3)f2,P_(>N/3)f3). Fourier projections contract L2 and the derivative H^(-23/14) norm. Each designated high input has H^(-23/14) norm <=C N^(-23/14) times its L2 norm. N006 therefore bounds this sum by C*h*product_j||f_j||_X+C*N^(-23/14)*product_j||f_j||_(L^infty L2), putting the negative norm on the designated high input in each summand. Instantiate this inequality for (e,g,V) and (v,v,e), where g=v-e/2. F001 gives ||e||_X<=C_M(tau^gamma+E_I), the other X norms <=C_M, and their L2 products <=C_M E_I. Consequently the two projected cubic integrals have total norm <=C_M*h*tau^gamma+C_M*(h+N^(-23/14))*E_I.",
+            "uses": [
+              "N006"
+            ],
+            "uses_local": [
+              "F001",
+              "F002"
+            ],
+            "objects": [
+              "M",
+              "e",
+              "v",
+              "V",
+              "I",
+              "h",
+              "tau",
+              "gamma",
+              "E_I",
+              "N",
+              "H",
+              "X",
+              "Cint",
+              "f1",
+              "f2",
+              "f3",
+              "g"
+            ],
+            "produces": [
+              {
+                "id": "F003",
+                "statement": "sup_(t in I)(||P_(>N)Cint_[a,t](e,v-e/2,V)||_2/3+||P_(>N)Cint_[a,t](v,v,e)||_2/6)<=C_M*h*tau^gamma+C_M*(h+N^(-23/14))*E_I.",
+                "binders": [],
+                "objects": [
+                  "M",
+                  "h",
+                  "tau",
+                  "gamma",
+                  "E_I",
+                  "N",
+                  "I",
+                  "a",
+                  "e",
+                  "v",
+                  "V",
+                  "Cint",
+                  "H"
+                ],
+                "assumptions": [
+                  "L1"
+                ]
+              }
+            ],
+            "introduces": [],
+            "discharges": []
+          },
+          {
+            "id": "S004",
+            "text": "For the forcing term in F002 use the actual stepwise Rres' from N007. On each intersected step define again f=v^n, w=v(t_n), delta_n=||f-w||_2 and q_n=tau^gamma+delta_n. On this step the forcing integral is the sum -Cint(Y_n,z_n,V)-Cint(Y_n,Y_n,V)/2-tau^(-1)integral J_s(W_n,V)ds over that intersection. N008 gives ||Y_n||_X<=C_M q_n and ||Y_n||_(L^infty H^(-p_star))<=C_M tau q_n. N006 with the negative norm on Y_n, and F001's bound on V, control each cubic term by C_M tau q_n; for the term with two Y_n use q_n<=2. N008's ||W_n||_2<=C_M tau q_n and N005's L2 bound for J control the last integral by C_M tau q_n, even on a partial step. Summing yields C_M(h+tau)(tau^gamma+E_I). Together with F002-F003 this gives sup||P_(>N)FI||_2<=C_M(h+tau)tau^gamma+C_M(h+tau+N^(-1)+N^(-p_star))E_I. Add the low-frequency estimate and F001's residual bound in the exact error identity. The result is E_I<=||e(a)||_2+C_M(h+tau)tau^gamma+C_M(N^2*h+h+tau+N^(-1)+N^(-23/14))*E_I. Discharge L1.",
+            "uses": [
+              "N005",
+              "N006",
+              "N007",
+              "N008"
+            ],
+            "uses_local": [
+              "F001",
+              "F002",
+              "F003"
+            ],
+            "objects": [
+              "M",
+              "e",
+              "v",
+              "V",
+              "Rres",
+              "I",
+              "h",
+              "tau",
+              "gamma",
+              "E_I",
+              "N",
+              "FI",
+              "H",
+              "B",
+              "J",
+              "Cint",
+              "X",
+              "Interp"
+            ],
+            "produces": [],
+            "introduces": [],
+            "discharges": [
+              "L1"
+            ]
+          }
+        ],
+        "applications": []
+      },
+      {
+        "id": "R011",
+        "inputs": [
+          "H001",
+          "H002",
+          "H003",
+          "N001",
+          "N007",
+          "N010"
+        ],
+        "output": "N011",
+        "definitions": [
+          "D003",
+          "D004",
+          "D010",
+          "D019"
+        ],
+        "rules": [
+          "direct",
+          "forall_introduction",
+          "implication_introduction",
+          "case_elimination",
+          "contradiction_classical",
+          "natural_induction",
+          "exists_elimination"
+        ],
+        "locals": [
+          {
+            "symbol": "u0",
+            "type": "smooth real mean-zero H^gamma datum",
+            "scope": "R011/argument",
+            "start": "S001",
+            "end": "S002",
+            "kind": "arbitrary",
+            "declaration": "Fix arbitrary smooth datum of norm <=R.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "M",
+            "type": "uniform exact bound",
+            "scope": "R011/argument",
+            "start": "S001",
+            "end": "S002",
+            "kind": "definition",
+            "declaration": "Use M=1+A(T,gamma,R) from N001.",
+            "from_inputs": [
+              "N001"
+            ],
+            "from_local": [],
+            "objects": [
+              "T",
+              "gamma",
+              "R"
+            ]
+          },
+          {
+            "symbol": "N",
+            "type": "integer frequency threshold",
+            "scope": "R011/argument",
+            "start": "S001",
+            "end": "S002",
+            "kind": "definition",
+            "declaration": "Define N=ceil(max(2,8*C_M,(8*C_M)^(14/23))) for the enlarged uniform stability constant C_M.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "M"
+            ]
+          },
+          {
+            "symbol": "delta",
+            "type": "positive block size",
+            "scope": "R011/argument",
+            "start": "S001",
+            "end": "S002",
+            "kind": "definition",
+            "declaration": "Choose delta=min(1,1/(4*C_M*(N^2+3))), decreasing if needed.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "M",
+              "N"
+            ]
+          },
+          {
+            "symbol": "u",
+            "type": "exact solution with datum u0",
+            "scope": "R011/argument",
+            "start": "S001",
+            "end": "S002",
+            "kind": "witness",
+            "declaration": "Take u from N001 for the current smooth datum.",
+            "objects": [
+              "u0"
+            ],
+            "from_inputs": [
+              "N001"
+            ],
+            "from_local": []
+          },
+          {
+            "symbol": "v",
+            "type": "exact twisted solution",
+            "scope": "R011/argument",
+            "start": "S001",
+            "end": "S002",
+            "kind": "definition",
+            "declaration": "Define v(t)=S_(-t)u(t).",
+            "objects": [
+              "S",
+              "u"
+            ],
+            "from_inputs": [],
+            "from_local": []
+          },
+          {
+            "symbol": "V",
+            "type": "numerical interpolant",
+            "scope": "R011/argument",
+            "start": "S001",
+            "end": "S002",
+            "kind": "definition",
+            "declaration": "For each allowed timestep construct V from Interp and the datum u0.",
+            "objects": [
+              "Interp",
+              "u0"
+            ],
+            "from_inputs": [
+              "N007"
+            ],
+            "from_local": []
+          },
+          {
+            "symbol": "e",
+            "type": "error path",
+            "scope": "R011/argument",
+            "start": "S001",
+            "end": "S002",
+            "kind": "definition",
+            "declaration": "Define e=v-V for each allowed timestep.",
+            "objects": [
+              "v",
+              "V"
+            ],
+            "from_inputs": [],
+            "from_local": []
+          }
+        ],
+        "argument": [
+          {
+            "id": "S001",
+            "text": "Fix a smooth real mean-zero datum u0 with ||u0||_(H^gamma)<=R. H001-H003 and N001 give a common M bound depending only on T,gamma,R. Take the exact u from N001, put v=S_(-t)u, construct V by Interp, and set e=v-V. Use N010 with a constant C_M enlarged to work throughout this ball. Define N=ceil(max(2,8*C_M,(8*C_M)^(14/23))). Then C_M(N^(-1)+N^(-23/14))<=1/4. Then choose delta in (0,1] so small that C_M delta(N^2+3)<=1/4, and restrict tau<=delta/2. On any interval starting at a grid point and of length h<=delta with error supremum <=1, N010 absorbs the error coefficient: h+tau<=3delta/2, and hence E_I<=2||e(a)||_2+C'_M delta*tau^gamma. These choices depend only on the common M and gamma,T.",
+            "uses": [
+              "H001",
+              "H002",
+              "H003",
+              "N001",
+              "N010"
+            ],
+            "uses_local": [],
+            "objects": [
+              "T",
+              "gamma",
+              "R",
+              "u0",
+              "M",
+              "N",
+              "delta",
+              "H",
+              "Psi",
+              "Interp",
+              "u",
+              "v",
+              "V",
+              "e"
+            ],
+            "produces": [
+              {
+                "id": "F001",
+                "statement": "For the current smooth datum, exact path v and interpolant V, with e=v-V, the fixed N,delta depend only on T,gamma,R. For every positive timestep theta<=delta/2 and every I=[a,b] starting at a grid point with b-a<=delta, if E_I=sup_I||e||_2<=1 then E_I<=2||e(a)||_2+C'_M*delta*theta^gamma.",
+                "binders": [
+                  {
+                    "symbol": "theta",
+                    "type": "positive timestep"
+                  },
+                  {
+                    "symbol": "I",
+                    "type": "closed time interval"
+                  },
+                  {
+                    "symbol": "a",
+                    "type": "grid left endpoint"
+                  },
+                  {
+                    "symbol": "b",
+                    "type": "right endpoint"
+                  },
+                  {
+                    "symbol": "E_I",
+                    "type": "error supremum"
+                  }
+                ],
+                "objects": [
+                  "T",
+                  "gamma",
+                  "R",
+                  "N",
+                  "delta",
+                  "H",
+                  "Interp",
+                  "e",
+                  "v",
+                  "V",
+                  "M"
+                ],
+                "assumptions": []
+              }
+            ],
+            "introduces": [],
+            "discharges": []
+          },
+          {
+            "id": "S002",
+            "text": "Partition the grid into blocks of floor(delta/tau) steps and a possibly shorter final block. Full block lengths belong to [delta/2,delta], so there are at most 2T/delta+1 blocks. Iterate F001, beginning with e(0)=0, to get sup_[0,t]||e||_2<=K*tau^gamma on every prefix on which ||e||_2<=1; K depends only on T,gamma,R. This includes a prefix ending inside the last step, because N010 explicitly allows a partial final interval. N007 gives continuity of the interpolant; the exact solution is continuous by N001. If the error first reached one, the same finite recurrence through that first time would give <=K*tau^gamma. Choose tau0<=min(1,delta/2) so small that K*tau0^gamma<1/2, possible because H002 gives gamma>0. This is a contradiction; hence the estimate holds on all [0,T]. N007 gives V(t_n)=S_(-t_n)u^n and N001 gives unitarity of the twist, so the grid-point bound follows. No bound depends on higher smooth norms or spectral support.",
+            "uses": [
+              "H002",
+              "N001",
+              "N007",
+              "N010"
+            ],
+            "uses_local": [
+              "F001"
+            ],
+            "objects": [
+              "T",
+              "gamma",
+              "R",
+              "u0",
+              "M",
+              "N",
+              "delta",
+              "H",
+              "S",
+              "Psi",
+              "Interp",
+              "u",
+              "v",
+              "V",
+              "e"
+            ],
+            "produces": [],
+            "introduces": [],
+            "discharges": []
+          }
+        ],
+        "applications": []
+      },
+      {
+        "id": "R012",
+        "inputs": [
+          "H001",
+          "H002",
+          "H003",
+          "N001",
+          "N005",
+          "N011"
+        ],
+        "output": "P",
+        "definitions": [
+          "D001",
+          "D003",
+          "D004",
+          "D005",
+          "D006",
+          "D007",
+          "D008",
+          "D009",
+          "D010"
+        ],
+        "rules": [
+          "direct",
+          "forall_introduction",
+          "implication_introduction",
+          "case_elimination",
+          "exists_elimination",
+          "natural_induction"
+        ],
+        "locals": [
+          {
+            "symbol": "u0",
+            "type": "real mean-zero H^gamma datum",
+            "scope": "R012/argument",
+            "start": "S001",
+            "end": "S003",
+            "kind": "arbitrary",
+            "declaration": "Fix arbitrary u0 with norm <=R.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "u0_m",
+            "type": "sequence of polynomial approximants",
+            "scope": "R012/argument",
+            "start": "S001",
+            "end": "S003",
+            "kind": "definition",
+            "declaration": "Define u0_m=P_(<=m)u0 for positive integers m.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": [
+              "u0",
+              "H"
+            ]
+          },
+          {
+            "symbol": "u",
+            "type": "exact solution path",
+            "scope": "R012/argument",
+            "start": "S001",
+            "end": "S003",
+            "kind": "witness",
+            "declaration": "Take the unique solution with datum u0 supplied by N001.",
+            "from_inputs": [
+              "N001"
+            ],
+            "from_local": [],
+            "objects": [
+              "u0"
+            ]
+          },
+          {
+            "symbol": "L",
+            "type": "positive integer",
+            "scope": "R012/argument",
+            "start": "S003",
+            "end": "S003",
+            "kind": "arbitrary",
+            "declaration": "Fix arbitrary positive integer L in the asserted timestep range.",
+            "from_inputs": [],
+            "from_local": [],
+            "objects": []
+          },
+          {
+            "symbol": "tau",
+            "type": "positive timestep",
+            "scope": "R012/argument",
+            "start": "S003",
+            "end": "S003",
+            "kind": "definition",
+            "declaration": "Define tau=T/L for the chosen L.",
+            "from_inputs": [
+              "H001"
+            ],
+            "from_local": [],
+            "objects": [
+              "T",
+              "L"
+            ]
+          },
+          {
+            "symbol": "u_m",
+            "type": "sequence of exact smooth solution paths",
+            "scope": "R012/argument",
+            "start": "S001",
+            "end": "S003",
+            "kind": "witness",
+            "declaration": "Take u_m to be the unique exact solution for each u0_m supplied by N001.",
+            "objects": [
+              "u0_m"
+            ],
+            "from_inputs": [
+              "N001"
+            ],
+            "from_local": []
+          }
+        ],
+        "argument": [
+          {
+            "id": "S001",
+            "text": "H001-H003 give the ranges T>0, 0<gamma<=1, R>0. Fix arbitrary real mean-zero u0 in H^gamma with ||u0||_(H^gamma)<=R. Let u0_m=P_(<=m)u0. The data are real mean-zero Fourier polynomials, ||u0_m||_(H^gamma)<=R, and ||u0_m-u0||_2 tends to zero by the convergent Fourier norm sum. N001 supplies exact solutions u_m,u with a common M bound and sup_[0,T]||u_m-u||_2<=C(T,2R)||u0_m-u0||_2 tending to zero. The solution u has precisely the continuous distributional smooth-approximation convention in the target.",
+            "uses": [
+              "H001",
+              "H002",
+              "H003",
+              "N001"
+            ],
+            "uses_local": [],
+            "objects": [
+              "T",
+              "gamma",
+              "R",
+              "u0",
+              "u0_m",
+              "u",
+              "H",
+              "S",
+              "u_m"
+            ],
+            "produces": [
+              {
+                "id": "F001",
+                "statement": "The real mean-zero polynomial approximants u0_m have H^gamma norm <=R and their exact solutions converge uniformly in time in L2 to the specified u.",
+                "binders": [],
+                "objects": [
+                  "T",
+                  "gamma",
+                  "R",
+                  "u0",
+                  "u0_m",
+                  "u",
+                  "H",
+                  "u_m"
+                ],
+                "assumptions": []
+              }
+            ],
+            "introduces": [],
+            "discharges": []
+          },
+          {
+            "id": "S002",
+            "text": "For each fixed tau>0, Psi_tau is continuous from mean-zero L2 to L2. Indeed N005 gives Dinv:L2->H^1 and the H^1 product bound; consequently F_tau:L2->H^1 is a continuous quadratic map. The first term of H_tau is a product of inverse derivatives. Its second has the continuous bilinear scalar mean P0(f^2) multiplied by S_tau Dinv f. Its third is the H^1 product (S_s Dinv f)^3 followed by Dinv. Its fourth is the product of D^(-2)F_tau(f) and Dinv f, with unitary S factors and a final D^(-2). Each is continuous into L2; all scalar coefficients, including tau^(-1), are finite for this fixed tau. Hence the map and all of its finitely many iterates are continuous. The same formulas preserve reality and zero mean: explicit P, outer inverse derivatives, and the zero-mean factor in the scalar-mean term show this directly.",
+            "uses": [
+              "N005"
+            ],
+            "uses_local": [],
+            "objects": [
+              "H",
+              "S",
+              "P0",
+              "P",
+              "Dinv",
+              "F_tau",
+              "H_tau",
+              "Psi"
+            ],
+            "produces": [
+              {
+                "id": "F002",
+                "statement": "For every fixed theta>0 and finite nonnegative msteps, Psi_theta and each of its first msteps iterates are continuous from mean-zero L2 to L2 and preserve reality and zero mean.",
+                "binders": [
+                  {
+                    "symbol": "theta",
+                    "type": "positive fixed timestep"
+                  },
+                  {
+                    "symbol": "msteps",
+                    "type": "nonnegative number of steps"
+                  }
+                ],
+                "objects": [
+                  "Psi",
+                  "H"
+                ],
+                "assumptions": []
+              }
+            ],
+            "introduces": [],
+            "discharges": []
+          },
+          {
+            "id": "S003",
+            "text": "Take C,tau0 from N011, determined only by T,gamma,R. Fix an arbitrary positive integer L with tau=T/L<=tau0. Applying N011 to u0_m gives the same error bound C*tau^gamma for every m. By F002 the numerical iterates converge in L2 at each of the finitely many grid points, and F001 gives uniform convergence of the exact solutions. The reverse triangle inequality, followed by the maximum over L+1 points, passes the estimate to u0. Since C and tau0 were selected before u0,L and are uniform over the entire datum ball, this is the full conclusion P, including n=0. The finite-step continuity argument uses fixed tau only and imposes no support restriction or numerical H^gamma bound.",
+            "uses": [
+              "N011"
+            ],
+            "uses_local": [
+              "F001",
+              "F002"
+            ],
+            "objects": [
+              "T",
+              "gamma",
+              "R",
+              "u0",
+              "u0_m",
+              "u",
+              "L",
+              "tau",
+              "H",
+              "Psi"
+            ],
+            "produces": [],
+            "introduces": [],
+            "discharges": []
+          }
+        ],
+        "applications": []
+      }
+    ]
+  }
+}

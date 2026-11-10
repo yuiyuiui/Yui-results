@@ -1,0 +1,486 @@
+{
+  "report": {
+    "all_checks_passed": false,
+    "review": {
+      "path": "/Users/syyui/projects/Yui-results/benchmark/results/20261031T212422Z-533b379994/nl0-to-lean/0001/interface-review/review.json",
+      "sha256": "12bf1411d0a9db2abecb19e1046f4dff56e7c8bed4b9bc0720df8de246504e82"
+    },
+    "findings": [
+      {
+        "verdict": "FAIL",
+        "explanation": "Weak does not enforce a weak derivative. In the pinned version, the order of ContDiff is WithTop ℕ∞, and ⊤ is analytic order ω. Every globally real-analytic φ whose support lies in the bounded interval (a,b) vanishes on an open ray and hence is identically zero. Thus the integration-by-parts clause tests only φ=0; Weak a b f d reduces to coordinate integrability. For example, on [0,1] a path equal to 0 before 1/2 and to a nonzero real mean-zero finite Fourier polynomial afterwards satisfies the proposed XPath α ... f 0, although its distributional derivative has a jump mass and is not in L∞H^(-pstar). Even for a differentiable path, d can be chosen independently of f'. Consequently ETri/E003 assumes an estimate on a larger domain with potentially artificially small derivative norms, and AccResidual's Weak field does not certify the source weak equation. The claimed two-way XPath/source-X correspondence fails.",
+        "locations": [
+          {
+            "document": "spec.json",
+            "pointer": "/definitions/16"
+          },
+          {
+            "document": "nl0.json",
+            "pointer": "/propositions/5/statement"
+          },
+          {
+            "document": "nl0.json",
+            "pointer": "/inferences/5/argument/0"
+          },
+          {
+            "document": "contract.json",
+            "pointer": "/header"
+          },
+          {
+            "document": "contract.json",
+            "pointer": "/premises/5/type"
+          },
+          {
+            "document": "contract.json",
+            "pointer": "/endpoint_correspondence/E003"
+          },
+          {
+            "document": "plan.json",
+            "pointer": "/steps/8"
+          },
+          {
+            "document": "plan.json",
+            "pointer": "/steps/13"
+          }
+        ],
+        "comparison": {
+          "source": {
+            "document": "spec.json",
+            "pointer": "/definitions/16/definition",
+            "quote": "For an interval I with length at most one, X(I) consists of L^infinity(I;L^2) functions with weak time derivative in L^infinity(I;H^(-pstar)); ||f||_(X(I))=||f||_(L^infinity(I;L^2))+||f'||_(L^infinity(I;H^(-pstar))). All time suprema of continuous functions use their continuous representatives; derivatives and L^infinity norms use essential suprema."
+          },
+          "formal": {
+            "document": "contract.json",
+            "pointer": "/header",
+            "quote": "def Weak (a b : ℝ) (f d : Path) : Prop :=\n  (∀ k, IntegrableOn (fun t => f t k) (Icc a b) ∧ IntegrableOn (fun t => d t k) (Icc a b)) ∧\n  ∀ φ : ℝ → ℝ, ContDiff ℝ ⊤ φ → HasCompactSupport φ → Function.support φ ⊆ Ioo a b →\n    ∀ k, (∫ t in a..b, f t k * ((deriv φ t : ℝ) : ℂ)) = -(∫ t in a..b, d t k * (φ t : ℂ))"
+          },
+          "difference": "The source requires the actual distributional time derivative of f. The formal derivative binder d is constrained only against globally analytic supported tests, all of which are zero; it need not be f'. XPath and hence external E003 are enlarged, and the derivative norm can be reduced independently of the path."
+        }
+      },
+      {
+        "verdict": "FAIL",
+        "explanation": "SmoothOn encodes time analyticity of every Fourier coefficient, in addition to its Sobolev derivative continuity. Pinned ContDiffOn ℝ ⊤ is analytic regularity within the closed interval, not C∞ regularity. The source's arbitrary smooth mean-zero paths need not have analytic time coefficients: a flat nonanalytic smooth scalar transition multiplied by a finite real mean-zero Fourier polynomial already distinguishes the domains. Piecewise inherits this restriction through SmoothOn, so NormalForm/N005 and NormalizedTri/N006 omit source-admissible smooth paths. In the other direction FlowOutput demands this stronger property for every smooth datum, EFlow requires it through SourceApprox, and Target/Exact requires it through SmoothApprox. The source's higher-Sobolev argument and the planned T001 conversion establish smoothness, with no claim or obligation establishing this additional analyticity. This identifies a changed regularity condition, not a failure merely to provide a completed local proof.",
+        "locations": [
+          {
+            "document": "nl0.json",
+            "pointer": "/propositions/13/statement"
+          },
+          {
+            "document": "nl0.json",
+            "pointer": "/propositions/14/statement"
+          },
+          {
+            "document": "nl0.json",
+            "pointer": "/inferences/0/argument/2"
+          },
+          {
+            "document": "nl0.json",
+            "pointer": "/propositions/3/statement"
+          },
+          {
+            "document": "spec.json",
+            "pointer": "/definitions/22"
+          },
+          {
+            "document": "contract.json",
+            "pointer": "/header"
+          },
+          {
+            "document": "contract.json",
+            "pointer": "/endpoint_correspondence/E001"
+          },
+          {
+            "document": "contract.json",
+            "pointer": "/endpoint_correspondence/P"
+          },
+          {
+            "document": "plan.json",
+            "pointer": "/steps/1"
+          },
+          {
+            "document": "plan.json",
+            "pointer": "/steps/7"
+          },
+          {
+            "document": "plan.json",
+            "pointer": "/steps/8"
+          }
+        ],
+        "comparison": {
+          "source": {
+            "document": "nl0.json",
+            "pointer": "/propositions/13/statement",
+            "quote": "For smooth mean-zero time-dependent f,g on [a,b], integral_a^b B_t(f,g)dt=(1/3)[J_t(f,g)]_a^b-(1/3)integral_a^b[J_t(f',g)+J_t(f,g')]dt."
+          },
+          "formal": {
+            "document": "contract.json",
+            "pointer": "/header",
+            "quote": "def SmoothOn (a b : ℝ) (f : Path) : Prop :=\n  (∀ k, ContDiffOn ℝ ⊤ (fun t => f t k) (Icc a b)) ∧\n  ∀ m j : ℕ, ContH (m : ℝ) a b (fun t k => iteratedDerivWithin j (fun r => f r k) (Icc a b) t)"
+          },
+          "difference": "The source path regularity is smooth time dependence. The formal order ⊤ requires analytic time dependence. This narrows the domains of the local normal-form/trilinear outputs and strengthens the flow/approximation conclusions inside E001 and complete P; the planned smoothness argument does not supply the extra condition."
+        }
+      }
+    ],
+    "qualification": {
+      "execution_qualified": true,
+      "identity_and_input_boundary_verified": true,
+      "execution_health": "NO_RECORDED_FAULT",
+      "measurement_complete": false,
+      "measurement_valid": false,
+      "record_context_qualified": true,
+      "submitted_record_qualified": true,
+      "recovered_transport": false,
+      "record_scope": "Execution evidence only. Callers still validate exact artifact/coverage and actual judgments; a blocker cannot grant full acceptance."
+    },
+    "review_status": "MATHEMATICAL_REVIEW_FAILED"
+  },
+  "actual_review": {
+    "checks": {
+      "source_route_and_coverage": {
+        "verdict": "FAIL",
+        "notes": "All 52 accepted paragraphs S001–S052 are copied faithfully and assigned to the plan; N001–N011 and P have identifiable expanded outputs. The covariance, two frequency majorants, dyadic summation, exponent-zero remainder, continuous estimates, interpolation, actual residual, restarted low/high stability, bootstrap and fixed-timestep density route are all present. The split helpers T013–T017 have producers rather than extra root premises. Nevertheless the typed route does not preserve the source's smooth-path argument: SmoothOn requires analytic time coefficients, and Piecewise, FlowOutput, SourceApprox and SmoothApprox inherit it. R001 S003 establishes time smoothness by higher Sobolev regularity, not time analyticity; T001 supplies no corresponding analytic conversion obligation. T005/T014 also restrict the accepted arbitrary smooth-path domains. Moreover the proposed Weak relation does not express the weak equation used in R006/R009. These are semantic route failures despite complete paragraph coverage, not demands for completed worker proof bodies.",
+        "locations": [
+          {
+            "document": "nl0.json",
+            "pointer": "/inferences/0/argument/2"
+          },
+          {
+            "document": "nl0.json",
+            "pointer": "/inferences/4"
+          },
+          {
+            "document": "nl0.json",
+            "pointer": "/inferences/5/argument/0"
+          },
+          {
+            "document": "nl0.json",
+            "pointer": "/inferences/8"
+          },
+          {
+            "document": "contract.json",
+            "pointer": "/header"
+          },
+          {
+            "document": "plan.json",
+            "pointer": "/steps/1"
+          },
+          {
+            "document": "plan.json",
+            "pointer": "/steps/7"
+          },
+          {
+            "document": "plan.json",
+            "pointer": "/steps/8"
+          },
+          {
+            "document": "source-map.json",
+            "pointer": "/paragraph_mapping"
+          }
+        ]
+      },
+      "parameters_and_allowed_inputs": {
+        "verdict": "FAIL",
+        "notes": "T,gamma,R are real, with exactly T>0, 0<gamma<=1 and R>0. The only declared roots are H001–H003 and E001–E006. Following every helper's inputs preserves the original direct boundaries; T013 is unconditional weighted-Sobolev infrastructure, not a new hypothesis, and no background note is promoted. E002 retains -1<theta<=0, constants before the horizon, the L2 norm-sum condition and both unitary versions. E004 retains every beta endpoint, the admissible positive-epsilon threshold, mean-zero inputs, n>=0 and uniformity; E005 retains sigma=0 and both epsilon endpoints; E006 copies the full unfiltered identity. However E003 is a stronger external assumption than its source: XPath uses Weak, whose analytic compactly supported test functions are all zero, so its derivative arguments need not be weak derivatives at all. The imported bound thus applies to additional paths and independently chosen derivative norms. E001 also imports SourceApprox through the time-analytic SmoothOn predicate, beyond the source's smooth-approximation clause. The endpoint_correspondence claims do not establish these equivalences.",
+        "locations": [
+          {
+            "document": "spec.json",
+            "pointer": "/hypotheses"
+          },
+          {
+            "document": "nl0.json",
+            "pointer": "/propositions/3"
+          },
+          {
+            "document": "nl0.json",
+            "pointer": "/propositions/5"
+          },
+          {
+            "document": "nl0.json",
+            "pointer": "/propositions/4"
+          },
+          {
+            "document": "nl0.json",
+            "pointer": "/propositions/6"
+          },
+          {
+            "document": "nl0.json",
+            "pointer": "/propositions/7"
+          },
+          {
+            "document": "nl0.json",
+            "pointer": "/propositions/8"
+          },
+          {
+            "document": "contract.json",
+            "pointer": "/parameters"
+          },
+          {
+            "document": "contract.json",
+            "pointer": "/premises"
+          },
+          {
+            "document": "contract.json",
+            "pointer": "/header"
+          },
+          {
+            "document": "contract.json",
+            "pointer": "/endpoint_correspondence/E001"
+          },
+          {
+            "document": "contract.json",
+            "pointer": "/endpoint_correspondence/E003"
+          },
+          {
+            "document": "source-map.json",
+            "pointer": "/direct_boundaries"
+          },
+          {
+            "document": "plan.json",
+            "pointer": "/steps"
+          }
+        ]
+      },
+      "representations_and_conversion_obligations": {
+        "verdict": "FAIL",
+        "notes": "The Fourier model otherwise has the specified integer frequencies, complex coefficients, even positive weights, guarded summability, conjugate symmetry and zero mode. FromLP uses the invertible weight (1+k²)^(-s/2); pinned lp has exponent p:ℝ≥0∞, so lp ... 2 is genuinely square-summable, and T013 explicitly obligates both realization directions, norm equality, truncation density, inclusions and completeness. The signs of S, B and sourceB, reflection, inverse derivatives, convolution and all four Htau terms agree with their source objects. The n2/n3 pairwise formulas give the second/third largest magnitudes, including ties; thresholds are real and grid indices natural. EssBound guards finiteness before ENNReal.toReal, and continuous-path guards justify real suprema. But pinned ContDiff/ContDiffOn take an order in WithTop ℕ∞: their outer top is analytic order ω, distinct from smooth order. Header Weak uses ContDiff ℝ ⊤ for its tests, making the testing condition trivial by analytic uniqueness on ℝ. SmoothOn uses ContDiffOn ℝ ⊤ and therefore strengthens C∞ paths to time-analytic coefficients. Smooth-to-analytic and arbitrary-derivative-to-weak-derivative reverse conversions are invalid. No weighted-lp, density or type-elaboration obligation fixes either mismatch. This was checked in pinned Mathlib Analysis/Calculus/ContDiff/FTaylorSeries.lean:112–120 and Defs.lean:131–136,472–473,1068–1072,1196–1198, with analytic uniqueness in Analysis/Analytic/IsolatedZeros.lean:209–217.",
+        "locations": [
+          {
+            "document": "spec.json",
+            "pointer": "/definitions/2"
+          },
+          {
+            "document": "spec.json",
+            "pointer": "/definitions/16"
+          },
+          {
+            "document": "spec.json",
+            "pointer": "/definitions/19"
+          },
+          {
+            "document": "nl0.json",
+            "pointer": "/propositions/13"
+          },
+          {
+            "document": "nl0.json",
+            "pointer": "/inferences/0/argument/2"
+          },
+          {
+            "document": "contract.json",
+            "pointer": "/header"
+          },
+          {
+            "document": "contract.json",
+            "pointer": "/representation"
+          },
+          {
+            "document": "contract.json",
+            "pointer": "/endpoint_correspondence/E003"
+          },
+          {
+            "document": "contract.json",
+            "pointer": "/endpoint_correspondence/P"
+          },
+          {
+            "document": "plan.json",
+            "pointer": "/steps/0"
+          },
+          {
+            "document": "plan.json",
+            "pointer": "/steps/8"
+          }
+        ]
+      },
+      "statements_and_local_plans": {
+        "verdict": "FAIL",
+        "notes": "Expanded Target/GridError retain positive constants before all data and step counts, the entire real mean-zero H^gamma ball, positive L, tau=T/L, every endpoint n<=L, normalized L2 error and preservation of the unfiltered recursion. Exact retains the correct integrated twisted PDE, continuity and uniqueness. The other expanded local estimates retain their exponents, slot choices, guards and uniformity: in particular f in the mixed remainder has only L2 regularity; LocalBounds has both stage Sobolev estimates; ResidualOutput permits partial final steps; StabilityEstimates keeps both normal-form endpoints and the actual residual forcing; T011/T012 discharge M, bootstrap and smoothness internally with the accepted uniform-block and density argument. Nevertheless Exact also includes SmoothApprox with time-analytic SmoothOn approximants, a stronger condition than the specified smooth-approximation meaning, while FlowOutput directly requires SmoothOn for every smooth datum. Conversely NormalForm and NormalizedTri now range over analytically restricted Piecewise paths instead of the source's smooth paths. T001/T005/T014 explanations only discuss smoothness and weak derivatives, not these altered statements. AccResidual's Weak field fails to certify its asserted weak equation, and ETri's derivative binders have the defect described above. These are concrete type-meaning errors; the reported IR-TYPES-CHECKED exit_code=0, scope=fragment checks declaration elaboration only and supplies no mathematical certification.",
+        "locations": [
+          {
+            "document": "spec.json",
+            "pointer": "/conclusion"
+          },
+          {
+            "document": "spec.json",
+            "pointer": "/definitions/22"
+          },
+          {
+            "document": "nl0.json",
+            "pointer": "/propositions/13"
+          },
+          {
+            "document": "nl0.json",
+            "pointer": "/propositions/14"
+          },
+          {
+            "document": "nl0.json",
+            "pointer": "/propositions/17"
+          },
+          {
+            "document": "nl0.json",
+            "pointer": "/propositions/18"
+          },
+          {
+            "document": "nl0.json",
+            "pointer": "/propositions/20"
+          },
+          {
+            "document": "contract.json",
+            "pointer": "/header"
+          },
+          {
+            "document": "contract.json",
+            "pointer": "/conclusion"
+          },
+          {
+            "document": "contract.json",
+            "pointer": "/endpoint_correspondence/P"
+          },
+          {
+            "document": "plan.json",
+            "pointer": "/steps/1"
+          },
+          {
+            "document": "plan.json",
+            "pointer": "/steps/7"
+          },
+          {
+            "document": "plan.json",
+            "pointer": "/steps/8"
+          },
+          {
+            "document": "plan.json",
+            "pointer": "/steps/13"
+          },
+          {
+            "document": "plan.json",
+            "pointer": "/steps/16"
+          },
+          {
+            "document": "type-result.json",
+            "pointer": "/status"
+          },
+          {
+            "document": "type-result.json",
+            "pointer": "/scope"
+          }
+        ]
+      }
+    },
+    "findings": [
+      {
+        "verdict": "FAIL",
+        "explanation": "Weak does not enforce a weak derivative. In the pinned version, the order of ContDiff is WithTop ℕ∞, and ⊤ is analytic order ω. Every globally real-analytic φ whose support lies in the bounded interval (a,b) vanishes on an open ray and hence is identically zero. Thus the integration-by-parts clause tests only φ=0; Weak a b f d reduces to coordinate integrability. For example, on [0,1] a path equal to 0 before 1/2 and to a nonzero real mean-zero finite Fourier polynomial afterwards satisfies the proposed XPath α ... f 0, although its distributional derivative has a jump mass and is not in L∞H^(-pstar). Even for a differentiable path, d can be chosen independently of f'. Consequently ETri/E003 assumes an estimate on a larger domain with potentially artificially small derivative norms, and AccResidual's Weak field does not certify the source weak equation. The claimed two-way XPath/source-X correspondence fails.",
+        "locations": [
+          {
+            "document": "spec.json",
+            "pointer": "/definitions/16"
+          },
+          {
+            "document": "nl0.json",
+            "pointer": "/propositions/5/statement"
+          },
+          {
+            "document": "nl0.json",
+            "pointer": "/inferences/5/argument/0"
+          },
+          {
+            "document": "contract.json",
+            "pointer": "/header"
+          },
+          {
+            "document": "contract.json",
+            "pointer": "/premises/5/type"
+          },
+          {
+            "document": "contract.json",
+            "pointer": "/endpoint_correspondence/E003"
+          },
+          {
+            "document": "plan.json",
+            "pointer": "/steps/8"
+          },
+          {
+            "document": "plan.json",
+            "pointer": "/steps/13"
+          }
+        ],
+        "comparison": {
+          "source": {
+            "document": "spec.json",
+            "pointer": "/definitions/16/definition",
+            "quote": "For an interval I with length at most one, X(I) consists of L^infinity(I;L^2) functions with weak time derivative in L^infinity(I;H^(-pstar)); ||f||_(X(I))=||f||_(L^infinity(I;L^2))+||f'||_(L^infinity(I;H^(-pstar))). All time suprema of continuous functions use their continuous representatives; derivatives and L^infinity norms use essential suprema."
+          },
+          "formal": {
+            "document": "contract.json",
+            "pointer": "/header",
+            "quote": "def Weak (a b : ℝ) (f d : Path) : Prop :=\n  (∀ k, IntegrableOn (fun t => f t k) (Icc a b) ∧ IntegrableOn (fun t => d t k) (Icc a b)) ∧\n  ∀ φ : ℝ → ℝ, ContDiff ℝ ⊤ φ → HasCompactSupport φ → Function.support φ ⊆ Ioo a b →\n    ∀ k, (∫ t in a..b, f t k * ((deriv φ t : ℝ) : ℂ)) = -(∫ t in a..b, d t k * (φ t : ℂ))"
+          },
+          "difference": "The source requires the actual distributional time derivative of f. The formal derivative binder d is constrained only against globally analytic supported tests, all of which are zero; it need not be f'. XPath and hence external E003 are enlarged, and the derivative norm can be reduced independently of the path."
+        }
+      },
+      {
+        "verdict": "FAIL",
+        "explanation": "SmoothOn encodes time analyticity of every Fourier coefficient, in addition to its Sobolev derivative continuity. Pinned ContDiffOn ℝ ⊤ is analytic regularity within the closed interval, not C∞ regularity. The source's arbitrary smooth mean-zero paths need not have analytic time coefficients: a flat nonanalytic smooth scalar transition multiplied by a finite real mean-zero Fourier polynomial already distinguishes the domains. Piecewise inherits this restriction through SmoothOn, so NormalForm/N005 and NormalizedTri/N006 omit source-admissible smooth paths. In the other direction FlowOutput demands this stronger property for every smooth datum, EFlow requires it through SourceApprox, and Target/Exact requires it through SmoothApprox. The source's higher-Sobolev argument and the planned T001 conversion establish smoothness, with no claim or obligation establishing this additional analyticity. This identifies a changed regularity condition, not a failure merely to provide a completed local proof.",
+        "locations": [
+          {
+            "document": "nl0.json",
+            "pointer": "/propositions/13/statement"
+          },
+          {
+            "document": "nl0.json",
+            "pointer": "/propositions/14/statement"
+          },
+          {
+            "document": "nl0.json",
+            "pointer": "/inferences/0/argument/2"
+          },
+          {
+            "document": "nl0.json",
+            "pointer": "/propositions/3/statement"
+          },
+          {
+            "document": "spec.json",
+            "pointer": "/definitions/22"
+          },
+          {
+            "document": "contract.json",
+            "pointer": "/header"
+          },
+          {
+            "document": "contract.json",
+            "pointer": "/endpoint_correspondence/E001"
+          },
+          {
+            "document": "contract.json",
+            "pointer": "/endpoint_correspondence/P"
+          },
+          {
+            "document": "plan.json",
+            "pointer": "/steps/1"
+          },
+          {
+            "document": "plan.json",
+            "pointer": "/steps/7"
+          },
+          {
+            "document": "plan.json",
+            "pointer": "/steps/8"
+          }
+        ],
+        "comparison": {
+          "source": {
+            "document": "nl0.json",
+            "pointer": "/propositions/13/statement",
+            "quote": "For smooth mean-zero time-dependent f,g on [a,b], integral_a^b B_t(f,g)dt=(1/3)[J_t(f,g)]_a^b-(1/3)integral_a^b[J_t(f',g)+J_t(f,g')]dt."
+          },
+          "formal": {
+            "document": "contract.json",
+            "pointer": "/header",
+            "quote": "def SmoothOn (a b : ℝ) (f : Path) : Prop :=\n  (∀ k, ContDiffOn ℝ ⊤ (fun t => f t k) (Icc a b)) ∧\n  ∀ m j : ℕ, ContH (m : ℝ) a b (fun t k => iteratedDerivWithin j (fun r => f r k) (Icc a b) t)"
+          },
+          "difference": "The source path regularity is smooth time dependence. The formal order ⊤ requires analytic time dependence. This narrows the domains of the local normal-form/trilinear outputs and strengthens the flow/approximation conclusions inside E001 and complete P; the planned smoothness argument does not supply the extra condition."
+        }
+      }
+    ]
+  },
+  "scope": "Repair the located interface findings; preserve NL0 and its Audit A."
+}
