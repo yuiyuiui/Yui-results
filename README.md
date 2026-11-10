@@ -1,25 +1,38 @@
 # Yui test and benchmark results
 
-This repository stores test and benchmark results for [Yui](https://github.com/yuiyuiui/Yui), a workflow for developing an existing natural-language mathematical proof into an audited Lean proof.
+This repository contains conditional and unconditional Lean formalizations of three mathematical exercises, and a benchmark comparing [Yui](https://github.com/yuiyuiui/Yui) with a single proof author. Each exercise has its own input, execution instructions and recorded result.
 
-To run these locally, complete [local setup](#local-setup), then use the [benchmark](#reproduce-the-benchmark) or [test](#execute-one-problem-in-a-fresh-task) prompts below in fresh local Codex chats opened at this repository root.
+## Exercise results
 
-For all six tests and both Yui benchmarks, start the foreground task with
-**gpt-6.1-sol / high / Standard**. This trusted checkout loads the defaults from
-[its project configuration](.codex/config.toml). The paired Yui checkout also
-sets them for chats opened there. When using `create_thread`, select
-`model="gpt-6.1-sol"` and `thinking="high"` at creation. Give the task only
-`Execute <path>/README.md`, using the absolute entry path when starting in Yui.
+Each cell links to the recorded result and gives the Yui case time (hh:mm:ss) and observed input plus output tokens. Token coverage was partial in all six runs.
 
-Fresh test and Yui benchmark runs let Yui size each local review or Lean proof
-pool from the number of nodes in that phase.
+| Problem | Conditional · time / tokens | Unconditional · time / tokens |
+| --- | ---: | ---: |
+| Hausdorff dimension of a product with an interval | [00:30:54 / 15,080,248](test_cond/geometry-product-dimension/rigorous-proof/20261101-fresh-full-18b3e2e0bf/OWNER_FINAL_REPORT.json) | [01:08:46 / 17,090,500](test_uncond/geometry-product-dimension/rigorous-proof/20261110T125656Z-567075d770/workflow/delivery/) |
+| Irreducibility of a reduced sl₂ module | [00:50:36 / 20,297,548](test_cond/lie-module-irreducibility/rigorous-proof/20261101-fresh-full-18b3e2e0bf/OWNER_FINAL_REPORT.json) | [01:40:17 / 22,583,229](test_uncond/lie-module-irreducibility/rigorous-proof/20261110T125736Z-c0496dfb22/workflow/delivery/) |
+| Energy conservation for a sphere-valued wave map | [00:27:18 / 11,489,484](test_cond/wave-map-energy/rigorous-proof/20261101-fresh-full-18b3e2e0bf/OWNER_FINAL_REPORT.json) | [01:09:49 / 16,589,112](test_uncond/wave-map-energy/rigorous-proof/20261110T125715Z-a078c5bc5f/workflow/delivery/) |
 
-Each entry launches detached workers and records which chat owns the run.
-Prefer a permitted ten-minute wakeup so the owner can end its turn between
-status reports. If scheduling is restricted or cannot be established, the
-owner continues in the current turn with ten-minute waits and observations.
-Both modes post a short Chinese status every interval, including unchanged
-progress, and follow the same terminal validation, reporting and cleanup.
+The November 1 conditional baseline used 10 local workers per case and passed Audit B. The November 10 unconditional runs used automatic worker counts. All three passed Audit A, Audit B and the final Lean check under the original hypotheses, with zero additional premises. Each delivery directory contains the Lean proof (`formalization/Solution.lean`), the theorem statement, the audited NL0 graph and `run.json`. To check a downloaded delivery, pass its directory to [Yui’s `verify-delivery` command](https://github.com/yuiyuiui/Yui#use).
+
+The November 10 records identify the [Yui revision used for those runs](https://github.com/yuiyuiui/Yui/commit/3e21dfc135a1bf2d6871dc55a436e7203f07ae9f). Historical logs and audit records preserve their original paths. For any retained file recorded under the former `test_uncond-test` directory, its suffix is the same under `test_uncond/`. [Earlier runs in Git history](docs/run-records-2026-11-06.md)
+
+## Run an exercise
+
+After [local setup](#local-setup), open a fresh Codex chat at the root of this repository. Choose one entry. Each pair uses the same problem text and complete target.
+
+| Problem | Conditional formalization | Unconditional formalization |
+| --- | --- | --- |
+| Hausdorff dimension of a product with an interval | [Conditional entry](test_cond/geometry-product-dimension/README.md) | [Unconditional entry](test_uncond/geometry-product-dimension/README.md) |
+| Irreducibility of a reduced sl₂ module | [Conditional entry](test_cond/lie-module-irreducibility/README.md) | [Unconditional entry](test_uncond/lie-module-irreducibility/README.md) |
+| Energy conservation for a sphere-valued wave map | [Conditional entry](test_cond/wave-map-energy/README.md) | [Unconditional entry](test_uncond/wave-map-energy/README.md) |
+
+For example, the following prompt starts one unconditional wave-map test.
+
+```text
+Execute test_uncond/wave-map-energy/README.md.
+```
+
+From another working directory, give the absolute path to that entry. Use **gpt-6.1-sol / high / Standard** for the foreground exercise or Yui benchmark chat. The [project configuration](.codex/config.toml) supplies these defaults in a trusted checkout. Each entry uses fresh source inputs, starts its own workers, reports in the owning chat every ten minutes and cleans up its temporary resources. Fresh runs size their local review and Lean proof worker pools from the node count in each phase.
 
 ## Benchmark
 
@@ -36,127 +49,21 @@ Despite the [original prompt](benchmark_cond/pure-model-result/20261028T154300Z-
 
 **Configuration:** all model stages requested **gpt-6.1-sol / high / Standard**, using clean background Codex CLI processes. Yui allowed **20 local workers** in this benchmark; pure-model construction used one author session per run. These are recorded workflow timings with different parallelism. Usage is `PARTIAL`; token totals count observed input plus output, with cached and reasoning tokens already included. Detailed records: [Yui](benchmark_cond/Yui/results/20261031T212422Z-533b379994/FINAL_OUTCOME.json), [pure model](benchmark_cond/pure-model-result/20261101T114606Z-5d3193f6/owner-records/accounting.json), and [Yui entry](benchmark_cond/Yui/README.md).
 
-### Reproduce the benchmark
+### Run the benchmark
 
-After [setup](#local-setup), paste this into a fresh local Codex chat to run the **Yui arm**:
+The [Yui benchmark entry](benchmark_cond/Yui/README.md) uses the original paper. Its [settings](benchmark_cond/Yui/settings.json) currently select `track: nl0`, which ends after the natural-language audit. To run through Lean and Audit B as in the comparison above, set `track` to `full` before starting a fresh run, then give the owning chat this prompt.
 
 ```text
 Execute benchmark_cond/Yui/README.md.
 ```
 
-For the **pure-model arm**, start from its [results and instructions](benchmark_cond/pure-model-result/README.md). Use a separate fresh local Codex chat and paste:
-
-```text
-Run a fresh from-scratch pure-model benchmark now. Start at benchmark_cond/pure-model-result/README.md and follow section 1 of REPRODUCE.md, targeting the complete Theorem 1 of benchmark_cond/pure-model-result/aim-518-kdv-log-loss.pdf.
-Use one clean native author session with gpt-6.1-sol/high/Standard and pinned Lean/Mathlib. Do not give the author Yui proof rules, personal skills/memories or earlier results.
-Save the exact inputs, prompt, configuration, elapsed time, native token records, proof and separate acceptance review under a new benchmark_cond/pure-model-result/<run-id>/.
-```
-
-## Tests
-
-The three test problems cover different fields, at roughly advanced undergraduate to graduate level. They test Yui's reliability across the complete natural-language proof, review, Lean translation and final acceptance workflow.
-
-### Latest unconditional geometry test
-
-The November 6 Hausdorff product-dimension run completed the full unconditional
-workflow using Yui [`8bd6c72b`](https://github.com/yuiyuiui/Yui/commit/8bd6c72bd0123a830f95d1ee81535a050909614c),
-with **gpt-6.1-sol / high / Standard** and automatic phase-sized worker pools.
-This was one fresh run with ordinary automatic repair enabled. All 14 local
-Lean proof nodes completed; observed peak proof concurrency was 14.
-
-| Problem | Elapsed time | Observed tokens | Accepted scope |
-| --- | ---: | ---: | --- |
-| Hausdorff dimension of a product with an interval | 01:10:03 | 17,831,046 (`PARTIAL`) | `UNCONDITIONAL_LEAN`, `WORKFLOW-PASSED` |
-
-The bound Audit A receipt, reviewed frozen interface, machine Audit B and final
-b2lean closure passed. The export `YuiClosed.P` retains the original nonempty
-and compactness hypotheses, with no residual class-4 dependency or source
-warning. Audit B inherited the independently reviewed frozen interface and
-checked the final proof; it did not call another final semantic reviewer.
-
-[Final outcome](test_uncond/geometry-product-dimension/rigorous-proof/20261106T125831Z-222bcbd7a3/FINAL_OUTCOME.json)
-· [Lean proof](test_uncond/geometry-product-dimension/rigorous-proof/20261106T125831Z-222bcbd7a3/workflow/b2lean/Proof.lean)
-· [Acceptance and cleanup recheck](test_uncond/geometry-product-dimension/rigorous-proof/20261106T125831Z-222bcbd7a3/OWNER_CLOSEOUT_VERIFICATION.json).
-All owned processes exited and all 132 registered temporary workspace paths
-were absent at closeout. Proofs, review evidence and the frozen runtime remain
-in the result directory.
-
-### Historical conditional baseline
-
-The following table records the November 1 conditional full-workflow baseline.
-All three used the same harness runtime as Yui commit [`adf65d18`](https://github.com/yuiyuiui/Yui/commit/adf65d18c810ffa9105e03a4b89b2fb5ad441e26), with **10 local workers per case**, and finished with `WORKFLOW-PASSED` and `AUDIT-B-PASSED`.
-
-| Problem | Elapsed time | Observed tokens | Result directory |
-| --- | ---: | ---: | --- |
-| Analysis / geometry: Hausdorff dimension of a product with an interval | 00:30:54 | 15,080,248 | [geometry-product-dimension](test_cond/geometry-product-dimension/rigorous-proof/20261101-fresh-full-18b3e2e0bf/) |
-| Algebra: irreducibility after reduction of an admissible sl2 lattice | 00:50:36 | 20,297,548 | [lie-module-irreducibility](test_cond/lie-module-irreducibility/rigorous-proof/20261101-fresh-full-18b3e2e0bf/) |
-| PDE: conservation of energy for a sphere-valued wave map | 00:27:18 | 11,489,484 | [wave-map-energy](test_cond/wave-map-energy/rigorous-proof/20261101-fresh-full-18b3e2e0bf/) |
-
-The three cases ran concurrently. These usage records are `PARTIAL`. (Occasional network instability and background-to-foreground reporting can affect token and timing accounting; the size of any discrepancy has not been quantified.)
-
-Each problem's `problem.md` records its source, complete target and approved interpretations. Each result directory includes:
-
-1. `OWNER_FINAL_REPORT.json`: the final verification summary, including acceptance status and measurement qualifications.
-2. `case-result.json`: Yui's machine-readable workflow result and usage summary.
-3. `Proof.lean`: the assembled final Lean proof, under `nl0-to-lean/.../workflow/audit-b/`.
-4. Reviews: the proof reviews and acceptance checks for the natural-language proof and Lean translation.
-5. Execution records: the run configuration, process records, logs, timing and token accounting.
-
-Later successful and cancelled runs are also retained for comparison and
-failure analysis; see the [November 6 run-record index](docs/run-records-2026-11-06.md).
-The index explains how to restore the losslessly archived oversized historical
-traces. Earlier removed runs remain in Git history.
-
-### Execute one problem in a fresh task
-
-Each problem owns its own README, source, settings and run directory. A fresh
-task needs only `Execute <path>/README.md`; no separate generated task prompt
-or second start message is required.
-
-| Goal | Problem entry |
-| --- | --- |
-| Conditional Lean, full workflow | [test_cond/geometry-product-dimension/README.md](test_cond/geometry-product-dimension/README.md) |
-| Conditional Lean, full workflow | [test_cond/lie-module-irreducibility/README.md](test_cond/lie-module-irreducibility/README.md) |
-| Conditional Lean, full workflow | [test_cond/wave-map-energy/README.md](test_cond/wave-map-energy/README.md) |
-| Unconditional Lean, full workflow | [test_uncond/geometry-product-dimension/README.md](test_uncond/geometry-product-dimension/README.md) |
-| Unconditional Lean, full workflow | [test_uncond/lie-module-irreducibility/README.md](test_uncond/lie-module-irreducibility/README.md) |
-| Unconditional Lean, full workflow | [test_uncond/wave-map-energy/README.md](test_uncond/wave-map-energy/README.md) |
-| Unconditional Lean, Yui `uncond-test` | [Hausdorff product dimension](test_uncond-test/geometry-product-dimension/README.md) |
-| Unconditional Lean, Yui `uncond-test` | [Irreducibility of the sl₂ module](test_uncond-test/lie-module-irreducibility/README.md) |
-| Unconditional Lean, Yui `uncond-test` | [Wave-map energy conservation](test_uncond-test/wave-map-energy/README.md) |
-
-For example:
-
-```text
-Execute test_uncond-test/wave-map-energy/README.md.
-```
-
-The conditional benchmark has its existing entry at
-[benchmark_cond/Yui/README.md](benchmark_cond/Yui/README.md). Its current settings
-select NL0/Audit A only; the retained full-workflow numbers above are historical.
-The bare-model arm and its reproduction procedure also live under `benchmark_cond`.
-
-The three `test_uncond-test` entries use the same problem bytes and complete
-targets as their `test_uncond` counterparts. Each entry checks the registered
-Yui checkout against the branch and full commit in its settings, uses that
-revision's 360-second native limit, and writes fresh runs under its own
-`rigorous-proof/` directory.
-
-Every new run binds the current original input and creates a fresh target
-selection. Archived target selections, runtime snapshots and absolute paths in
-historical records are preserved as evidence, not rewritten or reused as fresh
-construction inputs. All Yui entries retain useful proof/audit/source evidence
-while removing only owned disposable processes, caches and native scratch.
+For the other arm, use the [pure-model reproduction instructions](benchmark_cond/pure-model-result/REPRODUCE.md) in a separate fresh chat. They cover a new evaluation, the historical supplementary repair and rebuilding the accepted proof.
 
 ## Local setup
 
-Use macOS with an authenticated Codex CLI and follow [Yui's local setup guide](https://github.com/yuiyuiui/Yui/blob/main/docs/setup.md) for the matching Code Mode helper, Python, ripgrep and pinned Lean 4.32.2/Mathlib environment. Install the **complete Yui repository** as `$rigorous-proof`, not just `SKILL.md`. Historical results identify their original runtime. For a new run, install the complete intended Yui version; unconditional entries require its 2basis/b2lean support. Keep the registered checkout fixed during preparation and dispatch. For the three comparison entries, select the exact Yui `uncond-test` revision in their settings. The following setup example is for the original `test_uncond` family:
+On macOS, install the complete [Yui skill from main](https://github.com/yuiyuiui/Yui#4-installation-and-requirements), create its local Python environment and run its `doctor` check. Yui's [setup guide](https://github.com/yuiyuiui/Yui/blob/main/docs/setup.md) lists the authenticated Codex CLI, matching Code Mode helper and pinned Lean/Mathlib prerequisites. For the PDF benchmark, also install Poppler's `pdfinfo` and `pdftoppm`.
 
-```text
-Install https://github.com/yuiyuiui/Yui from its uncond branch as the rigorous-proof skill in ~/.agents/skills/rigorous-proof, keeping the entire repository together. Check its README prerequisites and run its doctor check; do not start any proof jobs yet. If this exact skill is already installed, use that installation without creating a duplicate.
-```
-
-The installation location follows [Codex's local skill documentation](https://developers.openai.com/codex/skills/#where-to-save-skills). Confirm `$rigorous-proof` is available before running a prompt; restart Codex if it is not detected. Fresh runs can produce different proofs, repair steps, timings and token totals.
+The unconditional entries in this release check for [Yui `main` at 748663fc](https://github.com/yuiyuiui/Yui/commit/748663fce1c885a7e5ff3fa528faac49d266daf5). Each entry's `settings.json` contains the full revision. Keep that checkout fixed throughout preparation and dispatch. Clone this results repository separately and open it as the working directory for the prompts above.
 
 ## License
 
@@ -180,6 +87,6 @@ Page renderings, extracted text and quotations from these papers retain the unde
 
 ### Exercise statements and source excerpts
 
-The three test `problem.md` files identify and quote exercises from Stein and Shakarchi's *Real Analysis*, Humphreys' *Introduction to Lie Algebras and Representation Theory*, and Evans' *Partial Differential Equations*. Those quoted statements retain their authors' and publishers' rights. The project's own interpretations, solutions and formalizations are licensed only to the extent that contributors hold the relevant rights.
+The paired `problem.md` files in the two test directories identify and quote three exercises from Stein and Shakarchi's *Real Analysis*, Humphreys' *Introduction to Lie Algebras and Representation Theory*, and Evans' *Partial Differential Equations*. Those quoted statements retain their authors' and publishers' rights. The project's own interpretations, solutions and formalizations are licensed only to the extent that contributors hold the relevant rights.
 
 Mathlib and other dependency excerpts retain their upstream attribution and licenses; see [Mathlib's license](https://github.com/leanprover-community/mathlib4/blob/master/LICENSE). Archived Yui runtime code is original project code, but its external dependencies are not relicensed by this repository. Raw execution records can contain quoted third-party text or tool instructions; MIT covers the contributors' original portions, not those embedded materials.
