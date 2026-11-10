@@ -68,8 +68,8 @@ def load_config(root=ROOT):
         if profile['speed'] != 'standard' or profile['automatic_fallback'] is not False:
             raise ValueError('Use Standard with no automatic model fallback')
     if not isinstance(config['limits'], dict) or type(config['limits'].get('native_seconds')) is not int or config['limits'] != dict(case_seconds=None, stage_seconds=None, tokens=None,
-                               model_calls=None, native_seconds=180):
-        raise ValueError('Keep unlimited total budgets and the 180-second native-call limit')
+                               model_calls=None, native_seconds=360):
+        raise ValueError('Keep unlimited total budgets and the initial 360-second native-call limit')
     runtime = config['runtime']
     if not isinstance(runtime, dict) or set(runtime) != {'expected_commit', 'expected_sha256'}:
         raise ValueError('Use explicit registered-runtime binding settings')

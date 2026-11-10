@@ -29,13 +29,17 @@ monitoring mode allows this run to proceed through preparation and dispatch.
   read fresh from this run's copy. Use no old target-selection JSON.
 - Goal: **unconditional**, `full`, normal repair; 2basis → the same NL0/Audit A and Lean/Audit B → b2lean final closure.
 - Both phase profiles use **gpt-6.1-sol / high / Standard** with no model
-  fallback, an unlimited total budget and a 180-second native-call limit.
+  fallback and an unlimited total budget. Native translation checks start at six
+  minutes. A workload-only diagnosis permits one six-minute increase per wall
+  timeout, up to thirty minutes. A code repair keeps the current allowance.
 - Yui sizes the local review and Lean proof pools from the number of nodes
   in each phase.
+- The registered checkout must match the `main` branch and the full Git commit
+  in this entry’s settings. The prepared job must use the frozen public Yui workflow.
 - Use only the exact registered `$rigorous-proof` installation and its bundled
   operation/rules. Read its SKILL.md after discovery. Do not substitute a sibling
   checkout, another skill, a peer task or an owner-written proof.
-- Only Yui 2basis may change the proof route. Preserve the original target/H, quantifiers, parameter ranges and constant dependencies. Verify the final YuiClosed.P and b2lean receipt; intermediate Audit B is insufficient. Remaining class-4 dependencies require the actual user choice; never silently downgrade this goal.
+- Yui 2basis selects and freezes the foundations. NL0 may repair intermediate statements and dependency edges under those foundations. Preserve the original target/H, quantifiers, parameter ranges and constant dependencies. Verify the final YuiClosed.P and b2lean receipt; intermediate Audit B is insufficient. Remaining class-4 dependencies require the actual user choice; never silently downgrade this goal.
 - Old `rigorous-proof/` runs and `target-selection*.json` are historical evidence,
   never construction input. Conditional/unconditional siblings do not exchange
   proofs, target files, source caches or review judgments.
@@ -172,7 +176,7 @@ python3 -B run_test.py finish RUN
 ```
 
 The helper verifies current job binding, existing Audit A and Audit B, and the
-actual final b2lean proof for an unconditional delivery. It performs no new
+actual final b2lean proof and the portable delivery bound to the public workflow exit. It performs no new
 mathematical review or Lean build. It writes `FINAL_OUTCOME.json` and
 `FINAL_REPORT.zh.md`. Read both and report the requested versus achieved scope,
 actual assumptions/warnings, process exit, wall time and observed token coverage.

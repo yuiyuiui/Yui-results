@@ -105,7 +105,7 @@ class Fixture(unittest.TestCase):
         (self.install/'nl0/scripts/fault_control.py').write_text("def pending(root):return []\n")
         (self.install/'nl0/scripts/cleanup.py').write_text("from contextlib import nullcontext\ndef cleanup_lock(root):return nullcontext()\ndef inventory(*args,**kwargs):return {'errors':[],'workspaces':{}}\ndef process_table():return {}\ndef discover(*args):return {}\ndef signal_owned(*args):pass\nCORE=None\n")
         (self.install/'auth').mkdir(); (self.install/'auth/auth.json').write_text('{"synthetic":true}')
-        (self.install/'config.json').write_text(json.dumps({'timeouts':{'case_seconds':None,'stage_seconds':None,'native_seconds':180},'token_budget':None}))
+        (self.install/'config.json').write_text(json.dumps({'timeouts':{'case_seconds':None,'stage_seconds':None,'native_seconds':360},'token_budget':None}))
         scripts = self.install/'nl0/scripts'
         (scripts/'runtime_config.py').write_text(
             "from pathlib import Path\nimport json,os\nfrom datetime import datetime,timezone\nROOT=Path(__file__).resolve().parents[2]\n"

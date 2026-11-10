@@ -107,7 +107,7 @@ checking may read the authentication file's presence and run version queries;
 it never prints credentials. The registry lookup uses only initialization and
 `skills/list`. Missing, disabled, duplicate, malformed or incomplete registered
 installations fail; a neighboring checkout is not a fallback. Model availability,
-the 180-second native-call limit, unlimited total budgets, pinned tools and PDF
+the initial six-minute native Lean check limit, unlimited total budgets, pinned tools and PDF
 tools and the available PDF text backend are checked. Quota, future network health and the actual service tier stay
 unverified.
 

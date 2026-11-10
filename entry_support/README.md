@@ -1,6 +1,6 @@
 # Shared entry support
 
-The nine exercise directories each own their executable README, problem and
+The six exercise directories each own their executable README, problem and
 settings. Start with that problem's README. This directory is mechanical
 support, not a proof source or a separate execution entry.
 

@@ -1,0 +1,60 @@
+{
+  "parameters": [
+    {
+      "name": "n",
+      "type": "ℕ"
+    },
+    {
+      "name": "m",
+      "type": "ℕ"
+    },
+    {
+      "name": "u",
+      "type": "WMZ n → WMX m"
+    },
+    {
+      "name": "q",
+      "type": "WMX m"
+    }
+  ],
+  "header": "import Mathlib\nopen MeasureTheory Filter Set\nopen scoped Topology BigOperators ContDiff\n\nabbrev WMX (n : ℕ) := EuclideanSpace ℝ (Fin n)\nabbrev WMZ (n : ℕ) := WMX n × ℝ\ndef WMOmega (n : ℕ) : Set (WMZ n) := {z | 0 < z.2}\ndef WMT (n : ℕ) : WMZ n := (0, 1)\nnoncomputable def WMBasis (n : ℕ) (j : Fin n) : WMX n :=\n  EuclideanSpace.basisFun (Fin n) ℝ j\nnoncomputable def WMS (n : ℕ) (j : Fin n) : WMZ n := (WMBasis n j, 0)\nnoncomputable def WMV {n m : ℕ} (u : WMZ n → WMX m) (z : WMZ n) : WMX m :=\n  fderiv ℝ u z (WMT n)\nnoncomputable def WMW {n m : ℕ} (u : WMZ n → WMX m) (j : Fin n) (z : WMZ n) : WMX m :=\n  fderiv ℝ u z (WMS n j)\nnoncomputable def WMA {n m : ℕ} (u : WMZ n → WMX m) (z : WMZ n) : WMX m :=\n  fderiv ℝ (WMV u) z (WMT n)\nnoncomputable def WMB {n m : ℕ} (u : WMZ n → WMX m) (j : Fin n) (z : WMZ n) : WMX m :=\n  fderiv ℝ (WMW u j) z (WMS n j)\nnoncomputable def WMMixed {n m : ℕ} (u : WMZ n → WMX m) (j : Fin n) (z : WMZ n) : WMX m :=\n  fderiv ℝ (WMV u) z (WMS n j)\nnoncomputable def WME {n m : ℕ} (u : WMZ n → WMX m) (z : WMZ n) : ℝ :=\n  if 0 < z.2 then ‖WMV u z‖ ^ 2 + ∑ j : Fin n, ‖WMW u j z‖ ^ 2 else 0\nnoncomputable def WMG {n m : ℕ} (u : WMZ n → WMX m) (j : Fin n) (z : WMZ n) : ℝ :=\n  if 0 < z.2 then inner ℝ (WMV u z) (WMW u j z) else 0\nnoncomputable def WMET {n m : ℕ} (u : WMZ n → WMX m) (z : WMZ n) : ℝ :=\n  fderiv ℝ (WME u) z (WMT n)\nnoncomputable def WMGX {n m : ℕ} (u : WMZ n → WMX m) (j : Fin n) (z : WMZ n) : ℝ :=\n  fderiv ℝ (WMG u j) z (WMS n j)\nnoncomputable def WMEnergy {n m : ℕ} (u : WMZ n → WMX m) (t : ℝ) : ℝ :=\n  ∫ x : WMX n, WME u (x, t)\ninductive WMTerm (n : ℕ) where\n  | density | densityTime | kineticPair\n  | flux (j : Fin n) | fluxSpace (j : Fin n)\n  | mixedPair (j : Fin n) | laplacePair (j : Fin n)\nnoncomputable def WMField {n m : ℕ} (u : WMZ n → WMX m) : WMTerm n → WMZ n → ℝ\n  | .density => WME u\n  | .densityTime => WMET u\n  | .kineticPair => fun z => inner ℝ (WMV u z) (WMA u z)\n  | .flux j => WMG u j\n  | .fluxSpace j => WMGX u j\n  | .mixedPair j => fun z => inner ℝ (WMW u j z) (WMMixed u j z)\n  | .laplacePair j => fun z => inner ℝ (WMV u z) (WMB u j z)\n",
+  "conclusion": {
+    "statement": "For every t>0, e(·,t) is Lebesgue integrable on R^n, and E(t)=∫_{R^n}e(x,t) dx is differentiable with E'(t)=0, where e(x,t)=|u_t(x,t)|²+Σ_{j=1}^n |∂_{x_j}u(x,t)|². Spatial squares and Laplacian use the Euclidean/Frobenius and componentwise normalizations in the original target; no conclusion is asserted at time zero.",
+    "type": "∀ t : ℝ, 0 < t → Integrable (fun x : WMX n => WME u (x, t)) ∧ HasDerivAt (WMEnergy u) 0 t"
+  },
+  "retained": [
+    {
+      "id": "H001",
+      "kind": "hypothesis",
+      "statement": "The integers n,m satisfy n≥1 and m≥1, and u:R^n×(0,∞)→R^m is jointly smooth.",
+      "type": "1 ≤ n ∧ 1 ≤ m ∧ ContDiffOn ℝ ∞ u (WMOmega n)"
+    },
+    {
+      "id": "H002",
+      "kind": "hypothesis",
+      "statement": "The fixed vector q∈R^m has Euclidean norm |q|=1.",
+      "type": "‖q‖ = 1"
+    },
+    {
+      "id": "H003",
+      "kind": "hypothesis",
+      "statement": "For every x∈R^n and every t>0, |u(x,t)|=1.",
+      "type": "∀ (x : WMX n) (t : ℝ), 0 < t → ‖u (x, t)‖ = 1"
+    },
+    {
+      "id": "H004",
+      "kind": "hypothesis",
+      "statement": "For every x∈R^n and every t>0 there exists a real number a with u_tt(x,t)-Σ_{j=1}^n ∂_{x_jx_j}u(x,t)=a u(x,t). No regularity of any choice of a is assumed.",
+      "type": "∀ (x : WMX n) (t : ℝ), 0 < t → ∃ a : ℝ, WMA u (x, t) - (∑ j : Fin n, WMB u j (x, t)) = a • u (x, t)"
+    },
+    {
+      "id": "H005",
+      "kind": "hypothesis",
+      "statement": "For every pair of real times 0<s<t there is a compact set C⊂R^n such that u(x,r)=q for all x∉C and every r∈[s,t].",
+      "type": "∀ s t : ℝ, 0 < s → s < t → ∃ C : Set (WMX n), IsCompact C ∧ ∀ (x : WMX n) (r : ℝ), x ∉ C → r ∈ Icc s t → u (x, r) = q"
+    }
+  ],
+  "export": "YuiClosed.P",
+  "source_contract_sha256": "eaf6fcf800a333588b04dfb731e259588be1195caf67f5eabbcf73f83021d860",
+  "semantic_review_sha256": "bd2ea1c615b89b96d53e9801a2d1e27ef55ac0a73f0ed96f4fc73714f8b33bbf"
+}

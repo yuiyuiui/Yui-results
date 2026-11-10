@@ -7,7 +7,7 @@ import unittest
 from urllib.parse import unquote,urlsplit
 
 ROOT=Path(__file__).resolve().parents[2]
-FAMILIES=('test_cond','test_uncond','test_uncond-test')
+FAMILIES=('test_cond','test_uncond')
 CASES=('geometry-product-dimension','lie-module-irreducibility','wave-map-energy')
 EXERCISES=[ROOT/family/case/'README.md' for family in FAMILIES for case in CASES]
 BENCHMARKS=[ROOT/'benchmark_cond/Yui/README.md']
@@ -70,28 +70,28 @@ class EntryLayout(unittest.TestCase):
             with self.subTest(entry=str(path.relative_to(ROOT))):
                 self.assertNotIn('workers', json.loads(path.read_text()))
 
-    def test_branch_comparison_preserves_every_input_and_isolates_its_results(self):
+    def test_paired_entries_share_inputs_and_have_separate_output_directories(self):
         revisions=set()
         for case in CASES:
-            original=ROOT/'test_uncond'/case
-            comparison=ROOT/'test_uncond-test'/case
+            conditional=ROOT/'test_cond'/case
+            unconditional=ROOT/'test_uncond'/case
             with self.subTest(case=case):
                 for name in ('problem.md','run_test.py'):
-                    self.assertEqual((comparison/name).read_bytes(),(original/name).read_bytes())
-                before=json.loads((original/'settings.json').read_text())
-                after=json.loads((comparison/'settings.json').read_text())
-                pin=after.pop('yui_revision')
-                self.assertEqual(pin['branch'],'uncond-test')
+                    self.assertEqual((conditional/name).read_bytes(),(unconditional/name).read_bytes())
+                direct=json.loads((conditional/'settings.json').read_text())
+                basis=json.loads((unconditional/'settings.json').read_text())
+                self.assertEqual(direct.pop('formalization'),'conditional')
+                self.assertEqual(basis.pop('formalization'),'unconditional')
+                pin=basis.pop('yui_revision')
+                self.assertEqual(pin['branch'],'main')
                 self.assertRegex(pin['commit'],r'^[0-9a-f]{40}$')
                 revisions.add(pin['commit'])
-                self.assertEqual(after['limits'].pop('native_seconds'),360)
-                self.assertEqual(before['limits'].pop('native_seconds'),180)
-                self.assertEqual(after,before)
-                readme=(comparison/'README.md').read_text()
-                self.assertIn(f'Execute test_uncond-test/{case}/README.md',readme)
-                self.assertNotIn('Execute test_uncond/',readme)
-                self.assertEqual(after['results_directory'],'rigorous-proof')
-                self.assertFalse((comparison/after['results_directory']).is_symlink())
+                self.assertEqual(basis,direct)
+                self.assertEqual(basis['limits']['native_seconds'],360)
+                self.assertEqual(basis['results_directory'],'rigorous-proof')
+                for entry in (conditional,unconditional):
+                    self.assertIn(f'Execute {entry.parent.name}/{case}/README.md',(entry/'README.md').read_text())
+                    self.assertEqual((entry/'rigorous-proof').resolve().parent,entry)
         self.assertEqual(len(revisions),1)
 
     def test_foreground_defaults_match_all_worker_profiles(self):

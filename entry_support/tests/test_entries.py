@@ -23,13 +23,14 @@ from common import digest,terminal_ready
 class ExerciseEntries(Fixture):
     def setUp(self):
         super().setUp()
-        self.entry_root=self.base/'relocated checkout with spaces/test_uncond/geometry-product-dimension'
+        self.entry_root=self.base/'relocated checkout with spaces/exercises/geometry-product-dimension'
         self.entry_root.mkdir(parents=True)
-        source=REPO/'test_uncond/geometry-product-dimension'
+        source=REPO/'test_cond/geometry-product-dimension'
         for name in ('README.md','settings.json','run_test.py'):shutil.copyfile(source/name,self.entry_root/name)
         self.problem='# Synthetic input\n\n## Fixed interpretation and complete target\n\nFor n a natural number, prove n=n.\n\n## Fixed natural-language proof\n\nReflexivity.\n'
         (self.entry_root/'problem.md').write_text(self.problem)
         c=json.loads((self.entry_root/'settings.json').read_text());c['input_sha256']=digest(self.entry_root/'problem.md')
+        c['formalization']='unconditional'
         (self.entry_root/'settings.json').write_text(json.dumps(c))
         self.entry=Entry(self.entry_root)
         self.environment=patch.dict(os.environ,self.env);self.environment.start();self.addCleanup(self.environment.stop)
@@ -46,7 +47,7 @@ class ExerciseEntries(Fixture):
         self.mode(mode);run=Path(self.entry.begin()['run']);self.source_review(run);self.entry.prepare(run);return run
 
     def test_checked_in_entries_have_pinned_source_and_exact_goals(self):
-        for family,mode in [('test_cond','conditional'),('test_uncond','unconditional'),('test_uncond-test','unconditional')]:
+        for family,mode in [('test_cond','conditional'),('test_uncond','unconditional')]:
             roots=sorted(p for p in (REPO/family).iterdir() if p.is_dir())
             self.assertEqual(len(roots),3)
             for root in roots:
@@ -62,7 +63,7 @@ class ExerciseEntries(Fixture):
 
     def test_hidden_finder_files_do_not_become_exercise_entries(self):
         checkout=self.base/'finder-checkout'
-        for family in ('test_cond','test_uncond','test_uncond-test'):
+        for family in ('test_cond','test_uncond'):
             shutil.copytree(REPO/family,checkout/family,ignore=shutil.ignore_patterns('rigorous-proof','__pycache__'))
             (checkout/family/'.DS_Store').write_bytes(b'Synthetic Finder metadata')
         with patch.object(sys.modules[__name__],'REPO',checkout):
@@ -85,28 +86,28 @@ class ExerciseEntries(Fixture):
         with self.assertRaisesRegex(ValueError,'runtime limits'):self.entry.begin()
         self.assertFalse((self.entry_root/'rigorous-proof').exists());self.assertEqual(self.runtime_calls(),[])
 
-    def test_comparison_blocks_wrong_branch_commit_dirty_runtime_and_legacy_job(self):
-        comparison=self.base/'test_uncond-test'/self.entry_root.name
+    def test_unconditional_entry_blocks_wrong_branch_commit_dirty_runtime_and_legacy_job(self):
+        comparison=self.base/'test_uncond'/self.entry_root.name
         shutil.copytree(self.entry_root,comparison)
         entry=Entry(comparison)
         with self.assertRaisesRegex(ValueError,'settings'):
             entry.config()
         def git(*args):
             return subprocess.check_output(['git','-C',str(self.install),*args],text=True,stderr=subprocess.PIPE).strip()
-        git('init','-b','uncond-test')
+        git('init','-b','main')
         git('add','SKILL.md','config.json','toolchain','nl0','nl02lean')
         git('-c','user.name=Fixture','-c','user.email=fixture@example.invalid','-c','commit.gpgsign=false','commit','-m','Synthetic Yui runtime')
         commit=git('rev-parse','HEAD')
         path=comparison/'settings.json'
         settings=json.loads(path.read_text())
-        settings['yui_revision']={'branch':'uncond-test','commit':'0'*40}
+        settings['yui_revision']={'branch':'main','commit':'0'*40}
         path.write_text(json.dumps(settings))
         with self.assertRaisesRegex(ValueError,'revision'):entry.begin()
         settings['yui_revision']['commit']=commit
         path.write_text(json.dumps(settings))
         git('switch','-c','other')
         with self.assertRaisesRegex(ValueError,'revision'):entry.begin()
-        git('switch','uncond-test')
+        git('switch','main')
         script=self.install/'nl0/scripts/local-change.py'
         script.write_text('changed = True')
         with self.assertRaisesRegex(ValueError,'unpublished runtime changes'):entry.begin()
@@ -441,7 +442,7 @@ class InstalledExercisePreparation(unittest.TestCase):
         registered={'root':str(runtime),'skill_md':str(runtime/'SKILL.md'),'skill_sha256':digest(runtime/'SKILL.md')}
         with tempfile.TemporaryDirectory(prefix='entry-prepare-contract-') as directory:
             settings = sorted(REPO.glob('test_*/*/settings.json'))
-            self.assertEqual(len(settings), 9)
+            self.assertEqual(len(settings), 6)
             for path in settings:
                 source = path.parent
                 family = source.parent.name
@@ -453,10 +454,6 @@ class InstalledExercisePreparation(unittest.TestCase):
                     heading=config['target_heading']
                     (root/'problem.md').write_text(f'# Neutral source\n\n{heading}\n\nFor every n : Nat, n = n.\n\n## Fixed natural-language proof\n\nReflexivity.\n')
                     config['input_sha256']=digest(root/'problem.md')
-                    # Exercise both historical entry shapes against this installation.
-                    # The three branch-comparison entries keep their actual timeout and revision.
-                    if family!='test_uncond-test':
-                        config['limits']['native_seconds']=json.loads((runtime/'config.json').read_text())['timeouts']['native_seconds']
                     (root/'settings.json').write_text(json.dumps(config));entry=Entry(root)
                     with patch('exercise_entry.require_skill',return_value=registered):
                         run=Path(entry.begin()['run']);p=run/'preparation/source-review.json';review=json.loads(p.read_text())
@@ -470,7 +467,7 @@ class InstalledExercisePreparation(unittest.TestCase):
                     self.assertNotIn('--workers', argv)
                     self.assertIn('For every n : Nat',job['target_selection']['full_target'])
                     self.assertEqual(len(job['documents']),2)
-                    if family=='test_uncond-test':
+                    if family=='test_uncond':
                         self.assertEqual(record['bindings']['yui_revision'],config['yui_revision'])
                         self.assertEqual(job['workflow_protocol'],'yui-workflow-1')
                         self.assertTrue((run/'workflow/runtime/workflow/workflow.json').is_file())

@@ -29,7 +29,7 @@ monitoring mode allows this run to proceed through preparation and dispatch.
   read fresh from this run's copy. Use no old target-selection JSON.
 - Goal: **conditional**, `full`, normal repair; NL0 → Audit A → frozen Lean interface → local Lean proofs/assembly → Audit B.
 - Both phase profiles use **gpt-6.1-sol / high / Standard** with no model
-  fallback, an unlimited total budget and a 180-second native-call limit.
+  fallback, an unlimited total budget and an initial six-minute native Lean check limit.
 - Yui sizes the local review and Lean proof pools from the number of nodes
   in each phase.
 - Use only the exact registered `$rigorous-proof` installation and its bundled

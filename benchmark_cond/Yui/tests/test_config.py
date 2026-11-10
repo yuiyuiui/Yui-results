@@ -60,7 +60,7 @@ class ConfigurationTests(Fixture):
     def test_total_limits_native_limit_and_monitoring_are_fixed(self):
         cases=[lambda d:d['limits'].update(case_seconds=60),lambda d:d['limits'].update(tokens=1000),
                lambda d:d['limits'].update(model_calls=2),lambda d:d['limits'].update(native_seconds=300),
-               lambda d:d['limits'].update(native_seconds=180.0),
+               lambda d:d['limits'].update(native_seconds=360.0),
                lambda d:d['monitor'].update(interval_seconds=1),lambda d:d['monitor'].update(interval_seconds=600.0),
                lambda d:d['monitor'].update(foreground='poll'),
                lambda d:d['monitor'].update(notifications='meaningful_changes_only')]

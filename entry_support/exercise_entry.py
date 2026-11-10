@@ -65,16 +65,16 @@ class Entry:
         c=json.loads(local(self.root,'settings.json').read_text())
         fields={'schema','case_id','input','input_sha256','target_heading','formalization','track','policy',
             'profiles','results_directory','limits','monitor'}
-        if self.root.parent.name=='test_uncond-test':
+        if self.root.parent.name=='test_uncond':
             fields.add('yui_revision')
         if not isinstance(c, dict) or set(c) - {'workers'} != fields or c['schema'] != 'yui-exercise-entry-1':
             raise ValueError('Unknown exercise settings')
         if 'yui_revision' in c:
             pin=c['yui_revision']
-            if (not isinstance(pin,dict) or set(pin)!={'branch','commit'} or pin['branch']!='uncond-test'
+            if (not isinstance(pin,dict) or set(pin)!={'branch','commit'} or pin['branch']!='main'
                     or not isinstance(pin['commit'],str) or not re.fullmatch('[0-9a-f]{40}',pin['commit'])
                     or c['formalization']!='unconditional'):
-                raise ValueError('The branch comparison requires a full unconditional run with a pinned Yui uncond-test commit')
+                raise ValueError('The unconditional entry requires a pinned Yui main revision')
         if c['case_id']!=self.root.name or c['input']!='problem.md' or c['results_directory']!='rigorous-proof':raise ValueError('Wrong exercise identity or local paths')
         headings={'geometry-product-dimension':'## Fixed interpretation and complete target',
             'lie-module-irreducibility':'## Definitions and complete target','wave-map-energy':'## Fixed interpretation and complete target'}
