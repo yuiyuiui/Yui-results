@@ -55,6 +55,7 @@ class InstalledRuntimeContractTests(unittest.TestCase):
                 self.assertEqual(prepare_yui.freeze(run)['status'],'INPUTS_FROZEN')
                 self.assertEqual(prepare_yui.prepare(run)['status'],'JOB_PREPARED')
                 job=prepare_yui.validate_job(run,{'configuration':config})
+                self.assertEqual((job['track'],job['formalization']),('full','conditional'))
                 self.assertEqual(job['track'],config['track'])
                 self.assertEqual(job['formalization'],config['formalization'])
                 self.assertEqual(job['max_concurrency'], 'auto')

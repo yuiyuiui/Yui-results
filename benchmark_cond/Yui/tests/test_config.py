@@ -18,7 +18,7 @@ class ConfigurationTests(Fixture):
         config=benchmark_config.load_config()
         self.assertEqual(config['benchmark_name'],'Yui')
         self.assertNotIn('workers', config)
-        self.assertIn(config['track'],{'full','nl0'})
+        self.assertEqual((config['track'],config['formalization']),('full','conditional'))
         self.assertEqual(config['policy'],'normal')
         self.assertFalse(config['reuse_previous_results'])
         self.assertEqual(set(config['profiles']),{'nl0','lean'})

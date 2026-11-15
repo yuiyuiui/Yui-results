@@ -156,7 +156,9 @@ if mode=='unconditional':
 
 if not (auth_home()/'auth.json').is_file():raise ValueError('Codex authentication file is absent')
 runtime=json.loads((root/'config.json').read_text())
-if runtime['timeouts']!={k:config['limits'][k] for k in ('case_seconds','stage_seconds','native_seconds')} or runtime['token_budget'] is not None:
+if (any(k not in runtime['timeouts'] or runtime['timeouts'][k]!=config['limits'][k]
+        for k in ('case_seconds','stage_seconds','native_seconds'))
+        or runtime['token_budget'] is not None):
  raise ValueError('Installed timeout/token policy differs from this benchmark')
 if native_timeout()!=config['limits']['native_seconds']:raise ValueError('Native-call limit differs')
 environment=verify()

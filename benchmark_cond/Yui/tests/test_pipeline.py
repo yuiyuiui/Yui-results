@@ -5,7 +5,7 @@ import subprocess
 from unittest.mock import patch
 import unittest
 
-from support import Fixture, prepare_yui
+from support import Fixture, prepare_yui, benchmark_config
 
 
 class PipelineTests(Fixture):
@@ -180,6 +180,21 @@ class PipelineTests(Fixture):
         calls=self.runtime_calls();self.assertEqual([x[0] for x in calls],['prepare'])
         self.assertIn('--output',calls[0]);self.assertIn(str(run/'workflow'),calls[0])
         self.assertNotIn('--use-config-profiles',calls[0]);self.assertNotIn('--source',calls[0])
+
+    def test_checked_in_default_prepares_the_complete_conditional_benchmark(self):
+        defaults=benchmark_config.load_config()
+        self.config['track']=defaults['track']
+        self.config['formalization']=defaults['formalization']
+        self.save_config()
+        # Do not use prepared(): it overrides track and previously hid the
+        # checked-in NL0-only default from the full-job tests.
+        run=self.begin();self.review(run);self.cli('freeze',run);self.cli('prepare',run)
+        job=json.loads((run/'workflow/job.json').read_text())
+        self.assertEqual((job['track'],job['formalization']),('full','conditional'))
+        calls=self.runtime_calls()
+        self.assertEqual([call[0] for call in calls],['prepare'])
+        self.assertEqual(calls[0][calls[0].index('--track')+1],'full')
+        self.assertEqual(calls[0][calls[0].index('--formalization')+1],'conditional')
 
     def test_legacy_worker_cap_stays_bound_after_the_entry_switches_to_auto(self):
         self.config['workers'] = 20

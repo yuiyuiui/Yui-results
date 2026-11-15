@@ -12,7 +12,7 @@ class ModeAndCleanupTests(Fixture):
         config=benchmark_config.load_config()
         expected='unconditional' if BENCHMARK.parent.name=='benchmark_uncond' else 'conditional'
         self.assertEqual(config['formalization'],expected)
-        self.assertEqual(config['track'],'full' if expected=='unconditional' else 'nl0')
+        self.assertEqual(config['track'],'full')
 
     def test_invalid_modes_and_unconditional_nl0_fail_closed(self):
         for mode in ('',None,'automatic','uncond'):

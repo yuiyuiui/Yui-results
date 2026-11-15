@@ -45,7 +45,7 @@ Execute test_uncond/wave-map-energy/README.md.
 
 ## Run the benchmark
 
-For the full conditional benchmark, ask Codex to set `track` to `full` in [Yui's settings](benchmark_cond/Yui/settings.json), then execute [the Yui benchmark README](benchmark_cond/Yui/README.md). For the pure model, follow [its benchmark instructions](benchmark_cond/pure-model-result/REPRODUCE.md).
+Ask Codex to execute [the Yui benchmark README](benchmark_cond/Yui/README.md). For the pure model, follow [its benchmark instructions](benchmark_cond/pure-model-result/REPRODUCE.md).
 
 ## License
 

@@ -78,16 +78,29 @@ class DiscoveryTests(Fixture):
 
     def test_policy_drift_authentication_and_environment_fault_block_before_run(self):
         runtime=self.install/'config.json';original=runtime.read_text()
-        for change in [dict(case_seconds=60),dict(native_seconds=300)]:
+        for change in [dict(case_seconds=60),dict(stage_seconds=60),dict(native_seconds=300)]:
             data=json.loads(original);data['timeouts'].update(change);runtime.write_text(json.dumps(data))
             value=self.cli('check',ok=False)
             self.assertIn('policy differs',value['error'])
+        for missing in ('case_seconds','stage_seconds','native_seconds'):
+            data=json.loads(original);del data['timeouts'][missing];runtime.write_text(json.dumps(data))
+            self.assertIn('policy differs',self.cli('check',ok=False)['error'])
         data=json.loads(original);data['token_budget']=1000;runtime.write_text(json.dumps(data))
         self.assertIn('policy differs',self.cli('check',ok=False)['error'])
         runtime.write_text(original)
         self.assertIn('toolchain mismatch',self.cli('check',ok=False,mode='bad_environment')['error'])
         (self.install/'auth/auth.json').unlink()
         self.assertIn('authentication',self.cli('check',ok=False)['error'])
+        self.assertFalse((self.local/'results').exists())
+        self.assertEqual(self.runtime_calls(),[])
+
+    def test_additional_runtime_timeout_scope_keeps_the_benchmark_policy_valid(self):
+        runtime=self.install/'config.json';data=json.loads(runtime.read_text())
+        data['timeouts']['whole_file_seconds']=1800
+        runtime.write_text(json.dumps(data))
+        value=self.cli('check')
+        self.assertEqual(value['status'],'ENVIRONMENT-CHECKED')
+        self.assertFalse(value['model_started'])
         self.assertFalse((self.local/'results').exists())
         self.assertEqual(self.runtime_calls(),[])
 

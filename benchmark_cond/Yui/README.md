@@ -25,15 +25,17 @@ monitoring mode allows this run to proceed through preparation and dispatch.
 
 ## Formalization goal
 
-This entry keeps `formalization: conditional` and its current `track: nl0`. It therefore runs NL0/Audit A only unless the user deliberately changes settings to `full` before a new run. Existing full conditional benchmark records remain historical evidence.
+This entry runs the complete conditional formalization: NL0/Audit A, followed by
+Lean formalization and Audit B. Its settings are `track: full` and
+`formalization: conditional`.
 
 ## Scope, authority and configuration
 
 - [settings.json](settings.json) selects the full Theorem 1 of the supplied
   original paper, `full` or `nl0`, `normal` repair, both model profiles, source
-  hash, runtime pins and monitoring. This checkout uses `nl0` with
+  hash, runtime pins and monitoring. This checkout uses `full` with
   gpt-6.1-sol/high/Standard. Yui sizes each local worker pool from that
-  phase's node count. The `nl0` track ends after NL0 and Audit A.
+  phase's node count. The benchmark continues through Lean and Audit B.
 - Read [AGENTS.md](AGENTS.md), then the exact registered `$rigorous-proof`
   `SKILL.md` returned by stage 1. Use its bundled operation, source qualification,
   repair and acceptance rules. This benchmark supplies the configuration and
