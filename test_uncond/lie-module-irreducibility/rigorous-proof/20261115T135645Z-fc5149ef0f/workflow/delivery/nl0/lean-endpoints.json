@@ -1,0 +1,84 @@
+{
+  "parameters": [
+    {
+      "name": "p",
+      "type": "ℕ"
+    },
+    {
+      "name": "K",
+      "type": "Type u"
+    },
+    {
+      "name": "instK",
+      "type": "Field K",
+      "binder_kind": "instance"
+    },
+    {
+      "name": "lam",
+      "type": "ℤ"
+    },
+    {
+      "name": "V",
+      "type": "Type v"
+    },
+    {
+      "name": "instVAdd",
+      "type": "AddCommGroup V",
+      "binder_kind": "instance"
+    },
+    {
+      "name": "instVModule",
+      "type": "Module ℂ V",
+      "binder_kind": "instance"
+    },
+    {
+      "name": "instVFinite",
+      "type": "FiniteDimensional ℂ V",
+      "binder_kind": "instance"
+    },
+    {
+      "name": "x",
+      "type": "Module.End ℂ V"
+    },
+    {
+      "name": "y",
+      "type": "Module.End ℂ V"
+    },
+    {
+      "name": "h",
+      "type": "Module.End ℂ V"
+    },
+    {
+      "name": "v",
+      "type": "V"
+    },
+    {
+      "name": "M",
+      "type": "Submodule ℤ V"
+    },
+    {
+      "name": "A",
+      "type": "ℕ → Module.End ℤ M"
+    },
+    {
+      "name": "B",
+      "type": "ℕ → Module.End ℤ M"
+    }
+  ],
+  "header": "import Mathlib\n\nuniverse u v w\nopen scoped BigOperators TensorProduct\n\nnamespace Reduction\n\ndef Stable {R : Type*} [Semiring R] {T : Type*} [AddCommMonoid T]\n    [Module R T] (W : Submodule R T) (f : T → T) : Prop :=\n  ∀ z ∈ W, f z ∈ W\n\nnoncomputable def dp {V : Type*} [AddCommGroup V] [Module ℂ V]\n    (f : Module.End ℂ V) (r : ℕ) : Module.End ℂ V :=\n  (Nat.factorial r : ℂ)⁻¹ • f ^ r\n\nnoncomputable def e {V : Type*} [AddCommGroup V] [Module ℂ V]\n    (lam : ℤ) (y : Module.End ℂ V) (v : V) (i : Fin (lam.toNat + 1)) : V :=\n  dp y i.val v\n\ndef IsBasisFamily {R : Type*} [CommRing R] {T : Type*} [AddCommGroup T]\n    [Module R T] {n : ℕ} (a : Fin n → T) : Prop :=\n  ∃ b : Module.Basis (Fin n) R T, ∀ i, b i = a i\n\ndef Scaled {M : Type*} [AddCommGroup M] [Module ℤ M]\n    (m : ℕ) (A B : ℕ → Module.End ℤ M) (i j : Fin (m + 1)) : Module.End ℤ M :=\n  ((Nat.factorial j.val * Nat.factorial (m - j.val) : ℕ) : ℤ) •\n    (A (m - i.val) * B m * A m * B (m - j.val))\n\nnoncomputable def ComplexScaled {V : Type*} [AddCommGroup V] [Module ℂ V]\n    (m : ℕ) (x y : Module.End ℂ V) (i j : Fin (m + 1)) : Module.End ℂ V :=\n  ((Nat.factorial j.val * Nat.factorial (m - j.val) : ℕ) : ℂ) •\n    (dp x (m - i.val) * dp y m * dp x m * dp y (m - j.val))\n\nnoncomputable def Fext (K : Type*) [Field K] {M : Type*} [AddCommGroup M]\n    [Module ℤ M] (f : Module.End ℤ M) : Module.End K (K ⊗[ℤ] M) :=\n  f.baseChange K\n\nnoncomputable def U (K : Type*) [Field K] {M : Type*} [AddCommGroup M]\n    [Module ℤ M] (m : ℕ) (A B : ℕ → Module.End ℤ M)\n    (i j : Fin (m + 1)) : Module.End K (K ⊗[ℤ] M) :=\n  (Nat.factorial m : K)⁻¹ • Fext K (Scaled m A B i j)\n\ndef MatrixUnits {F : Type*} [Field F] {T : Type*} [AddCommGroup T] [Module F T]\n    (n : ℕ) (C : Fin n → Fin n → Module.End F T) : Prop :=\n  (∀ i j k l, C i j * C k l = if j = k then C i l else 0) ∧\n    (∑ i, C i i) = 1\n\nabbrev VK (K : Type*) [Field K] (M : Type*) [AddCommGroup M] [Module ℤ M] :=\n  M ⊗[ℤ] K\n\nnoncomputable instance originalModule (K : Type*) [Field K] (M : Type*)\n    [AddCommGroup M] [Module ℤ M] : Module K (VK K M) :=\n  let flip : VK K M ≃+ (K ⊗[ℤ] M) :=\n    { toEquiv := (TensorProduct.comm ℤ M K).toEquiv\n      map_add' := (TensorProduct.comm ℤ M K).map_add }\n  flip.module K\n\ndef originalAction (K : Type*) [Field K] {M : Type*} [AddCommGroup M] [Module ℤ M]\n    (f : Module.End ℤ M) : Module.End ℤ (VK K M) :=\n  TensorProduct.map f (LinearMap.id : K →ₗ[ℤ] K)\n\ndef Standing (p : ℕ) (K : Type*) [Field K] (lam : ℤ) (V : Type*)\n    [AddCommGroup V] [Module ℂ V] (x y h : Module.End ℂ V) (v : V)\n    (M : Submodule ℤ V) (A B : ℕ → Module.End ℤ M) : Prop :=\n  Nat.Prime p ∧ CharP K p ∧ 0 ≤ lam ∧ lam < (p : ℤ) ∧\n  (Module.finrank ℂ V : ℤ) = lam + 1 ∧\n  h * x - x * h = (2 : ℂ) • x ∧\n  h * y - y * h = -(2 : ℂ) • y ∧ x * y - y * x = h ∧\n  v ≠ 0 ∧ x v = 0 ∧ h v = (lam : ℂ) • v ∧\n  (∀ W : Submodule ℂ V, Stable W x → Stable W y → Stable W h →\n    W = ⊥ ∨ W = ⊤) ∧\n  (∃ n : ℕ, ∃ b : Module.Basis (Fin n) ℤ M,\n    ∃ c : Module.Basis (Fin n) ℂ V, ∀ i, c i = (b i : V)) ∧\n  (∀ r (z : M), (A r z : V) = dp x r (z : V)) ∧\n  (∀ r (z : M), (B r z : V) = dp y r (z : V))\n\nend Reduction\n",
+  "conclusion": {
+    "statement": "Let \\(p\\) be any prime, \\(K\\) any field of characteristic \\(p\\), and\n\\(\\lambda\\) an integer with \\(0\\leq\\lambda<p\\).\nLet \\(V(\\lambda)\\) be the complex irreducible highest-weight\n\\(\\mathfrak{sl}_2(\\mathbb C)\\)-module of highest weight \\(\\lambda\\),\nof dimension \\(\\lambda+1\\). Its Chevalley generators satisfy\n\n\\[\n[h,x]=2x,\\qquad[h,y]=-2y,\\qquad[x,y]=h.\n\\]\n\nChoose a nonzero highest-weight vector \\(v\\) with \\(xv=0\\) and\n\\(hv=\\lambda v\\). Let \\(U_{\\mathbb Z}\\) be the integer subalgebra of\nthe universal enveloping algebra generated by all divided powers\n\\(X_r=x^r/r!\\), \\(Y_r=y^r/r!\\), for integers \\(r\\geq0\\).\nAn **admissible lattice** \\(M\\subset V(\\lambda)\\) is a free abelian\nsubgroup with an integer basis that is also a complex basis, stable under\n\\(U_{\\mathbb Z}\\). It is arbitrary, not necessarily the minimal lattice.\n\nPut \\(V(K)=M\\otimes_{\\mathbb Z}K\\). The Lie algebra\n\\(L(K)=(\\mathbb Zx+\\mathbb Zy+\\mathbb Zh)\\otimes_{\\mathbb Z}K\\)\nacts by the induced lattice operators. This is the Chevalley\n\\(\\mathfrak{sl}_2\\) construction also in characteristic 2.\nProve that \\(V(K)\\) is nonzero and every \\(K\\)-linear subspace\ninvariant under \\(x,y,h\\) is zero or all of \\(V(K)\\).\nBoth \\(\\lambda=0\\) and \\(p=2\\) are included; \\(K\\) need not be\nalgebraically closed.",
+    "type": "Nontrivial (Reduction.VK K M) ∧\n  ∀ W : Submodule K (Reduction.VK K M),\n    Reduction.Stable W (Reduction.originalAction K (A 1)) →\n    Reduction.Stable W (Reduction.originalAction K (B 1)) →\n    Reduction.Stable W (Reduction.originalAction K (A 1 * B 1 - B 1 * A 1)) →\n    W = ⊥ ∨ W = ⊤"
+  },
+  "retained": [
+    {
+      "id": "H001",
+      "kind": "hypothesis",
+      "statement": "Let p be any prime, K any field of characteristic p, λ an integer with 0≤λ<p, V=V(λ) the complex irreducible highest-weight sl₂-module of dimension λ+1, and x,y,h its Chevalley operators satisfying hx−xh=2x, hy−yh=−2y, xy−yx=h. Let v∈V be nonzero with xv=0 and hv=λv. Let U_ℤ be the integer enveloping subalgebra generated by all X_r=x^r/r! and Y_r=y^r/r!, r≥0. Let M⊆V be any U_ℤ-stable free abelian subgroup with an integer basis also a complex basis of V. The target space is M⊗_ℤ K with the induced x,y,h actions and the Chevalley Lie algebra (ℤx+ℤy+ℤh)⊗_ℤ K, including characteristic two.",
+      "type": "Reduction.Standing p K lam V x y h v M A B"
+    }
+  ],
+  "export": "YuiClosed.P",
+  "source_contract_sha256": "bc4ddd229158c3367c629fb8c14e8e84f522e9a5aaff8edda89c0e37b963aefc",
+  "semantic_review_sha256": "295f55c40479047be11fa4ad4bcdc0de1b242ea899ab1242d76ec84a026f44de"
+}

@@ -1,0 +1,28 @@
+{
+  "parameters": [
+    {
+      "name": "n",
+      "type": "ℕ"
+    },
+    {
+      "name": "E",
+      "type": "Set (YuiRn n)"
+    }
+  ],
+  "header": "import Mathlib\nopen Set MeasureTheory\nopen scoped ENNReal NNReal\nnoncomputable section\n\nabbrev YuiRn (n : ℕ) := EuclideanSpace ℝ (Fin n)\n\ndef YuiContent {X : Type*} [EMetricSpace X] (a : ℝ) (r : ℝ≥0∞) (A : Set X) : ℝ≥0∞ :=\n  ⨅ (U : ℕ → Set X) (_ : A ⊆ ⋃ i, U i) (_ : ∀ i, Metric.ediam (U i) ≤ r),\n    ∑' i, (Metric.ediam (U i)) ^ a\n\ndef YuiJoinEquiv (n : ℕ) : (YuiRn n × ℝ) ≃L[ℝ] YuiRn (n + 1) :=\n  (((PiLp.continuousLinearEquiv 2 ℝ (fun _ : Fin n => ℝ)).prodCongr\n      (ContinuousLinearEquiv.refl ℝ ℝ)).trans\n    (ContinuousLinearEquiv.prodComm ℝ (Fin n → ℝ) ℝ)).trans\n    ((Fin.consEquivL ℝ (fun _ : Fin (n + 1) => ℝ)).trans\n      (PiLp.continuousLinearEquiv 2 ℝ (fun _ : Fin (n + 1) => ℝ)).symm)\n\ndef YuiI : Set ℝ := Set.Icc 0 1\n\ndef YuiFmax (n : ℕ) (A : Set (YuiRn n)) : Set (YuiRn n × ℝ) :=\n  A ×ˢ YuiI\n\ndef YuiFeuc (n : ℕ) (A : Set (YuiRn n)) : Set (YuiRn (n + 1)) :=\n  YuiJoinEquiv n '' YuiFmax n A\n\ndef YuiLast (n : ℕ) (z : YuiRn (n + 1)) : YuiRn (n + 1) :=\n  WithLp.toLp 2 (fun j => z (finRotate (n + 1) j))\n\ndef YuiFeucLast (n : ℕ) (A : Set (YuiRn n)) : Set (YuiRn (n + 1)) :=\n  YuiLast n '' YuiFeuc n A\n",
+  "conclusion": {
+    "statement": "Here dimension means **Hausdorff dimension**. As approved by the user on\n2026-10-23, assume explicitly that \\(E\\) is nonempty. With the convention\n\\(\\dim_H\\varnothing=0\\), the printed equality would otherwise fail for\nthe empty set. This is a disclosed addition to the printed exercise.\n\nLet \\(n\\geq0\\) be an integer, let \\(E\\subset\\mathbb R^n\\) be a nonempty\ncompact set, and put \\(I=[0,1]\\). Identify \\(\\mathbb R^n\\times\\mathbb R\\)\nwith \\(\\mathbb R^{n+1}\\) and use its Euclidean metric. Prove\n\n\\[\n\\dim_H(E\\times[0,1])=\\dim_H E+1.\n\\]\n\nThe zero-dimensional ambient space \\(\\mathbb R^0\\) is included. A later\nformalization using a different product norm must justify the metric change.",
+    "type": "dimH (YuiFeucLast n E) = dimH E + 1"
+  },
+  "retained": [
+    {
+      "id": "H001",
+      "kind": "hypothesis",
+      "statement": "Let n be an arbitrary natural number, E⊆Euclidean n-space be nonempty and compact, I=[0,1], Fmax=E×I with the max product metric, and Feuc the coordinate realization of E×I with the Euclidean metric in dimension n+1. These are the original target hypotheses, including n=0.",
+      "type": "E.Nonempty ∧ IsCompact E"
+    }
+  ],
+  "export": "YuiClosed.P",
+  "source_contract_sha256": "d5a9cc8f90d20b019c8fc5767b32e77e6fbf9a081921071e8e0f2612c9d26295",
+  "semantic_review_sha256": "0159a093dfb5f2310efb27732de4d1dd855f1354f07cc28fa5a7a51cc0021af3"
+}

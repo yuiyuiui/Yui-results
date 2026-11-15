@@ -1,0 +1,48 @@
+{
+  "parameters": [
+    {
+      "name": "n",
+      "type": "ℕ"
+    },
+    {
+      "name": "m",
+      "type": "ℕ"
+    },
+    {
+      "name": "U",
+      "type": "Z n → V m"
+    },
+    {
+      "name": "q",
+      "type": "V m"
+    }
+  ],
+  "header": "import Mathlib\nopen MeasureTheory Set Filter\nopen scoped Topology ContDiff BigOperators\n\nnamespace WaveEnergy\nabbrev X (n : ℕ) := EuclideanSpace ℝ (Fin n)\nabbrev V (m : ℕ) := EuclideanSpace ℝ (Fin m)\nabbrev Z (n : ℕ) := X n × ℝ\ndef omega (n : ℕ) : Set (Z n) := {z | 0 < z.2}\ndef tau (n : ℕ) : Z n := (0, 1)\nnoncomputable def basis (n : ℕ) (j : Fin n) : X n := EuclideanSpace.single j 1\nnoncomputable def sigma (n : ℕ) (j : Fin n) : Z n := (basis n j, 0)\nnoncomputable def D {n : ℕ} {F : Type} [NormedAddCommGroup F] [NormedSpace ℝ F]\n    (v : Z n) (f : Z n → F) (z : Z n) : F := fderiv ℝ f z v\nnoncomputable def ordered {n m : ℕ} (U : Z n → V m) : List (Z n) → Z n → V m\n  | [] => U\n  | v :: vs => D v (ordered U vs)\nnoncomputable def ut {n m : ℕ} (U : Z n → V m) := D (tau n) U\nnoncomputable def uj {n m : ℕ} (U : Z n → V m) (j : Fin n) := D (sigma n j) U\nnoncomputable def utt {n m : ℕ} (U : Z n → V m) := D (tau n) (ut U)\nnoncomputable def ujj {n m : ℕ} (U : Z n → V m) (j : Fin n) := D (sigma n j) (uj U j)\nnoncomputable def utj {n m : ℕ} (U : Z n → V m) (j : Fin n) := D (sigma n j) (ut U)\nnoncomputable def lap {n m : ℕ} (U : Z n → V m) (z : Z n) := ∑ j, ujj U j z\nnoncomputable def density {n m : ℕ} (U : Z n → V m) (z : Z n) : ℝ :=\n  ‖ut U z‖ ^ 2 + ∑ j, ‖uj U j z‖ ^ 2\nnoncomputable def energy {n m : ℕ} (U : Z n → V m) (t : ℝ) : ℝ :=\n  ∫ x, density U (x, t)\nnoncomputable def timeProd {n m : ℕ} (U : Z n → V m) (z : Z n) : ℝ :=\n  inner ℝ (ut U z) (utt U z)\nnoncomputable def gradProd {n m : ℕ} (U : Z n → V m) (j : Fin n) (z : Z n) : ℝ :=\n  inner ℝ (uj U j z) (utj U j z)\nnoncomputable def lapProd {n m : ℕ} (U : Z n → V m) (j : Fin n) (z : Z n) : ℝ :=\n  inner ℝ (ut U z) (ujj U j z)\nnoncomputable def flux {n m : ℕ} (U : Z n → V m) (j : Fin n) (z : Z n) : ℝ :=\n  inner ℝ (ut U z) (uj U j z)\nnoncomputable def densityTime {n m : ℕ} (U : Z n → V m) := D (tau n) (density U)\nnoncomputable def rate {n m : ℕ} (U : Z n → V m) (z : Z n) : ℝ :=\n  2 * timeProd U z + 2 * ∑ j, gradProd U j z\ndef ScalarField {n m : ℕ} (U : Z n → V m) (f : Z n → ℝ) : Prop :=\n  f = density U ∨ f = densityTime U ∨ f = timeProd U ∨\n    ∃ j, f = gradProd U j ∨ f = lapProd U j ∨ f = flux U j\ndef SectionFacts {n : ℕ} {F : Type} [NormedAddCommGroup F]\n    (f : Z n → F) (C : Set (X n)) (r : ℝ) : Prop :=\n  Continuous (fun x => f (x, r)) ∧\n  tsupport (fun x => f (x, r)) ⊆ C ∧\n  HasCompactSupport (fun x => f (x, r)) ∧\n  Integrable (fun x => f (x, r)) volume\ndef Regular {n m : ℕ} (U : Z n → V m) : Prop :=\n  (∀ ds, ContDiffOn ℝ ∞ (ordered U ds) (omega n)) ∧\n  (∀ k : ℕ, ContDiffOn ℝ ∞ (iteratedFDeriv ℝ k U) (omega n)) ∧\n  (∀ f, ScalarField U f → ContDiffOn ℝ ∞ f (omega n))\ndef Localized {n m : ℕ} (U : Z n → V m) (C : Set (X n)) (r : ℝ) : Prop :=\n  (∀ ds, ds ≠ [] →\n    (∀ x, x ∉ C → ordered U ds (x, r) = 0) ∧ SectionFacts (ordered U ds) C r) ∧\n  (∀ k : ℕ, 0 < k →\n    (∀ x, x ∉ C → iteratedFDeriv ℝ k U (x, r) = 0) ∧\n      SectionFacts (iteratedFDeriv ℝ k U) C r) ∧\n  (∀ f, ScalarField U f →\n    (∀ x, x ∉ C → f (x, r) = 0) ∧ SectionFacts f C r)\ndef LocalData {n m : ℕ} (U : Z n → V m) : Prop :=\n  ∀ t₀ : ℝ, 0 < t₀ → ∃ C : Set (X n), IsCompact C ∧\n    ∀ r ∈ Ioo (t₀ / 2) (3 * t₀ / 2), Localized U C r\nend WaveEnergy\nopen WaveEnergy\n",
+  "conclusion": {
+    "statement": "A sphere-valued map cannot vanish outside a compact set. As approved by\nthe user on 2026-10-23, interpret spatial compact support as compact support\nof a perturbation from a **fixed unit vector**, locally uniformly in time.\nThis is a disclosed nontrivial interpretation, not a claimed author-issued\ncorrection.\n\nLet \\(n,m\\geq1\\) be integers and let\n\\(u:\\mathbb R^n\\times(0,\\infty)\\to\\mathbb R^m\\) be jointly smooth.\nFix \\(q\\in\\mathbb R^m\\) with \\(|q|=1\\). Assume:\n\n1. \\(|u(x,t)|=1\\) for all \\(x\\) and \\(t>0\\).\n2. The acceleration \\(u_{tt}-\\Delta_xu\\) is normal to the sphere at\n   \\(u\\): at each point there is a real scalar \\(a(x,t)\\) with\n   \\(u_{tt}-\\Delta_xu=a u\\). No regularity of the selected scalar is\n   assumed.\n3. For every \\(0<s<t<\\infty\\), a compact set\n   \\(C_{[s,t]}\\subset\\mathbb R^n\\) exists such that \\(u(x,r)=q\\) for\n   \\(x\\notin C_{[s,t]}\\), \\(r\\in[s,t]\\).\n\nWith Euclidean norms and Lebesgue measure, define\n\n\\[\ne(x,t)=|u_t(x,t)|^2+\\sum_{j=1}^n|\\partial_{x_j}u(x,t)|^2,\n\\qquad E(t)=\\int_{\\mathbb R^n}e(x,t)\\,dx.\n\\]\n\nThe spatial gradient square is the Frobenius square, and\n\\(\\Delta_xu=\\sum_j\\partial_{x_jx_j}u\\) component by component.\nProve integrability of \\(e(\\cdot,t)\\), differentiability of \\(E\\),\nand \\(E'(t)=0\\) for every \\(t>0\\). No assertion at time zero is required.",
+    "type": "∀ t : ℝ, 0 < t → Integrable (fun x : X n => density U (x, t)) volume ∧ DifferentiableAt ℝ (energy U) t ∧ deriv (energy U) t = 0"
+  },
+  "retained": [
+    {
+      "id": "H001",
+      "kind": "hypothesis",
+      "statement": "Let n,m≥1 be integers, X=ℝ^n and V=ℝ^m with their Euclidean structures, and u:X×(0,∞)→V jointly C∞. Let q∈V be fixed with ‖q‖=1. For r>0 write u_t=∂_t u, u_j=∂_{x_j}u, u_tt=∂²_tu, u_jj=∂²_{x_j}u, Δ_xu=Σ_{j=1}^n u_jj, e(x,r)=‖u_t(x,r)‖²+Σ_j‖u_j(x,r)‖² and E(r)=∫_X e(x,r)dx, using Lebesgue measure and Frobenius gradient square.",
+      "type": "1 ≤ n ∧ 1 ≤ m ∧ ‖q‖ = 1 ∧ ContDiffOn ℝ ∞ U (omega n)"
+    },
+    {
+      "id": "H002",
+      "kind": "hypothesis",
+      "statement": "For every x∈ℝ^n and t>0, ‖u(x,t)‖=1 and there exists a real scalar a such that u_tt(x,t)−Σ_{j=1}^n u_jj(x,t)=a u(x,t). No regularity is assumed for any selection of these pointwise scalar witnesses.",
+      "type": "∀ x : X n, ∀ t : ℝ, 0 < t → ‖U (x, t)‖ = 1 ∧ ∃ a : ℝ, utt U (x, t) - lap U (x, t) = a • U (x, t)"
+    },
+    {
+      "id": "H003",
+      "kind": "hypothesis",
+      "statement": "For every pair of real times 0<s<t, there is a compact set C⊂ℝ^n such that for every x∉C and every r∈[s,t], u(x,r)=q, where q is the same fixed unit vector at all points and times.",
+      "type": "∀ s t : ℝ, 0 < s → s < t → ∃ C : Set (X n), IsCompact C ∧ ∀ x : X n, x ∉ C → ∀ r ∈ Icc s t, U (x, r) = q"
+    }
+  ],
+  "export": "YuiClosed.P",
+  "source_contract_sha256": "36778ca5a06aa2ad31717424af852fa70cdd4fe5f363c62ed0bb6812a7be17e0",
+  "semantic_review_sha256": "44c71a1971b1f9714301473f551612ee31de32b3b1a1cf1709cc38f95297a2d0"
+}
