@@ -86,6 +86,18 @@ class ExerciseEntries(Fixture):
         with self.assertRaisesRegex(ValueError,'runtime limits'):self.entry.begin()
         self.assertFalse((self.entry_root/'rigorous-proof').exists());self.assertEqual(self.runtime_calls(),[])
 
+    def test_separate_whole_file_limit_preserves_the_local_limit(self):
+        path=self.install/'config.json';config=json.loads(path.read_text())
+        config['timeouts']['whole_file_seconds']=1800
+        path.write_text(json.dumps(config))
+        checked=self.entry.check()
+        self.assertEqual(checked['configuration']['limits']['native_seconds'],360)
+        self.assertEqual(self.runtime_calls(),[])
+        config['timeouts']['native_seconds']=1800
+        path.write_text(json.dumps(config))
+        with self.assertRaisesRegex(ValueError,'runtime limits'):self.entry.begin()
+        self.assertFalse((self.entry_root/'rigorous-proof').exists())
+
     def test_unconditional_entry_blocks_wrong_branch_commit_dirty_runtime_and_legacy_job(self):
         comparison=self.base/'test_uncond'/self.entry_root.name
         shutil.copytree(self.entry_root,comparison)
@@ -128,11 +140,13 @@ class ExerciseEntries(Fixture):
         job=json.loads((workflow/'job.json').read_text())
         job['workflow_protocol']='yui-workflow-1'
         (workflow/'job.json').write_text(json.dumps(job))
+        (runtime/'nl0/scripts/runtime_snapshot.py').write_text(
+            "import os\ndef environment(job):\n return dict(os.environ,YUI_TEST_FROZEN_JOB='selected')\n")
         case=json.loads((workflow/'case-result.json').read_text())
         case['result']['public_result']='UNCONDITIONAL_LEAN'
         (workflow/'case-result.json').write_text(json.dumps(case))
         (runtime/'nl0/scripts/delivery.py').write_text(
-            "import json\ndef cleanup_anchor(root):\n return json.loads((root/'test-anchor.json').read_text())\n")
+            "import json,os\ndef cleanup_anchor(root):\n assert os.environ['YUI_TEST_FROZEN_JOB']=='selected'\n return json.loads((root/'test-anchor.json').read_text())\n")
         from common import terminal_check
         with self.assertRaisesRegex(ValueError,'test-anchor'):terminal_check(runtime,workflow,'unconditional')
         (workflow/'test-anchor.json').write_text(json.dumps({'run_sha256':'synthetic-hash'}))

@@ -76,6 +76,12 @@ root=Path(sys.argv[1]);run=Path(sys.argv[2]).resolve();mode=sys.argv[3]
 sys.path[:0]=[str(root/'nl0/scripts'),str(root/'nl02lean/scripts')]
 from source_preparation import read_source
 from final_acceptance import validate_receipt
+job=json.loads((run/'job.json').read_text())
+if job.get('workflow_protocol')=='yui-workflow-1':
+ import runtime_snapshot
+ # Readback uses the exact saved job, never a possibly changed machine default.
+ import os
+ os.environ.update(runtime_snapshot.environment(job))
 result=json.loads((run/'case-result.json').read_text())['result']
 value={'audit_a':'NOT_AVAILABLE','audit_b':'NOT_AVAILABLE','basis_closure':'NOT_AVAILABLE',
  'mathematics_automatically_verified':False,'formalization':mode}

@@ -63,7 +63,7 @@ For the other arm, use the [pure-model reproduction instructions](benchmark_cond
 
 On macOS, install the complete [Yui skill from main](https://github.com/yuiyuiui/Yui#4-installation-and-requirements), create its local Python environment and run its `doctor` check. Yui's [setup guide](https://github.com/yuiyuiui/Yui/blob/main/docs/setup.md) lists the authenticated Codex CLI, matching Code Mode helper and pinned Lean/Mathlib prerequisites. For the PDF benchmark, also install Poppler's `pdfinfo` and `pdftoppm`.
 
-The unconditional entries in this release check for [Yui `main` at 748663fc](https://github.com/yuiyuiui/Yui/commit/748663fce1c885a7e5ff3fa528faac49d266daf5). Each entry's `settings.json` contains the full revision. Keep that checkout fixed throughout preparation and dispatch. Clone this results repository separately and open it as the working directory for the prompts above.
+The unconditional entries currently check for [Yui `main` at 15d29c8a](https://github.com/yuiyuiui/Yui/commit/b8a2851587741f0e559b85525a1f51ba427252af). Each entry's `settings.json` contains the full revision. Keep that checkout fixed throughout preparation and dispatch. Clone this results repository separately and open it as the working directory for the prompts above.
 
 ## License
 

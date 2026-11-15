@@ -109,7 +109,7 @@ from runtime_config import verify,native_timeout
 from entrypoint import preflight_profiles
 preflight_profiles({'track':'full','profiles':c['profiles']})
 runtime=json.loads((root/'config.json').read_text())
-if runtime['timeouts']!={k:c['limits'][k] for k in ('case_seconds','stage_seconds','native_seconds')} or runtime['token_budget'] is not None:
+if any(runtime['timeouts'][k]!=c['limits'][k] for k in ('case_seconds','stage_seconds','native_seconds')) or runtime['token_budget'] is not None:
  raise ValueError('Installed runtime limits differ from this entry')
 if native_timeout()!=c['limits']['native_seconds']:raise ValueError('Wrong native-call limit')
 print(json.dumps({'environment':verify()}))

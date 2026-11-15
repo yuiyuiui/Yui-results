@@ -130,7 +130,7 @@ def select(result, *, skill_name=NAME):
             required = ['config.json', 'nl0/scripts/yui.py', 'nl0/scripts/entrypoint.py',
                         'nl0/scripts/target_selection.py', 'nl0/scripts/nl0.py',
                         'nl02lean/scripts/workflow.py', 'nl02lean/scripts/final_acceptance.py',
-                        'toolchain/lock.json']
+                        'nl0/scripts/runtime_config.py']
             if any(not (root/name).is_file() for name in required):
                 raise SkillUnavailable('The installed rigorous-proof skill is incomplete: '+str(root))
             candidates[path] = {'name': skill_name, 'skill_md': str(path), 'root': str(root),
