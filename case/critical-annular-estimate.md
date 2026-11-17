@@ -9,6 +9,14 @@ The complete proof and published acceptance records are maintained in the
 This catalogue entry points to that published project rather than copying its
 proof and evidence.
 
+## Task cost
+
+| Estimated productive time | Codex tokens |
+| --- | --- |
+| **≈19.5 hours** | **≈2.05 billion** |
+
+The [project’s cost summary](https://github.com/yuiyuiui/critical-annular-estimate-lean#cost) counts 18.5 hours of Codex work (GPT-6.1-Sol, Max, Standard; Apple M4 Pro, 48 GB RAM) and less than one hour of equivalent Web GPT work to find the foundation proof.
+
 ## Recorded result
 
 | Item | Result |
