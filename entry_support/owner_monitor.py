@@ -6,6 +6,14 @@ import shlex
 import sys
 
 
+REPORT_PROGRESS = (
+    'Use cases[0].phase, proof_total and cases[0].progress for the plan, current passes and '
+    'ten-minute change, current activities, latest full target check and collected helper, '
+    'and the longest blocker with its next action. Abbreviate long IDs in chat and name any observation gap. '
+    'For an older runtime without progress, report the available phase and counts and say the detailed observation is unavailable. '
+)
+
+
 def validate_monitor(policy):
     if (not isinstance(policy, dict)
             or set(policy) != {'interval_seconds', 'foreground', 'notifications'}
@@ -47,7 +55,8 @@ def record_monitor(heartbeat_id, run, entry, policy, *, write):
             'automation_id': None, 'host_tool': None, 'host_kind': None,
             'prompt': (
                 f'Wait ten minutes in this active chat, then observe once with {shlex.join(command)}. '
-                'Post a short Chinese status even when unchanged. Follow the entry for faults and terminal cleanup.'
+                'Post a short Chinese status even when unchanged. '
+                + REPORT_PROGRESS + 'Follow the entry for faults and terminal cleanup.'
             ),
             'next_action': 'Verify the detached controller once, report its initial status, then wait 600 seconds in this owner turn.',
         })
@@ -58,7 +67,7 @@ def record_monitor(heartbeat_id, run, entry, policy, *, write):
             'prompt': (
                 f'Observe the existing run with {shlex.join(command)} once per wake. '
                 'Post a short Chinese status in this chat on every wake, including unchanged progress. '
-                f'Follow the fault and terminal instructions in {entry.with_name("README.md")}. '
+                + REPORT_PROGRESS + f'Follow the fault and terminal instructions in {entry.with_name("README.md")}. '
                 'End each foreground turn between wakes.'
             ),
             'next_action': 'Verify the detached controller once, post the initial status, then end this foreground turn.',

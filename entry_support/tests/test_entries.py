@@ -12,12 +12,12 @@ import unittest
 from unittest.mock import patch
 
 REPO=Path(__file__).resolve().parents[2]
-sys.path.insert(0,str(REPO/'benchmark_cond/Yui/tests'))
-from support import Fixture
 sys.path.insert(0,str(REPO/'entry_support'))
 from exercise_entry import Entry,target_section
 import exercise_entry
 from common import digest,terminal_ready
+sys.path.insert(0,str(REPO/'benchmark_cond/Yui/tests'))
+from support import Fixture
 
 
 class ExerciseEntries(Fixture):
@@ -237,6 +237,12 @@ class ExerciseEntries(Fixture):
             self.assertEqual(row['scheduler'],'owner_chat_wait')
             self.assertEqual(row['observe_command'][-3:],[str(self.entry_root/'run_test.py'),'observe',str(run)])
         self.assertEqual(self.entry.action(run,'observe')['cases'][0]['phase'],'RUNNING')
+        self.assertIn('cases[0].progress',handoff['prompt'])
+        observed={'cases':[{'run':str(run/'workflow'),'phase':'proof','progress':{
+            'status':'FRESH','passed_last_10m':4,'longest_blocker':{'activity':'WAITING_FOR_HELPER'}}}]}
+        with patch.object(exercise_entry,'json_call',return_value=observed):
+            self.assertEqual(self.entry.action(run,'observe'),observed)
+        self.assertEqual(json.loads((run/'OWNER_MONITOR_LOG.jsonl').read_text().splitlines()[-1])['observation'],observed)
         with self.assertRaises(ValueError):self.entry.launch(run)
         self.assertEqual([r[0] for r in self.runtime_calls()],['prepare','execute','observe'])
         self.terminal(run)
