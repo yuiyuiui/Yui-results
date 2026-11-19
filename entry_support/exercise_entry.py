@@ -98,23 +98,35 @@ class Entry:
 
     def check(self,codex=None):
         c=self.config()
-        if digest(local(self.root,c['input']))!=c['input_sha256']:raise ValueError('Problem changed; review and update its explicit input pin')
+        source=local(self.root,c['input'])
+        if digest(source)!=c['input_sha256']:raise ValueError('Problem changed; review and update its explicit input pin')
         installed=require_skill(cwd=self.root,codex=codex)
         revision=verify_revision(installed['root'],c['yui_revision']) if 'yui_revision' in c else None
         program='''import json,sys
+from contextlib import nullcontext
 from pathlib import Path
 root=Path(sys.argv[1]);c=json.load(sys.stdin)
 sys.path[:0]=[str(root/'nl0/scripts'),str(root/'nl02lean/scripts')]
 from runtime_config import verify,native_timeout
 from entrypoint import preflight_profiles
 preflight_profiles({'track':'full','profiles':c['profiles']})
-runtime=json.loads((root/'config.json').read_text())
-if any(runtime['timeouts'][k]!=c['limits'][k] for k in ('case_seconds','stage_seconds','native_seconds')) or runtime['token_budget'] is not None:
+runtime_path=root/'config.json'
+context=nullcontext()
+if (root/'nl0/scripts/project_config.py').is_file():
+ import project_config
+ project_file=project_config.directory_for(Path(sys.argv[2]))/project_config.NAME
+ if project_file.is_symlink():raise ValueError('Expected a regular project configuration file: '+str(project_file))
+ runtime_path=project_file if project_file.exists() else project_config.template(root)
+ context=project_config.use(runtime_path)
+runtime=json.loads(runtime_path.read_text())
+if (any(k not in runtime['timeouts'] or runtime['timeouts'][k]!=c['limits'][k]
+        for k in ('case_seconds','stage_seconds','native_seconds')) or runtime['token_budget'] is not None):
  raise ValueError('Installed runtime limits differ from this entry')
-if native_timeout()!=c['limits']['native_seconds']:raise ValueError('Wrong native-call limit')
+with context:
+ if native_timeout()!=c['limits']['native_seconds']:raise ValueError('Wrong native-call limit')
 print(json.dumps({'environment':verify()}))
 '''
-        environment=runtime_call(installed['root'],program,data=c)
+        environment=runtime_call(installed['root'],program,str(source),data=c)
         capabilities=runtime_call(installed['root'],CAPABILITY_CHECK,c['formalization'])
         bindings={'startup':{n:digest(local(self.root,n)) for n in ('README.md','settings.json','run_test.py')},
             'support':support_bindings(),'input':c['input_sha256'],'runtime':runtime_binding(installed['root'],public_workflow=bool(revision)),

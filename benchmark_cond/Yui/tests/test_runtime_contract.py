@@ -9,7 +9,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from support import benchmark_config, prepare_yui
+from support import benchmark_config, prepare_yui, skill_check
 
 
 def neutral_pdf(path):
@@ -41,11 +41,24 @@ class InstalledRuntimeContractTests(unittest.TestCase):
             pdf=local/config['paper'];neutral_pdf(pdf)
             config['paper_sha256']=prepare_yui.sha256(pdf)
             (local/'settings.json').write_text(json.dumps(config))
-            entry={'name':'rigorous-proof','root':str(installed),
-                   'skill_md':str(installed/'SKILL.md'),
-                   'skill_sha256':prepare_yui.sha256(installed/'SKILL.md')}
+            entry=skill_check.select({'data':[{'skills':[{'name':'rigorous-proof','enabled':True,
+                'path':str(installed/'SKILL.md'),'scope':'user'}],'errors':[]}]})
+            project_file=local/'yui-config.json'
+            template=installed/'nl0/templates/yui-config.json'
             def local_path(value,*,root=local):return benchmark_config.local_path(value,root=root)
             with patch.object(prepare_yui,'ROOT',local),patch.object(prepare_yui,'local_path',side_effect=local_path),patch.object(prepare_yui,'load_config',return_value=config),patch.object(prepare_yui,'require_skill',return_value=entry):
+                if template.is_file():
+                    prepare_yui.checked_environment()
+                    self.assertFalse(project_file.exists())
+                    project=json.loads(template.read_text())
+                    project['timeouts']['stage_seconds']=60
+                    project_file.write_text(json.dumps(project))
+                    with self.assertRaisesRegex(ValueError,'timeout/token policy'):
+                        prepare_yui.begin()
+                    self.assertFalse((local/config['results_directory']).exists())
+                    project['timeouts']['stage_seconds']=None
+                    project['timeouts']['whole_file_seconds']=900
+                    project_file.write_text(json.dumps(project))
                 run=Path(prepare_yui.begin()['run']);prep=run/'preparation'
                 (prep/'target-statement.md').write_text('Synthetic software fixture only.')
                 review=prepare_yui.read(prep/'source-review.json')
@@ -55,6 +68,9 @@ class InstalledRuntimeContractTests(unittest.TestCase):
                 self.assertEqual(prepare_yui.freeze(run)['status'],'INPUTS_FROZEN')
                 self.assertEqual(prepare_yui.prepare(run)['status'],'JOB_PREPARED')
                 job=prepare_yui.validate_job(run,{'configuration':config})
+                if template.is_file():
+                    frozen=prepare_yui.read(run/'workflow/runtime/yui-config.json')
+                    self.assertEqual(frozen['timeouts']['whole_file_seconds'],900)
                 self.assertEqual((job['track'],job['formalization']),('full','conditional'))
                 self.assertEqual(job['track'],config['track'])
                 self.assertEqual(job['formalization'],config['formalization'])

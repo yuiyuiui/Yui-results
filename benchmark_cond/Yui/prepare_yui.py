@@ -140,6 +140,7 @@ def runtime_program(installed, program, *args, data=None, timeout=60):
 
 def environment_check(installed, config):
     program = '''import json,sys,shutil,importlib.util
+from contextlib import nullcontext
 from pathlib import Path
 root=Path(sys.argv[1]);config=json.load(sys.stdin)
 sys.path[:0]=[str(root/'nl0/scripts'),str(root/'nl02lean/scripts')]
@@ -155,12 +156,21 @@ if mode=='unconditional':
  if not callable(getattr(b2lean,'validate_receipt',None)):raise ValueError('Missing b2lean validator')
 
 if not (auth_home()/'auth.json').is_file():raise ValueError('Codex authentication file is absent')
-runtime=json.loads((root/'config.json').read_text())
+runtime_path=root/'config.json'
+context=nullcontext()
+if (root/'nl0/scripts/project_config.py').is_file():
+ import project_config
+ project_file=project_config.directory_for(Path(sys.argv[2]))/project_config.NAME
+ if project_file.is_symlink():raise ValueError('Expected a regular project configuration file: '+str(project_file))
+ runtime_path=project_file if project_file.exists() else project_config.template(root)
+ context=project_config.use(runtime_path)
+runtime=json.loads(runtime_path.read_text())
 if (any(k not in runtime['timeouts'] or runtime['timeouts'][k]!=config['limits'][k]
         for k in ('case_seconds','stage_seconds','native_seconds'))
         or runtime['token_budget'] is not None):
  raise ValueError('Installed timeout/token policy differs from this benchmark')
-if native_timeout()!=config['limits']['native_seconds']:raise ValueError('Native-call limit differs')
+with context:
+ if native_timeout()!=config['limits']['native_seconds']:raise ValueError('Native-call limit differs')
 environment=verify()
 missing=[name for name in ('pdfinfo','pdftoppm') if not shutil.which(name)]
 if missing:raise ValueError('Full-paper preparation needs Poppler tools on PATH: '+', '.join(missing))
@@ -173,7 +183,7 @@ print(json.dumps({'status':'ENVIRONMENT-CHECKED','resolved_environment':environm
  'model_started':False,'proof_check_started':False,'actual_service_tier':None,
  'provider_quota_verified':False}))
 '''
-    return runtime_program(installed, program, data=config)
+    return runtime_program(installed, program, str(local_path(config['paper'])), data=config)
 
 
 def checked_environment(codex=None):

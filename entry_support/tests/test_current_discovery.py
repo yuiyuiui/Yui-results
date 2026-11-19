@@ -28,6 +28,22 @@ class CurrentDiscovery(unittest.TestCase):
         self.assertFalse((self.root/'toolchain/lock.json').exists())
         self.assertEqual(discovery.select(self.registry)['root'],str(self.root))
 
+    def test_all_entries_accept_the_project_configuration_template_without_legacy_files(self):
+        (self.root/'config.json').unlink()
+        for name in ('nl0/scripts/project_config.py','nl0/templates/yui-config.json',
+                     'nl0/scripts/direct_runner.py'):
+            path=self.root/name
+            path.parent.mkdir(parents=True,exist_ok=True)
+            path.write_text('{}' if path.suffix=='.json' else '')
+        repo=ROOT.parent
+        for path in ('entry_support/skill_check.py','benchmark_cond/Yui/skill_check.py',
+                     'benchmark_cond/pure-model-result/skill_check.py'):
+            with self.subTest(entry=path):
+                spec=spec_from_file_location('project_config_discovery',repo/path)
+                consumer=module_from_spec(spec)
+                spec.loader.exec_module(consumer)
+                self.assertEqual(consumer.select(self.registry)['root'],str(self.root))
+
     def test_missing_runtime_configuration_still_rejects_incomplete_installation(self):
         (self.root/'nl0/scripts/runtime_config.py').unlink()
         with self.assertRaisesRegex(discovery.SkillUnavailable,'incomplete'):
